@@ -312,13 +312,22 @@
   }
   function topicCard(t) {
     const hasVideo = t.videoUrl && /^https?:\/\//.test(t.videoUrl);
+    const kind = t.kind || (hasVideo ? 'video' : 'search');
     const link = hasVideo ? t.videoUrl : (PLATFORMS[t.platform] || PLATFORMS['抖音'])(t.search || t.title);
-    const btnLabel = hasVideo ? '▶ 跳原视频' : '🔍 搜同款';
-    const btnCls = hasVideo ? 'bg-rose-500 text-white' : 'bg-brand-50 text-brand-600';
+    let btnLabel, btnCls;
+    if (kind === 'video') { btnLabel = '▶ 跳原视频'; btnCls = 'bg-rose-500 text-white'; }
+    else if (kind === 'topic') { btnLabel = '🔗 进话题'; btnCls = 'bg-sky-500 text-white'; }
+    else { btnLabel = '🔍 搜同款'; btnCls = 'bg-brand-50 text-brand-600'; }
+    const kindBadge = kind === 'video'
+      ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">真实视频</span>'
+      : (kind === 'topic'
+        ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-600">话题页</span>'
+        : '');
     const heatBadge = t.heat ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600">🔥 ${esc(String(t.heat))}</span>` : '';
     return `<div class="card-enter bg-white rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-1.5 gap-2">
+      <div class="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
         <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-600">${esc(t.platform)}</span>
+        ${kindBadge}
         ${heatBadge}
         <button data-rtopic="${t.id}" class="text-gray-300 text-xs ml-auto">删除</button>
       </div>
