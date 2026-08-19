@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#ec4899" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <title>瑜的工作台</title>
+
+  <!-- Tailwind CSS (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4',
+                400: '#f472b6', 500: '#ec4899', 600: '#db2777', 700: '#be185d'
+              }
+            },
+            fontFamily: {
+              sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'PingFang SC', 'Microsoft YaHei', 'sans-serif']
+            }
+          }
+        }
+      };
+    }
+  </script>
+
+  <style>
+    html, body { height: 100%; overscroll-behavior: none; }
+    body { background: #fdf2f8; -webkit-tap-highlight-color: transparent; }
+    /* 隐藏滚动条但保留滚动 */
+    .no-bar::-webkit-scrollbar { display: none; }
+    .no-bar { scrollbar-width: none; }
+    .nav-btn.active { background: #fff; color: #db2777; box-shadow: 0 4px 14px rgba(219,39,119,.18); }
+    .card-enter { animation: pop .22s ease; }
+    @keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .toast { animation: toastIn .25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    textarea, input, select { font-size: 16px; } /* 防 iOS 聚焦缩放 */
+  </style>
+</head>
+<body class="font-sans text-gray-800">
+
+  <div class="flex h-screen w-screen max-w-md mx-auto bg-brand-50 overflow-hidden">
+
+    <!-- 左侧纵向导航 -->
+    <nav class="w-[76px] shrink-0 bg-gradient-to-b from-brand-500 to-brand-600 flex flex-col items-center py-4 gap-2 safe-area-left">
+      <div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-white text-lg font-bold mb-2">瑜</div>
+      <button data-view="plan"    class="nav-btn active flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
+        <span class="text-xl">📋</span><span>每日计划</span>
+      </button>
+      <button data-view="topic"   class="nav-btn flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
+        <span class="text-xl">💡</span><span>选题灵感</span>
+      </button>
+      <button data-view="repost"  class="nav-btn flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
+        <span class="text-xl">🔥</span><span>爆款二创</span>
+      </button>
+      <button data-view="review"  class="nav-btn flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
+        <span class="text-xl">📊</span><span>内容复盘</span>
+      </button>
+    </nav>
+
+    <!-- 右侧内容区 -->
+    <main class="flex-1 flex flex-col min-w-0 bg-brand-50">
+
+      <!-- 顶部条 -->
+      <header class="px-4 pt-4 pb-3 bg-gradient-to-r from-brand-500 to-brand-400 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 id="viewTitle" class="text-lg font-bold leading-tight">每日计划</h1>
+            <p id="todayDate" class="text-[11px] text-white/80"></p>
+          </div>
+          <span class="text-[11px] bg-white/20 px-2 py-1 rounded-full">瑜 · 自媒体工作台</span>
+        </div>
+      </header>
+
+      <!-- 视图容器 -->
+      <section class="flex-1 overflow-y-auto no-bar px-4 py-4 space-y-4" id="content">
+
+        <!-- ========== 每日计划 ========== -->
+        <div data-panel="plan">
+          <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-semibold text-gray-700">今日完成度</span>
+              <span id="planCount" class="text-sm font-bold text-brand-600">0/0</span>
+            </div>
+            <div class="h-2.5 rounded-full bg-brand-100 overflow-hidden">
+              <div id="planBar" class="h-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all duration-300" style="width:0%"></div>
+            </div>
+          </div>
+
+          <ul id="taskList" class="space-y-2"></ul>
+
+          <div class="flex gap-2 mt-3">
+            <input id="taskInput" type="text" placeholder="添加新任务，回车确认…" class="flex-1 rounded-xl border border-brand-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300" />
+            <button id="taskAdd" class="shrink-0 bg-brand-500 text-white px-4 rounded-xl text-sm font-medium active:scale-95 transition">添加</button>
+          </div>
+          <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">提示：每天 0 点后任务会自动重置为未完成，任务清单本身长期保留。完成后点圆圈打勾即可。</p>
+        </div>
+
+        <!-- ========== 选题灵感 ========== -->
+        <div data-panel="topic" class="hidden">
+          <div id="topicTabs" class="flex gap-1.5 overflow-x-auto no-bar pb-1"></div>
+          <button id="topicAddBtn" class="w-full mt-3 bg-white border border-dashed border-brand-300 text-brand-600 rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">＋ 新增一条选题</button>
+          <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">有真实链接的卡片显示「▶ 跳原视频」可直接看原片；没有的显示「🔍 搜同款」跳平台搜索。你也可以把刷到的抖音/小红书分享链接粘贴进「＋新增」的「原视频链接」里，生成专属跳原视频按钮。</p>
+          <button id="topicImportBtn" class="w-full mt-3 bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">📥 粘贴导入今日采集（JSON）</button>
+          <div id="topicList" class="space-y-3 mt-3"></div>
+        </div>
+
+        <!-- ========== 爆款二创 ========== -->
+        <div data-panel="repost" class="hidden">
+          <div id="repostFilter" class="flex gap-1.5 overflow-x-auto no-bar pb-1"></div>
+          <button id="repostAddBtn" class="w-full mt-3 bg-white border border-dashed border-brand-300 text-brand-600 rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">＋ 新增二创素材</button>
+          <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">有真实链接的卡片显示「▶ 跳原视频」可直接看原片；没有的显示「🔍 搜同款」跳平台搜索。把刷到的爆款分享链接粘贴进「＋新增」即可生成专属跳原视频按钮。</p>
+          <button id="repostImportBtn" class="w-full mt-3 bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">📥 粘贴导入今日采集（JSON）</button>
+          <div id="repostList" class="space-y-3 mt-3"></div>
+        </div>
+
+        <!-- ========== 内容复盘 ========== -->
+        <div data-panel="review" class="hidden">
+          <form id="reviewForm" class="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <label class="text-xs text-gray-500">平台
+                <select name="platform" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">
+                  <option>抖音</option><option>小红书</option><option>快手</option><option>微博</option><option>B站</option>
+                </select>
+              </label>
+              <label class="text-xs text-gray-500">流量来源
+                <select name="source" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">
+                  <option>推荐</option><option>关注</option><option>搜索</option><option>其他</option>
+                </select>
+              </label>
+            </div>
+            <label class="block text-xs text-gray-500">选题 / 标题
+              <input name="title" required class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="如：通勤伪素颜妆" />
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="text-xs text-gray-500">播放量<input name="views" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
+              <label class="text-xs text-gray-500">点赞<input name="likes" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
+              <label class="text-xs text-gray-500">评论<input name="comments" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
+              <label class="text-xs text-gray-500">转发<input name="shares" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
+              <label class="text-xs text-gray-500">完播率(%)<input name="finish" type="number" min="0" max="100" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
+              <label class="text-xs text-gray-500">赞播比<input name="lkrate" type="text" readonly class="mt-1 w-full rounded-lg border border-brand-100 bg-gray-50 px-2 py-2 text-sm text-gray-400" placeholder="自动" /></label>
+            </div>
+            <label class="block text-xs text-gray-500">做得好的点（选填）
+              <textarea name="good" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="这次哪里表现不错"></textarea>
+            </label>
+            <label class="block text-xs text-gray-500">下次优化点（选填）
+              <textarea name="improve" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="下次想改的地方"></textarea>
+            </label>
+            <button type="submit" class="w-full bg-brand-500 text-white rounded-xl py-3 text-sm font-semibold active:scale-95 transition">保存并智能诊断</button>
+          </form>
+
+          <h3 class="text-sm font-semibold text-gray-700 mt-5 mb-2">历史复盘（永久存档）</h3>
+          <div id="reviewList" class="space-y-3"></div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- 通用弹层（新增/编辑表单） -->
+  <div id="sheet" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40" data-close></div>
+    <div class="absolute left-0 right-0 bottom-0 bg-white rounded-t-3xl p-4 max-h-[85%] overflow-y-auto no-bar">
+      <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
+      <h3 id="sheetTitle" class="text-base font-bold text-gray-800 mb-3">新增</h3>
+      <div id="sheetBody" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-24 z-[60] hidden">
+    <div class="bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg toast"></div>
+  </div>
+
+<script>
+/* =========================================================
+   瑜的工作台 · 纯前端逻辑 (localStorage 持久化)
+   ========================================================= */
+(function () {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const todayKey = () => new Date().toISOString().slice(0, 10);
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const LS = {
+    tasks: 'yu_tasks',
+    done: 'yu_done',
+    topics: 'yu_topics',
+    reposts: 'yu_reposts',
+    reviews: 'yu_reviews',
+    lastImport: 'yu_lastImport'
+  };
+
+  const load = (k, def) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? def; } catch { return def; } };
+  const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+  /* ---------- 平台跳转链接 ---------- */
+  const PLATFORMS = {
+    '抖音':   q => 'https://www.douyin.com/search/' + encodeURIComponent(q),
+    '小红书': q => 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(q),
+    '快手':   q => 'https://www.kuaishou.com/search/video?keyword=' + encodeURIComponent(q),
+    '微博':   q => 'https://s.weibo.com/weibo?q=' + encodeURIComponent(q),
+    'B站':    q => 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(q)
+  };
+
+  /* =========================================================
+     1. 每日计划
+     ========================================================= */
+  let tasks = load(LS.tasks, [
+    { id: uid(), text: '🏃 运动', fixed: true },
+    { id: uid(), text: '😴 10:50 提醒睡觉', fixed: true }
+  ]);
+  let doneMap = load(LS.done, {});          // { 'YYYY-MM-DD': { taskId: true } }
+  let doneToday = doneMap[todayKey()] || {};
+
+  const taskList = $('#taskList');
+  const planBar = $('#planBar');
+  const planCount = $('#planCount');
+
+  function renderPlan() {
+    taskList.innerHTML = '';
+    tasks.forEach(t => {
+      const ok = !!doneToday[t.id];
+      const li = document.createElement('li');
+      li.className = 'card-enter flex items-center gap-3 bg-white rounded-2xl p-3 shadow-sm';
+      li.innerHTML = `
+        <button data-toggle="${t.id}" class="shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition ${ok ? 'bg-brand-500 border-brand-500' : 'border-gray-300'}">
+          ${ok ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 12l5 5L20 6"/></svg>' : ''}
+        </button>
+        <span class="flex-1 text-sm ${ok ? 'line-through text-gray-400' : 'text-gray-700'}">${esc(t.text)}</span>
+        ${t.fixed ? '' : `<button data-del="${t.id}" class="shrink-0 text-gray-300 active:text-red-400 text-lg leading-none px-1">✕</button>`}
+      `;
+      taskList.appendChild(li);
+    });
+    const total = tasks.length, done = tasks.filter(t => doneToday[t.id]).length;
+    planCount.textContent = done + '/' + total;
+    planBar.style.width = (total ? Math.round(done / total * 100) : 0) + '%';
+    save(LS.done, doneMap);
+  }
+
+  taskList.addEventListener('click', e => {
+    const tg = e.target.closest('[data-toggle]');
+    const dl = e.target.closest('[data-del]');
+    if (tg) {
+      const id = tg.dataset.toggle;
+      doneToday[id] = !doneToday[id];
+      doneMap[todayKey()] = doneToday;
+      renderPlan();
+    }
+    if (dl) {
+      const id = dl.dataset.del;
+      tasks = tasks.filter(t => t.id !== id);
+      delete doneToday[id];
+      save(LS.tasks, tasks);
+      renderPlan();
+    }
+  });
+
+  function addTask(text) {
+    text = text.trim();
+    if (!text) return;
+    tasks.push({ id: uid(), text });
+    save(LS.tasks, tasks);
+    renderPlan();
+  }
+  $('#taskAdd').addEventListener('click', () => { addTask($('#taskInput').value); $('#taskInput').value = ''; });
+  $('#taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') { addTask($('#taskInput').value); $('#taskInput').value = ''; } });
+
+  // 跨天自动重置打卡（保留任务清单）
+  if (!doneMap[todayKey()]) { doneMap[todayKey()] = {}; doneToday = doneMap[todayKey()]; }
+  renderPlan();
+
+  /* =========================================================
+     2. 选题灵感
+     ========================================================= */
+  const TOPIC_SEED = [
+    { platform: '抖音', title: '上班妆容 3 分钟搞定伪素颜', reason: '打工人通勤痛点 + 低价平替，完播高', idea: '你以行政前台身份拍「到岗前对镜化妆」，强调不迟到也能精致', search: '通勤伪素颜妆' },
+    { platform: '小红书', title: '敏感肌平价护肤清单', reason: '混干微敏皮人群精准，收藏率高', idea: '按你的真实肤质写「不踩雷清单」，标注价格和购买渠道', search: '敏感肌平价护肤' },
+    { platform: '抖音', title: '宽肩女生显瘦穿搭', reason: '肩宽 43 是差异化人设，评论区爱问链接', idea: '用你的身形示范「上松下紧」搭配，结尾抛「想要链接打 1」', search: '宽肩女生穿搭' },
+    { platform: 'B站', title: '行政前台的一天 Vlog', reason: '职场窥探欲强，适合中长视频涨粉', idea: '真实记录前台日常，穿插化妆/唱歌碎片', search: '行政前台 vlog' },
+    { platform: '微博', title: '打工人下班翻唱', reason: '情绪共鸣 + 唱歌特长，易转发', idea: '下班路上对镜唱一首，文案写「今天也辛苦啦」', search: '打工人翻唱' }
+  ];
+  let topics = load(LS.topics, TOPIC_SEED.map(t => ({ id: uid(), ...t })));
+
+  let topicTab = '全部';
+  const topicTabsEl = $('#topicTabs');
+  const topicListEl = $('#topicList');
+
+  function renderTopicTabs() {
+    const tabs = ['全部', ...Object.keys(PLATFORMS)];
+    topicTabsEl.innerHTML = tabs.map(t =>
+      `<button data-tab="${esc(t)}" class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${t === topicTab ? 'bg-brand-500 text-white' : 'bg-white text-gray-600 border border-brand-100'}">${esc(t)}</button>`
+    ).join('');
+  }
+  function renderTopics() {
+    const list = topics.filter(t => topicTab === '全部' || t.platform === topicTab);
+    topicListEl.innerHTML = list.length ? list.map(t => topicCard(t)).join('')
+      : `<p class="text-center text-sm text-gray-400 py-8">该平台暂无选题，点上方「＋新增」添加</p>`;
+  }
+  function topicCard(t) {
+    const hasVideo = t.videoUrl && /^https?:\/\//.test(t.videoUrl);
+    const link = hasVideo ? t.videoUrl : (PLATFORMS[t.platform] || PLATFORMS['抖音'])(t.search || t.title);
+    const btnLabel = hasVideo ? '▶ 跳原视频' : '🔍 搜同款';
+    const btnCls = hasVideo ? 'bg-rose-500 text-white' : 'bg-brand-50 text-brand-600';
+    const heatBadge = t.heat ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600">🔥 ${esc(String(t.heat))}</span>` : '';
+    return `<div class="card-enter bg-white rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-1.5 gap-2">
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-600">${esc(t.platform)}</span>
+        ${heatBadge}
+        <button data-rtopic="${t.id}" class="text-gray-300 text-xs ml-auto">删除</button>
+      </div>
+      <h4 class="font-semibold text-gray-800 text-sm leading-snug">${esc(t.title)}</h4>
+      <p class="text-xs text-gray-600 mt-1.5"><b class="text-brand-600">🔥 火爆原因：</b>${esc(t.reason)}</p>
+      <p class="text-xs text-gray-600 mt-1"><b class="text-brand-600">💡 创作思路：</b>${esc(t.idea)}</p>
+      <div class="flex items-center gap-2 mt-2.5 flex-wrap">
+        <a href="${esc(link)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 ${btnCls}">${btnLabel}</a>
+        <button data-copy="${esc(link)}" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 bg-gray-100 text-gray-600">📋 复制链接</button>
+      </div>
+    </div>`;
+  }
+  topicTabsEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-tab]'); if (!b) return;
+    topicTab = b.dataset.tab; renderTopicTabs(); renderTopics();
+  });
+  topicListEl.addEventListener('click', e => {
+    const c = e.target.closest('[data-copy]');
+    if (c) { copyLink(c.dataset.copy); return; }
+    const b = e.target.closest('[data-rtopic]'); if (!b) return;
+    topics = topics.filter(t => t.id !== b.dataset.rtopic); save(LS.topics, topics); renderTopics();
+  });
+  $('#topicAddBtn').addEventListener('click', () => openSheet('选题', buildTopicForm()));
+
+  /* =========================================================
+     3. 爆款二创
+     ========================================================= */
+  const REPOST_SEED = [
+    { type: '肩宽穿搭', title: '原爆款：梨形+宽肩显瘦神裤', reason: '评论区疯狂求链接，转化意向强', plan: '改为你的「前台通勤版」：西装裤+尖头鞋，加「47kg也能撑起」反差钩子', search: '宽肩显瘦穿搭' },
+    { type: '化妆教程', title: '原爆款：10 秒伪素颜底妆', reason: '短平快、易模仿，完播极高', plan: '换成「敏感肌版本」，强调不卡粉不泛红，结尾教「定妆手法」差异化', search: '敏感肌底妆教程' },
+    { type: '肩宽穿搭', title: '原爆款：一字肩避雷指南', reason: '踩坑类内容收藏率高', plan: '你以肩宽 43 实测，拍「这 3 种领型我踩雷了」，真实测评更有信任感', search: '肩宽 避雷 领型' }
+  ];
+  let reposts = load(LS.reposts, REPOST_SEED.map(t => ({ id: uid(), ...t })));
+
+  let repostFilter = '全部';
+  const repostFilterEl = $('#repostFilter');
+  const repostListEl = $('#repostList');
+
+  function renderRepostFilter() {
+    const tabs = ['全部', '肩宽穿搭', '化妆教程'];
+    repostFilterEl.innerHTML = tabs.map(t =>
+      `<button data-f="${esc(t)}" class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${t === repostFilter ? 'bg-brand-500 text-white' : 'bg-white text-gray-600 border border-brand-100'}">${esc(t)}</button>`
+    ).join('');
+  }
+  function renderReposts() {
+    const list = reposts.filter(t => repostFilter === '全部' || t.type === repostFilter);
+    repostListEl.innerHTML = list.length ? list.map(repostCard).join('')
+      : `<p class="text-center text-sm text-gray-400 py-8">暂无素材，点上方「＋新增」添加</p>`;
+  }
+  function repostCard(t) {
+    const hasVideo = t.videoUrl && /^https?:\/\//.test(t.videoUrl);
+    const link = hasVideo ? t.videoUrl : (PLATFORMS['抖音'])(t.search || t.title);
+    const btnLabel = hasVideo ? '▶ 跳原视频' : '🔍 搜同款';
+    const btnCls = hasVideo ? 'bg-rose-500 text-white' : 'bg-brand-50 text-brand-600';
+    const color = t.type === '肩宽穿搭' ? 'bg-orange-100 text-orange-600' : 'bg-pink-100 text-pink-600';
+    const heatBadge = t.heat ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600">🔥 ${esc(String(t.heat))}</span>` : '';
+    return `<div class="card-enter bg-white rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-1.5 gap-2">
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${color}">${esc(t.type)}</span>
+        ${heatBadge}
+        <button data-rrepost="${t.id}" class="text-gray-300 text-xs ml-auto">删除</button>
+      </div>
+      <h4 class="font-semibold text-gray-800 text-sm leading-snug">${esc(t.title)}</h4>
+      <p class="text-xs text-gray-600 mt-1.5"><b class="text-brand-600">🔥 爆款原因：</b>${esc(t.reason)}</p>
+      <p class="text-xs text-gray-600 mt-1"><b class="text-brand-600">🛠 二创方案：</b>${esc(t.plan)}</p>
+      <div class="flex items-center gap-2 mt-2.5 flex-wrap">
+        <a href="${esc(link)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 ${btnCls}">${btnLabel}</a>
+        <button data-copy="${esc(link)}" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 bg-gray-100 text-gray-600">📋 复制链接</button>
+      </div>
+    </div>`;
+  }
+  repostFilterEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-f]'); if (!b) return;
+    repostFilter = b.dataset.f; renderRepostFilter(); renderReposts();
+  });
+  repostListEl.addEventListener('click', e => {
+    const c = e.target.closest('[data-copy]');
+    if (c) { copyLink(c.dataset.copy); return; }
+    const b = e.target.closest('[data-rrepost]'); if (!b) return;
+    reposts = reposts.filter(t => t.id !== b.dataset.rrepost); save(LS.reposts, reposts); renderReposts();
+  });
+  $('#repostAddBtn').addEventListener('click', () => openSheet('二创素材', buildRepostForm()));
+
+  /* =========================================================
+     4. 内容复盘 + 智能诊断
+     ========================================================= */
+  let reviews = load(LS.reviews, []);
+  const reviewListEl = $('#reviewList');
+
+  function diagnose(d) {
+    const out = [];
+    const views = +d.views || 0, likes = +d.likes || 0, comments = +d.comments || 0,
+          shares = +d.shares || 0, finish = +d.finish || 0;
+    const lkRate = views ? (likes / views * 100) : 0;
+
+    if (views > 0 && finish > 0 && finish < 30)
+      out.push('📉 完播率仅 ' + finish + '%，偏低 → 前 3 秒必须前置钩子：把最大反差/结果/冲突放开头，配大字标题，节奏前快后稳。');
+    if (views > 0 && comments < likes * 0.02)
+      out.push('💬 评论偏少 → 结尾主动抛互动问题（如「你是宽肩还是窄肩？」「求链接打 1」），并在评论区自己先留一条引导。');
+    if (views > 0 && lkRate < 3)
+      out.push('❤️ 赞播比仅 ' + lkRate.toFixed(1) + '% → 选题或封面标题吸引力不足，建议测试更情绪化/更具体的标题，封面用「对比图+大字」。');
+    if (views > 0 && shares < likes * 0.05)
+      out.push('🔁 转发低 → 缺「可收藏实用价值」，建议加干货清单、金句截图点或「抄作业」式步骤，提升转发动机。');
+    if (d.source === '推荐' && views < 500)
+      out.push('🚀 推荐流量弱 → 话题标签不精准或账号权重低，优化 3-5 个垂直话题词，固定黄金发布时段（19-22 点）培养习惯。');
+    if (views > 0 && views < 200)
+      out.push('🔍 整体播放低 → 检查发布时间、首波互动（发后 1 小时内自己点赞评论引动），并考虑蹭当日热点二创。');
+
+    if (!out.length) out.push('✅ 数据表现均衡，继续保持当前节奏，可尝试在稳定选题上做微创新（换钩子/换封面）测试天花板。');
+    return out;
+  }
+
+  $('#reviewForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const f = e.target;
+    const d = {
+      id: uid(), date: todayKey(),
+      platform: f.platform.value, source: f.source.value, title: f.title.value.trim(),
+      views: f.views.value, likes: f.likes.value, comments: f.comments.value,
+      shares: f.shares.value, finish: f.finish.value, good: f.good.value.trim(), improve: f.improve.value.trim()
+    };
+    const tips = diagnose(d);
+    d.tips = tips;
+    reviews.unshift(d);
+    save(LS.reviews, reviews);
+    f.reset();
+    renderReviews();
+    toast('已保存 · ' + tips.length + ' 条优化建议');
+  });
+
+  function renderReviews() {
+    if (!reviews.length) { reviewListEl.innerHTML = `<p class="text-center text-sm text-gray-400 py-8">还没有复盘记录，发完作品来填一单吧</p>`; return; }
+    reviewListEl.innerHTML = reviews.map(r => `
+      <div class="card-enter bg-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-600">${esc(r.platform)}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-gray-400">${esc(r.date)}</span>
+            <button data-rreview="${r.id}" class="text-gray-300 text-xs">删除</button>
+          </div>
+        </div>
+        <h4 class="font-semibold text-gray-800 text-sm">${esc(r.title)}</h4>
+        <div class="grid grid-cols-3 gap-1.5 mt-2 text-center">
+          ${metric('播放', r.views)} ${metric('点赞', r.likes)} ${metric('评论', r.comments)}
+          ${metric('转发', r.shares)} ${metric('完播', r.finish + '%')} ${metric('来源', r.source)}
+        </div>
+        ${r.good ? `<p class="text-xs text-gray-600 mt-2"><b class="text-green-600">👍 亮点：</b>${esc(r.good)}</p>` : ''}
+        ${r.improve ? `<p class="text-xs text-gray-600 mt-1"><b class="text-brand-600">🔧 待改：</b>${esc(r.improve)}</p>` : ''}
+        <div class="mt-2 pt-2 border-t border-gray-100 space-y-1">
+          ${(r.tips || []).map(t => `<p class="text-xs text-gray-700">${esc(t)}</p>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+  function metric(label, val) {
+    return `<div class="bg-brand-50 rounded-lg py-1.5"><div class="text-[10px] text-gray-400">${label}</div><div class="text-xs font-bold text-gray-700">${esc(val || 0)}</div></div>`;
+  }
+  reviewListEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-rreview]'); if (!b) return;
+    reviews = reviews.filter(r => r.id !== b.dataset.rreview); save(LS.reviews, reviews); renderReviews();
+  });
+  renderReviews();
+
+  // 自动计算赞播比（展示用）
+  $('#reviewForm').addEventListener('input', e => {
+    if (e.target.name === 'views' || e.target.name === 'likes') {
+      const v = +e.target.form.views.value || 0, l = +e.target.form.likes.value || 0;
+      e.target.form.lkrate.value = v ? (l / v * 100).toFixed(1) + '%' : '';
+    }
+  });
+
+  /* =========================================================
+     通用弹层（新增表单）
+     ========================================================= */
+  const sheet = $('#sheet'), sheetBody = $('#sheetBody'), sheetTitle = $('#sheetTitle');
+  function openSheet(title, html) {
+    sheetTitle.textContent = '新增' + title;
+    sheetBody.innerHTML = html + `<button id="sheetSave" class="w-full bg-brand-500 text-white rounded-xl py-3 text-sm font-semibold active:scale-95 transition mt-1">保存</button>`;
+    sheet.classList.remove('hidden');
+  }
+  function closeSheet() { sheet.classList.add('hidden'); }
+  sheet.addEventListener('click', e => { if (e.target.hasAttribute('data-close') || e.target.id === 'sheetSave') closeSheet(); });
+
+  function buildTopicForm() {
+    const opts = Object.keys(PLATFORMS).map(p => `<option>${p}</option>`).join('');
+    return `
+      <label class="block text-xs text-gray-500">平台<select id="f_platform" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">${opts}</select></label>
+      <label class="block text-xs text-gray-500">标题 / 选题<textarea id="f_title" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="爆款标题或你的选题"></textarea></label>
+      <label class="block text-xs text-gray-500">火爆核心原因<textarea id="f_reason" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="为什么火"></textarea></label>
+      <label class="block text-xs text-gray-500">原创创作思路<textarea id="f_idea" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="结合你的人设怎么拍"></textarea></label>
+      <label class="block text-xs text-gray-500">🔥 热度（可选，如 772万）<input id="f_heat" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="留空则显示 —" /></label>
+      <label class="block text-xs text-gray-500">原视频链接（粘贴抖音/小红书分享链接，点开即看原片）<input id="f_video" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="https://... 留空则跳平台搜索" /></label>
+      <label class="block text-xs text-gray-500">搜索词（无原视频链接时用于跳转平台搜索）<input id="f_search" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="如：通勤伪素颜妆" /></label>
+    `;
+  }
+  function buildRepostForm() {
+    return `
+      <label class="block text-xs text-gray-500">类型<select id="f_type" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm"><option>肩宽穿搭</option><option>化妆教程</option></select></label>
+      <label class="block text-xs text-gray-500">原爆款标题<textarea id="f_title" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="原视频标题"></textarea></label>
+      <label class="block text-xs text-gray-500">爆款原因<textarea id="f_reason" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="为什么火"></textarea></label>
+      <label class="block text-xs text-gray-500">二创改编方案<textarea id="f_plan" rows="3" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="你的改编脚本/钩子/差异化"></textarea></label>
+      <label class="block text-xs text-gray-500">🔥 热度（可选，如 772万）<input id="f_heat" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="留空则显示 —" /></label>
+      <label class="block text-xs text-gray-500">原视频链接（粘贴爆款分享链接，点开即看原片）<input id="f_video" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="https://... 留空则跳平台搜索" /></label>
+      <label class="block text-xs text-gray-500">搜索词（无原视频链接时用于跳转平台搜索）<input id="f_search" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="如：宽肩显瘦穿搭" /></label>
+    `;
+  }
+  // 弹层保存（事件委托到 body 渲染后的按钮）
+  sheetBody.addEventListener('click', e => {
+    if (e.target.id !== 'sheetSave') return;
+    if (sheetTitle.textContent.includes('选题')) {
+      topics.unshift({ id: uid(), platform: $('#f_platform').value, title: $('#f_title').value, reason: $('#f_reason').value, idea: $('#f_idea').value, search: $('#f_search').value, heat: $('#f_heat').value.trim(), videoUrl: $('#f_video').value.trim() });
+      save(LS.topics, topics); renderTopics(); toast('选题已添加');
+    } else if (sheetTitle.textContent.includes('二创')) {
+      reposts.unshift({ id: uid(), type: $('#f_type').value, title: $('#f_title').value, reason: $('#f_reason').value, plan: $('#f_plan').value, search: $('#f_search').value, heat: $('#f_heat').value.trim(), videoUrl: $('#f_video').value.trim() });
+      save(LS.reposts, reposts); renderReposts(); toast('二创素材已添加');
+    } else if (sheetTitle.textContent.includes('导入')) {
+      importData($('#f_import') ? $('#f_import').value : '');
+    }
+    closeSheet();
+  });
+
+  /* =========================================================
+     导入今日采集（JSON）
+     ========================================================= */
+  function importObj(d) {
+    if (d && Array.isArray(d.topics)) {
+      d.topics.forEach(t => topics.unshift({ id: uid(), ...t }));
+      save(LS.topics, topics); renderTopics();
+    }
+    if (d && Array.isArray(d.reposts)) {
+      d.reposts.forEach(t => reposts.unshift({ id: uid(), ...t }));
+      save(LS.reposts, reposts); renderReposts();
+    }
+  }
+  function importData(str) {
+    try { importObj(JSON.parse(str)); toast('已导入今日采集'); }
+    catch (e) { toast('JSON 解析失败，请检查格式'); }
+  }
+  function openImport() {
+    openSheet('今日采集', `<label class="block text-xs text-gray-500">把聊天里「瑜的工作台·今日采集」的 JSON 整段粘贴到这里（包含 topics / reposts 两项）：<textarea id="f_import" rows="9" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm font-mono" placeholder='{"date":"2026-08-18","topics":[{"platform":"抖音","title":"...","reason":"...","idea":"...","heat":"772万","videoUrl":"https://www.douyin.com/shipin/..."}],"reposts":[...]}'></textarea></label>`);
+  }
+  $('#topicImportBtn').addEventListener('click', openImport);
+  $('#repostImportBtn').addEventListener('click', openImport);
+
+  // 打开即自动拉取当日数据（需经 http/https 托管，file:// 下会被浏览器拦截，可用上方「粘贴导入」替代）
+  let lastImport = load(LS.lastImport, '');
+  fetch('./daily.json').then(r => r.ok ? r.json() : null).then(d => {
+    if (d && d.date && d.date !== lastImport) {
+      importObj(d);
+      save(LS.lastImport, d.date);
+      toast('已自动导入 ' + d.date + ' 采集');
+    }
+  }).catch(() => {});
+
+  /* =========================================================
+     视图切换
+     ========================================================= */
+  const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘' };
+  function switchView(v) {
+    $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+    $$('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== v));
+    $('#viewTitle').textContent = titles[v];
+  }
+  $$('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+
+  /* =========================================================
+     Toast
+     ========================================================= */
+  let toastTimer;
+  function toast(msg) {
+    const t = $('#toast');
+    t.firstElementChild.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.add('hidden'), 2200);
+  }
+
+  async function copyLink(url) {
+    if (!url) return;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.top = '-9999px'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      toast('✅ 链接已复制');
+    } catch (e) {
+      toast('复制失败，请长按链接手动复制');
+    }
+  }
+
+  /* =========================================================
+     初始化
+     ========================================================= */
+  $('#todayDate').textContent = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+  renderTopicTabs(); renderTopics();
+  renderRepostFilter(); renderReposts();
+
+  /* =========================================================
+     PWA Service Worker 注册
+     ========================================================= */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
