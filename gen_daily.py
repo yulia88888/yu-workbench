@@ -3,14 +3,18 @@
 """
 gen_daily.py — 生成 daily.json（供 GitHub Action 每日自动运行）
 
-- B站：调用公开 popular 接口，按「美妆/护肤/穿搭/变美/职场/拍照」筛选，取播放量 Top5，给真实 BV 链接
-- 微博：调用公开 hotSearch 接口，取与你赛道相关的热搜 Top5，给真实搜索链接
-- 抖音 / 小红书 / 快手：精选搜索话题（这些本就是「搜索入口」，不需要实时数据，精选更稳更有用）
-- 全部带兜底：任一接口失败不影响出文件，保证站点每天都有数据
+数据策略（诚实标注）：
+- B站：公开接口，真实 BV 视频链接（kind=video）
+- 微博：公开热搜，真实链接（kind=topic）
+- 抖音/小红书/快手：
+    * 优先走第三方聚合接口拿「真实视频链接」（kind=video）
+    * 拿不到就退回到「官方实时热搜词」生成平台话题页链接（kind=topic）
+    * 都没有时退回精选搜索话题（kind=search）
+- 每个平台最多 20 条，混着给你挑；失败不影响出文件。
 
-输出：daily.json  { date, topics[], reposts[] }
-字段与「瑜的工作台」前端导入格式一致：platform/title/reason/idea/heat/videoUrl/search
+字段与「瑜的工作台」前端一致：platform/title/reason/idea/heat/videoUrl/search/kind
 """
+
 import json
 import urllib.request
 import urllib.parse
@@ -25,7 +29,7 @@ CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
 
 NICHES = ("美妆", "化妆", "护肤", "穿搭", "变美", "职场", "拍照", "vlog",
-          "减肥", "瘦身", "素颜", "平价", "通勤")
+          "减肥", "瘦身", "素颜", "平价", "通勤", "敏感肌", "前台", "唱歌")
 
 
 def http_get(url, referer="https://www.bilibili.com/", timeout=15):
@@ -36,13 +40,109 @@ def http_get(url, referer="https://www.bilibili.com/", timeout=15):
         return r.read().decode("utf-8", "ignore")
 
 
-def fetch_bilibili_top(n=5):
+def http_post(url, data, referer=None, timeout=15):
+    headers = {"User-Agent": UA, "Content-Type": "application/json",
+               "Accept": "application/json", "Referer": referer or url}
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    with urllib.request.urlopen(req, timeout=timeout, context=CTX) as r:
+        return r.read().decode("utf-8", "ignore")
+
+
+def is_niche(text):
+    return any(k in text for k in NICHES)
+
+
+# ---------- 聚合接口（尽力拿真实视频链接）----------
+AGGREGATORS = {
+    "抖音": [
+        "https://api.vvhan.com/api/douyin/hot",
+        "https://tenapi.vvhan.com/api/douyin/hot",
+    ],
+    "小红书": [
+        "https://api.vvhan.com/api/xiaohongshu/hot",
+        "https://tenapi.vvhan.com/api/xiaohongshu/hot",
+    ],
+    "快手": [
+        "https://api.vvhan.com/api/kuaishou/hot",
+        "https://tenapi.vvhan.com/api/kuaishou/hot",
+    ],
+}
+
+
+def parse_items(obj):
+    """从各种聚合返回结构中尽量提取 (title, url, hot)"""
+    out = []
+    def grab(o):
+        if not isinstance(o, dict):
+            return
+        title = (o.get("title") or o.get("word") or o.get("name")
+                 or o.get("text") or o.get("desc") or o.get("title"))
+        url = (o.get("url") or o.get("link") or o.get("href")
+               or o.get("origin") or o.get("share_url") or o.get("video"))
+        hot = (o.get("hot") or o.get("hotValue") or o.get("hot_value")
+               or o.get("heat") or o.get("score") or o.get("hotScore") or "")
+        if title and url:
+            out.append({"title": str(title).strip(),
+                        "url": str(url).strip(),
+                        "hot": hot})
+    data = obj
+    if isinstance(obj, dict):
+        if "data" in obj:
+            data = obj["data"]
+        if isinstance(data, dict):
+            for k in ("list", "items", "results", "newslist", "info", "array"):
+                if isinstance(data.get(k), list):
+                    data = data[k]
+                    break
+    if isinstance(data, list):
+        for it in data:
+            grab(it)
+    return out
+
+
+def fetch_aggregator(urls, n=20):
+    """依次尝试聚合接口，拿到真实视频链接"""
+    for u in urls:
+        try:
+            raw = http_get(u, referer=u)
+            items = parse_items(json.loads(raw))
+            if items:
+                return items[:n]
+        except Exception as e:
+            print("[warn] aggregator failed:", u, e)
+    return []
+
+
+# ---------- 官方实时热搜词（兜底/话题页）----------
+def fetch_douyin_words(n=30):
+    """抖音官方热搜词（真实热度），返回 [(word, hot)]"""
+    try:
+        data = json.loads(http_get(
+            "https://www.iesdouyin.com/web/api/v2/hotsearch/billboard/word/",
+            referer="https://www.douyin.com/"))
+        return [(w.get("word", ""), w.get("hot_value", ""))
+                for w in data.get("word_list", [])][:n]
+    except Exception as e:
+        print("[warn] douyin words failed:", e)
+        return []
+
+
+def topic_link(platform, word):
+    return {
+        "抖音": "https://www.douyin.com/search/" + urllib.parse.quote(word),
+        "小红书": "https://www.xiaohongshu.com/search_result?keyword=" + urllib.parse.quote(word),
+        "快手": "https://www.kuaishou.com/search/video?keyword=" + urllib.parse.quote(word),
+    }[platform]
+
+
+# ---------- B站 / 微博（真实接口）----------
+def fetch_bilibili_top(n=10):
     out = []
     try:
         url = "https://api.bilibili.com/x/web-interface/popular?ps=30&pn=1"
-        data = json.loads(http_get(url))
+        data = json.loads(http_get(url, referer="https://www.bilibili.com/"))
         items = data.get("data", {}).get("list", [])
-        sel = [v for v in items if any(k in v.get("title", "") for k in NICHES)]
+        sel = [v for v in items if is_niche(v.get("title", ""))]
         sel.sort(key=lambda v: v.get("stat", {}).get("view", 0), reverse=True)
         for v in sel[:n]:
             out.append({
@@ -52,21 +152,22 @@ def fetch_bilibili_top(n=5):
                 "idea": "以行政前台视角翻拍/点评，强调平价与敏感肌差异化",
                 "heat": v.get("stat", {}).get("view", 0),
                 "videoUrl": "https://www.bilibili.com/video/" + v.get("bvid", ""),
-                "search": v.get("title", "")
+                "search": v.get("title", ""),
+                "kind": "video",
             })
     except Exception as e:
         print("[warn] bilibili failed:", e)
     return out
 
 
-def fetch_weibo_hot(n=5):
+def fetch_weibo_hot(n=10):
     out = []
     try:
         data = json.loads(http_get("https://weibo.com/ajax/side/hotSearch",
                                    referer="https://weibo.com/"))
         lst = data.get("data", {}).get("realtime", [])
-        matched = [x for x in lst if any(k in x.get("word", "") for k in NICHES)]
-        sel = (matched[:n] if matched else lst[:n])
+        sel = [x for x in lst if is_niche(x.get("word", ""))]
+        sel = sel[:n] if sel else lst[:n]
         for x in sel:
             w = x.get("word", "")
             out.append({
@@ -76,71 +177,80 @@ def fetch_weibo_hot(n=5):
                 "idea": "结合打工人/前台视角做观点或轻松吐槽内容",
                 "heat": x.get("num", 0),
                 "videoUrl": "https://s.weibo.com/weibo?q=" + urllib.parse.quote(w),
-                "search": w
+                "search": w,
+                "kind": "topic",
             })
     except Exception as e:
         print("[warn] weibo failed:", e)
     return out
 
 
-# ---- 抖音 / 小红书 / 快手 精选搜索话题（稳定可复用，按日期轻微轮换）----
-DOUYIN_TOPICS = [
-    "通勤伪素颜妆教程", "敏感肌平价护肤", "宽肩显瘦穿搭", "职场前台妆容",
-    "新手化妆入门", "拍照姿势怎么摆", "打工人减脂餐", "学生党彩妆测评",
-    "早八快速出门妆", "方脸修容教程", "小个子穿搭", "素颜好物分享",
-    "变美逆袭vlog", "唱歌对口型变装", "办公室穿搭", "干皮保湿攻略",
-]
-XHS_TOPICS = [
-    "敏感肌护肤流程", "肩宽女生穿搭", "平价彩妆红黑榜", "通勤妆容分享",
-    "手机自拍技巧", "职场新人穿搭", "化妆小白教程", "干皮妆前打底",
-    "显脸小发型", "早八伪素颜", "拍照显瘦角度", "打工人好物",
-    "变美日记", "口红试色", "通勤包里有什么", "素颜霜测评",
-]
-KUAISHOU_TOPICS = [
-    "农村女孩变美", "平价衣服穿搭", "手残党化妆", "素颜逆袭",
-    "职场穿搭", "宝妈护肤", "拍照姿势教学", "唱歌对口型",
-    "减肥打卡", "敏感肌自救", "通勤妆", "显瘦神裤",
-    "新手化妆", "拍照氛围感", "打工人日常", "平价好物",
-]
+# ---------- 抖音 / 小红书 / 快手（聚合视频 + 热搜话题兜底）----------
+PLAT_CURATED = {
+    "抖音": ["通勤伪素颜妆", "敏感肌平价护肤", "宽肩显瘦穿搭", "职场前台妆容",
+             "新手化妆入门", "手机自拍技巧", "打工人减脂餐", "学生党彩妆测评",
+             "早八快速出门妆", "方脸修容教程", "小个子穿搭", "素颜好物分享",
+             "变美逆袭vlog", "唱歌对口型变装", "办公室穿搭", "干皮保湿攻略",
+             "黄黑皮口红", "氛围感写真", "约会妆容", "夏日穿搭"],
+    "小红书": ["敏感肌护肤流程", "肩宽女生穿搭", "平价彩妆红黑榜", "通勤妆容分享",
+               "手机自拍技巧", "职场新人穿搭", "化妆小白教程", "干皮妆前打底",
+               "显脸小发型", "早八伪素颜", "拍照显瘦角度", "打工人好物",
+               "变美日记", "口红试色", "通勤包里有什么", "素颜霜测评",
+               "黄皮穿搭", "氛围感照片", "约会妆", "夏日防晒"],
+    "快手": ["农村女孩变美", "平价衣服穿搭", "手残党化妆", "素颜逆袭",
+             "职场穿搭", "宝妈护肤", "拍照姿势教学", "唱歌对口型",
+             "减肥打卡", "敏感肌自救", "通勤妆", "显瘦神裤",
+             "新手化妆", "拍照氛围感", "打工人日常", "平价好物",
+             "黄黑皮穿搭", "约会妆容", "夏季穿搭", "学生党好物"],
+}
 
 
-def search_entry(platform, keyword, reason, idea):
-    base = {
-        "抖音": "https://www.douyin.com/search/",
-        "小红书": "https://www.xiaohongshu.com/search_result?keyword=",
-        "快手": "https://www.kuaishou.com/search/video?keyword=",
-    }[platform]
-    return {
-        "platform": platform,
-        "title": keyword,
-        "reason": reason,
-        "idea": idea,
-        "heat": "",
-        "videoUrl": "",
-        "search": keyword,
-    }
+def build_flex(platform, n=20):
+    """优先真实视频链接，不足用官方热搜/精选话题补足，凑满 n 条"""
+    out = []
+    seen = set()
 
+    # 1) 真实视频链接（聚合）
+    for it in fetch_aggregator(AGGREGATORS[platform], n):
+        if it["title"] in seen:
+            continue
+        seen.add(it["title"])
+        out.append({
+            "platform": platform,
+            "title": it["title"],
+            "reason": "第三方聚合抓到的当日热门视频，可直接看原片",
+            "idea": "用行政前台人设翻拍/点评，强调平价/敏感肌差异点",
+            "heat": it["hot"],
+            "videoUrl": it["url"],
+            "search": it["title"],
+            "kind": "video",
+        })
 
-def build_search_topics():
-    # 按日期偏移轮换，制造"每日略有不同"的感觉
-    day = datetime.date.today().toordinal()
-    topics = []
-    for i, kw in enumerate(DOUYIN_TOPICS):
-        if (i + day) % 2 == 0:  # 隔日轮换，保持一半稳定一半更新
-            topics.append(search_entry("抖音", kw,
-                                       "抖音高热搜索词，前台变美赛道流量池",
-                                       "用行政前台人设翻拍，强调平价/敏感肌差异点"))
-    for i, kw in enumerate(XHS_TOPICS):
-        if (i + day) % 2 == 0:
-            topics.append(search_entry("小红书", kw,
-                                       "小红书种草高频词，适合接广告内容",
-                                       "做测评/清单体，封面用对比图+大字"))
-    for i, kw in enumerate(KUAISHOU_TOPICS):
-        if (i + day) % 2 == 0:
-            topics.append(search_entry("快手", kw,
-                                       "快手老铁向爆款方向，真实接地气",
-                                       "用素人视角真实记录，不精致反而更可信"))
-    return topics
+    # 2) 官方热搜话题（兜底/补充）
+    words = []
+    if platform == "抖音":
+        words = [w for w, _ in fetch_douyin_words(40)]
+    if not words:
+        words = PLAT_CURATED[platform]
+
+    for w in words:
+        if len(out) >= n:
+            break
+        if w in seen:
+            continue
+        seen.add(w)
+        out.append({
+            "platform": platform,
+            "title": w,
+            "reason": ("抖音官方实时热搜，当下讨论度高" if platform == "抖音"
+                       else "平台高频词，适合接广告/测评内容"),
+            "idea": "结合你的人设做差异化表达，结尾抛互动问题引导评论",
+            "heat": "",
+            "videoUrl": topic_link(platform, w),
+            "search": w,
+            "kind": "topic",
+        })
+    return out[:n]
 
 
 # ---- 爆款二创（肩宽穿搭 / 化妆教程 / 职场吐槽）----
@@ -194,9 +304,11 @@ def build_reposts():
 
 def build():
     topics = []
-    topics += fetch_bilibili_top(5)     # 真实 BV 链接
-    topics += fetch_weibo_hot(5)        # 真实微博链接
-    topics += build_search_topics()      # 抖音/小红书/快手 搜索入口
+    topics += fetch_bilibili_top(10)     # 真实视频
+    topics += fetch_weibo_hot(10)        # 真实链接
+    topics += build_flex("抖音", 20)
+    topics += build_flex("小红书", 20)
+    topics += build_flex("快手", 20)
     return {
         "date": datetime.date.today().isoformat(),
         "topics": topics,
@@ -206,7 +318,10 @@ def build():
 
 if __name__ == "__main__":
     d = build()
-    with open("daily.json", "w", encoding="utf-8") as f:
+    with open("daily.json", "w",  encoding="utf-8") as f:
         json.dump(d, f, ensure_ascii=False, indent=2)
+    kinds = {}
+    for t in d["topics"]:
+        kinds[t.get("kind", "search")] = kinds.get(t.get("kind", "search"), 0) + 1
     print(f"daily.json written: {len(d['topics'])} topics, "
-          f"{len(d['reposts'])} reposts, date={d['date']}")
+          f"{len(d['reposts'])} reposts, date={d['date']}, kind={kinds}")
