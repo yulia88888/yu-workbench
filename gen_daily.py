@@ -32,12 +32,18 @@ NICHES = ("美妆", "化妆", "护肤", "穿搭", "变美", "职场", "拍照", 
           "减肥", "瘦身", "素颜", "平价", "通勤", "敏感肌", "前台", "唱歌")
 
 
-def http_get(url, referer="https://www.bilibili.com/", timeout=15):
+def http_get(url, referer="https://www.bilibili.com/", timeout=15, retries=3):
     headers = {"User-Agent": UA, "Referer": referer,
                "Accept": "application/json, text/plain, */*"}
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req, timeout=timeout, context=CTX) as r:
-        return r.read().decode("utf-8", "ignore")
+    last = None
+    for i in range(retries):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=timeout, context=CTX) as r:
+                return r.read().decode("utf-8", "ignore")
+        except Exception as e:
+            last = e
+    raise last
 
 
 def http_post(url, data, referer=None, timeout=15):
