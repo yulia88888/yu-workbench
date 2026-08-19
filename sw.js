@@ -1,5 +1,5 @@
 // 瑜的工作台 Service Worker —— 离线缓存 App Shell
-const CACHE = 'yu-workbench-v1';
+const CACHE = 'yu-workbench-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -28,11 +28,26 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  const url = req.url;
 
   // 导航请求：优先网络，失败回退缓存首页
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // 每日数据 daily.json：网络优先（保证每天自动刷新生效），失败才用缓存兜底
+  if (url.includes('daily.json')) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(req))
     );
     return;
   }
