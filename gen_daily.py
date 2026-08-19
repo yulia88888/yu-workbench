@@ -364,18 +364,15 @@ def main():
     weibo = fetch_weibo()
     bili = fetch_bilibili()
 
-    real_map = {
-        "微博": weibo,
-        "B站": bili,
-        "抖音": [],
-        "小红书": [],
-        "快手": [],
-    }
+    # 选题灵感：以赛道词池为主，B站用真实单条视频（云端不拦时）
+    real_topic = {"抖音": [], "小红书": [], "快手": [], "微博": [], "B站": bili}
+    # 爆款二创：注入微博/B站真实全网热点（更契合「全网最新热点爆款」）
+    real_repost = {"抖音": [], "小红书": [], "快手": [], "微博": weibo, "B站": bili}
 
     topics, reposts = [], []
     for i, p in enumerate(PLATFORMS_ORDER):
-        topics.extend(gen_platform(p, i, real_map[p], "topic"))
-        reposts.extend(gen_platform(p, i, real_map[p], "repost"))
+        topics.extend(gen_platform(p, i, real_topic[p], "topic"))
+        reposts.extend(gen_platform(p, i, real_repost[p], "repost"))
 
     data = {
         "date": today,
