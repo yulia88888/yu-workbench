@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#6B8E42" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <title>瑜的工作台</title>
+
+  <style>
+    :root{
+      --bg:#F7F5EF;
+      --card:#FFFFFF;
+      --primary:#6B8E42;
+      --primary-dark:#4A632D;
+      --primary-light:#EDF2E5;
+      --primary-soft:#F4F7EF;
+      --text:#2C3E2D;
+      --text-secondary:#5E6B5F;
+      --text-tertiary:#909E91;
+      --border:#E0E8D5;
+      --heat:#F5A623;
+      --info-bg:#F6F8F2;
+      --shadow:0 2px 10px rgba(107,142,66,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box;}
+    html,body{height:100%;margin:0;overscroll-behavior:none;}
+    body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;color:var(--text);-webkit-tap-highlight-color:transparent;}
+    button{font:inherit;color:inherit;cursor:pointer;background:none;border:none;padding:0;}
+    a{text-decoration:none;color:inherit;}
+    textarea,input,select{font-size:16px;font-family:inherit;}
+
+    .app{display:flex;height:100vh;height:100dvh;width:100vw;max-width:480px;margin:0 auto;overflow:hidden;background:var(--bg);}
+    .sidebar{width:76px;flex-shrink:0;background:linear-gradient(180deg,var(--primary) 0%,var(--primary-dark) 100%);display:flex;flex-direction:column;align-items:center;padding:16px 8px 12px;gap:10px;}
+    .sidebar-logo{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;margin-bottom:4px;}
+    .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;flex:1;border-radius:14px;color:rgba(255,255,255,.88);font-size:11px;font-weight:500;gap:4px;transition:all .15s ease;}
+    .nav-btn.active{background:#fff;color:var(--primary-dark);box-shadow:0 4px 14px rgba(0,0,0,.14);}
+    .nav-btn span:first-child{font-size:22px;line-height:1;}
+    .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+    .topbar{flex-shrink:0;padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:relative;z-index:10;}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.2px;}
+    .topbar-date{font-size:12px;color:var(--text-tertiary);white-space:nowrap;}
+
+    .content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 12px 20px;scrollbar-width:none;-ms-overflow-style:none;}
+    .content::-webkit-scrollbar{display:none;}
+
+    .filter-bar{display:flex;gap:8px;overflow-x:auto;padding:4px 4px 10px;scrollbar-width:none;-ms-overflow-style:none;}
+    .filter-bar::-webkit-scrollbar{display:none;}
+    .filter-chip{flex-shrink:0;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--text-secondary);transition:all .15s;}
+    .filter-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;animation:pop .22s ease;}
+    @keyframes pop{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+    .tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--primary);color:var(--primary);background:rgba(107,142,66,.06);}
+
+    .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--primary);color:#fff;font-size:13px;font-weight:600;padding:9px 16px;border-radius:999px;box-shadow:0 3px 8px rgba(107,142,66,.25);transition:all .15s;}
+    .btn-primary:active{transform:scale(.97);box-shadow:0 1px 4px rgba(107,142,66,.2);}
+    .btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#fff;border:1px solid var(--border);color:var(--text-secondary);font-size:12px;font-weight:500;padding:7px 12px;border-radius:999px;transition:all .15s;}
+    .btn-outline:active{transform:scale(.97);background:var(--primary-soft);}
+
+    .topic-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+    .topic-number{flex-shrink:0;font-size:20px;font-weight:800;color:var(--primary);line-height:1.1;margin-top:1px;}
+    .topic-title-wrap{flex:1;min-width:0;}
+    .topic-title{font-size:16px;font-weight:700;color:var(--text);line-height:1.35;}
+    .topic-analysis{font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:12px;}
+    .topic-actions{display:flex;gap:10px;}
+    .topic-actions .btn-primary{flex:1;}
+    .topic-actions .btn-outline{flex:1;color:var(--primary);border-color:var(--primary);}
+
+    .repost-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+    .repost-title{font-size:17px;font-weight:700;color:var(--text);line-height:1.35;flex:1;min-width:0;}
+    .repost-heat{flex-shrink:0;display:flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--heat);white-space:nowrap;margin-top:2px;}
+    .repost-section{margin-bottom:10px;}
+    .repost-label{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:3px;}
+    .repost-text{font-size:13px;color:var(--text-secondary);line-height:1.65;}
+    .repost-source{font-size:11px;color:var(--text-tertiary);margin:10px 0 12px;}
+    .repost-cta{margin-bottom:12px;}
+    .repost-info{background:var(--info-bg);border-radius:12px;padding:12px;display:flex;gap:8px;margin-bottom:14px;}
+    .repost-info-icon{flex-shrink:0;font-size:16px;}
+    .repost-info-text{flex:1;font-size:12px;color:var(--text-secondary);line-height:1.6;}
+    .repost-info-text b{color:var(--primary);font-weight:700;}
+    .repost-footer{display:flex;gap:8px;}
+    .repost-footer .btn-outline{flex:1;padding:8px 4px;font-size:12px;}
+
+    .plan-progress-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;}
+    .plan-progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .plan-progress-top span:first-child{font-size:14px;font-weight:600;color:var(--text);}
+    .plan-progress-top span:last-child{font-size:14px;font-weight:700;color:var(--primary);}
+    .plan-progress-bar{height:8px;border-radius:999px;background:var(--primary-light);overflow:hidden;}
+    .plan-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-dark));border-radius:999px;transition:width .3s ease;}
+    .task-item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px;animation:pop .22s ease;}
+    .task-check{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .task-check.done{background:var(--primary);border-color:var(--primary);}
+    .task-check svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;}
+    .task-text{flex:1;font-size:14px;color:var(--text);}
+    .task-text.done{text-decoration:line-through;color:var(--text-tertiary);}
+    .task-del{flex-shrink:0;color:var(--text-tertiary);font-size:16px;padding:4px;}
+    .plan-add{display:flex;gap:8px;margin-top:12px;}
+    .plan-add input{flex:1;border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;background:#fff;outline:none;}
+    .plan-add input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+    .plan-add button{background:var(--primary);color:#fff;border-radius:12px;padding:0 18px;font-size:14px;font-weight:600;}
+    .plan-tip{font-size:11px;color:var(--text-tertiary);margin-top:10px;line-height:1.5;}
+
+    .upgrade-box{background:var(--card);border:1.5px dashed var(--primary);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+    .upgrade-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .upgrade-input{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;resize:vertical;min-height:52px;}
+    .upgrade-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+
+    .review-form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;}
+    .review-form label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:12px;}
+    .review-form input,.review-form select,.review-form textarea{width:100%;margin-top:6px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;outline:none;}
+    .review-form input:focus,.review-form select:focus,.review-form textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+    .review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .review-submit{width:100%;background:var(--primary);color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700;margin-top:4px;}
+    .review-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:10px;}
+    .review-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .review-item-title{font-size:15px;font-weight:700;color:var(--text);}
+    .review-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;}
+    .metric{background:var(--primary-soft);border-radius:10px;padding:8px 4px;text-align:center;}
+    .metric-label{font-size:10px;color:var(--text-tertiary);}
+    .metric-val{font-size:13px;font-weight:700;color:var(--text);margin-top:2px;}
+    .review-tips{border-top:1px solid var(--border);padding-top:10px;margin-top:10px;}
+    .review-tips p{font-size:12px;color:var(--text-secondary);line-height:1.6;margin:0 0 6px;}
+
+    .sheet{position:fixed;inset:0;z-index:50;display:none;}
+    .sheet-back{position:absolute;inset:0;background:rgba(0,0,0,.4);}
+    .sheet-body{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:16px 16px 24px;max-height:85%;overflow-y:auto;}
+    .sheet-handle{width:40px;height:5px;background:var(--border);border-radius:999px;margin:0 auto 14px;}
+    .sheet-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px;}
+    .sheet-field{margin-bottom:12px;}
+    .sheet-field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:5px;}
+    .sheet-field input,.sheet-field select,.sheet-field textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;}
+    .sheet-field input:focus,.sheet-field select:focus,.sheet-field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+    .sheet-save{width:100%;background:var(--primary);color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700;margin-top:6px;}
+
+    .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;background:rgba(44,62,45,.92);color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.18);display:none;animation:toastIn .25s ease;}
+    @keyframes toastIn{from{opacity:0;transform:translate(-50%,12px);}to{opacity:1;transform:translate(-50%,0);}}
+
+    .hidden{display:none!important;}
+    .empty{text-align:center;padding:40px 20px;color:var(--text-tertiary);font-size:14px;}
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <nav class="sidebar">
+      <div class="sidebar-logo">瑜</div>
+      <button data-view="plan" class="nav-btn active"><span>📋</span><span>每日计划</span></button>
+      <button data-view="topic" class="nav-btn"><span>💡</span><span>选题灵感</span></button>
+      <button data-view="repost" class="nav-btn"><span>🔥</span><span>爆款二创</span></button>
+      <button data-view="review" class="nav-btn"><span>📊</span><span>内容复盘</span></button>
+    </nav>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 class="topbar-title" id="viewTitle">每日计划</h1>
+        <span class="topbar-date" id="todayDate"></span>
+      </header>
+
+      <section class="content" id="content">
+
+        <div data-panel="plan">
+          <div class="plan-progress-card">
+            <div class="plan-progress-top"><span>今日完成度</span><span id="planCount">0/0</span></div>
+            <div class="plan-progress-bar"><div id="planBar" class="plan-progress-fill" style="width:0%"></div></div>
+          </div>
+          <ul id="taskList"></ul>
+          <div class="plan-add">
+            <input id="taskInput" type="text" placeholder="添加新任务，回车确认…" />
+            <button id="taskAdd">添加</button>
+          </div>
+          <p class="plan-tip">提示：每天 0 点后任务会自动重置为未完成，任务清单本身长期保留。完成后点圆圈打勾即可。</p>
+        </div>
+
+        <div data-panel="topic" class="hidden">
+          <div id="topicFilter" class="filter-bar"></div>
+          <div class="upgrade-box">
+            <div class="upgrade-title">🔗 链接升级 · 粘贴分享链接</div>
+            <textarea id="upInput" class="upgrade-input" placeholder="把抖音/小红书/快手/B站 的「分享→复制链接」整段粘贴进来（如 v.douyin.com/xxx），自动转成可跳转灵感卡片"></textarea>
+            <button id="upBtn" class="btn-primary" style="width:100%;margin-top:10px;">⤴ 升级成灵感卡片</button>
+          </div>
+          <div id="topicList"></div>
+          <button id="topicAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增一条选题</button>
+          <button id="topicImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
+          <p class="plan-tip">各平台赛道「当日爆款」广撒网扫描（含美食/旅行/搞笑/影视/知识/健身/数码/职场等大众赛道，不过滤是否适合你），逐条给火爆核心原因 + 原创创作思路。抖音/快手卡片的「看原爆款」是真实视频/热榜链接；微博/B站为真实页；小红书为搜索页。下方「链接升级」可把分享短链转成卡片。</p>
+        </div>
+
+        <div data-panel="repost" class="hidden">
+          <div id="repostFilter" class="filter-bar"></div>
+          <div id="repostList"></div>
+          <button id="repostAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增二创素材</button>
+          <button id="repostImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
+          <p class="plan-tip">从全网热点中筛选适合你的 13 个方向（穿搭/妆容/测评/鞋履配饰/网购避坑/护肤身体护理/好物/情绪共鸣/女性成长/审美建立/消费观/vlog/唱歌碎片），逐条给出「为什么适合你二创 + 详细改编方案」。点击绿色按钮进入对应平台查看真实视频/话题流。</p>
+        </div>
+
+        <div data-panel="review" class="hidden">
+          <form id="reviewForm" class="review-form">
+            <div class="review-grid">
+              <label>平台<select name="platform"><option>抖音</option><option>小红书</option><option>快手</option><option>微博</option><option>B站</option></select></label>
+              <label>流量来源<select name="source"><option>推荐</option><option>关注</option><option>搜索</option><option>其他</option></select></label>
+              <label>赞播比<input name="lkrate" type="text" readonly placeholder="自动" /></label>
+            </div>
+            <label>选题 / 标题<input name="title" required placeholder="如：通勤伪素颜妆" /></label>
+            <div class="review-grid">
+              <label>播放量<input name="views" type="number" min="0" placeholder="0" /></label>
+              <label>点赞<input name="likes" type="number" min="0" placeholder="0" /></label>
+              <label>评论<input name="comments" type="number" min="0" placeholder="0" /></label>
+              <label>转发<input name="shares" type="number" min="0" placeholder="0" /></label>
+              <label>完播率(%)<input name="finish" type="number" min="0" max="100" placeholder="0" /></label>
+              <label>日期<input name="rdate" type="date" /></label>
+            </div>
+            <label>做得好的点（选填）<textarea name="good" rows="2" placeholder="这次哪里表现不错"></textarea></label>
+            <label>下次优化点（选填）<textarea name="improve" rows="2" placeholder="下次想改的地方"></textarea></label>
+            <button type="submit" class="review-submit">保存并智能诊断</button>
+          </form>
+          <h3 style="font-size:15px;font-weight:700;color:var(--text);margin:18px 4px 10px;">历史复盘（永久存档）</h3>
+          <div id="reviewList"></div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <div id="sheet" class="sheet hidden">
+    <div class="sheet-back" data-close></div>
+    <div class="sheet-body">
+      <div class="sheet-handle"></div>
+      <h3 id="sheetTitle" class="sheet-title">新增</h3>
+      <div id="sheetBody"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+__SCRIPT__
+  </script>
+</body>
+</html>
