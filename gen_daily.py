@@ -21,6 +21,7 @@
 """
 import json
 import ssl
+import re
 import urllib.request
 import urllib.parse
 import random
@@ -381,6 +382,37 @@ RPOST_TITLES = {
 }
 
 
+# ------------------------- 真实接口：tophub 聚合热榜（抖音/快手，含真实视频/热搜链接） -------------------------
+TOPHUB = {
+    "抖音": "DpQvNABoNE",   # 抖音总榜（含真实 douyin.com/video/ID 链接）
+    "快手": "MZd7PrPerO",   # 快手热榜（含 index.e.kuaishou.com 热搜页）
+}
+
+def fetch_tophub(platform):
+    """返回 [{title, url, heat}]；抖音给真实视频链接，快手给真实热搜页。失败返回 []。"""
+    code = TOPHUB.get(platform)
+    if not code:
+        return []
+    try:
+        d = http_get(f"https://tophub.today/n/{code}")
+        if not d:
+            return []
+        items = re.findall(
+            r'<a href="(https?://(?:www\.douyin\.com/video/\d+|index\.e\.kuaishou\.com/[^\"]+))"[^>]*>([^<]+)</a>',
+            d,
+        )
+        out = []
+        for url, title in items:
+            title = title.strip()
+            if not title:
+                continue
+            out.append({"title": title, "url": url, "heat": "—"})
+        return out[:20]
+    except Exception as e:
+        print("[warn] tophub", platform, "failed:", e)
+        return []
+
+
 # ------------------------- 真实接口：微博热搜 -------------------------
 def fetch_weibo():
     out = []
@@ -509,19 +541,12 @@ def build_topic(platform, track, title, idx, real=None):
         "title": title,
         "analysis": pick(meta["analysis"], idx),
         "idea": pick(meta["idea"], idx + 1),
+        "real_url": "",  # 真实爆款链接（抖音真实视频 / 快手真实热搜页 / 微博话题页 / B站视频）
     }
-    if real:
-        base["dy_link"] = search_url("抖音", real.get("title", title))
-        base["bz_link"] = search_url("B站", real.get("title", title))
-        # 真实链接优先用原 url（微博话题页 / B站真实视频）
-        if real.get("url"):
-            if platform == "微博":
-                base["dy_link"] = real["url"]
-            if platform == "B站":
-                base["bz_link"] = real["url"]
-    else:
-        base["dy_link"] = search_url("抖音", title)
-        base["bz_link"] = search_url("B站", title)
+    if real and real.get("url"):
+        base["real_url"] = real["url"]  # 直接用真实原链接（抖音视频/快手热搜/B站视频）
+    base["dy_link"] = search_url("抖音", title)
+    base["bz_link"] = search_url("B站", title)
     return base
 
 
@@ -597,11 +622,13 @@ def main():
 
     weibo = fetch_weibo()
     bili = fetch_bilibili()
+    douyin = fetch_tophub("抖音")      # 真实视频链接
+    kuaishou = fetch_tophub("快手")    # 真实热搜页
 
     # 选题灵感：全平台广撒网（含大众赛道），真实接口不过滤
-    real_topic = {"抖音": [], "小红书": [], "快手": [], "微博": weibo, "B站": bili}
+    real_topic = {"抖音": douyin, "小红书": [], "快手": kuaishou, "微博": weibo, "B站": bili}
     # 爆款二创：只取适合瑜的赛道（真实接口过滤到 YU_TRACKS）
-    real_repost = {"抖音": [], "小红书": [], "快手": [], "微博": weibo, "B站": bili}
+    real_repost = {"抖音": douyin, "小红书": [], "快手": kuaishou, "微博": weibo, "B站": bili}
 
     topics, reposts = [], []
     for i, p in enumerate(PLATFORMS_ORDER):
@@ -614,7 +641,8 @@ def main():
         "reposts": reposts,
         "note": ("选题灵感=各平台赛道当日爆款广撒网扫描（含瑜不做的大众赛道），逐条给火爆核心原因+原创创作思路；"
                  "爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。"
-                 "B站为真实单条视频链接；微博为真实热搜话题页；抖音/小红书/快手官方未开放单条视频接口，给搜索入口，已如实标注。")
+                 "抖音=真实单条视频链接（via tophub 聚合）；快手=真实热搜页；B站=真实视频（云端IP可则）；微博=真实热搜话题页。"
+                 "小红书官方未开放接口，给搜索入口，已如实标注。「链接升级」可粘贴分享短链解析为原视频卡片。")
     }
 
     with open("daily.json", "w", encoding="utf-8") as f:
