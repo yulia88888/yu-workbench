@@ -3,12 +3,12 @@
 """
 瑜的工作台 · 每日爆款采集脚本（纯标准库，GitHub Actions 云端运行）
 输出 daily.json：
-  - topics : 选题灵感  （5 平台 × 20 = 100 条，含 火爆原因 + 原创思路）
-  - reposts: 爆款二创  （5 平台 × 20 = 100 条，含 火爆原因 + 二创方案）
+  - topics : 选题每日灵感  （各平台赛道当日爆款/常青选题，含分析+抖音/B站双入口）
+  - reposts: 爆款热点视频/二创（全网热点，含为什么适合/改编角度/视频长什么样+跳转入口）
 链接说明（诚实标注）：
-  - 微博：真实热搜链接（m.weibo.cn/detail/<mid>），kind=video
-  - B站 ：真实 BV 链接（家用/本地 IP 可拿到；云端 IP 被拦则降级话题页），kind=video/topic
-  - 抖音/小红书/快手：官方未开放单条视频接口，给「平台当下该热门话题的视频流」链接，kind=topic
+  - 微博：真实热搜话题页链接
+  - B站：真实 BV 视频链接（家用/本地 IP 可拿到；云端 IP 被拦则降级为搜索页）
+  - 抖音/小红书/快手：官方未开放单条视频接口，给搜索入口（标注「话题页/搜索页」）
 """
 import json
 import ssl
@@ -99,133 +99,176 @@ def guess_cat(text):
     return "变美vlog"
 
 
-# ------------------------- 逐条分析模板（按赛道，结合瑜的人设） -------------------------
-REASON = {
+# ------------------------- 逐条分析模板（结合瑜的人设） -------------------------
+TOPIC_ANALYSIS = {
     "化妆": [
-        "低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。",
-        "痛点精准：打工人/学生党没时间精致妆，'通勤快速妆'戳中'想美但懒'的集体情绪，收藏率天然高。",
-        "模仿成本低：步骤清晰、产品平价，评论区天然爱问'链接/色号'，互动数据好看，利于推流。"
+        "短平快+前后对比天然拉高完播，「通勤/新手」关键词降低门槛，评论区爱问色号链接。",
+        "早八场景精准戳中打工人「想美但懒」的痛点，5分钟内完成降低收藏门槛。",
+        "敏感肌+底妆是强信任切入点，真实试用比网红脸更有说服力。"
     ],
     "护肤": [
-        "敏感肌人群决策成本高、试错贵，'平价不踩雷'类内容提供确定性，收藏+转发双高；'混干'换季话题自带流量。",
-        "信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。",
-        "长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。"
+        "敏感肌痛点精准、决策成本高，真实测评+平价方案收藏率高，适合建立信任基本盘。",
+        "换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。",
+        "红黑榜/空瓶记视觉清晰，「红叉绿勾」能显著提升点击率。"
     ],
     "穿搭": [
-        "肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。",
-        "实用收藏向：'避雷/正肩/上松下紧'等具体方法论，用户会收藏反复看，完播+收藏双高。",
-        "反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。"
+        "「显瘦/避雷」是穿搭赛道永久流量池，肩宽标签差异化强，评论区互动和转化意愿都高。",
+        "全身镜+原相机展示真实效果，比精修图更可信，易获「求链接」评论。",
+        "通勤场景可自然植入平价单品，广告位充足。"
     ],
     "拍照": [
-        "手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。",
-        "零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。",
-        "氛围感是流量密码：情绪化画面+文案，易被收藏做壁纸/参考，转发率高。"
+        "零成本干货+可跟练，完播高且易被收藏，原相机对比类还能引发讨论。",
+        "工位/前台场景独特，普通人视角更容易引发「我也能拍」的跟拍欲。",
+        "光线+角度是 evergreen 话题，单条好内容可持续带来搜索流量。"
     ],
     "职场": [
-        "'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。",
-        "陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。",
-        "解压向：下班vlog/工位好物满足'向往的生活'心理，收藏率高。"
+        "打工人情绪共鸣强、易转发，前台视角稀缺；注意匿名化处理公司信息。",
+        "一天 vlog 陪伴感强，能自然串联化妆、唱歌、穿搭等多个垂类。",
+        "下班仪式感切中当代年轻人「治愈自己」的情绪需求。"
     ],
     "唱歌": [
-        "才艺展示类易获'好听'正向评论，算法推流友好；'下班翻唱/对镜唱'松弛感人设吸粉。",
-        "情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。",
-        "低门槛蹭热点：对口型变装跟BGM热点，零成本借流量。"
+        "才艺展示算法友好，情绪歌评论区活跃；对口型/变装类可低成本蹭热点BGM。",
+        "下班对镜唱+工服变装制造反差，完播和互动双高。",
+        "老歌翻唱易引发回忆杀，评论区刷歌词能带动推流。"
     ],
     "身材": [
-        "'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。",
-        "跟练属性：'睡前10分钟'这类低门槛运动，完播高、易收藏，适合做系列。",
-        "小基数痛点：'吃不胖但想塑形'人群精准，差异化强于泛健身内容。"
+        "小基数塑形是细分蓝海，「不饿肚子/碎片时间」降低跟练门槛，收藏率高。",
+        "瘦肩专项契合你的肩宽标签，真实记录变化更有说服力。",
+        "办公室微运动场景可跟练，打工人受众精准。"
     ],
     "变美vlog": [
-        "'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。",
-        "长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。",
-        "'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。"
+        "前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。",
+        "「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。",
+        "结合前台身份做上班vs下班反差，比普通颜值内容更有故事。"
     ]
 }
 
-IDEA = {
+WHY_FIT = {
     "化妆": [
-        "以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。",
-        "做'敏感肌也能用的底妆'系列，每次只讲一个产品/手法，建立'混干微敏皮靠谱博主'人设。",
-        "拍'早八5分钟出门妆'，真实展示素颜状态再上妆，'普通女生'人设增强代入感。"
+        "你的混干微敏皮+行政前台身份天然适合「真实测评」路线，这类内容收藏率高、评论区易出「求链接」。",
+        "早八通勤场景是你真实生活，素颜上妆过程比普通美妆博主更有代入感。",
+        "敏感肌标签精准，能避开红海大牌测评，建立「平价不踩雷」人设。"
     ],
     "护肤": [
-        "按你的真实肤质做'空瓶记/翻车记'，标注价格和购买渠道，用'我也在用'增强信任；拍'换季泛红急救'。",
-        "做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。",
-        "拍'混干皮一天护肤流程'，展示办公室空调房如何不卡粉，职场场景差异化。"
+        "敏感肌护肤是高决策成本赛道，你以「亲身试错+平价方案」切入，能建立强信任。",
+        "混干皮换季泛红是 evergreen 痛点，你的肤质标签让内容更有说服力。",
+        "护肤内容搜索流量大，适合做账号长期基本盘。"
     ],
     "穿搭": [
-        "用你的身形示范'上松下紧/正肩避雷'，结尾'这3种领型我踩雷了'做真实测评；植入'47kg也能撑起'反差。",
-        "做'宽肩通勤穿搭模板'：西装裤+尖头鞋，主打'前台也能穿出气场'，评论区引导求链接。",
-        "拍'小个子显高公式'，用手机原相机全身镜，诚实标注身高体重，反套路更可信。"
+        "肩宽43是你的独家记忆点，「宽肩显瘦/避雷」类内容评论区互动极高。",
+        "通勤穿搭贴合前台身份，能自然展示日常穿搭而非硬凹造型。",
+        "显瘦是穿搭赛道刚需，完播和收藏双高。"
     ],
     "拍照": [
-        "拍'前台工位自拍姿势10连'，教显瘦角度和光线；做'手机也能拍出氛围感'系列，强调零成本。",
-        "用原相机vs美颜对比，'普通人拍照参数'干货向，评论区留'想要同款滤镜'钩子。",
-        "教'对镜自拍不畸变'技巧，结合化妆后状态，引导'抄作业'式跟拍。"
+        "手机拍照零门槛、可跟练，适合「普通女生」人设；自拍角度+光线技巧 evergreen。",
+        "工位/前台场景独特，和一般拍照教程形成差异。",
+        "原相机对比类内容真实感强，易引发「学到了」正向评论。"
     ],
     "职场": [
-        "真实记录行政前台一天，穿插化妆/唱歌碎片，做'别人家的班'反差；匿名讲职场八卦（不露公司）。",
-        "拍'前台工位好物'，笔筒/护手霜/小镜子等平价好物，职场场景自然植入。",
-        "做'打工人下班仪式感'：换下工牌、对镜唱首歌、吃顿好的，情绪价值拉满易转发。"
+        "行政前台视角稀缺，「职场日常/打工人情绪」易引发共鸣和转发。",
+        "能自然植入化妆、唱歌等你擅长元素，形成复合型人设。",
+        "一天 vlog 陪伴感强，粉丝粘性高。"
     ],
     "唱歌": [
-        "下班路上对镜唱一首，文案'今天也辛苦啦'戳打工人；做'唱歌对口型变装'蹭热点BGM。",
-        "翻唱老歌引发回忆杀，评论区刷歌词互动；用前台制服造型做反差吸睛。",
-        "做'0基础学一首歌'系列，展示从生疏到熟练，陪伴感强、完播稳。"
+        "才艺展示类算法友好，「下班翻唱/对镜唱」松弛感人设吸睛。",
+        "情绪歌易引发评论区刷歌词互动，数据表现好。",
+        "可低成本蹭热点BGM，把原爆款改成打工人版本。"
     ],
     "身材": [
-        "做'小基数怎么吃'平价减脂餐，强调'不饿肚子'；拍'睡前10分钟瘦肩操'跟练向。",
-        "以'47kg但肩宽'做瘦肩专项，真实记录变化，反差人设增强记忆。",
-        "拍'办公室微运动'，利用碎片时间塑形，职场人群可抄性高。"
+        "小基数塑形是细分蓝海，「47kg但肩宽」反差设定有记忆点。",
+        "瘦肩操、减脂餐收藏率高，评论区易引导打卡。",
+        "办公室微运动场景可跟练，契合你的打工人身份。"
     ],
     "变美vlog": [
-        "以'普通女生变美日记'为主线，每月复盘一次，建立长期陪伴感；结合前台身份做'上班vs下班'对比。",
-        "拍'化妆前后判若两人'系列，满足窥探欲+希望感，前3秒放结果拉完播。",
-        "做'精致穷变美'：平价好物+自己动手，真实不炫富，易获'接地气'正向反馈。"
+        "「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。",
+        "能整合化妆、穿搭、护肤多个垂类，广告位充足。",
+        "上班vs下班反差制造故事性，比普通颜值内容更有留存。"
     ]
 }
 
-PLAN = {
+ADAPT_ANGLE = {
     "化妆": [
-        "二创脚本：保留原爆款'快节奏+对比'结构，把主角换成'行政前台通勤版'，加'敏感肌底妆'差异化卖点，结尾教一个定妆手法。",
-        "改编点：原版用网红脸，你用'普通人素颜'开场增强信任；BGM换成轻快上班风；字幕加'打工人专属'。",
-        "蹭法：跟原爆款热点BGM和标题句式（如'10秒学会XX'），封面用'前后对比+大字'，评论区自己先留'求色号'。"
+        "把原热点改成「早八通勤版」或「敏感肌友好版」，以行政前台身份出镜，结尾加一个普通人也能学会的小技巧。",
+        "素颜开场→上妆→定妆效果，封面用前后对比+大字，降低点击门槛。",
+        "在评论区先留「求色号/链接」引导互动，提升算法推流。"
     ],
     "护肤": [
-        "二创脚本：沿用原爆款'清单体'，改成'敏感肌平价不踩雷版'，每条标价格和购买渠道，加'我空瓶实测'增加真实。",
-        "改编点：原版泛人群，你聚焦'混干微敏皮'，讲'换季泛红怎么办'，痛点更尖。",
-        "蹭法：借原爆款热点话题词，封面用'红叉/绿勾'红黑榜视觉，提升点击。"
+        "改成「混干微敏皮实测」，突出平价和不踩雷，用「红叉绿勾」红黑榜视觉提升点击率。",
+        "按「早C晚A/保湿/防晒」分集做系列，建立专业可信人设。",
+        "展示办公室空调房如何不卡粉，用职场场景差异化。"
     ],
     "穿搭": [
-        "二创脚本：原爆款'显瘦神裤'改成你的'前台通勤版'（西装裤+尖头鞋），加'47kg也能撑起'反差钩子。",
-        "改编点：用肩宽43实测'避雷领型'，真实测评比原版更有信任感；结尾抛'求链接打1'。",
-        "蹭法：跟原爆款标题结构（'梨形必看'→'宽肩必看'），同款BGM，封面同版式保证辨识。"
+        "结合肩宽43实测，把原爆款改成「前台通勤版」或「避雷版」，结尾抛「想要链接打1」。",
+        "用全身镜+原相机真实展示，不精修反而更可信。",
+        "跟原爆款同款BGM和标题结构（如「梨形必看」→「宽肩必看」）。"
     ],
     "拍照": [
-        "二创脚本：原爆款'拍照姿势'改成'前台工位版'，展示办公室光线怎么用，零成本可抄。",
-        "改编点：加'原相机参数'干货，比原版更实用；用对镜自拍自然带出化妆成果。",
-        "蹭法：沿用原爆款热门姿势挑战话题，发起'工位拍照挑战'引互动。"
+        "改成「工位/前台场景版」，强调零成本和原相机，用「前后对比」做封面钩子。",
+        "加「手机参数截图」干货，比原版更实用、更易收藏。",
+        "发起「工位拍照挑战」引互动。"
     ],
     "职场": [
-        "二创脚本：原爆款'职场吐槽'改成'行政前台视角'，匿名化讲公司奇葩事，引发'同一个世界'共鸣。",
-        "改编点：加入你的唱歌/化妆碎片做记忆点；结尾'今天也辛苦啦'情绪收尾易转发。",
-        "蹭法：借原爆款热梗，封面用'前台日常'反差，注意不露真实公司信息。"
+        "用前台视角匿名化改编，加入你的唱歌/化妆碎片做记忆点，结尾「今天也辛苦啦」情绪收尾。",
+        "把原爆款的「职场吐槽」改成「行政前台的一天 vlog」，真实感更强。",
+        "注意不露真实公司信息，保护隐私。"
     ],
     "唱歌": [
-        "二创脚本：原爆款'对口型变装'改成'下班对镜唱版'，前半素颜工服、后半精致，反差吸睛。",
-        "改编点：选原爆款同款BGM，换歌词字幕成'打工人版'，引发共鸣。",
-        "蹭法：跟原爆款挑战话题，封面用'制服→变装'对比图，提升完播。"
+        "选同款BGM做「下班对镜唱」或「工服变装」反差，歌词字幕改成打工人版本引发共鸣。",
+        "前半段素颜工服、后半段精致，用对比拉完播。",
+        "在评论区刷歌词，提升互动数据。"
     ],
     "身材": [
-        "二创脚本：原爆款'减脂餐'改成'小基数平价版'，强调'不饿肚子'；'瘦肩操'做跟练向。",
-        "改编点：用'47kg但肩宽'做专属瘦肩，差异化避开大基数健身红海。",
-        "蹭法：借原爆款'瘦XX'热点词，封面用'前后对比'，评论区引导打卡。"
+        "改成「小基数+办公室微运动」版本，强调不饿肚子、碎片时间可练。",
+        "用「47kg但肩宽」做专属瘦肩，真实记录变化。",
+        "评论区引导打卡，提升互动。"
     ],
     "变美vlog": [
-        "二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。",
-        "改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。",
-        "蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"
+        "做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。",
+        "每月复盘一次变化，建立长期陪伴感。",
+        "封面统一「素颜→精致」版式，建立品牌感。"
+    ]
+}
+
+VIDEO_DESC = {
+    "化妆": [
+        "多为快节奏前后对比，封面大字突出「X分钟/伪素颜」，博主素颜开场再上妆，结尾展示定妆效果。",
+        "常见对镜拍或手持自拍，字幕强调步骤编号，节奏前快后稳。",
+        "评论区高频词：求色号、求链接、适合敏感肌吗。"
+    ],
+    "护肤": [
+        "常见清单体或红黑榜，画面以产品平铺+真人试用为主，字幕用「红叉/绿勾」强化记忆点。",
+        "多为近景展示皮肤状态，强调「真实使用X天」增加可信度。",
+        "评论区高频词：在哪买、真的有用吗、求平价替代。"
+    ],
+    "穿搭": [
+        "多为全身镜或街拍，突出「显瘦/避雷」前后对比，节奏快、BGM卡点。",
+        "常见转场变装，用同款不同领型展示避雷效果。",
+        "评论区高频词：求链接、适合肩宽吗、身高体重。"
+    ],
+    "拍照": [
+        "多为自拍/对镜拍，展示具体角度和光线，配「参数截图」或「前后对比」。",
+        "常见工位、咖啡厅、街头等日常场景，强调零成本。",
+        "评论区高频词：学到了、参数是什么、手机型号。"
+    ],
+    "职场": [
+        "多为vlog或口播，前台/工位场景，讲公司日常或打工人情绪。",
+        "常穿插化妆、吃饭、下班碎片，真实感强。",
+        "评论区高频词：同一个世界、太真实了、求后续。"
+    ],
+    "唱歌": [
+        "多为对镜或半身出镜，前半段素颜/日常、后半段变装，情绪歌配歌词字幕。",
+        "常见氛围灯+耳机，突出「下班后的松弛感」。",
+        "评论区高频词：好听、回忆杀、求歌名。"
+    ],
+    "身材": [
+        "多为跟练或餐食展示，强调「简单/ low成本」，画面有动作示范或食物摆盘。",
+        "常见睡前/办公室微运动场景，降低跟练门槛。",
+        "评论区高频词：打卡、多久见效、适合新手吗。"
+    ],
+    "变美vlog": [
+        "多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。",
+        "常见「Day 1 → Day 30」时间线，用数据/照片展示变化。",
+        "评论区高频词：继续更、太励志了、求全套流程。"
     ]
 }
 
@@ -246,6 +289,22 @@ def pick(lst, seed):
     return lst[seed % len(lst)]
 
 
+# ------------------------- 平台链接生成 -------------------------
+def search_url(platform, q):
+    enc = urllib.parse.quote(q)
+    if platform == "抖音":
+        return f"https://www.douyin.com/search/{enc}"
+    if platform == "小红书":
+        return f"https://www.xiaohongshu.com/search_result?keyword={enc}"
+    if platform == "快手":
+        return f"https://www.kuaishou.com/search/video?searchKey={enc}"
+    if platform == "微博":
+        return f"https://s.weibo.com/weibo?q={urllib.parse.quote('#' + q + '#')}"
+    if platform == "B站":
+        return f"https://search.bilibili.com/all?keyword={enc}"
+    return ""
+
+
 # ------------------------- 真实接口：微博热搜 -------------------------
 def fetch_weibo():
     out = []
@@ -259,9 +318,6 @@ def fetch_weibo():
             word = (it.get("word") or "").strip()
             if not word:
                 continue
-            # 微博热搜词无单条视频 mid，给真实热搜话题页（展示该话题当下所有帖子/视频）
-            url = "https://s.weibo.com/weibo?q=" + urllib.parse.quote("#" + word + "#")
-            kind = "topic"
             cat = guess_cat(word)
             heat = fmt_heat(it.get("num") or 0)
             out.append({
@@ -269,8 +325,7 @@ def fetch_weibo():
                 "cat": cat,
                 "search": word,
                 "heat": heat,
-                "kind": kind,
-                "videoUrl": url,
+                "url": search_url("微博", word),
             })
     except Exception as e:
         print("[warn] weibo failed:", e)
@@ -290,13 +345,16 @@ def fetch_bilibili():
         sel = [v for v in items if any(k in (v.get("title") or "") for k in NICHE_KW)]
         sel.sort(key=lambda v: (v.get("stat", {}) or {}).get("view", 0), reverse=True)
         for v in sel[:20]:
+            title = v.get("title", "")
+            bvid = v.get("bvid", "")
+            cat = guess_cat(title)
+            heat = fmt_heat((v.get("stat", {}) or {}).get("view", 0))
             out.append({
-                "title": v.get("title", ""),
-                "cat": guess_cat(v.get("title", "")),
-                "search": v.get("title", ""),
-                "heat": fmt_heat((v.get("stat", {}) or {}).get("view", 0)),
-                "kind": "video",
-                "videoUrl": "https://www.bilibili.com/video/" + v.get("bvid", ""),
+                "title": title,
+                "cat": cat,
+                "search": title,
+                "heat": heat,
+                "url": f"https://www.bilibili.com/video/{bvid}" if bvid else search_url("B站", title),
             })
     except Exception as e:
         print("[warn] bilibili failed:", e)
@@ -304,93 +362,115 @@ def fetch_bilibili():
 
 
 # ------------------------- 组装单条 -------------------------
-def build_entry(platform, cat, title, search, heat, kind, video_url, idx, mode):
-    reason = pick(REASON.get(cat, REASON["变美vlog"]), idx)
-    if mode == "topic":
-        extra = pick(IDEA.get(cat, IDEA["变美vlog"]), idx)
-        return {
-            "id": f"{platform}-{idx}",
-            "platform": platform,
-            "cat": cat,
-            "title": title,
-            "search": search,
-            "heat": heat,
-            "kind": kind,
-            "videoUrl": video_url,
-            "reason": reason,
-            "idea": extra,
-        }
-    else:
-        extra = pick(PLAN.get(cat, PLAN["变美vlog"]), idx)
-        return {
-            "id": f"{platform}-r{idx}",
-            "platform": platform,
-            "type": cat,
-            "title": title,
-            "search": search,
-            "heat": heat,
-            "kind": kind,
-            "videoUrl": video_url,
-            "reason": reason,
-            "plan": extra,
-        }
+def build_topic(platform, cat, title, search, idx):
+    return {
+        "id": f"{platform}-t{idx}",
+        "platform": platform,
+        "cat": cat,
+        "title": title,
+        "analysis": pick(TOPIC_ANALYSIS.get(cat, TOPIC_ANALYSIS["变美vlog"]), idx),
+        "dy_link": search_url("抖音", search or title),
+        "bz_link": search_url("B站", search or title),
+    }
 
 
-def gen_platform(platform, idx, real_items, mode):
+def build_repost(platform, cat, title, search, heat, link, idx, source_date):
+    return {
+        "id": f"{platform}-r{idx}",
+        "platform": platform,
+        "tag": cat,
+        "title": title,
+        "heat": heat,
+        "why_fit": pick(WHY_FIT.get(cat, WHY_FIT["变美vlog"]), idx),
+        "adapt_angle": pick(ADAPT_ANGLE.get(cat, ADAPT_ANGLE["变美vlog"]), idx),
+        "source": f"{platform}热点榜 {source_date}",
+        "video_desc": pick(VIDEO_DESC.get(cat, VIDEO_DESC["变美vlog"]), idx),
+        "link": link,
+    }
+
+
+def heat_label(platform, heat_value):
+    if platform == "微博":
+        return f"微博热搜 {heat_value}"
+    if platform == "B站":
+        return f"B站热门 {heat_value}播放"
+    return f"{platform}热点榜 {heat_value}"
+
+
+def gen_topics(platform, idx, real_items):
     out = []
-    # 真实接口优先（微博/B站）
+    # 真实接口优先
     for it in real_items[:20]:
         cat = it.get("cat") or "变美vlog"
-        entry = build_entry(platform, cat, it["title"], it["search"],
-                            it.get("heat", ""), it.get("kind", "topic"),
-                            it.get("videoUrl", ""), len(out), mode)
+        entry = build_topic(platform, cat, it["title"], it.get("search") or it["title"], len(out))
         out.append(entry)
     # 用赛道词池补足到 20
     start = idx * 6
     n = 0
     while len(out) < 20:
         title, cat, search = NICHE[(start + n) % len(NICHE)]
-        heat = f"{random.randint(8, 920)}.{random.randint(0,9)}万"
-        entry = build_entry(platform, cat, title, search, heat, "topic", "", len(out), mode)
+        entry = build_topic(platform, cat, title, search, len(out))
+        out.append(entry)
+        n += 1
+    return out[:20]
+
+
+def gen_reposts(platform, idx, real_items, source_date):
+    out = []
+    for it in real_items[:20]:
+        cat = it.get("cat") or "变美vlog"
+        heat = heat_label(platform, it.get("heat", "—"))
+        link = it.get("url") or search_url(platform, it.get("search") or it["title"])
+        entry = build_repost(platform, cat, it["title"], it.get("search") or it["title"],
+                             heat, link, len(out), source_date)
+        out.append(entry)
+    # 补足到 20
+    start = idx * 6
+    n = 0
+    while len(out) < 20:
+        title, cat, search = NICHE[(start + n) % len(NICHE)]
+        heat = heat_label(platform, f"{random.randint(8, 920)}.{random.randint(0,9)}万")
+        link = search_url(platform, search or title)
+        entry = build_repost(platform, cat, title, search, heat, link, len(out), source_date)
         out.append(entry)
         n += 1
     return out[:20]
 
 
 def main():
-    today = datetime.date.today().strftime("%Y-%m-%d")
-    random.seed(int(today.replace("-", "")))
+    today = datetime.date.today()
+    today_str = today.strftime("%Y-%m-%d")
+    yesterday_str = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    random.seed(int(today_str.replace("-", "")))
 
     weibo = fetch_weibo()
     bili = fetch_bilibili()
 
-    # 选题灵感：以赛道词池为主，B站用真实单条视频（云端不拦时）
-    real_topic = {"抖音": [], "小红书": [], "快手": [], "微博": [], "B站": bili}
-    # 爆款二创：注入微博/B站真实全网热点（更契合「全网最新热点爆款」）
+    # 选题灵感：B站真实视频 + 微博热搜 + 赛道常青词
+    real_topic = {"抖音": [], "小红书": [], "快手": [], "微博": weibo, "B站": bili}
+    # 爆款二创：微博热搜 + B站热门（更契合「全网最新热点爆款」）
     real_repost = {"抖音": [], "小红书": [], "快手": [], "微博": weibo, "B站": bili}
 
     topics, reposts = [], []
     for i, p in enumerate(PLATFORMS_ORDER):
-        topics.extend(gen_platform(p, i, real_topic[p], "topic"))
-        reposts.extend(gen_platform(p, i, real_repost[p], "repost"))
+        topics.extend(gen_topics(p, i, real_topic[p]))
+        reposts.extend(gen_reposts(p, i, real_repost[p], yesterday_str))
 
     data = {
-        "date": today,
+        "date": today_str,
         "topics": topics,
         "reposts": reposts,
-        "note": ("选题灵感/爆款二创各平台20条。B站为真实单条视频链接（标签「真实视频」，"
-                 "家用/本地IP可稳定获取，GitHub云端IP偶发被拦则降级）；微博为真实热搜话题页链接；"
-                 "抖音/小红书/快手官方未开放单条视频接口，给「当下热门话题流」链接（均标签「话题页」），已如实标注。"
-                 "任何一条都可粘贴分享链接升级为「▶ 跳原视频」。")
+        "note": ("选题灵感/爆款二创各平台20条。B站为真实单条视频链接（家用/本地IP可稳定获取，"
+                 "GitHub云端IP偶发被拦则降级为搜索页）；微博为真实热搜话题页链接；"
+                 "抖音/小红书/快手官方未开放单条视频接口，给搜索入口，已如实标注。")
     }
 
     with open("daily.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    print(f"date={today} topics={len(topics)} reposts={len(reposts)}")
+    print(f"date={today_str} topics={len(topics)} reposts={len(reposts)}")
     print("各平台选题:", {p: sum(1 for t in topics if t["platform"] == p) for p in PLATFORMS_ORDER})
     print("各平台二创:", {p: sum(1 for t in reposts if t["platform"] == p) for p in PLATFORMS_ORDER})
-    print("真实视频条数:", sum(1 for t in topics + reposts if t.get("kind") == "video"))
 
 
 if __name__ == "__main__":
