@@ -1,12 +1,10 @@
-// 瑜的工作台 Service Worker —— 离线缓存 App Shell
-const CACHE = 'yu-workbench-v2';
+// 瑜的工作台 Service Worker —— 离线缓存 App Shell（已去除 Tailwind CDN 依赖）
+const CACHE = 'yu-workbench-v3';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icon.svg',
-  // Tailwind Play CDN 脚本：首次联网加载后缓存，之后离线可用
-  'https://cdn.tailwindcss.com'
+  './icon.svg'
 ];
 
 self.addEventListener('install', (e) => {
@@ -30,10 +28,14 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = req.url;
 
-  // 导航请求：优先网络，失败回退缓存首页
+  // 导航请求：永远优先网络（保证 index.html 永远是最新版，按钮逻辑不被旧缓存卡住），失败回退缓存首页
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).catch(() => caches.match('./index.html'))
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put('./index.html', copy)).catch(() => {});
+        return res;
+      }).catch(() => caches.match('./index.html'))
     );
     return;
   }
@@ -52,7 +54,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 静态资源：缓存优先，缺失则网络并写入缓存
+  // 静态资源（icon / manifest）：缓存优先，缺失则网络并写入缓存
   e.respondWith(
     caches.match(req).then((hit) => {
       if (hit) return hit;
@@ -63,9 +65,9 @@ self.addEventListener('fetch', (e) => {
           return res;
         })
         .catch(() => {
-          // CDN 离线兜底：返回一个空样式表避免页面崩溃
-          if (req.url.includes('tailwindcss')) {
-            return new Response('', { headers: { 'Content-Type': 'text/css' } });
+          // 图标离线兜底
+          if (req.url.includes('icon.svg')) {
+            return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#ec4899"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#fff" font-family="sans-serif">瑜</text></svg>', { headers: { 'Content-Type': 'image/svg+xml' } });
           }
         });
     })
