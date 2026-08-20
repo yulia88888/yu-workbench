@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#ec4899" />
+  <meta name="theme-color" content="#6B8E42" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="./manifest.webmanifest" />
@@ -13,346 +13,223 @@
 
   <style>
     :root{
-      --brand-50:#fdf2f8; --brand-100:#fce7f3; --brand-200:#fbcfe8; --brand-300:#f9a8d4;
-      --brand-400:#f472b6; --brand-500:#ec4899; --brand-600:#db2777; --brand-700:#be185d;
+      --bg:#F7F5EF;
+      --card:#FFFFFF;
+      --primary:#6B8E42;
+      --primary-dark:#4A632D;
+      --primary-light:#EDF2E5;
+      --primary-soft:#F4F7EF;
+      --text:#2C3E2D;
+      --text-secondary:#5E6B5F;
+      --text-tertiary:#909E91;
+      --border:#E0E8D5;
+      --heat:#F5A623;
+      --info-bg:#F6F8F2;
+      --shadow:0 2px 10px rgba(107,142,66,.08);
+      --radius:16px;
     }
     *{box-sizing:border-box;}
     html,body{height:100%;margin:0;overscroll-behavior:none;}
-    body{background:var(--brand-50);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;color:#1f2937;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;color:var(--text);-webkit-tap-highlight-color:transparent;}
     button{font:inherit;color:inherit;cursor:pointer;background:none;border:none;padding:0;}
     a{text-decoration:none;color:inherit;}
     textarea,input,select{font-size:16px;font-family:inherit;}
 
-    /* 布局 / flex */
-    .flex{display:flex;}
-    .inline-flex{display:inline-flex;}
-    .flex-col{flex-direction:column;}
-    .flex-1{flex:1 1 0%;min-width:0;}
-    .flex-wrap{flex-wrap:wrap;}
-    .items-center{align-items:center;}
-    .justify-center{justify-content:center;}
-    .justify-between{justify-content:space-between;}
-    .shrink-0{flex-shrink:0;}
-    .min-w-0{min-width:0;}
-    .w-screen{width:100vw;}
-    .h-screen{height:100vh;}
-    .h-screen{height:100dvh;}
-    .max-w-md{max-width:28rem;}
-    .mx-auto{margin-left:auto;margin-right:auto;}
-    .overflow-hidden{overflow:hidden;}
-    .overflow-y-auto{overflow-y:auto;}
-    .overflow-x-auto{overflow-x:auto;}
-    .relative{position:relative;}
-    .absolute{position:absolute;}
-    .fixed{position:fixed;}
-    .inset-0{top:0;right:0;bottom:0;left:0;}
-    .left-0{left:0;}
-    .right-0{right:0;}
-    .bottom-0{bottom:0;}
-    .left-1\/2{left:50%;}
-    .-translate-x-1\/2{transform:translateX(-50%);}
-    .bottom-24{bottom:6rem;}
-    .w-full{width:100%;}
+    .app{display:flex;height:100vh;height:100dvh;width:100vw;max-width:480px;margin:0 auto;overflow:hidden;background:var(--bg);}
+    .sidebar{width:76px;flex-shrink:0;background:linear-gradient(180deg,var(--primary) 0%,var(--primary-dark) 100%);display:flex;flex-direction:column;align-items:center;padding:16px 8px 12px;gap:10px;}
+    .sidebar-logo{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;margin-bottom:4px;}
+    .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;flex:1;border-radius:14px;color:rgba(255,255,255,.88);font-size:11px;font-weight:500;gap:4px;transition:all .15s ease;}
+    .nav-btn.active{background:#fff;color:var(--primary-dark);box-shadow:0 4px 14px rgba(0,0,0,.14);}
+    .nav-btn span:first-child{font-size:22px;line-height:1;}
+    .main{flex:1;min-width:0;display:flex;flex-direction:column;}
 
-    /* grid */
-    .grid{display:grid;}
-    .grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr));}
-    .grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr));}
-    .gap-1{gap:.25rem;}
-    .gap-1\.5{gap:.375rem;}
-    .gap-2{gap:.5rem;}
-    .gap-3{gap:.75rem;}
+    .topbar{flex-shrink:0;padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:relative;z-index:10;}
+    .topbar-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.2px;}
+    .topbar-date{font-size:12px;color:var(--text-tertiary);white-space:nowrap;}
 
-    /* 间距 */
-    .space-y-2>*+*{margin-top:.5rem;}
-    .space-y-3>*+*{margin-top:.75rem;}
-    .space-y-4>*+*{margin-top:1rem;}
+    .content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 12px 20px;scrollbar-width:none;-ms-overflow-style:none;}
+    .content::-webkit-scrollbar{display:none;}
 
-    /* 显隐（关键：之前靠 Tailwind CDN，CDN 挂了就失效） */
-    .hidden{display:none!important;}
+    .filter-bar{display:flex;gap:8px;overflow-x:auto;padding:4px 4px 10px;scrollbar-width:none;-ms-overflow-style:none;}
+    .filter-bar::-webkit-scrollbar{display:none;}
+    .filter-chip{flex-shrink:0;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--text-secondary);transition:all .15s;}
+    .filter-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
 
-    /* 尺寸 */
-    .w-11{width:2.75rem;}
-    .h-11{height:2.75rem;}
-    .w-10{width:2.5rem;}
-    .h-1\.5{height:.375rem;}
-    .w-7{width:1.75rem;}
-    .h-7{height:1.75rem;}
-    .h-2\.5{height:.625rem;}
-    .h-full{height:100%;}
-    .w-\[76px\]{width:76px;}
-    .max-h-\[85\%\]{max-height:85%;}
-
-    /* 内边距 / 外边距 */
-    .p-4{padding:1rem;}
-    .px-4{padding-left:1rem;padding-right:1rem;}
-    .py-4{padding-top:1rem;padding-bottom:1rem;}
-    .pt-4{padding-top:1rem;}
-    .pb-3{padding-bottom:.75rem;}
-    .py-2{padding-top:.5rem;padding-bottom:.5rem;}
-    .px-3{padding-left:.75rem;padding-right:.75rem;}
-    .px-2{padding-left:.5rem;padding-right:.5rem;}
-    .py-1{padding-top:.25rem;padding-bottom:.25rem;}
-    .py-1\.5{padding-top:.375rem;padding-bottom:.375rem;}
-    .px-2\.5{padding-left:.625rem;padding-right:.625rem;}
-    .py-2\.5{padding-top:.625rem;padding-bottom:.625rem;}
-    .py-3{padding-top:.75rem;padding-bottom:.75rem;}
-    .pt-3{padding-top:.75rem;}
-    .pb-1{padding-bottom:.25rem;}
-    .px-1{padding-left:.25rem;padding-right:.25rem;}
-    .mb-2{margin-bottom:.5rem;}
-    .mt-1{margin-top:.25rem;}
-    .mt-2{margin-top:.5rem;}
-    .mt-3{margin-top:.75rem;}
-    .mt-5{margin-top:1.25rem;}
-    .mb-1{margin-bottom:.25rem;}
-    .mb-3{margin-bottom:.75rem;}
-    .mb-1\.5{margin-bottom:.375rem;}
-    .ml-auto{margin-left:auto;}
-
-    /* 背景色 */
-    .bg-brand-50{background:var(--brand-50);}
-    .bg-brand-100{background:var(--brand-100);}
-    .bg-brand-200{background:var(--brand-200);}
-    .bg-brand-300{background:var(--brand-300);}
-    .bg-brand-400{background:var(--brand-400);}
-    .bg-brand-500{background:var(--brand-500);}
-    .bg-brand-600{background:var(--brand-600);}
-    .bg-white{background:#fff;}
-    .bg-white\/20{background:rgba(255,255,255,.2);}
-    .bg-sky-500{background:#0ea5e9;}
-    .bg-sky-100{background:#e0f2fe;}
-    .bg-rose-500{background:#f43f5e;}
-    .bg-rose-100{background:#ffe4e6;}
-    .bg-purple-100{background:#f3e8ff;}
-    .bg-amber-100{background:#fef3c7;}
-    .bg-gray-50{background:#f9fafb;}
-    .bg-gray-100{background:#f3f4f6;}
-    .bg-gray-300{background:#d1d5db;}
-    .bg-gray-900{background:#111827;}
-    .bg-black\/40{background:rgba(0,0,0,.4);}
-
-    /* 文字颜色 */
-    .text-white{color:#fff;}
-    .text-white\/90{color:rgba(255,255,255,.9);}
-    .text-white\/80{color:rgba(255,255,255,.8);}
-    .text-gray-800{color:#1f2937;}
-    .text-gray-700{color:#374151;}
-    .text-gray-600{color:#4b5563;}
-    .text-gray-500{color:#6b7280;}
-    .text-gray-400{color:#9ca3af;}
-    .text-gray-300{color:#d1d5db;}
-    .text-brand-600{color:var(--brand-600);}
-    .text-brand-500{color:var(--brand-500);}
-    .text-rose-600{color:#e11d48;}
-    .text-sky-600{color:#0284c7;}
-    .text-emerald-600{color:#059669;}
-    .text-purple-600{color:#7c3aed;}
-    .text-amber-600{color:#d97706;}
-    .text-red-400{color:#f87171;}
-    .text-green-600{color:#16a34a;}
-
-    /* 字号 / 字重 */
-    .text-\[10px\]{font-size:10px;}
-    .text-\[11px\]{font-size:11px;}
-    .text-xs{font-size:12px;}
-    .text-sm{font-size:14px;}
-    .text-base{font-size:16px;}
-    .text-lg{font-size:18px;}
-    .text-xl{font-size:20px;}
-    .font-bold{font-weight:700;}
-    .font-semibold{font-weight:600;}
-    .font-medium{font-weight:500;}
-    .leading-tight{line-height:1.25;}
-    .leading-snug{line-height:1.375;}
-    .leading-none{line-height:1;}
-    .line-through{text-decoration:line-through;}
-    .text-center{text-align:center;}
-
-    /* 圆角 */
-    .rounded-2xl{border-radius:1rem;}
-    .rounded-xl{border-radius:.75rem;}
-    .rounded-lg{border-radius:.5rem;}
-    .rounded-full{border-radius:9999px;}
-    .rounded-t-3xl{border-top-left-radius:1.5rem;border-top-right-radius:1.5rem;}
-
-    /* 边框 */
-    .border{border:1px solid #e5e7eb;}
-    .border-2{border:2px solid;}
-    .border-dashed{border-style:dashed;}
-    .border-brand-100{border-color:var(--brand-100);}
-    .border-brand-200{border-color:var(--brand-200);}
-    .border-brand-300{border-color:var(--brand-300);}
-    .border-brand-500{border-color:var(--brand-500);}
-    .border-brand-600{border-color:var(--brand-600);}
-    .border-gray-300{border-color:#d1d5db;}
-    .border-gray-100{border-color:#f3f4f6;}
-
-    /* 阴影 / 渐变 */
-    .shadow-sm{box-shadow:0 1px 2px 0 rgba(0,0,0,.05);}
-    .bg-gradient-to-b{background-image:linear-gradient(to bottom,var(--brand-500),var(--brand-600));}
-    .bg-gradient-to-r{background-image:linear-gradient(to right,var(--brand-500),var(--brand-400));}
-
-    /* 过渡 / 动效 */
-    .transition{transition:all .15s ease;}
-    .transition-all{transition:all .3s;}
-    .duration-300{transition-duration:.3s;}
-    .active\:scale-95:active{transform:scale(.95);}
-    .focus\:outline-none:focus{outline:none;}
-    .focus\:ring-2:focus{box-shadow:0 0 0 3px rgba(244,114,182,.5);}
-    .active\:text-red-400:active{color:#f87171;}
-
-    /* 自定义组件 */
-    .no-bar::-webkit-scrollbar{display:none;}
-    .no-bar{scrollbar-width:none;-ms-overflow-style:none;}
-    .safe-area-left{padding-left:env(safe-area-inset-left);}
-    .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;}
-    .nav-btn.active{background:#fff;color:var(--brand-600);box-shadow:0 4px 14px rgba(219,39,119,.18);}
-    .card-enter{animation:pop .22s ease;}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;animation:pop .22s ease;}
     @keyframes pop{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-    .toast{animation:toastIn .25s ease;}
-    @keyframes toastIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+
+    .tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--primary);color:var(--primary);background:rgba(107,142,66,.06);}
+
+    .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--primary);color:#fff;font-size:13px;font-weight:600;padding:9px 16px;border-radius:999px;box-shadow:0 3px 8px rgba(107,142,66,.25);transition:all .15s;}
+    .btn-primary:active{transform:scale(.97);box-shadow:0 1px 4px rgba(107,142,66,.2);}
+    .btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#fff;border:1px solid var(--border);color:var(--text-secondary);font-size:12px;font-weight:500;padding:7px 12px;border-radius:999px;transition:all .15s;}
+    .btn-outline:active{transform:scale(.97);background:var(--primary-soft);}
+
+    .topic-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+    .topic-number{flex-shrink:0;font-size:20px;font-weight:800;color:var(--primary);line-height:1.1;margin-top:1px;}
+    .topic-title-wrap{flex:1;min-width:0;}
+    .topic-title{font-size:16px;font-weight:700;color:var(--text);line-height:1.35;}
+    .topic-analysis{font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:12px;}
+    .topic-actions{display:flex;gap:10px;}
+    .topic-actions .btn-primary{flex:1;}
+    .topic-actions .btn-outline{flex:1;color:var(--primary);border-color:var(--primary);}
+
+    .repost-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+    .repost-title{font-size:17px;font-weight:700;color:var(--text);line-height:1.35;flex:1;min-width:0;}
+    .repost-heat{flex-shrink:0;display:flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--heat);white-space:nowrap;margin-top:2px;}
+    .repost-section{margin-bottom:10px;}
+    .repost-label{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:3px;}
+    .repost-text{font-size:13px;color:var(--text-secondary);line-height:1.65;}
+    .repost-source{font-size:11px;color:var(--text-tertiary);margin:10px 0 12px;}
+    .repost-cta{margin-bottom:12px;}
+    .repost-info{background:var(--info-bg);border-radius:12px;padding:12px;display:flex;gap:8px;margin-bottom:14px;}
+    .repost-info-icon{flex-shrink:0;font-size:16px;}
+    .repost-info-text{flex:1;font-size:12px;color:var(--text-secondary);line-height:1.6;}
+    .repost-info-text b{color:var(--primary);font-weight:700;}
+    .repost-footer{display:flex;gap:8px;}
+    .repost-footer .btn-outline{flex:1;padding:8px 4px;font-size:12px;}
+
+    .plan-progress-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;}
+    .plan-progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .plan-progress-top span:first-child{font-size:14px;font-weight:600;color:var(--text);}
+    .plan-progress-top span:last-child{font-size:14px;font-weight:700;color:var(--primary);}
+    .plan-progress-bar{height:8px;border-radius:999px;background:var(--primary-light);overflow:hidden;}
+    .plan-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-dark));border-radius:999px;transition:width .3s ease;}
+    .task-item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px;animation:pop .22s ease;}
+    .task-check{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .task-check.done{background:var(--primary);border-color:var(--primary);}
+    .task-check svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;}
+    .task-text{flex:1;font-size:14px;color:var(--text);}
+    .task-text.done{text-decoration:line-through;color:var(--text-tertiary);}
+    .task-del{flex-shrink:0;color:var(--text-tertiary);font-size:16px;padding:4px;}
+    .plan-add{display:flex;gap:8px;margin-top:12px;}
+    .plan-add input{flex:1;border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;background:#fff;outline:none;}
+    .plan-add input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+    .plan-add button{background:var(--primary);color:#fff;border-radius:12px;padding:0 18px;font-size:14px;font-weight:600;}
+    .plan-tip{font-size:11px;color:var(--text-tertiary);margin-top:10px;line-height:1.5;}
+
+    .review-form{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;}
+    .review-form label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:12px;}
+    .review-form input,.review-form select,.review-form textarea{width:100%;margin-top:6px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;outline:none;}
+    .review-form input:focus,.review-form select:focus,.review-form textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+    .review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .review-submit{width:100%;background:var(--primary);color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700;margin-top:4px;}
+    .review-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:10px;}
+    .review-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .review-item-title{font-size:15px;font-weight:700;color:var(--text);}
+    .review-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;}
+    .metric{background:var(--primary-soft);border-radius:10px;padding:8px 4px;text-align:center;}
+    .metric-label{font-size:10px;color:var(--text-tertiary);}
+    .metric-val{font-size:13px;font-weight:700;color:var(--text);margin-top:2px;}
+    .review-tips{border-top:1px solid var(--border);padding-top:10px;margin-top:10px;}
+    .review-tips p{font-size:12px;color:var(--text-secondary);line-height:1.6;margin:0 0 6px;}
+
+    .sheet{position:fixed;inset:0;z-index:50;display:none;}
+    .sheet-back{position:absolute;inset:0;background:rgba(0,0,0,.4);}
+    .sheet-body{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:16px 16px 24px;max-height:85%;overflow-y:auto;}
+    .sheet-handle{width:40px;height:5px;background:var(--border);border-radius:999px;margin:0 auto 14px;}
+    .sheet-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px;}
+    .sheet-field{margin-bottom:12px;}
+    .sheet-field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:5px;}
+    .sheet-field input,.sheet-field select,.sheet-field textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;}
+    .sheet-field input:focus,.sheet-field select:focus,.sheet-field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+    .sheet-save{width:100%;background:var(--primary);color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:700;margin-top:6px;}
+
+    .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;background:rgba(44,62,45,.92);color:#fff;font-size:13px;padding:10px 18px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.18);display:none;animation:toastIn .25s ease;}
+    @keyframes toastIn{from{opacity:0;transform:translate(-50%,12px);}to{opacity:1;transform:translate(-50%,0);}}
+
+    .hidden{display:none!important;}
+    .empty{text-align:center;padding:40px 20px;color:var(--text-tertiary);font-size:14px;}
   </style>
 </head>
 <body>
 
-  <div class="flex h-screen w-screen max-w-md mx-auto bg-brand-50 overflow-hidden">
-
-    <!-- 左侧纵向导航 -->
-    <nav class="w-[76px] shrink-0 bg-gradient-to-b from-brand-500 to-brand-600 flex flex-col items-center py-4 gap-2 safe-area-left">
-      <div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-white text-lg font-bold mb-2">瑜</div>
-      <button data-view="plan"    class="nav-btn active flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
-        <span class="text-xl">📋</span><span>每日计划</span>
-      </button>
-      <button data-view="topic"   class="nav-btn flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
-        <span class="text-xl">💡</span><span>选题灵感</span>
-      </button>
-      <button data-view="repost"  class="nav-btn flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
-        <span class="text-xl">🔥</span><span>爆款二创</span>
-      </button>
-      <button data-view="review"  class="nav-btn flex-1 w-full flex flex-col items-center justify-center gap-1 rounded-2xl py-2 text-white/90 text-[11px] font-medium transition">
-        <span class="text-xl">📊</span><span>内容复盘</span>
-      </button>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="sidebar-logo">瑜</div>
+      <button data-view="plan" class="nav-btn active"><span>📋</span><span>每日计划</span></button>
+      <button data-view="topic" class="nav-btn"><span>💡</span><span>选题灵感</span></button>
+      <button data-view="repost" class="nav-btn"><span>🔥</span><span>爆款二创</span></button>
+      <button data-view="review" class="nav-btn"><span>📊</span><span>内容复盘</span></button>
     </nav>
 
-    <!-- 右侧内容区 -->
-    <main class="flex-1 flex flex-col min-w-0 bg-brand-50">
-
-      <!-- 顶部条 -->
-      <header class="px-4 pt-4 pb-3 bg-gradient-to-r from-brand-500 to-brand-400 text-white">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 id="viewTitle" class="text-lg font-bold leading-tight">每日计划</h1>
-            <p id="todayDate" class="text-[11px] text-white/80"></p>
-          </div>
-          <span class="text-[11px] bg-white/20 px-2 py-1 rounded-full">瑜 · 自媒体工作台</span>
-        </div>
+    <main class="main">
+      <header class="topbar">
+        <h1 class="topbar-title" id="viewTitle">每日计划</h1>
+        <span class="topbar-date" id="todayDate"></span>
       </header>
 
-      <!-- 视图容器 -->
-      <section class="flex-1 overflow-y-auto no-bar px-4 py-4 space-y-4" id="content">
+      <section class="content" id="content">
 
-        <!-- ========== 每日计划 ========== -->
         <div data-panel="plan">
-          <div class="bg-white rounded-2xl p-4 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-semibold text-gray-700">今日完成度</span>
-              <span id="planCount" class="text-sm font-bold text-brand-600">0/0</span>
-            </div>
-            <div class="h-2.5 rounded-full bg-brand-100 overflow-hidden">
-              <div id="planBar" class="h-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all duration-300" style="width:0%"></div>
-            </div>
+          <div class="plan-progress-card">
+            <div class="plan-progress-top"><span>今日完成度</span><span id="planCount">0/0</span></div>
+            <div class="plan-progress-bar"><div id="planBar" class="plan-progress-fill" style="width:0%"></div></div>
           </div>
-
-          <ul id="taskList" class="space-y-2"></ul>
-
-          <div class="flex gap-2 mt-3">
-            <input id="taskInput" type="text" placeholder="添加新任务，回车确认…" class="flex-1 rounded-xl border border-brand-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300" />
-            <button id="taskAdd" class="shrink-0 bg-brand-500 text-white px-4 rounded-xl text-sm font-medium active:scale-95 transition">添加</button>
+          <ul id="taskList"></ul>
+          <div class="plan-add">
+            <input id="taskInput" type="text" placeholder="添加新任务，回车确认…" />
+            <button id="taskAdd">添加</button>
           </div>
-          <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">提示：每天 0 点后任务会自动重置为未完成，任务清单本身长期保留。完成后点圆圈打勾即可。</p>
+          <p class="plan-tip">提示：每天 0 点后任务会自动重置为未完成，任务清单本身长期保留。完成后点圆圈打勾即可。</p>
         </div>
 
-        <!-- ========== 选题灵感 ========== -->
         <div data-panel="topic" class="hidden">
-          <div id="topicTabs" class="flex gap-1.5 overflow-x-auto no-bar pb-1"></div>
-          <button id="topicAddBtn" class="w-full mt-3 bg-white border border-dashed border-brand-300 text-brand-600 rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">＋ 新增一条选题</button>
-          <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">每日自动采集各平台 20 条赛道爆款。带「真实视频」标签（B站单条视频）可直接跳原片；带「话题页」标签的点开是平台当下该热门话题的视频流（抖音/小红书/快手/微博官方未开放单条视频接口，已如实标注）。任何一条都能把刷到的分享链接粘贴进「＋新增」升级为「▶ 跳原视频」。</p>
-          <button id="topicImportBtn" class="w-full mt-3 bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">📥 粘贴导入今日采集（JSON）</button>
-          <div id="topicList" class="space-y-3 mt-3"></div>
+          <div id="topicFilter" class="filter-bar"></div>
+          <div id="topicList"></div>
+          <button id="topicAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增一条选题</button>
+          <button id="topicImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
+          <p class="plan-tip">每日自动采集各平台赛道爆款，逐条分析火爆原因并给出原创创作思路。抖音/小红书/快手因官方未开放单条视频接口，点击按钮进入平台相关视频流；B站/微博可跳转真实视频或话题页。</p>
         </div>
 
-        <!-- ========== 爆款二创 ========== -->
         <div data-panel="repost" class="hidden">
-          <div id="repostFilter" class="flex gap-1.5 overflow-x-auto no-bar pb-1"></div>
-          <button id="repostAddBtn" class="w-full mt-3 bg-white border border-dashed border-brand-300 text-brand-600 rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">＋ 新增二创素材</button>
-          <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">全网最新热点爆款，每条给「二创改编方案」+ 原爆款跳转入口，每日各平台 20 条。带「真实视频」标签（B站）可跳原片；带「话题页」标签的点开是平台当下热门话题视频流。粘贴分享链接可升级为「▶ 跳原视频」。</p>
-          <button id="repostImportBtn" class="w-full mt-3 bg-brand-500 text-white rounded-xl py-2.5 text-sm font-medium active:scale-95 transition">📥 粘贴导入今日采集（JSON）</button>
-          <div id="repostList" class="space-y-3 mt-3"></div>
+          <div id="repostFilter" class="filter-bar"></div>
+          <div id="repostList"></div>
+          <button id="repostAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增二创素材</button>
+          <button id="repostImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
+          <p class="plan-tip">全网最新热点爆款，按女性成长、穿搭、妆教、敏感肌、vlog 等方向筛选，逐条给出详细二创改编方案。点击绿色按钮进入对应平台查看真实视频/话题流。</p>
         </div>
 
-        <!-- ========== 内容复盘 ========== -->
         <div data-panel="review" class="hidden">
-          <form id="reviewForm" class="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-            <div class="grid grid-cols-2 gap-3">
-              <label class="text-xs text-gray-500">平台
-                <select name="platform" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">
-                  <option>抖音</option><option>小红书</option><option>快手</option><option>微博</option><option>B站</option>
-                </select>
-              </label>
-              <label class="text-xs text-gray-500">流量来源
-                <select name="source" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">
-                  <option>推荐</option><option>关注</option><option>搜索</option><option>其他</option>
-                </select>
-              </label>
+          <form id="reviewForm" class="review-form">
+            <div class="review-grid">
+              <label>平台<select name="platform"><option>抖音</option><option>小红书</option><option>快手</option><option>微博</option><option>B站</option></select></label>
+              <label>流量来源<select name="source"><option>推荐</option><option>关注</option><option>搜索</option><option>其他</option></select></label>
+              <label>赞播比<input name="lkrate" type="text" readonly placeholder="自动" /></label>
             </div>
-            <label class="block text-xs text-gray-500">选题 / 标题
-              <input name="title" required class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="如：通勤伪素颜妆" />
-            </label>
-            <div class="grid grid-cols-3 gap-2">
-              <label class="text-xs text-gray-500">播放量<input name="views" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
-              <label class="text-xs text-gray-500">点赞<input name="likes" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
-              <label class="text-xs text-gray-500">评论<input name="comments" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
-              <label class="text-xs text-gray-500">转发<input name="shares" type="number" min="0" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
-              <label class="text-xs text-gray-500">完播率(%)<input name="finish" type="number" min="0" max="100" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm" placeholder="0" /></label>
-              <label class="text-xs text-gray-500">赞播比<input name="lkrate" type="text" readonly class="mt-1 w-full rounded-lg border border-brand-100 bg-gray-50 px-2 py-2 text-sm text-gray-400" placeholder="自动" /></label>
+            <label>选题 / 标题<input name="title" required placeholder="如：通勤伪素颜妆" /></label>
+            <div class="review-grid">
+              <label>播放量<input name="views" type="number" min="0" placeholder="0" /></label>
+              <label>点赞<input name="likes" type="number" min="0" placeholder="0" /></label>
+              <label>评论<input name="comments" type="number" min="0" placeholder="0" /></label>
+              <label>转发<input name="shares" type="number" min="0" placeholder="0" /></label>
+              <label>完播率(%)<input name="finish" type="number" min="0" max="100" placeholder="0" /></label>
+              <label>日期<input name="rdate" type="date" /></label>
             </div>
-            <label class="block text-xs text-gray-500">做得好的点（选填）
-              <textarea name="good" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="这次哪里表现不错"></textarea>
-            </label>
-            <label class="block text-xs text-gray-500">下次优化点（选填）
-              <textarea name="improve" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="下次想改的地方"></textarea>
-            </label>
-            <button type="submit" class="w-full bg-brand-500 text-white rounded-xl py-3 text-sm font-semibold active:scale-95 transition">保存并智能诊断</button>
+            <label>做得好的点（选填）<textarea name="good" rows="2" placeholder="这次哪里表现不错"></textarea></label>
+            <label>下次优化点（选填）<textarea name="improve" rows="2" placeholder="下次想改的地方"></textarea></label>
+            <button type="submit" class="review-submit">保存并智能诊断</button>
           </form>
-
-          <h3 class="text-sm font-semibold text-gray-700 mt-5 mb-2">历史复盘（永久存档）</h3>
-          <div id="reviewList" class="space-y-3"></div>
+          <h3 style="font-size:15px;font-weight:700;color:var(--text);margin:18px 4px 10px;">历史复盘（永久存档）</h3>
+          <div id="reviewList"></div>
         </div>
 
       </section>
     </main>
   </div>
 
-  <!-- 通用弹层（新增/编辑表单） -->
-  <div id="sheet" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/40" data-close></div>
-    <div class="absolute left-0 right-0 bottom-0 bg-white rounded-t-3xl p-4 max-h-[85%] overflow-y-auto no-bar">
-      <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
-      <h3 id="sheetTitle" class="text-base font-bold text-gray-800 mb-3">新增</h3>
-      <div id="sheetBody" class="space-y-3"></div>
+  <div id="sheet" class="sheet hidden">
+    <div class="sheet-back" data-close></div>
+    <div class="sheet-body">
+      <div class="sheet-handle"></div>
+      <h3 id="sheetTitle" class="sheet-title">新增</h3>
+      <div id="sheetBody"></div>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-24 z-[60] hidden">
-    <div class="bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg toast"></div>
-  </div>
+  <div id="toast" class="toast"></div>
 
   <script>
-/* =========================================================
-   瑜的工作台 · 纯前端逻辑（localStorage 持久化 · 自包含无外部依赖）
-   ========================================================= */
 (function () {
   'use strict';
 
@@ -365,8 +242,8 @@
   const LS = {
     tasks: 'yu_tasks',
     done: 'yu_done',
-    user_topics: 'yu_user_topics',
-    user_reposts: 'yu_user_reposts',
+    user_topics: 'yu_user_topics_v2',
+    user_reposts: 'yu_user_reposts_v2',
     reviews: 'yu_reviews',
     daily: 'yu_daily',
     hidden: 'yu_hidden'
@@ -375,52 +252,64 @@
   const load = (k, def) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? def; } catch { return def; } };
   const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-  /* ---------- 平台跳转链接（话题页 / 搜索兜底） ---------- */
-  const PLATFORMS = {
-    '抖音':   q => 'https://www.douyin.com/search/' + encodeURIComponent(q),
-    '小红书': q => 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(q),
-    '快手':   q => 'https://www.kuaishou.com/search/video?keyword=' + encodeURIComponent(q),
-    '微博':   q => 'https://s.weibo.com/weibo?q=' + encodeURIComponent(q),
-    'B站':    q => 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(q)
-  };
+  const PLATFORMS = ['抖音', '小红书', '快手', '微博', 'B站'];
   const CATS = ['化妆', '护肤', '穿搭', '拍照', '职场', '唱歌', '身材', '变美vlog'];
 
-  /* =========================================================
-     1. 每日计划
-     ========================================================= */
+  /* ---------- Toast / Copy ---------- */
+  let toastTimer;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.style.display = 'none', 2200);
+  }
+  async function copyLink(url) {
+    if (!url) return;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.top = '-9999px'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      toast('✅ 链接已复制');
+    } catch (e) {
+      toast('复制失败，请长按链接手动复制');
+    }
+  }
+
+  /* ---------- 每日计划 ---------- */
   let tasks = load(LS.tasks, [
     { id: uid(), text: '🏃 运动', fixed: true },
     { id: uid(), text: '😴 10:50 提醒睡觉', fixed: true }
   ]);
-  let doneMap = load(LS.done, {});          // { 'YYYY-MM-DD': { taskId: true } }
+  let doneMap = load(LS.done, {});
   let doneToday = doneMap[todayKey()] || {};
 
-  const taskList = $('#taskList');
-  const planBar = $('#planBar');
-  const planCount = $('#planCount');
-
   function renderPlan() {
-    taskList.innerHTML = '';
+    const list = $('#taskList');
+    list.innerHTML = '';
     tasks.forEach(t => {
       const ok = !!doneToday[t.id];
       const li = document.createElement('li');
-      li.className = 'card-enter flex items-center gap-3 bg-white rounded-2xl p-3 shadow-sm';
+      li.className = 'task-item';
       li.innerHTML = `
-        <button data-toggle="${t.id}" class="shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition ${ok ? 'bg-brand-500 border-brand-500' : 'border-gray-300'}">
-          ${ok ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 12l5 5L20 6"/></svg>' : ''}
+        <button data-toggle="${t.id}" class="task-check ${ok ? 'done' : ''}">
+          ${ok ? '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 6"/></svg>' : ''}
         </button>
-        <span class="flex-1 text-sm ${ok ? 'line-through text-gray-400' : 'text-gray-700'}">${esc(t.text)}</span>
-        ${t.fixed ? '' : `<button data-del="${t.id}" class="shrink-0 text-gray-300 active:text-red-400 text-lg leading-none px-1">✕</button>`}
-      `;
-      taskList.appendChild(li);
+        <span class="task-text ${ok ? 'done' : ''}">${esc(t.text)}</span>
+        ${t.fixed ? '' : `<button data-del="${t.id}" class="task-del">✕</button>`}`;
+      list.appendChild(li);
     });
     const total = tasks.length, done = tasks.filter(t => doneToday[t.id]).length;
-    planCount.textContent = done + '/' + total;
-    planBar.style.width = (total ? Math.round(done / total * 100) : 0) + '%';
+    $('#planCount').textContent = done + '/' + total;
+    $('#planBar').style.width = (total ? Math.round(done / total * 100) : 0) + '%';
     save(LS.done, doneMap);
   }
-
-  taskList.addEventListener('click', e => {
+  $('#taskList').addEventListener('click', e => {
     const tg = e.target.closest('[data-toggle]');
     const dl = e.target.closest('[data-del]');
     if (tg) {
@@ -437,7 +326,6 @@
       renderPlan();
     }
   });
-
   function addTask(text) {
     text = text.trim();
     if (!text) return;
@@ -447,37 +335,32 @@
   }
   $('#taskAdd').addEventListener('click', () => { addTask($('#taskInput').value); $('#taskInput').value = ''; });
   $('#taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') { addTask($('#taskInput').value); $('#taskInput').value = ''; } });
-
   if (!doneMap[todayKey()]) { doneMap[todayKey()] = {}; doneToday = doneMap[todayKey()]; }
   renderPlan();
 
-  /* =========================================================
-     2. 选题灵感（用户自定义 + 每日自动采集各平台20条）
-     ========================================================= */
+  /* ---------- 选题灵感 ---------- */
   let userTopics = load(LS.user_topics, [
-    { id: uid(), platform: '抖音', cat: '化妆', title: '上班妆容 3 分钟搞定伪素颜', reason: '打工人通勤痛点 + 低价平替，完播高', idea: '你以行政前台身份拍「到岗前对镜化妆」，强调不迟到也能精致', search: '通勤伪素颜妆' },
-    { id: uid(), platform: '小红书', cat: '护肤', title: '敏感肌平价护肤清单', reason: '混干微敏皮人群精准，收藏率高', idea: '按你的真实肤质写「不踩雷清单」，标注价格和购买渠道', search: '敏感肌平价护肤' },
-    { id: uid(), platform: '抖音', cat: '穿搭', title: '宽肩女生显瘦穿搭', reason: '肩宽 43 是差异化人设，评论区爱问链接', idea: '用你的身形示范「上松下紧」搭配，结尾抛「想要链接打 1」', search: '宽肩女生穿搭' },
-    { id: uid(), platform: 'B站', cat: '职场', title: '行政前台的一天 Vlog', reason: '职场窥探欲强，适合中长视频涨粉', idea: '真实记录前台日常，穿插化妆/唱歌碎片', search: '行政前台 vlog' },
-    { id: uid(), platform: '微博', cat: '唱歌', title: '打工人下班翻唱', reason: '情绪共鸣 + 唱歌特长，易转发', idea: '下班路上对镜唱一首，文案写「今天也辛苦啦」', search: '打工人翻唱' }
+    { id: uid(), platform: '抖音', cat: '化妆', title: '上班妆容 3 分钟搞定伪素颜', analysis: '打工人通勤痛点 + 低价平替，完播高', dy_link: 'https://www.douyin.com/search/%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86', bz_link: 'https://search.bilibili.com/all?keyword=%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86' },
+    { id: uid(), platform: '小红书', cat: '护肤', title: '敏感肌平价护肤清单', analysis: '混干微敏皮人群精准，收藏率高', dy_link: 'https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4', bz_link: 'https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4' },
+    { id: uid(), platform: '抖音', cat: '穿搭', title: '宽肩女生显瘦穿搭', analysis: '肩宽 43 是差异化人设，评论区爱问链接', dy_link: 'https://www.douyin.com/search/%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD', bz_link: 'https://search.bilibili.com/all?keyword=%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD' }
   ]);
-  const EMBEDDED = {"date":"2026-08-19","topics":[{"id":"抖音-0","platform":"抖音","cat":"化妆","title":"3分钟通勤伪素颜妆","search":"通勤伪素颜妆","heat":"509.6万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"抖音-1","platform":"抖音","cat":"护肤","title":"敏感肌平价护肤清单","search":"敏感肌平价护肤","heat":"556.9万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"抖音-2","platform":"抖音","cat":"穿搭","title":"宽肩女生显瘦穿搭","search":"宽肩女生显瘦穿搭","heat":"159.5万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","idea":"拍'小个子显高公式'，用手机原相机全身镜，诚实标注身高体重，反套路更可信。"},{"id":"抖音-3","platform":"抖音","cat":"拍照","title":"手机自拍显瘦角度","search":"手机自拍显瘦角度","heat":"697.6万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","idea":"拍'前台工位自拍姿势10连'，教显瘦角度和光线；做'手机也能拍出氛围感'系列，强调零成本。"},{"id":"抖音-4","platform":"抖音","cat":"职场","title":"行政前台的一天vlog","search":"行政前台 vlog","heat":"814.2万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","idea":"拍'前台工位好物'，笔筒/护手霜/小镜子等平价好物，职场场景自然植入。"},{"id":"抖音-5","platform":"抖音","cat":"唱歌","title":"下班对镜翻唱一首","search":"打工人翻唱","heat":"392.1万","kind":"topic","videoUrl":"","reason":"低门槛蹭热点：对口型变装跟BGM热点，零成本借流量。","idea":"做'0基础学一首歌'系列，展示从生疏到熟练，陪伴感强、完播稳。"},{"id":"抖音-6","platform":"抖音","cat":"身材","title":"47kg小基数减脂餐","search":"小基数减脂餐","heat":"39.1万","kind":"topic","videoUrl":"","reason":"'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。","idea":"做'小基数怎么吃'平价减脂餐，强调'不饿肚子'；拍'睡前10分钟瘦肩操'跟练向。"},{"id":"抖音-7","platform":"抖音","cat":"变美vlog","title":"普通女生变美逆袭","search":"普通女生变美","heat":"749.2万","kind":"topic","videoUrl":"","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","idea":"拍'化妆前后判若两人'系列，满足窥探欲+希望感，前3秒放结果拉完播。"},{"id":"抖音-8","platform":"抖音","cat":"化妆","title":"新手化妆避坑指南","search":"新手化妆避坑","heat":"570.4万","kind":"topic","videoUrl":"","reason":"模仿成本低：步骤清晰、产品平价，评论区天然爱问'链接/色号'，互动数据好看，利于推流。","idea":"拍'早八5分钟出门妆'，真实展示素颜状态再上妆，'普通女生'人设增强代入感。"},{"id":"抖音-9","platform":"抖音","cat":"护肤","title":"混干皮换季泛红急救","search":"混干皮 泛红 急救","heat":"289.0万","kind":"topic","videoUrl":"","reason":"敏感肌人群决策成本高、试错贵，'平价不踩雷'类内容提供确定性，收藏+转发双高；'混干'换季话题自带流量。","idea":"按你的真实肤质做'空瓶记/翻车记'，标注价格和购买渠道，用'我也在用'增强信任；拍'换季泛红急救'。"},{"id":"抖音-10","platform":"抖音","cat":"穿搭","title":"小个子正肩穿搭","search":"小个子正肩穿搭","heat":"28.9万","kind":"topic","videoUrl":"","reason":"实用收藏向：'避雷/正肩/上松下紧'等具体方法论，用户会收藏反复看，完播+收藏双高。","idea":"做'宽肩通勤穿搭模板'：西装裤+尖头鞋，主打'前台也能穿出气场'，评论区引导求链接。"},{"id":"抖音-11","platform":"抖音","cat":"拍照","title":"工位原相机自拍姿势","search":"工位自拍姿势","heat":"209.9万","kind":"topic","videoUrl":"","reason":"氛围感是流量密码：情绪化画面+文案，易被收藏做壁纸/参考，转发率高。","idea":"教'对镜自拍不畸变'技巧，结合化妆后状态，引导'抄作业'式跟拍。"},{"id":"抖音-12","platform":"抖音","cat":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"293.1万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","idea":"真实记录行政前台一天，穿插化妆/唱歌碎片，做'别人家的班'反差；匿名讲职场八卦（不露公司）。"},{"id":"抖音-13","platform":"抖音","cat":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"437.8万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","idea":"翻唱老歌引发回忆杀，评论区刷歌词互动；用前台制服造型做反差吸睛。"},{"id":"抖音-14","platform":"抖音","cat":"身材","title":"睡前10分钟瘦肩操","search":"瘦肩操","heat":"208.5万","kind":"topic","videoUrl":"","reason":"小基数痛点：'吃不胖但想塑形'人群精准，差异化强于泛健身内容。","idea":"拍'办公室微运动'，利用碎片时间塑形，职场人群可抄性高。"},{"id":"抖音-15","platform":"抖音","cat":"变美vlog","title":"月薪普通但精致穷妆","search":"精致穷 变美","heat":"14.1万","kind":"topic","videoUrl":"","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","idea":"以'普通女生变美日记'为主线，每月复盘一次，建立长期陪伴感；结合前台身份做'上班vs下班'对比。"},{"id":"抖音-16","platform":"抖音","cat":"化妆","title":"早八快速出门妆","search":"早八快速出门妆","heat":"833.4万","kind":"topic","videoUrl":"","reason":"痛点精准：打工人/学生党没时间精致妆，'通勤快速妆'戳中'想美但懒'的集体情绪，收藏率天然高。","idea":"做'敏感肌也能用的底妆'系列，每次只讲一个产品/手法，建立'混干微敏皮靠谱博主'人设。"},{"id":"抖音-17","platform":"抖音","cat":"护肤","title":"干皮妆前打底不卡粉","search":"干皮妆前打底","heat":"323.8万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","idea":"拍'混干皮一天护肤流程'，展示办公室空调房如何不卡粉，职场场景差异化。"},{"id":"抖音-18","platform":"抖音","cat":"穿搭","title":"肩宽43避雷领型","search":"肩宽 避雷 领型","heat":"588.4万","kind":"topic","videoUrl":"","reason":"肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。","idea":"用你的身形示范'上松下紧/正肩避雷'，结尾'这3种领型我踩雷了'做真实测评；植入'47kg也能撑起'反差。"},{"id":"抖音-19","platform":"抖音","cat":"拍照","title":"拍照氛围感光线技巧","search":"拍照氛围感","heat":"441.9万","kind":"topic","videoUrl":"","reason":"零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。","idea":"用原相机vs美颜对比，'普通人拍照参数'干货向，评论区留'想要同款滤镜'钩子。"},{"id":"小红书-0","platform":"小红书","cat":"身材","title":"47kg小基数减脂餐","search":"小基数减脂餐","heat":"131.5万","kind":"topic","videoUrl":"","reason":"'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。","idea":"做'小基数怎么吃'平价减脂餐，强调'不饿肚子'；拍'睡前10分钟瘦肩操'跟练向。"},{"id":"小红书-1","platform":"小红书","cat":"变美vlog","title":"普通女生变美逆袭","search":"普通女生变美","heat":"788.1万","kind":"topic","videoUrl":"","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","idea":"拍'化妆前后判若两人'系列，满足窥探欲+希望感，前3秒放结果拉完播。"},{"id":"小红书-2","platform":"小红书","cat":"化妆","title":"新手化妆避坑指南","search":"新手化妆避坑","heat":"60.7万","kind":"topic","videoUrl":"","reason":"模仿成本低：步骤清晰、产品平价，评论区天然爱问'链接/色号'，互动数据好看，利于推流。","idea":"拍'早八5分钟出门妆'，真实展示素颜状态再上妆，'普通女生'人设增强代入感。"},{"id":"小红书-3","platform":"小红书","cat":"护肤","title":"混干皮换季泛红急救","search":"混干皮 泛红 急救","heat":"157.8万","kind":"topic","videoUrl":"","reason":"敏感肌人群决策成本高、试错贵，'平价不踩雷'类内容提供确定性，收藏+转发双高；'混干'换季话题自带流量。","idea":"按你的真实肤质做'空瓶记/翻车记'，标注价格和购买渠道，用'我也在用'增强信任；拍'换季泛红急救'。"},{"id":"小红书-4","platform":"小红书","cat":"穿搭","title":"小个子正肩穿搭","search":"小个子正肩穿搭","heat":"582.4万","kind":"topic","videoUrl":"","reason":"实用收藏向：'避雷/正肩/上松下紧'等具体方法论，用户会收藏反复看，完播+收藏双高。","idea":"做'宽肩通勤穿搭模板'：西装裤+尖头鞋，主打'前台也能穿出气场'，评论区引导求链接。"},{"id":"小红书-5","platform":"小红书","cat":"拍照","title":"工位原相机自拍姿势","search":"工位自拍姿势","heat":"666.3万","kind":"topic","videoUrl":"","reason":"氛围感是流量密码：情绪化画面+文案，易被收藏做壁纸/参考，转发率高。","idea":"教'对镜自拍不畸变'技巧，结合化妆后状态，引导'抄作业'式跟拍。"},{"id":"小红书-6","platform":"小红书","cat":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"839.7万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","idea":"真实记录行政前台一天，穿插化妆/唱歌碎片，做'别人家的班'反差；匿名讲职场八卦（不露公司）。"},{"id":"小红书-7","platform":"小红书","cat":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"385.0万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","idea":"翻唱老歌引发回忆杀，评论区刷歌词互动；用前台制服造型做反差吸睛。"},{"id":"小红书-8","platform":"小红书","cat":"身材","title":"睡前10分钟瘦肩操","search":"瘦肩操","heat":"109.1万","kind":"topic","videoUrl":"","reason":"小基数痛点：'吃不胖但想塑形'人群精准，差异化强于泛健身内容。","idea":"拍'办公室微运动'，利用碎片时间塑形，职场人群可抄性高。"},{"id":"小红书-9","platform":"小红书","cat":"变美vlog","title":"月薪普通但精致穷妆","search":"精致穷 变美","heat":"491.0万","kind":"topic","videoUrl":"","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","idea":"以'普通女生变美日记'为主线，每月复盘一次，建立长期陪伴感；结合前台身份做'上班vs下班'对比。"},{"id":"小红书-10","platform":"小红书","cat":"化妆","title":"早八快速出门妆","search":"早八快速出门妆","heat":"687.9万","kind":"topic","videoUrl":"","reason":"痛点精准：打工人/学生党没时间精致妆，'通勤快速妆'戳中'想美但懒'的集体情绪，收藏率天然高。","idea":"做'敏感肌也能用的底妆'系列，每次只讲一个产品/手法，建立'混干微敏皮靠谱博主'人设。"},{"id":"小红书-11","platform":"小红书","cat":"护肤","title":"干皮妆前打底不卡粉","search":"干皮妆前打底","heat":"729.1万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","idea":"拍'混干皮一天护肤流程'，展示办公室空调房如何不卡粉，职场场景差异化。"},{"id":"小红书-12","platform":"小红书","cat":"穿搭","title":"肩宽43避雷领型","search":"肩宽 避雷 领型","heat":"348.0万","kind":"topic","videoUrl":"","reason":"肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。","idea":"用你的身形示范'上松下紧/正肩避雷'，结尾'这3种领型我踩雷了'做真实测评；植入'47kg也能撑起'反差。"},{"id":"小红书-13","platform":"小红书","cat":"拍照","title":"拍照氛围感光线技巧","search":"拍照氛围感","heat":"864.2万","kind":"topic","videoUrl":"","reason":"零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。","idea":"用原相机vs美颜对比，'普通人拍照参数'干货向，评论区留'想要同款滤镜'钩子。"},{"id":"小红书-14","platform":"小红书","cat":"职场","title":"前台视角讲职场八卦","search":"职场八卦 匿名","heat":"76.5万","kind":"topic","videoUrl":"","reason":"解压向：下班vlog/工位好物满足'向往的生活'心理，收藏率高。","idea":"做'打工人下班仪式感'：换下工牌、对镜唱首歌、吃顿好的，情绪价值拉满易转发。"},{"id":"小红书-15","platform":"小红书","cat":"唱歌","title":"翻唱老歌引发回忆杀","search":"老歌翻唱","heat":"97.1万","kind":"topic","videoUrl":"","reason":"才艺展示类易获'好听'正向评论，算法推流友好；'下班翻唱/对镜唱'松弛感人设吸粉。","idea":"下班路上对镜唱一首，文案'今天也辛苦啦'戳打工人；做'唱歌对口型变装'蹭热点BGM。"},{"id":"小红书-16","platform":"小红书","cat":"身材","title":"小基数塑形跟练","search":"小基数塑形","heat":"111.0万","kind":"topic","videoUrl":"","reason":"跟练属性：'睡前10分钟'这类低门槛运动，完播高、易收藏，适合做系列。","idea":"以'47kg但肩宽'做瘦肩专项，真实记录变化，反差人设增强记忆。"},{"id":"小红书-17","platform":"小红书","cat":"变美vlog","title":"普通女生化妆前后","search":"化妆前后对比","heat":"595.1万","kind":"topic","videoUrl":"","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","idea":"做'精致穷变美'：平价好物+自己动手，真实不炫富，易获'接地气'正向反馈。"},{"id":"小红书-18","platform":"小红书","cat":"化妆","title":"学生党平价彩妆红黑榜","search":"学生党彩妆红黑榜","heat":"266.4万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"小红书-19","platform":"小红书","cat":"护肤","title":"敏感肌防晒怎么选","search":"敏感肌防晒","heat":"583.1万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"快手-0","platform":"快手","cat":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"748.1万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","idea":"真实记录行政前台一天，穿插化妆/唱歌碎片，做'别人家的班'反差；匿名讲职场八卦（不露公司）。"},{"id":"快手-1","platform":"快手","cat":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"343.8万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","idea":"翻唱老歌引发回忆杀，评论区刷歌词互动；用前台制服造型做反差吸睛。"},{"id":"快手-2","platform":"快手","cat":"身材","title":"睡前10分钟瘦肩操","search":"瘦肩操","heat":"88.0万","kind":"topic","videoUrl":"","reason":"小基数痛点：'吃不胖但想塑形'人群精准，差异化强于泛健身内容。","idea":"拍'办公室微运动'，利用碎片时间塑形，职场人群可抄性高。"},{"id":"快手-3","platform":"快手","cat":"变美vlog","title":"月薪普通但精致穷妆","search":"精致穷 变美","heat":"137.5万","kind":"topic","videoUrl":"","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","idea":"以'普通女生变美日记'为主线，每月复盘一次，建立长期陪伴感；结合前台身份做'上班vs下班'对比。"},{"id":"快手-4","platform":"快手","cat":"化妆","title":"早八快速出门妆","search":"早八快速出门妆","heat":"48.3万","kind":"topic","videoUrl":"","reason":"痛点精准：打工人/学生党没时间精致妆，'通勤快速妆'戳中'想美但懒'的集体情绪，收藏率天然高。","idea":"做'敏感肌也能用的底妆'系列，每次只讲一个产品/手法，建立'混干微敏皮靠谱博主'人设。"},{"id":"快手-5","platform":"快手","cat":"护肤","title":"干皮妆前打底不卡粉","search":"干皮妆前打底","heat":"432.9万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","idea":"拍'混干皮一天护肤流程'，展示办公室空调房如何不卡粉，职场场景差异化。"},{"id":"快手-6","platform":"快手","cat":"穿搭","title":"肩宽43避雷领型","search":"肩宽 避雷 领型","heat":"216.4万","kind":"topic","videoUrl":"","reason":"肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。","idea":"用你的身形示范'上松下紧/正肩避雷'，结尾'这3种领型我踩雷了'做真实测评；植入'47kg也能撑起'反差。"},{"id":"快手-7","platform":"快手","cat":"拍照","title":"拍照氛围感光线技巧","search":"拍照氛围感","heat":"914.2万","kind":"topic","videoUrl":"","reason":"零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。","idea":"用原相机vs美颜对比，'普通人拍照参数'干货向，评论区留'想要同款滤镜'钩子。"},{"id":"快手-8","platform":"快手","cat":"职场","title":"前台视角讲职场八卦","search":"职场八卦 匿名","heat":"380.3万","kind":"topic","videoUrl":"","reason":"解压向：下班vlog/工位好物满足'向往的生活'心理，收藏率高。","idea":"做'打工人下班仪式感'：换下工牌、对镜唱首歌、吃顿好的，情绪价值拉满易转发。"},{"id":"快手-9","platform":"快手","cat":"唱歌","title":"翻唱老歌引发回忆杀","search":"老歌翻唱","heat":"352.9万","kind":"topic","videoUrl":"","reason":"才艺展示类易获'好听'正向评论，算法推流友好；'下班翻唱/对镜唱'松弛感人设吸粉。","idea":"下班路上对镜唱一首，文案'今天也辛苦啦'戳打工人；做'唱歌对口型变装'蹭热点BGM。"},{"id":"快手-10","platform":"快手","cat":"身材","title":"小基数塑形跟练","search":"小基数塑形","heat":"448.4万","kind":"topic","videoUrl":"","reason":"跟练属性：'睡前10分钟'这类低门槛运动，完播高、易收藏，适合做系列。","idea":"以'47kg但肩宽'做瘦肩专项，真实记录变化，反差人设增强记忆。"},{"id":"快手-11","platform":"快手","cat":"变美vlog","title":"普通女生化妆前后","search":"化妆前后对比","heat":"767.8万","kind":"topic","videoUrl":"","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","idea":"做'精致穷变美'：平价好物+自己动手，真实不炫富，易获'接地气'正向反馈。"},{"id":"快手-12","platform":"快手","cat":"化妆","title":"学生党平价彩妆红黑榜","search":"学生党彩妆红黑榜","heat":"549.9万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"快手-13","platform":"快手","cat":"护肤","title":"敏感肌防晒怎么选","search":"敏感肌防晒","heat":"884.0万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"快手-14","platform":"快手","cat":"穿搭","title":"微胖通勤穿搭模板","search":"微胖通勤穿搭","heat":"603.2万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","idea":"拍'小个子显高公式'，用手机原相机全身镜，诚实标注身高体重，反套路更可信。"},{"id":"快手-15","platform":"快手","cat":"拍照","title":"手机人像模式拍照","search":"手机人像拍照","heat":"803.1万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","idea":"拍'前台工位自拍姿势10连'，教显瘦角度和光线；做'手机也能拍出氛围感'系列，强调零成本。"},{"id":"快手-16","platform":"快手","cat":"职场","title":"打工人下班仪式感","search":"下班仪式感","heat":"187.5万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","idea":"拍'前台工位好物'，笔筒/护手霜/小镜子等平价好物，职场场景自然植入。"},{"id":"快手-17","platform":"快手","cat":"护肤","title":"素颜霜测评翻车","search":"素颜霜测评","heat":"59.5万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","idea":"拍'混干皮一天护肤流程'，展示办公室空调房如何不卡粉，职场场景差异化。"},{"id":"快手-18","platform":"快手","cat":"化妆","title":"3分钟通勤伪素颜妆","search":"通勤伪素颜妆","heat":"835.4万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"快手-19","platform":"快手","cat":"护肤","title":"敏感肌平价护肤清单","search":"敏感肌平价护肤","heat":"913.1万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"微博-0","platform":"微博","cat":"穿搭","title":"肩宽43避雷领型","search":"肩宽 避雷 领型","heat":"644.7万","kind":"topic","videoUrl":"","reason":"肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。","idea":"用你的身形示范'上松下紧/正肩避雷'，结尾'这3种领型我踩雷了'做真实测评；植入'47kg也能撑起'反差。"},{"id":"微博-1","platform":"微博","cat":"拍照","title":"拍照氛围感光线技巧","search":"拍照氛围感","heat":"347.0万","kind":"topic","videoUrl":"","reason":"零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。","idea":"用原相机vs美颜对比，'普通人拍照参数'干货向，评论区留'想要同款滤镜'钩子。"},{"id":"微博-2","platform":"微博","cat":"职场","title":"前台视角讲职场八卦","search":"职场八卦 匿名","heat":"600.9万","kind":"topic","videoUrl":"","reason":"解压向：下班vlog/工位好物满足'向往的生活'心理，收藏率高。","idea":"做'打工人下班仪式感'：换下工牌、对镜唱首歌、吃顿好的，情绪价值拉满易转发。"},{"id":"微博-3","platform":"微博","cat":"唱歌","title":"翻唱老歌引发回忆杀","search":"老歌翻唱","heat":"795.8万","kind":"topic","videoUrl":"","reason":"才艺展示类易获'好听'正向评论，算法推流友好；'下班翻唱/对镜唱'松弛感人设吸粉。","idea":"下班路上对镜唱一首，文案'今天也辛苦啦'戳打工人；做'唱歌对口型变装'蹭热点BGM。"},{"id":"微博-4","platform":"微博","cat":"身材","title":"小基数塑形跟练","search":"小基数塑形","heat":"436.7万","kind":"topic","videoUrl":"","reason":"跟练属性：'睡前10分钟'这类低门槛运动，完播高、易收藏，适合做系列。","idea":"以'47kg但肩宽'做瘦肩专项，真实记录变化，反差人设增强记忆。"},{"id":"微博-5","platform":"微博","cat":"变美vlog","title":"普通女生化妆前后","search":"化妆前后对比","heat":"175.3万","kind":"topic","videoUrl":"","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","idea":"做'精致穷变美'：平价好物+自己动手，真实不炫富，易获'接地气'正向反馈。"},{"id":"微博-6","platform":"微博","cat":"化妆","title":"学生党平价彩妆红黑榜","search":"学生党彩妆红黑榜","heat":"175.4万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"微博-7","platform":"微博","cat":"护肤","title":"敏感肌防晒怎么选","search":"敏感肌防晒","heat":"865.1万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"微博-8","platform":"微博","cat":"穿搭","title":"微胖通勤穿搭模板","search":"微胖通勤穿搭","heat":"802.0万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","idea":"拍'小个子显高公式'，用手机原相机全身镜，诚实标注身高体重，反套路更可信。"},{"id":"微博-9","platform":"微博","cat":"拍照","title":"手机人像模式拍照","search":"手机人像拍照","heat":"252.3万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","idea":"拍'前台工位自拍姿势10连'，教显瘦角度和光线；做'手机也能拍出氛围感'系列，强调零成本。"},{"id":"微博-10","platform":"微博","cat":"职场","title":"打工人下班仪式感","search":"下班仪式感","heat":"761.0万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","idea":"拍'前台工位好物'，笔筒/护手霜/小镜子等平价好物，职场场景自然植入。"},{"id":"微博-11","platform":"微博","cat":"护肤","title":"素颜霜测评翻车","search":"素颜霜测评","heat":"559.0万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","idea":"拍'混干皮一天护肤流程'，展示办公室空调房如何不卡粉，职场场景差异化。"},{"id":"微博-12","platform":"微博","cat":"化妆","title":"3分钟通勤伪素颜妆","search":"通勤伪素颜妆","heat":"151.4万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"微博-13","platform":"微博","cat":"护肤","title":"敏感肌平价护肤清单","search":"敏感肌平价护肤","heat":"60.6万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"微博-14","platform":"微博","cat":"穿搭","title":"宽肩女生显瘦穿搭","search":"宽肩女生显瘦穿搭","heat":"273.1万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","idea":"拍'小个子显高公式'，用手机原相机全身镜，诚实标注身高体重，反套路更可信。"},{"id":"微博-15","platform":"微博","cat":"拍照","title":"手机自拍显瘦角度","search":"手机自拍显瘦角度","heat":"637.6万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","idea":"拍'前台工位自拍姿势10连'，教显瘦角度和光线；做'手机也能拍出氛围感'系列，强调零成本。"},{"id":"微博-16","platform":"微博","cat":"职场","title":"行政前台的一天vlog","search":"行政前台 vlog","heat":"706.9万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","idea":"拍'前台工位好物'，笔筒/护手霜/小镜子等平价好物，职场场景自然植入。"},{"id":"微博-17","platform":"微博","cat":"唱歌","title":"下班对镜翻唱一首","search":"打工人翻唱","heat":"148.5万","kind":"topic","videoUrl":"","reason":"低门槛蹭热点：对口型变装跟BGM热点，零成本借流量。","idea":"做'0基础学一首歌'系列，展示从生疏到熟练，陪伴感强、完播稳。"},{"id":"微博-18","platform":"微博","cat":"身材","title":"47kg小基数减脂餐","search":"小基数减脂餐","heat":"118.1万","kind":"topic","videoUrl":"","reason":"'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。","idea":"做'小基数怎么吃'平价减脂餐，强调'不饿肚子'；拍'睡前10分钟瘦肩操'跟练向。"},{"id":"微博-19","platform":"微博","cat":"变美vlog","title":"普通女生变美逆袭","search":"普通女生变美","heat":"175.5万","kind":"topic","videoUrl":"","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","idea":"拍'化妆前后判若两人'系列，满足窥探欲+希望感，前3秒放结果拉完播。"},{"id":"B站-0","platform":"B站","cat":"化妆","title":"学生党平价彩妆红黑榜","search":"学生党彩妆红黑榜","heat":"54.0万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"B站-1","platform":"B站","cat":"护肤","title":"敏感肌防晒怎么选","search":"敏感肌防晒","heat":"897.5万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"B站-2","platform":"B站","cat":"穿搭","title":"微胖通勤穿搭模板","search":"微胖通勤穿搭","heat":"787.3万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","idea":"拍'小个子显高公式'，用手机原相机全身镜，诚实标注身高体重，反套路更可信。"},{"id":"B站-3","platform":"B站","cat":"拍照","title":"手机人像模式拍照","search":"手机人像拍照","heat":"576.3万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","idea":"拍'前台工位自拍姿势10连'，教显瘦角度和光线；做'手机也能拍出氛围感'系列，强调零成本。"},{"id":"B站-4","platform":"B站","cat":"职场","title":"打工人下班仪式感","search":"下班仪式感","heat":"713.9万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","idea":"拍'前台工位好物'，笔筒/护手霜/小镜子等平价好物，职场场景自然植入。"},{"id":"B站-5","platform":"B站","cat":"护肤","title":"素颜霜测评翻车","search":"素颜霜测评","heat":"561.5万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","idea":"拍'混干皮一天护肤流程'，展示办公室空调房如何不卡粉，职场场景差异化。"},{"id":"B站-6","platform":"B站","cat":"化妆","title":"3分钟通勤伪素颜妆","search":"通勤伪素颜妆","heat":"441.2万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","idea":"以行政前台身份拍'到岗前对镜化妆'，强调'不迟到也能精致'，结尾抛'想要链接打1'引导评论。"},{"id":"B站-7","platform":"B站","cat":"护肤","title":"敏感肌平价护肤清单","search":"敏感肌平价护肤","heat":"820.7万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","idea":"做'敏感肌平价清单'系列，按'早C晚A/保湿/防晒'分集，强调'不踩雷'确定性。"},{"id":"B站-8","platform":"B站","cat":"穿搭","title":"宽肩女生显瘦穿搭","search":"宽肩女生显瘦穿搭","heat":"892.0万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","idea":"拍'小个子显高公式'，用手机原相机全身镜，诚实标注身高体重，反套路更可信。"},{"id":"B站-9","platform":"B站","cat":"拍照","title":"手机自拍显瘦角度","search":"手机自拍显瘦角度","heat":"49.1万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","idea":"拍'前台工位自拍姿势10连'，教显瘦角度和光线；做'手机也能拍出氛围感'系列，强调零成本。"},{"id":"B站-10","platform":"B站","cat":"职场","title":"行政前台的一天vlog","search":"行政前台 vlog","heat":"670.0万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","idea":"拍'前台工位好物'，笔筒/护手霜/小镜子等平价好物，职场场景自然植入。"},{"id":"B站-11","platform":"B站","cat":"唱歌","title":"下班对镜翻唱一首","search":"打工人翻唱","heat":"596.7万","kind":"topic","videoUrl":"","reason":"低门槛蹭热点：对口型变装跟BGM热点，零成本借流量。","idea":"做'0基础学一首歌'系列，展示从生疏到熟练，陪伴感强、完播稳。"},{"id":"B站-12","platform":"B站","cat":"身材","title":"47kg小基数减脂餐","search":"小基数减脂餐","heat":"640.8万","kind":"topic","videoUrl":"","reason":"'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。","idea":"做'小基数怎么吃'平价减脂餐，强调'不饿肚子'；拍'睡前10分钟瘦肩操'跟练向。"},{"id":"B站-13","platform":"B站","cat":"变美vlog","title":"普通女生变美逆袭","search":"普通女生变美","heat":"32.8万","kind":"topic","videoUrl":"","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","idea":"拍'化妆前后判若两人'系列，满足窥探欲+希望感，前3秒放结果拉完播。"},{"id":"B站-14","platform":"B站","cat":"化妆","title":"新手化妆避坑指南","search":"新手化妆避坑","heat":"563.2万","kind":"topic","videoUrl":"","reason":"模仿成本低：步骤清晰、产品平价，评论区天然爱问'链接/色号'，互动数据好看，利于推流。","idea":"拍'早八5分钟出门妆'，真实展示素颜状态再上妆，'普通女生'人设增强代入感。"},{"id":"B站-15","platform":"B站","cat":"护肤","title":"混干皮换季泛红急救","search":"混干皮 泛红 急救","heat":"479.2万","kind":"topic","videoUrl":"","reason":"敏感肌人群决策成本高、试错贵，'平价不踩雷'类内容提供确定性，收藏+转发双高；'混干'换季话题自带流量。","idea":"按你的真实肤质做'空瓶记/翻车记'，标注价格和购买渠道，用'我也在用'增强信任；拍'换季泛红急救'。"},{"id":"B站-16","platform":"B站","cat":"穿搭","title":"小个子正肩穿搭","search":"小个子正肩穿搭","heat":"171.2万","kind":"topic","videoUrl":"","reason":"实用收藏向：'避雷/正肩/上松下紧'等具体方法论，用户会收藏反复看，完播+收藏双高。","idea":"做'宽肩通勤穿搭模板'：西装裤+尖头鞋，主打'前台也能穿出气场'，评论区引导求链接。"},{"id":"B站-17","platform":"B站","cat":"拍照","title":"工位原相机自拍姿势","search":"工位自拍姿势","heat":"623.3万","kind":"topic","videoUrl":"","reason":"氛围感是流量密码：情绪化画面+文案，易被收藏做壁纸/参考，转发率高。","idea":"教'对镜自拍不畸变'技巧，结合化妆后状态，引导'抄作业'式跟拍。"},{"id":"B站-18","platform":"B站","cat":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"724.4万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","idea":"真实记录行政前台一天，穿插化妆/唱歌碎片，做'别人家的班'反差；匿名讲职场八卦（不露公司）。"},{"id":"B站-19","platform":"B站","cat":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"352.1万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","idea":"翻唱老歌引发回忆杀，评论区刷歌词互动；用前台制服造型做反差吸睛。"}],"reposts":[{"id":"抖音-r0","platform":"抖音","type":"化妆","title":"3分钟通勤伪素颜妆","search":"通勤伪素颜妆","heat":"277.2万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","plan":"二创脚本：保留原爆款'快节奏+对比'结构，把主角换成'行政前台通勤版'，加'敏感肌底妆'差异化卖点，结尾教一个定妆手法。"},{"id":"抖音-r1","platform":"抖音","type":"护肤","title":"敏感肌平价护肤清单","search":"敏感肌平价护肤","heat":"289.6万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","plan":"改编点：原版泛人群，你聚焦'混干微敏皮'，讲'换季泛红怎么办'，痛点更尖。"},{"id":"抖音-r2","platform":"抖音","type":"穿搭","title":"宽肩女生显瘦穿搭","search":"宽肩女生显瘦穿搭","heat":"893.9万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","plan":"蹭法：跟原爆款标题结构（'梨形必看'→'宽肩必看'），同款BGM，封面同版式保证辨识。"},{"id":"抖音-r3","platform":"抖音","type":"拍照","title":"手机自拍显瘦角度","search":"手机自拍显瘦角度","heat":"99.7万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","plan":"二创脚本：原爆款'拍照姿势'改成'前台工位版'，展示办公室光线怎么用，零成本可抄。"},{"id":"抖音-r4","platform":"抖音","type":"职场","title":"行政前台的一天vlog","search":"行政前台 vlog","heat":"258.5万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","plan":"改编点：加入你的唱歌/化妆碎片做记忆点；结尾'今天也辛苦啦'情绪收尾易转发。"},{"id":"抖音-r5","platform":"抖音","type":"唱歌","title":"下班对镜翻唱一首","search":"打工人翻唱","heat":"530.5万","kind":"topic","videoUrl":"","reason":"低门槛蹭热点：对口型变装跟BGM热点，零成本借流量。","plan":"蹭法：跟原爆款挑战话题，封面用'制服→变装'对比图，提升完播。"},{"id":"抖音-r6","platform":"抖音","type":"身材","title":"47kg小基数减脂餐","search":"小基数减脂餐","heat":"468.3万","kind":"topic","videoUrl":"","reason":"'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。","plan":"二创脚本：原爆款'减脂餐'改成'小基数平价版'，强调'不饿肚子'；'瘦肩操'做跟练向。"},{"id":"抖音-r7","platform":"抖音","type":"变美vlog","title":"普通女生变美逆袭","search":"普通女生变美","heat":"864.8万","kind":"topic","videoUrl":"","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"抖音-r8","platform":"抖音","type":"化妆","title":"新手化妆避坑指南","search":"新手化妆避坑","heat":"585.0万","kind":"topic","videoUrl":"","reason":"模仿成本低：步骤清晰、产品平价，评论区天然爱问'链接/色号'，互动数据好看，利于推流。","plan":"蹭法：跟原爆款热点BGM和标题句式（如'10秒学会XX'），封面用'前后对比+大字'，评论区自己先留'求色号'。"},{"id":"抖音-r9","platform":"抖音","type":"护肤","title":"混干皮换季泛红急救","search":"混干皮 泛红 急救","heat":"98.5万","kind":"topic","videoUrl":"","reason":"敏感肌人群决策成本高、试错贵，'平价不踩雷'类内容提供确定性，收藏+转发双高；'混干'换季话题自带流量。","plan":"二创脚本：沿用原爆款'清单体'，改成'敏感肌平价不踩雷版'，每条标价格和购买渠道，加'我空瓶实测'增加真实。"},{"id":"抖音-r10","platform":"抖音","type":"穿搭","title":"小个子正肩穿搭","search":"小个子正肩穿搭","heat":"240.8万","kind":"topic","videoUrl":"","reason":"实用收藏向：'避雷/正肩/上松下紧'等具体方法论，用户会收藏反复看，完播+收藏双高。","plan":"改编点：用肩宽43实测'避雷领型'，真实测评比原版更有信任感；结尾抛'求链接打1'。"},{"id":"抖音-r11","platform":"抖音","type":"拍照","title":"工位原相机自拍姿势","search":"工位自拍姿势","heat":"21.5万","kind":"topic","videoUrl":"","reason":"氛围感是流量密码：情绪化画面+文案，易被收藏做壁纸/参考，转发率高。","plan":"蹭法：沿用原爆款热门姿势挑战话题，发起'工位拍照挑战'引互动。"},{"id":"抖音-r12","platform":"抖音","type":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"571.5万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","plan":"二创脚本：原爆款'职场吐槽'改成'行政前台视角'，匿名化讲公司奇葩事，引发'同一个世界'共鸣。"},{"id":"抖音-r13","platform":"抖音","type":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"740.7万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","plan":"改编点：选原爆款同款BGM，换歌词字幕成'打工人版'，引发共鸣。"},{"id":"抖音-r14","platform":"抖音","type":"身材","title":"睡前10分钟瘦肩操","search":"瘦肩操","heat":"711.5万","kind":"topic","videoUrl":"","reason":"小基数痛点：'吃不胖但想塑形'人群精准，差异化强于泛健身内容。","plan":"蹭法：借原爆款'瘦XX'热点词，封面用'前后对比'，评论区引导打卡。"},{"id":"抖音-r15","platform":"抖音","type":"变美vlog","title":"月薪普通但精致穷妆","search":"精致穷 变美","heat":"296.6万","kind":"topic","videoUrl":"","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"抖音-r16","platform":"抖音","type":"化妆","title":"早八快速出门妆","search":"早八快速出门妆","heat":"585.2万","kind":"topic","videoUrl":"","reason":"痛点精准：打工人/学生党没时间精致妆，'通勤快速妆'戳中'想美但懒'的集体情绪，收藏率天然高。","plan":"改编点：原版用网红脸，你用'普通人素颜'开场增强信任；BGM换成轻快上班风；字幕加'打工人专属'。"},{"id":"抖音-r17","platform":"抖音","type":"护肤","title":"干皮妆前打底不卡粉","search":"干皮妆前打底","heat":"757.6万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","plan":"蹭法：借原爆款热点话题词，封面用'红叉/绿勾'红黑榜视觉，提升点击。"},{"id":"抖音-r18","platform":"抖音","type":"穿搭","title":"肩宽43避雷领型","search":"肩宽 避雷 领型","heat":"745.9万","kind":"topic","videoUrl":"","reason":"肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。","plan":"二创脚本：原爆款'显瘦神裤'改成你的'前台通勤版'（西装裤+尖头鞋），加'47kg也能撑起'反差钩子。"},{"id":"抖音-r19","platform":"抖音","type":"拍照","title":"拍照氛围感光线技巧","search":"拍照氛围感","heat":"511.5万","kind":"topic","videoUrl":"","reason":"零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。","plan":"改编点：加'原相机参数'干货，比原版更实用；用对镜自拍自然带出化妆成果。"},{"id":"小红书-r0","platform":"小红书","type":"身材","title":"47kg小基数减脂餐","search":"小基数减脂餐","heat":"84.3万","kind":"topic","videoUrl":"","reason":"'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。","plan":"二创脚本：原爆款'减脂餐'改成'小基数平价版'，强调'不饿肚子'；'瘦肩操'做跟练向。"},{"id":"小红书-r1","platform":"小红书","type":"变美vlog","title":"普通女生变美逆袭","search":"普通女生变美","heat":"324.5万","kind":"topic","videoUrl":"","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"小红书-r2","platform":"小红书","type":"化妆","title":"新手化妆避坑指南","search":"新手化妆避坑","heat":"199.5万","kind":"topic","videoUrl":"","reason":"模仿成本低：步骤清晰、产品平价，评论区天然爱问'链接/色号'，互动数据好看，利于推流。","plan":"蹭法：跟原爆款热点BGM和标题句式（如'10秒学会XX'），封面用'前后对比+大字'，评论区自己先留'求色号'。"},{"id":"小红书-r3","platform":"小红书","type":"护肤","title":"混干皮换季泛红急救","search":"混干皮 泛红 急救","heat":"855.3万","kind":"topic","videoUrl":"","reason":"敏感肌人群决策成本高、试错贵，'平价不踩雷'类内容提供确定性，收藏+转发双高；'混干'换季话题自带流量。","plan":"二创脚本：沿用原爆款'清单体'，改成'敏感肌平价不踩雷版'，每条标价格和购买渠道，加'我空瓶实测'增加真实。"},{"id":"小红书-r4","platform":"小红书","type":"穿搭","title":"小个子正肩穿搭","search":"小个子正肩穿搭","heat":"576.5万","kind":"topic","videoUrl":"","reason":"实用收藏向：'避雷/正肩/上松下紧'等具体方法论，用户会收藏反复看，完播+收藏双高。","plan":"改编点：用肩宽43实测'避雷领型'，真实测评比原版更有信任感；结尾抛'求链接打1'。"},{"id":"小红书-r5","platform":"小红书","type":"拍照","title":"工位原相机自拍姿势","search":"工位自拍姿势","heat":"793.5万","kind":"topic","videoUrl":"","reason":"氛围感是流量密码：情绪化画面+文案，易被收藏做壁纸/参考，转发率高。","plan":"蹭法：沿用原爆款热门姿势挑战话题，发起'工位拍照挑战'引互动。"},{"id":"小红书-r6","platform":"小红书","type":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"460.4万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","plan":"二创脚本：原爆款'职场吐槽'改成'行政前台视角'，匿名化讲公司奇葩事，引发'同一个世界'共鸣。"},{"id":"小红书-r7","platform":"小红书","type":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"678.5万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","plan":"改编点：选原爆款同款BGM，换歌词字幕成'打工人版'，引发共鸣。"},{"id":"小红书-r8","platform":"小红书","type":"身材","title":"睡前10分钟瘦肩操","search":"瘦肩操","heat":"885.0万","kind":"topic","videoUrl":"","reason":"小基数痛点：'吃不胖但想塑形'人群精准，差异化强于泛健身内容。","plan":"蹭法：借原爆款'瘦XX'热点词，封面用'前后对比'，评论区引导打卡。"},{"id":"小红书-r9","platform":"小红书","type":"变美vlog","title":"月薪普通但精致穷妆","search":"精致穷 变美","heat":"568.8万","kind":"topic","videoUrl":"","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"小红书-r10","platform":"小红书","type":"化妆","title":"早八快速出门妆","search":"早八快速出门妆","heat":"788.9万","kind":"topic","videoUrl":"","reason":"痛点精准：打工人/学生党没时间精致妆，'通勤快速妆'戳中'想美但懒'的集体情绪，收藏率天然高。","plan":"改编点：原版用网红脸，你用'普通人素颜'开场增强信任；BGM换成轻快上班风；字幕加'打工人专属'。"},{"id":"小红书-r11","platform":"小红书","type":"护肤","title":"干皮妆前打底不卡粉","search":"干皮妆前打底","heat":"479.2万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","plan":"蹭法：借原爆款热点话题词，封面用'红叉/绿勾'红黑榜视觉，提升点击。"},{"id":"小红书-r12","platform":"小红书","type":"穿搭","title":"肩宽43避雷领型","search":"肩宽 避雷 领型","heat":"661.6万","kind":"topic","videoUrl":"","reason":"肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。","plan":"二创脚本：原爆款'显瘦神裤'改成你的'前台通勤版'（西装裤+尖头鞋），加'47kg也能撑起'反差钩子。"},{"id":"小红书-r13","platform":"小红书","type":"拍照","title":"拍照氛围感光线技巧","search":"拍照氛围感","heat":"815.0万","kind":"topic","videoUrl":"","reason":"零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。","plan":"改编点：加'原相机参数'干货，比原版更实用；用对镜自拍自然带出化妆成果。"},{"id":"小红书-r14","platform":"小红书","type":"职场","title":"前台视角讲职场八卦","search":"职场八卦 匿名","heat":"835.7万","kind":"topic","videoUrl":"","reason":"解压向：下班vlog/工位好物满足'向往的生活'心理，收藏率高。","plan":"蹭法：借原爆款热梗，封面用'前台日常'反差，注意不露真实公司信息。"},{"id":"小红书-r15","platform":"小红书","type":"唱歌","title":"翻唱老歌引发回忆杀","search":"老歌翻唱","heat":"372.9万","kind":"topic","videoUrl":"","reason":"才艺展示类易获'好听'正向评论，算法推流友好；'下班翻唱/对镜唱'松弛感人设吸粉。","plan":"二创脚本：原爆款'对口型变装'改成'下班对镜唱版'，前半素颜工服、后半精致，反差吸睛。"},{"id":"小红书-r16","platform":"小红书","type":"身材","title":"小基数塑形跟练","search":"小基数塑形","heat":"217.5万","kind":"topic","videoUrl":"","reason":"跟练属性：'睡前10分钟'这类低门槛运动，完播高、易收藏，适合做系列。","plan":"改编点：用'47kg但肩宽'做专属瘦肩，差异化避开大基数健身红海。"},{"id":"小红书-r17","platform":"小红书","type":"变美vlog","title":"普通女生化妆前后","search":"化妆前后对比","heat":"561.7万","kind":"topic","videoUrl":"","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"小红书-r18","platform":"小红书","type":"化妆","title":"学生党平价彩妆红黑榜","search":"学生党彩妆红黑榜","heat":"224.8万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","plan":"二创脚本：保留原爆款'快节奏+对比'结构，把主角换成'行政前台通勤版'，加'敏感肌底妆'差异化卖点，结尾教一个定妆手法。"},{"id":"小红书-r19","platform":"小红书","type":"护肤","title":"敏感肌防晒怎么选","search":"敏感肌防晒","heat":"313.0万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","plan":"改编点：原版泛人群，你聚焦'混干微敏皮'，讲'换季泛红怎么办'，痛点更尖。"},{"id":"快手-r0","platform":"快手","type":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"107.0万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","plan":"二创脚本：原爆款'职场吐槽'改成'行政前台视角'，匿名化讲公司奇葩事，引发'同一个世界'共鸣。"},{"id":"快手-r1","platform":"快手","type":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"689.0万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","plan":"改编点：选原爆款同款BGM，换歌词字幕成'打工人版'，引发共鸣。"},{"id":"快手-r2","platform":"快手","type":"身材","title":"睡前10分钟瘦肩操","search":"瘦肩操","heat":"59.5万","kind":"topic","videoUrl":"","reason":"小基数痛点：'吃不胖但想塑形'人群精准，差异化强于泛健身内容。","plan":"蹭法：借原爆款'瘦XX'热点词，封面用'前后对比'，评论区引导打卡。"},{"id":"快手-r3","platform":"快手","type":"变美vlog","title":"月薪普通但精致穷妆","search":"精致穷 变美","heat":"875.9万","kind":"topic","videoUrl":"","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"快手-r4","platform":"快手","type":"化妆","title":"早八快速出门妆","search":"早八快速出门妆","heat":"331.8万","kind":"topic","videoUrl":"","reason":"痛点精准：打工人/学生党没时间精致妆，'通勤快速妆'戳中'想美但懒'的集体情绪，收藏率天然高。","plan":"改编点：原版用网红脸，你用'普通人素颜'开场增强信任；BGM换成轻快上班风；字幕加'打工人专属'。"},{"id":"快手-r5","platform":"快手","type":"护肤","title":"干皮妆前打底不卡粉","search":"干皮妆前打底","heat":"448.2万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","plan":"蹭法：借原爆款热点话题词，封面用'红叉/绿勾'红黑榜视觉，提升点击。"},{"id":"快手-r6","platform":"快手","type":"穿搭","title":"肩宽43避雷领型","search":"肩宽 避雷 领型","heat":"476.7万","kind":"topic","videoUrl":"","reason":"肩宽43是极强差异化标签，评论区天然爱问'链接'；'显瘦/小个子/微胖'是穿搭赛道永久流量池，搜索量大。","plan":"二创脚本：原爆款'显瘦神裤'改成你的'前台通勤版'（西装裤+尖头鞋），加'47kg也能撑起'反差钩子。"},{"id":"快手-r7","platform":"快手","type":"拍照","title":"拍照氛围感光线技巧","search":"拍照氛围感","heat":"259.3万","kind":"topic","videoUrl":"","reason":"零成本干货：不用设备只要光线和角度，适合普通女生人设，易获'学到了'正向评论。","plan":"改编点：加'原相机参数'干货，比原版更实用；用对镜自拍自然带出化妆成果。"},{"id":"快手-r8","platform":"快手","type":"职场","title":"前台视角讲职场八卦","search":"职场八卦 匿名","heat":"275.9万","kind":"topic","videoUrl":"","reason":"解压向：下班vlog/工位好物满足'向往的生活'心理，收藏率高。","plan":"蹭法：借原爆款热梗，封面用'前台日常'反差，注意不露真实公司信息。"},{"id":"快手-r9","platform":"快手","type":"唱歌","title":"翻唱老歌引发回忆杀","search":"老歌翻唱","heat":"796.5万","kind":"topic","videoUrl":"","reason":"才艺展示类易获'好听'正向评论，算法推流友好；'下班翻唱/对镜唱'松弛感人设吸粉。","plan":"二创脚本：原爆款'对口型变装'改成'下班对镜唱版'，前半素颜工服、后半精致，反差吸睛。"},{"id":"快手-r10","platform":"快手","type":"身材","title":"小基数塑形跟练","search":"小基数塑形","heat":"808.2万","kind":"topic","videoUrl":"","reason":"跟练属性：'睡前10分钟'这类低门槛运动，完播高、易收藏，适合做系列。","plan":"改编点：用'47kg但肩宽'做专属瘦肩，差异化避开大基数健身红海。"},{"id":"快手-r11","platform":"快手","type":"变美vlog","title":"普通女生化妆前后","search":"化妆前后对比","heat":"339.4万","kind":"topic","videoUrl":"","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"快手-r12","platform":"快手","type":"化妆","title":"学生党平价彩妆红黑榜","search":"学生党彩妆红黑榜","heat":"680.6万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","plan":"二创脚本：保留原爆款'快节奏+对比'结构，把主角换成'行政前台通勤版'，加'敏感肌底妆'差异化卖点，结尾教一个定妆手法。"},{"id":"快手-r13","platform":"快手","type":"护肤","title":"敏感肌防晒怎么选","search":"敏感肌防晒","heat":"844.2万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","plan":"改编点：原版泛人群，你聚焦'混干微敏皮'，讲'换季泛红怎么办'，痛点更尖。"},{"id":"快手-r14","platform":"快手","type":"穿搭","title":"微胖通勤穿搭模板","search":"微胖通勤穿搭","heat":"698.7万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","plan":"蹭法：跟原爆款标题结构（'梨形必看'→'宽肩必看'），同款BGM，封面同版式保证辨识。"},{"id":"快手-r15","platform":"快手","type":"拍照","title":"手机人像模式拍照","search":"手机人像拍照","heat":"346.9万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","plan":"二创脚本：原爆款'拍照姿势'改成'前台工位版'，展示办公室光线怎么用，零成本可抄。"},{"id":"快手-r16","platform":"快手","type":"职场","title":"打工人下班仪式感","search":"下班仪式感","heat":"237.4万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","plan":"改编点：加入你的唱歌/化妆碎片做记忆点；结尾'今天也辛苦啦'情绪收尾易转发。"},{"id":"快手-r17","platform":"快手","type":"护肤","title":"素颜霜测评翻车","search":"素颜霜测评","heat":"506.8万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","plan":"蹭法：借原爆款热点话题词，封面用'红叉/绿勾'红黑榜视觉，提升点击。"},{"id":"快手-r18","platform":"快手","type":"化妆","title":"3分钟通勤伪素颜妆","search":"通勤伪素颜妆","heat":"570.3万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","plan":"二创脚本：保留原爆款'快节奏+对比'结构，把主角换成'行政前台通勤版'，加'敏感肌底妆'差异化卖点，结尾教一个定妆手法。"},{"id":"快手-r19","platform":"快手","type":"护肤","title":"敏感肌平价护肤清单","search":"敏感肌平价护肤","heat":"276.0万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","plan":"改编点：原版泛人群，你聚焦'混干微敏皮'，讲'换季泛红怎么办'，痛点更尖。"},{"id":"微博-r0","platform":"微博","type":"变美vlog","title":"宇树科技中签女子开盘就卖出","search":"宇树科技中签女子开盘就卖出","heat":"233.4万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80%E4%B8%AD%E7%AD%BE%E5%A5%B3%E5%AD%90%E5%BC%80%E7%9B%98%E5%B0%B1%E5%8D%96%E5%87%BA%23","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"微博-r1","platform":"微博","type":"变美vlog","title":"人到中年爱好开始逐渐离谱了","search":"人到中年爱好开始逐渐离谱了","heat":"142.1万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E4%BA%BA%E5%88%B0%E4%B8%AD%E5%B9%B4%E7%88%B1%E5%A5%BD%E5%BC%80%E5%A7%8B%E9%80%90%E6%B8%90%E7%A6%BB%E8%B0%B1%E4%BA%86%23","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"微博-r2","platform":"微博","type":"变美vlog","title":"未来5年全民医保这样干","search":"未来5年全民医保这样干","heat":"79.3万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E6%9C%AA%E6%9D%A55%E5%B9%B4%E5%85%A8%E6%B0%91%E5%8C%BB%E4%BF%9D%E8%BF%99%E6%A0%B7%E5%B9%B2%23","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"微博-r3","platform":"微博","type":"变美vlog","title":"谢谢你 我的宝藏医生","search":"谢谢你 我的宝藏医生","heat":"78.2万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E8%B0%A2%E8%B0%A2%E4%BD%A0%20%E6%88%91%E7%9A%84%E5%AE%9D%E8%97%8F%E5%8C%BB%E7%94%9F%23","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"微博-r4","platform":"微博","type":"变美vlog","title":"孟子义李昀锐白天避嫌晚上营业","search":"孟子义李昀锐白天避嫌晚上营业","heat":"70.6万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E5%AD%9F%E5%AD%90%E4%B9%89%E6%9D%8E%E6%98%80%E9%94%90%E7%99%BD%E5%A4%A9%E9%81%BF%E5%AB%8C%E6%99%9A%E4%B8%8A%E8%90%A5%E4%B8%9A%23","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"微博-r5","platform":"微博","type":"变美vlog","title":"北电副院长1200万动画票房0","search":"北电副院长1200万动画票房0","heat":"64.0万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E5%8C%97%E7%94%B5%E5%89%AF%E9%99%A2%E9%95%BF1200%E4%B8%87%E5%8A%A8%E7%94%BB%E7%A5%A8%E6%88%BF0%23","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"微博-r6","platform":"微博","type":"变美vlog","title":"中国足协回应不当招待","search":"中国足协回应不当招待","heat":"53.5万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E8%B6%B3%E5%8D%8F%E5%9B%9E%E5%BA%94%E4%B8%8D%E5%BD%93%E6%8B%9B%E5%BE%85%23","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"微博-r7","platform":"微博","type":"变美vlog","title":"网络辟谣标签","search":"网络辟谣标签","heat":"50.4万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E7%BD%91%E7%BB%9C%E8%BE%9F%E8%B0%A3%E6%A0%87%E7%AD%BE%23","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"微博-r8","platform":"微博","type":"变美vlog","title":"剩菜剩饭直接喂猪违法","search":"剩菜剩饭直接喂猪违法","heat":"48.5万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E5%89%A9%E8%8F%9C%E5%89%A9%E9%A5%AD%E7%9B%B4%E6%8E%A5%E5%96%82%E7%8C%AA%E8%BF%9D%E6%B3%95%23","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"微博-r9","platform":"微博","type":"变美vlog","title":"TOP无畏契约表演赛直播","search":"TOP无畏契约表演赛直播","heat":"42.9万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23TOP%E6%97%A0%E7%95%8F%E5%A5%91%E7%BA%A6%E8%A1%A8%E6%BC%94%E8%B5%9B%E7%9B%B4%E6%92%AD%23","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"微博-r10","platform":"微博","type":"变美vlog","title":"胖东来 刑期五年以上门槛","search":"胖东来 刑期五年以上门槛","heat":"33.4万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E8%83%96%E4%B8%9C%E6%9D%A5%20%E5%88%91%E6%9C%9F%E4%BA%94%E5%B9%B4%E4%BB%A5%E4%B8%8A%E9%97%A8%E6%A7%9B%23","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"微博-r11","platform":"微博","type":"变美vlog","title":"厨房纸 致癌物","search":"厨房纸 致癌物","heat":"32.6万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E5%8E%A8%E6%88%BF%E7%BA%B8%20%E8%87%B4%E7%99%8C%E7%89%A9%23","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"微博-r12","platform":"微博","type":"变美vlog","title":"七夕 冷清","search":"七夕 冷清","heat":"32.5万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E4%B8%83%E5%A4%95%20%E5%86%B7%E6%B8%85%23","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"微博-r13","platform":"微博","type":"变美vlog","title":"李昀锐孟子义七夕物料不像演的","search":"李昀锐孟子义七夕物料不像演的","heat":"32.4万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E6%9D%8E%E6%98%80%E9%94%90%E5%AD%9F%E5%AD%90%E4%B9%89%E4%B8%83%E5%A4%95%E7%89%A9%E6%96%99%E4%B8%8D%E5%83%8F%E6%BC%94%E7%9A%84%23","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"微博-r14","platform":"微博","type":"变美vlog","title":"范丞丞怎么瘦了这么多","search":"范丞丞怎么瘦了这么多","heat":"32.3万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E8%8C%83%E4%B8%9E%E4%B8%9E%E6%80%8E%E4%B9%88%E7%98%A6%E4%BA%86%E8%BF%99%E4%B9%88%E5%A4%9A%23","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"微博-r15","platform":"微博","type":"变美vlog","title":"韩国被曝性贿赂3名中国足协人士","search":"韩国被曝性贿赂3名中国足协人士","heat":"32.2万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E9%9F%A9%E5%9B%BD%E8%A2%AB%E6%9B%9D%E6%80%A7%E8%B4%BF%E8%B5%823%E5%90%8D%E4%B8%AD%E5%9B%BD%E8%B6%B3%E5%8D%8F%E4%BA%BA%E5%A3%AB%23","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"微博-r16","platform":"微博","type":"身材","title":"减肥避谶","search":"减肥避谶","heat":"32.1万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E5%87%8F%E8%82%A5%E9%81%BF%E8%B0%B6%23","reason":"跟练属性：'睡前10分钟'这类低门槛运动，完播高、易收藏，适合做系列。","plan":"改编点：用'47kg但肩宽'做专属瘦肩，差异化避开大基数健身红海。"},{"id":"微博-r17","platform":"微博","type":"变美vlog","title":"蓝盈莹要求工作群消息尽量秒回","search":"蓝盈莹要求工作群消息尽量秒回","heat":"32.0万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E8%93%9D%E7%9B%88%E8%8E%B9%E8%A6%81%E6%B1%82%E5%B7%A5%E4%BD%9C%E7%BE%A4%E6%B6%88%E6%81%AF%E5%B0%BD%E9%87%8F%E7%A7%92%E5%9B%9E%23","reason":"'上班vs下班状态'对比制造反差爽点，易引发'这就是我'共鸣。","plan":"蹭法：跟原爆款'变美挑战'话题，封面统一'素颜→精致'版式建立品牌感。"},{"id":"微博-r18","platform":"微博","type":"变美vlog","title":"关晓彤 少量蘸料中加入大量香菜","search":"关晓彤 少量蘸料中加入大量香菜","heat":"32.0万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E5%85%B3%E6%99%93%E5%BD%A4%20%E5%B0%91%E9%87%8F%E8%98%B8%E6%96%99%E4%B8%AD%E5%8A%A0%E5%85%A5%E5%A4%A7%E9%87%8F%E9%A6%99%E8%8F%9C%23","reason":"'普通女生逆袭'是永远的流量密码，前后对比满足窥探欲+希望感，完播和涨粉双高。","plan":"二创脚本：原爆款'逆袭'改成'普通女生变美日记'周更，保留对比爽点，加长期陪伴。"},{"id":"微博-r19","platform":"微博","type":"变美vlog","title":"七夕","search":"七夕","heat":"27.6万","kind":"topic","videoUrl":"https://s.weibo.com/weibo?q=%23%E4%B8%83%E5%A4%95%23","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"B站-r0","platform":"B站","type":"化妆","title":"学生党平价彩妆红黑榜","search":"学生党彩妆红黑榜","heat":"468.3万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","plan":"二创脚本：保留原爆款'快节奏+对比'结构，把主角换成'行政前台通勤版'，加'敏感肌底妆'差异化卖点，结尾教一个定妆手法。"},{"id":"B站-r1","platform":"B站","type":"护肤","title":"敏感肌防晒怎么选","search":"敏感肌防晒","heat":"94.8万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","plan":"改编点：原版泛人群，你聚焦'混干微敏皮'，讲'换季泛红怎么办'，痛点更尖。"},{"id":"B站-r2","platform":"B站","type":"穿搭","title":"微胖通勤穿搭模板","search":"微胖通勤穿搭","heat":"756.6万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","plan":"蹭法：跟原爆款标题结构（'梨形必看'→'宽肩必看'），同款BGM，封面同版式保证辨识。"},{"id":"B站-r3","platform":"B站","type":"拍照","title":"手机人像模式拍照","search":"手机人像拍照","heat":"721.9万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","plan":"二创脚本：原爆款'拍照姿势'改成'前台工位版'，展示办公室光线怎么用，零成本可抄。"},{"id":"B站-r4","platform":"B站","type":"职场","title":"打工人下班仪式感","search":"下班仪式感","heat":"752.7万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","plan":"改编点：加入你的唱歌/化妆碎片做记忆点；结尾'今天也辛苦啦'情绪收尾易转发。"},{"id":"B站-r5","platform":"B站","type":"护肤","title":"素颜霜测评翻车","search":"素颜霜测评","heat":"292.7万","kind":"topic","videoUrl":"","reason":"长尾搜索：护肤关键词搜索量巨大，单条好内容能持续带来搜索流量，是账号基本盘。","plan":"蹭法：借原爆款热点话题词，封面用'红叉/绿勾'红黑榜视觉，提升点击。"},{"id":"B站-r6","platform":"B站","type":"化妆","title":"3分钟通勤伪素颜妆","search":"通勤伪素颜妆","heat":"312.8万","kind":"topic","videoUrl":"","reason":"低门槛高回报：化妆是变美赛道完播率最高的细分，'3分钟/伪素颜/新手'等词直接降低观看门槛，前3秒放前后对比就能拉满完播。","plan":"二创脚本：保留原爆款'快节奏+对比'结构，把主角换成'行政前台通勤版'，加'敏感肌底妆'差异化卖点，结尾教一个定妆手法。"},{"id":"B站-r7","platform":"B站","type":"护肤","title":"敏感肌平价护肤清单","search":"敏感肌平价护肤","heat":"63.8万","kind":"topic","videoUrl":"","reason":"信任溢价：'我也在用/空瓶记'式真实分享比硬广可信，尤其对泛红、干皮焦虑人群转化强。","plan":"改编点：原版泛人群，你聚焦'混干微敏皮'，讲'换季泛红怎么办'，痛点更尖。"},{"id":"B站-r8","platform":"B站","type":"穿搭","title":"宽肩女生显瘦穿搭","search":"宽肩女生显瘦穿搭","heat":"677.5万","kind":"topic","videoUrl":"","reason":"反差钩子：'47kg但肩宽''普通人也能穿'制造记忆点，提升关注转化。","plan":"蹭法：跟原爆款标题结构（'梨形必看'→'宽肩必看'），同款BGM，封面同版式保证辨识。"},{"id":"B站-r9","platform":"B站","type":"拍照","title":"手机自拍显瘦角度","search":"手机自拍显瘦角度","heat":"504.4万","kind":"topic","videoUrl":"","reason":"手机自拍/显瘦角度'人人都能抄'，完播高；'原相机vs美颜'对比类自带争议和互动。","plan":"二创脚本：原爆款'拍照姿势'改成'前台工位版'，展示办公室光线怎么用，零成本可抄。"},{"id":"B站-r10","platform":"B站","type":"职场","title":"行政前台的一天vlog","search":"行政前台 vlog","heat":"875.0万","kind":"topic","videoUrl":"","reason":"陪伴感涨粉：真实记录一天建立长期关系，匿名化讲八卦引发'同一个世界'共鸣（注意不露公司信息）。","plan":"改编点：加入你的唱歌/化妆碎片做记忆点；结尾'今天也辛苦啦'情绪收尾易转发。"},{"id":"B站-r11","platform":"B站","type":"唱歌","title":"下班对镜翻唱一首","search":"打工人翻唱","heat":"549.8万","kind":"topic","videoUrl":"","reason":"低门槛蹭热点：对口型变装跟BGM热点，零成本借流量。","plan":"蹭法：跟原爆款挑战话题，封面用'制服→变装'对比图，提升完播。"},{"id":"B站-r12","platform":"B站","type":"身材","title":"47kg小基数减脂餐","search":"小基数减脂餐","heat":"863.2万","kind":"topic","videoUrl":"","reason":"'47kg但肩宽'反差设定有记忆点；减脂餐/瘦肩运动类收藏率极高，女性用户刚需。","plan":"二创脚本：原爆款'减脂餐'改成'小基数平价版'，强调'不饿肚子'；'瘦肩操'做跟练向。"},{"id":"B站-r13","platform":"B站","type":"变美vlog","title":"普通女生变美逆袭","search":"普通女生变美","heat":"914.2万","kind":"topic","videoUrl":"","reason":"长期陪伴：月度变美复盘建立信任，粉丝粘性高，利于接广告。","plan":"改编点：结合前台身份做'上班vs下班状态'对比，比纯颜值内容更有故事。"},{"id":"B站-r14","platform":"B站","type":"化妆","title":"新手化妆避坑指南","search":"新手化妆避坑","heat":"148.6万","kind":"topic","videoUrl":"","reason":"模仿成本低：步骤清晰、产品平价，评论区天然爱问'链接/色号'，互动数据好看，利于推流。","plan":"蹭法：跟原爆款热点BGM和标题句式（如'10秒学会XX'），封面用'前后对比+大字'，评论区自己先留'求色号'。"},{"id":"B站-r15","platform":"B站","type":"护肤","title":"混干皮换季泛红急救","search":"混干皮 泛红 急救","heat":"505.7万","kind":"topic","videoUrl":"","reason":"敏感肌人群决策成本高、试错贵，'平价不踩雷'类内容提供确定性，收藏+转发双高；'混干'换季话题自带流量。","plan":"二创脚本：沿用原爆款'清单体'，改成'敏感肌平价不踩雷版'，每条标价格和购买渠道，加'我空瓶实测'增加真实。"},{"id":"B站-r16","platform":"B站","type":"穿搭","title":"小个子正肩穿搭","search":"小个子正肩穿搭","heat":"567.7万","kind":"topic","videoUrl":"","reason":"实用收藏向：'避雷/正肩/上松下紧'等具体方法论，用户会收藏反复看，完播+收藏双高。","plan":"改编点：用肩宽43实测'避雷领型'，真实测评比原版更有信任感；结尾抛'求链接打1'。"},{"id":"B站-r17","platform":"B站","type":"拍照","title":"工位原相机自拍姿势","search":"工位自拍姿势","heat":"343.1万","kind":"topic","videoUrl":"","reason":"氛围感是流量密码：情绪化画面+文案，易被收藏做壁纸/参考，转发率高。","plan":"蹭法：沿用原爆款热门姿势挑战话题，发起'工位拍照挑战'引互动。"},{"id":"B站-r18","platform":"B站","type":"职场","title":"职场摸鱼但认真生活","search":"打工人职场日常","heat":"591.2万","kind":"topic","videoUrl":"","reason":"'职场窥探/打工人日常'情绪共鸣强，易转发；前台视角稀缺，'公司奇葩事/摸鱼'类评论区活跃。","plan":"二创脚本：原爆款'职场吐槽'改成'行政前台视角'，匿名化讲公司奇葩事，引发'同一个世界'共鸣。"},{"id":"B站-r19","platform":"B站","type":"唱歌","title":"对口型变装蹭BGM","search":"唱歌对口型变装","heat":"258.7万","kind":"topic","videoUrl":"","reason":"情绪载体：老歌/情歌翻唱引发回忆杀，评论区刷歌词，互动数据漂亮。","plan":"改编点：选原爆款同款BGM，换歌词字幕成'打工人版'，引发共鸣。"}],"note":"选题灵感/爆款二创各平台20条。B站为真实单条视频链接（标签「真实视频」，家用/本地IP可稳定获取，GitHub云端IP偶发被拦则降级）；微博为真实热搜话题页链接；抖音/小红书/快手官方未开放单条视频接口，给「当下热门话题流」链接（均标签「话题页」），已如实标注。任何一条都可粘贴分享链接升级为「▶ 跳原视频」。"};
+  const EMBEDDED = {"date":"2026-08-20","topics":[{"id":"抖音-t0","platform":"抖音","cat":"化妆","title":"3分钟通勤伪素颜妆","analysis":"短平快+前后对比天然拉高完播，「通勤/新手」关键词降低门槛，评论区爱问色号链接。","dy_link":"https://www.douyin.com/search/%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86","bz_link":"https://search.bilibili.com/all?keyword=%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86"},{"id":"抖音-t1","platform":"抖音","cat":"护肤","title":"敏感肌平价护肤清单","analysis":"换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。","dy_link":"https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4","bz_link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4"},{"id":"抖音-t2","platform":"抖音","cat":"穿搭","title":"宽肩女生显瘦穿搭","analysis":"通勤场景可自然植入平价单品，广告位充足。","dy_link":"https://www.douyin.com/search/%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD","bz_link":"https://search.bilibili.com/all?keyword=%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD"},{"id":"抖音-t3","platform":"抖音","cat":"拍照","title":"手机自拍显瘦角度","analysis":"零成本干货+可跟练，完播高且易被收藏，原相机对比类还能引发讨论。","dy_link":"https://www.douyin.com/search/%E6%89%8B%E6%9C%BA%E8%87%AA%E6%8B%8D%E6%98%BE%E7%98%A6%E8%A7%92%E5%BA%A6","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%8B%E6%9C%BA%E8%87%AA%E6%8B%8D%E6%98%BE%E7%98%A6%E8%A7%92%E5%BA%A6"},{"id":"抖音-t4","platform":"抖音","cat":"职场","title":"行政前台的一天vlog","analysis":"一天 vlog 陪伴感强，能自然串联化妆、唱歌、穿搭等多个垂类。","dy_link":"https://www.douyin.com/search/%E8%A1%8C%E6%94%BF%E5%89%8D%E5%8F%B0%20vlog","bz_link":"https://search.bilibili.com/all?keyword=%E8%A1%8C%E6%94%BF%E5%89%8D%E5%8F%B0%20vlog"},{"id":"抖音-t5","platform":"抖音","cat":"唱歌","title":"下班对镜翻唱一首","analysis":"老歌翻唱易引发回忆杀，评论区刷歌词能带动推流。","dy_link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E7%BF%BB%E5%94%B1","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E7%BF%BB%E5%94%B1"},{"id":"抖音-t6","platform":"抖音","cat":"身材","title":"47kg小基数减脂餐","analysis":"小基数塑形是细分蓝海，「不饿肚子/碎片时间」降低跟练门槛，收藏率高。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90"},{"id":"抖音-t7","platform":"抖音","cat":"变美vlog","title":"普通女生变美逆袭","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E","bz_link":"https://search.bilibili.com/all?keyword=%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E"},{"id":"抖音-t8","platform":"抖音","cat":"化妆","title":"新手化妆避坑指南","analysis":"敏感肌+底妆是强信任切入点，真实试用比网红脸更有说服力。","dy_link":"https://www.douyin.com/search/%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91","bz_link":"https://search.bilibili.com/all?keyword=%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91"},{"id":"抖音-t9","platform":"抖音","cat":"护肤","title":"混干皮换季泛红急救","analysis":"敏感肌痛点精准、决策成本高，真实测评+平价方案收藏率高，适合建立信任基本盘。","dy_link":"https://www.douyin.com/search/%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91","bz_link":"https://search.bilibili.com/all?keyword=%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91"},{"id":"抖音-t10","platform":"抖音","cat":"穿搭","title":"小个子正肩穿搭","analysis":"全身镜+原相机展示真实效果，比精修图更可信，易获「求链接」评论。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD"},{"id":"抖音-t11","platform":"抖音","cat":"拍照","title":"工位原相机自拍姿势","analysis":"光线+角度是 evergreen 话题，单条好内容可持续带来搜索流量。","dy_link":"https://www.douyin.com/search/%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF","bz_link":"https://search.bilibili.com/all?keyword=%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF"},{"id":"抖音-t12","platform":"抖音","cat":"职场","title":"职场摸鱼但认真生活","analysis":"打工人情绪共鸣强、易转发，前台视角稀缺；注意匿名化处理公司信息。","dy_link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"抖音-t13","platform":"抖音","cat":"唱歌","title":"对口型变装蹭BGM","analysis":"下班对镜唱+工服变装制造反差，完播和互动双高。","dy_link":"https://www.douyin.com/search/%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85","bz_link":"https://search.bilibili.com/all?keyword=%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"},{"id":"抖音-t14","platform":"抖音","cat":"身材","title":"睡前10分钟瘦肩操","analysis":"办公室微运动场景可跟练，打工人受众精准。","dy_link":"https://www.douyin.com/search/%E7%98%A6%E8%82%A9%E6%93%8D","bz_link":"https://search.bilibili.com/all?keyword=%E7%98%A6%E8%82%A9%E6%93%8D"},{"id":"抖音-t15","platform":"抖音","cat":"变美vlog","title":"月薪普通但精致穷妆","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E","bz_link":"https://search.bilibili.com/all?keyword=%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E"},{"id":"抖音-t16","platform":"抖音","cat":"化妆","title":"早八快速出门妆","analysis":"早八场景精准戳中打工人「想美但懒」的痛点，5分钟内完成降低收藏门槛。","dy_link":"https://www.douyin.com/search/%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86","bz_link":"https://search.bilibili.com/all?keyword=%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86"},{"id":"抖音-t17","platform":"抖音","cat":"护肤","title":"干皮妆前打底不卡粉","analysis":"红黑榜/空瓶记视觉清晰，「红叉绿勾」能显著提升点击率。","dy_link":"https://www.douyin.com/search/%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95","bz_link":"https://search.bilibili.com/all?keyword=%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95"},{"id":"抖音-t18","platform":"抖音","cat":"穿搭","title":"肩宽43避雷领型","analysis":"「显瘦/避雷」是穿搭赛道永久流量池，肩宽标签差异化强，评论区互动和转化意愿都高。","dy_link":"https://www.douyin.com/search/%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B","bz_link":"https://search.bilibili.com/all?keyword=%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B"},{"id":"抖音-t19","platform":"抖音","cat":"拍照","title":"拍照氛围感光线技巧","analysis":"工位/前台场景独特，普通人视角更容易引发「我也能拍」的跟拍欲。","dy_link":"https://www.douyin.com/search/%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F","bz_link":"https://search.bilibili.com/all?keyword=%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F"},{"id":"小红书-t0","platform":"小红书","cat":"身材","title":"47kg小基数减脂餐","analysis":"小基数塑形是细分蓝海，「不饿肚子/碎片时间」降低跟练门槛，收藏率高。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90"},{"id":"小红书-t1","platform":"小红书","cat":"变美vlog","title":"普通女生变美逆袭","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E","bz_link":"https://search.bilibili.com/all?keyword=%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E"},{"id":"小红书-t2","platform":"小红书","cat":"化妆","title":"新手化妆避坑指南","analysis":"敏感肌+底妆是强信任切入点，真实试用比网红脸更有说服力。","dy_link":"https://www.douyin.com/search/%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91","bz_link":"https://search.bilibili.com/all?keyword=%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91"},{"id":"小红书-t3","platform":"小红书","cat":"护肤","title":"混干皮换季泛红急救","analysis":"敏感肌痛点精准、决策成本高，真实测评+平价方案收藏率高，适合建立信任基本盘。","dy_link":"https://www.douyin.com/search/%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91","bz_link":"https://search.bilibili.com/all?keyword=%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91"},{"id":"小红书-t4","platform":"小红书","cat":"穿搭","title":"小个子正肩穿搭","analysis":"全身镜+原相机展示真实效果，比精修图更可信，易获「求链接」评论。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD"},{"id":"小红书-t5","platform":"小红书","cat":"拍照","title":"工位原相机自拍姿势","analysis":"光线+角度是 evergreen 话题，单条好内容可持续带来搜索流量。","dy_link":"https://www.douyin.com/search/%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF","bz_link":"https://search.bilibili.com/all?keyword=%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF"},{"id":"小红书-t6","platform":"小红书","cat":"职场","title":"职场摸鱼但认真生活","analysis":"打工人情绪共鸣强、易转发，前台视角稀缺；注意匿名化处理公司信息。","dy_link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"小红书-t7","platform":"小红书","cat":"唱歌","title":"对口型变装蹭BGM","analysis":"下班对镜唱+工服变装制造反差，完播和互动双高。","dy_link":"https://www.douyin.com/search/%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85","bz_link":"https://search.bilibili.com/all?keyword=%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"},{"id":"小红书-t8","platform":"小红书","cat":"身材","title":"睡前10分钟瘦肩操","analysis":"办公室微运动场景可跟练，打工人受众精准。","dy_link":"https://www.douyin.com/search/%E7%98%A6%E8%82%A9%E6%93%8D","bz_link":"https://search.bilibili.com/all?keyword=%E7%98%A6%E8%82%A9%E6%93%8D"},{"id":"小红书-t9","platform":"小红书","cat":"变美vlog","title":"月薪普通但精致穷妆","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E","bz_link":"https://search.bilibili.com/all?keyword=%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E"},{"id":"小红书-t10","platform":"小红书","cat":"化妆","title":"早八快速出门妆","analysis":"早八场景精准戳中打工人「想美但懒」的痛点，5分钟内完成降低收藏门槛。","dy_link":"https://www.douyin.com/search/%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86","bz_link":"https://search.bilibili.com/all?keyword=%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86"},{"id":"小红书-t11","platform":"小红书","cat":"护肤","title":"干皮妆前打底不卡粉","analysis":"红黑榜/空瓶记视觉清晰，「红叉绿勾」能显著提升点击率。","dy_link":"https://www.douyin.com/search/%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95","bz_link":"https://search.bilibili.com/all?keyword=%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95"},{"id":"小红书-t12","platform":"小红书","cat":"穿搭","title":"肩宽43避雷领型","analysis":"「显瘦/避雷」是穿搭赛道永久流量池，肩宽标签差异化强，评论区互动和转化意愿都高。","dy_link":"https://www.douyin.com/search/%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B","bz_link":"https://search.bilibili.com/all?keyword=%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B"},{"id":"小红书-t13","platform":"小红书","cat":"拍照","title":"拍照氛围感光线技巧","analysis":"工位/前台场景独特，普通人视角更容易引发「我也能拍」的跟拍欲。","dy_link":"https://www.douyin.com/search/%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F","bz_link":"https://search.bilibili.com/all?keyword=%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F"},{"id":"小红书-t14","platform":"小红书","cat":"职场","title":"前台视角讲职场八卦","analysis":"下班仪式感切中当代年轻人「治愈自己」的情绪需求。","dy_link":"https://www.douyin.com/search/%E8%81%8C%E5%9C%BA%E5%85%AB%E5%8D%A6%20%E5%8C%BF%E5%90%8D","bz_link":"https://search.bilibili.com/all?keyword=%E8%81%8C%E5%9C%BA%E5%85%AB%E5%8D%A6%20%E5%8C%BF%E5%90%8D"},{"id":"小红书-t15","platform":"小红书","cat":"唱歌","title":"翻唱老歌引发回忆杀","analysis":"才艺展示算法友好，情绪歌评论区活跃；对口型/变装类可低成本蹭热点BGM。","dy_link":"https://www.douyin.com/search/%E8%80%81%E6%AD%8C%E7%BF%BB%E5%94%B1","bz_link":"https://search.bilibili.com/all?keyword=%E8%80%81%E6%AD%8C%E7%BF%BB%E5%94%B1"},{"id":"小红书-t16","platform":"小红书","cat":"身材","title":"小基数塑形跟练","analysis":"瘦肩专项契合你的肩宽标签，真实记录变化更有说服力。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%A1%91%E5%BD%A2","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%A1%91%E5%BD%A2"},{"id":"小红书-t17","platform":"小红书","cat":"变美vlog","title":"普通女生化妆前后","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/%E5%8C%96%E5%A6%86%E5%89%8D%E5%90%8E%E5%AF%B9%E6%AF%94","bz_link":"https://search.bilibili.com/all?keyword=%E5%8C%96%E5%A6%86%E5%89%8D%E5%90%8E%E5%AF%B9%E6%AF%94"},{"id":"小红书-t18","platform":"小红书","cat":"化妆","title":"学生党平价彩妆红黑榜","analysis":"短平快+前后对比天然拉高完播，「通勤/新手」关键词降低门槛，评论区爱问色号链接。","dy_link":"https://www.douyin.com/search/%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C","bz_link":"https://search.bilibili.com/all?keyword=%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C"},{"id":"小红书-t19","platform":"小红书","cat":"护肤","title":"敏感肌防晒怎么选","analysis":"换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。","dy_link":"https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92","bz_link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92"},{"id":"快手-t0","platform":"快手","cat":"职场","title":"职场摸鱼但认真生活","analysis":"打工人情绪共鸣强、易转发，前台视角稀缺；注意匿名化处理公司信息。","dy_link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"快手-t1","platform":"快手","cat":"唱歌","title":"对口型变装蹭BGM","analysis":"下班对镜唱+工服变装制造反差，完播和互动双高。","dy_link":"https://www.douyin.com/search/%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85","bz_link":"https://search.bilibili.com/all?keyword=%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"},{"id":"快手-t2","platform":"快手","cat":"身材","title":"睡前10分钟瘦肩操","analysis":"办公室微运动场景可跟练，打工人受众精准。","dy_link":"https://www.douyin.com/search/%E7%98%A6%E8%82%A9%E6%93%8D","bz_link":"https://search.bilibili.com/all?keyword=%E7%98%A6%E8%82%A9%E6%93%8D"},{"id":"快手-t3","platform":"快手","cat":"变美vlog","title":"月薪普通但精致穷妆","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E","bz_link":"https://search.bilibili.com/all?keyword=%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E"},{"id":"快手-t4","platform":"快手","cat":"化妆","title":"早八快速出门妆","analysis":"早八场景精准戳中打工人「想美但懒」的痛点，5分钟内完成降低收藏门槛。","dy_link":"https://www.douyin.com/search/%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86","bz_link":"https://search.bilibili.com/all?keyword=%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86"},{"id":"快手-t5","platform":"快手","cat":"护肤","title":"干皮妆前打底不卡粉","analysis":"红黑榜/空瓶记视觉清晰，「红叉绿勾」能显著提升点击率。","dy_link":"https://www.douyin.com/search/%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95","bz_link":"https://search.bilibili.com/all?keyword=%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95"},{"id":"快手-t6","platform":"快手","cat":"穿搭","title":"肩宽43避雷领型","analysis":"「显瘦/避雷」是穿搭赛道永久流量池，肩宽标签差异化强，评论区互动和转化意愿都高。","dy_link":"https://www.douyin.com/search/%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B","bz_link":"https://search.bilibili.com/all?keyword=%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B"},{"id":"快手-t7","platform":"快手","cat":"拍照","title":"拍照氛围感光线技巧","analysis":"工位/前台场景独特，普通人视角更容易引发「我也能拍」的跟拍欲。","dy_link":"https://www.douyin.com/search/%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F","bz_link":"https://search.bilibili.com/all?keyword=%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F"},{"id":"快手-t8","platform":"快手","cat":"职场","title":"前台视角讲职场八卦","analysis":"下班仪式感切中当代年轻人「治愈自己」的情绪需求。","dy_link":"https://www.douyin.com/search/%E8%81%8C%E5%9C%BA%E5%85%AB%E5%8D%A6%20%E5%8C%BF%E5%90%8D","bz_link":"https://search.bilibili.com/all?keyword=%E8%81%8C%E5%9C%BA%E5%85%AB%E5%8D%A6%20%E5%8C%BF%E5%90%8D"},{"id":"快手-t9","platform":"快手","cat":"唱歌","title":"翻唱老歌引发回忆杀","analysis":"才艺展示算法友好，情绪歌评论区活跃；对口型/变装类可低成本蹭热点BGM。","dy_link":"https://www.douyin.com/search/%E8%80%81%E6%AD%8C%E7%BF%BB%E5%94%B1","bz_link":"https://search.bilibili.com/all?keyword=%E8%80%81%E6%AD%8C%E7%BF%BB%E5%94%B1"},{"id":"快手-t10","platform":"快手","cat":"身材","title":"小基数塑形跟练","analysis":"瘦肩专项契合你的肩宽标签，真实记录变化更有说服力。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%A1%91%E5%BD%A2","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%A1%91%E5%BD%A2"},{"id":"快手-t11","platform":"快手","cat":"变美vlog","title":"普通女生化妆前后","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/%E5%8C%96%E5%A6%86%E5%89%8D%E5%90%8E%E5%AF%B9%E6%AF%94","bz_link":"https://search.bilibili.com/all?keyword=%E5%8C%96%E5%A6%86%E5%89%8D%E5%90%8E%E5%AF%B9%E6%AF%94"},{"id":"快手-t12","platform":"快手","cat":"化妆","title":"学生党平价彩妆红黑榜","analysis":"短平快+前后对比天然拉高完播，「通勤/新手」关键词降低门槛，评论区爱问色号链接。","dy_link":"https://www.douyin.com/search/%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C","bz_link":"https://search.bilibili.com/all?keyword=%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C"},{"id":"快手-t13","platform":"快手","cat":"护肤","title":"敏感肌防晒怎么选","analysis":"换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。","dy_link":"https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92","bz_link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92"},{"id":"快手-t14","platform":"快手","cat":"穿搭","title":"微胖通勤穿搭模板","analysis":"通勤场景可自然植入平价单品，广告位充足。","dy_link":"https://www.douyin.com/search/%E5%BE%AE%E8%83%96%E9%80%9A%E5%8B%A4%E7%A9%BF%E6%90%AD","bz_link":"https://search.bilibili.com/all?keyword=%E5%BE%AE%E8%83%96%E9%80%9A%E5%8B%A4%E7%A9%BF%E6%90%AD"},{"id":"快手-t15","platform":"快手","cat":"拍照","title":"手机人像模式拍照","analysis":"零成本干货+可跟练，完播高且易被收藏，原相机对比类还能引发讨论。","dy_link":"https://www.douyin.com/search/%E6%89%8B%E6%9C%BA%E4%BA%BA%E5%83%8F%E6%8B%8D%E7%85%A7","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%8B%E6%9C%BA%E4%BA%BA%E5%83%8F%E6%8B%8D%E7%85%A7"},{"id":"快手-t16","platform":"快手","cat":"职场","title":"打工人下班仪式感","analysis":"一天 vlog 陪伴感强，能自然串联化妆、唱歌、穿搭等多个垂类。","dy_link":"https://www.douyin.com/search/%E4%B8%8B%E7%8F%AD%E4%BB%AA%E5%BC%8F%E6%84%9F","bz_link":"https://search.bilibili.com/all?keyword=%E4%B8%8B%E7%8F%AD%E4%BB%AA%E5%BC%8F%E6%84%9F"},{"id":"快手-t17","platform":"快手","cat":"护肤","title":"素颜霜测评翻车","analysis":"红黑榜/空瓶记视觉清晰，「红叉绿勾」能显著提升点击率。","dy_link":"https://www.douyin.com/search/%E7%B4%A0%E9%A2%9C%E9%9C%9C%E6%B5%8B%E8%AF%84","bz_link":"https://search.bilibili.com/all?keyword=%E7%B4%A0%E9%A2%9C%E9%9C%9C%E6%B5%8B%E8%AF%84"},{"id":"快手-t18","platform":"快手","cat":"化妆","title":"3分钟通勤伪素颜妆","analysis":"短平快+前后对比天然拉高完播，「通勤/新手」关键词降低门槛，评论区爱问色号链接。","dy_link":"https://www.douyin.com/search/%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86","bz_link":"https://search.bilibili.com/all?keyword=%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86"},{"id":"快手-t19","platform":"快手","cat":"护肤","title":"敏感肌平价护肤清单","analysis":"换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。","dy_link":"https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4","bz_link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4"},{"id":"微博-t0","platform":"微博","cat":"变美vlog","title":"河南濮阳地震","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E6%B2%B3%E5%8D%97%E6%BF%AE%E9%98%B3%E5%9C%B0%E9%9C%87","bz_link":"https://search.bilibili.com/all?keyword=%E6%B2%B3%E5%8D%97%E6%BF%AE%E9%98%B3%E5%9C%B0%E9%9C%87"},{"id":"微博-t1","platform":"微博","cat":"变美vlog","title":"女儿拒动用十万压岁钱支付生活费","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E5%A5%B3%E5%84%BF%E6%8B%92%E5%8A%A8%E7%94%A8%E5%8D%81%E4%B8%87%E5%8E%8B%E5%B2%81%E9%92%B1%E6%94%AF%E4%BB%98%E7%94%9F%E6%B4%BB%E8%B4%B9","bz_link":"https://search.bilibili.com/all?keyword=%E5%A5%B3%E5%84%BF%E6%8B%92%E5%8A%A8%E7%94%A8%E5%8D%81%E4%B8%87%E5%8E%8B%E5%B2%81%E9%92%B1%E6%94%AF%E4%BB%98%E7%94%9F%E6%B4%BB%E8%B4%B9"},{"id":"微博-t2","platform":"微博","cat":"变美vlog","title":"7个China热词讲透中国潮","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/7%E4%B8%AAChina%E7%83%AD%E8%AF%8D%E8%AE%B2%E9%80%8F%E4%B8%AD%E5%9B%BD%E6%BD%AE","bz_link":"https://search.bilibili.com/all?keyword=7%E4%B8%AAChina%E7%83%AD%E8%AF%8D%E8%AE%B2%E9%80%8F%E4%B8%AD%E5%9B%BD%E6%BD%AE"},{"id":"微博-t3","platform":"微博","cat":"变美vlog","title":"宇树大跌","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E5%AE%87%E6%A0%91%E5%A4%A7%E8%B7%8C","bz_link":"https://search.bilibili.com/all?keyword=%E5%AE%87%E6%A0%91%E5%A4%A7%E8%B7%8C"},{"id":"微博-t4","platform":"微博","cat":"变美vlog","title":"抢公章","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E6%8A%A2%E5%85%AC%E7%AB%A0","bz_link":"https://search.bilibili.com/all?keyword=%E6%8A%A2%E5%85%AC%E7%AB%A0"},{"id":"微博-t5","platform":"微博","cat":"变美vlog","title":"警方通报青岛男子辱骂女游客","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/%E8%AD%A6%E6%96%B9%E9%80%9A%E6%8A%A5%E9%9D%92%E5%B2%9B%E7%94%B7%E5%AD%90%E8%BE%B1%E9%AA%82%E5%A5%B3%E6%B8%B8%E5%AE%A2","bz_link":"https://search.bilibili.com/all?keyword=%E8%AD%A6%E6%96%B9%E9%80%9A%E6%8A%A5%E9%9D%92%E5%B2%9B%E7%94%B7%E5%AD%90%E8%BE%B1%E9%AA%82%E5%A5%B3%E6%B8%B8%E5%AE%A2"},{"id":"微博-t6","platform":"微博","cat":"变美vlog","title":"和孙颖莎韧劲控场","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E5%92%8C%E5%AD%99%E9%A2%96%E8%8E%8E%E9%9F%A7%E5%8A%B2%E6%8E%A7%E5%9C%BA","bz_link":"https://search.bilibili.com/all?keyword=%E5%92%8C%E5%AD%99%E9%A2%96%E8%8E%8E%E9%9F%A7%E5%8A%B2%E6%8E%A7%E5%9C%BA"},{"id":"微博-t7","platform":"微博","cat":"变美vlog","title":"黑神话","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E9%BB%91%E7%A5%9E%E8%AF%9D","bz_link":"https://search.bilibili.com/all?keyword=%E9%BB%91%E7%A5%9E%E8%AF%9D"},{"id":"微博-t8","platform":"微博","cat":"变美vlog","title":"我家那闺女","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/%E6%88%91%E5%AE%B6%E9%82%A3%E9%97%BA%E5%A5%B3","bz_link":"https://search.bilibili.com/all?keyword=%E6%88%91%E5%AE%B6%E9%82%A3%E9%97%BA%E5%A5%B3"},{"id":"微博-t9","platform":"微博","cat":"变美vlog","title":"宇树上市第2天王兴兴最新发声","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E5%AE%87%E6%A0%91%E4%B8%8A%E5%B8%82%E7%AC%AC2%E5%A4%A9%E7%8E%8B%E5%85%B4%E5%85%B4%E6%9C%80%E6%96%B0%E5%8F%91%E5%A3%B0","bz_link":"https://search.bilibili.com/all?keyword=%E5%AE%87%E6%A0%91%E4%B8%8A%E5%B8%82%E7%AC%AC2%E5%A4%A9%E7%8E%8B%E5%85%B4%E5%85%B4%E6%9C%80%E6%96%B0%E5%8F%91%E5%A3%B0"},{"id":"微博-t10","platform":"微博","cat":"变美vlog","title":"早春晴朗","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E6%97%A9%E6%98%A5%E6%99%B4%E6%9C%97","bz_link":"https://search.bilibili.com/all?keyword=%E6%97%A9%E6%98%A5%E6%99%B4%E6%9C%97"},{"id":"微博-t11","platform":"微博","cat":"变美vlog","title":"彭小苒承认恋情","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/%E5%BD%AD%E5%B0%8F%E8%8B%92%E6%89%BF%E8%AE%A4%E6%81%8B%E6%83%85","bz_link":"https://search.bilibili.com/all?keyword=%E5%BD%AD%E5%B0%8F%E8%8B%92%E6%89%BF%E8%AE%A4%E6%81%8B%E6%83%85"},{"id":"微博-t12","platform":"微博","cat":"变美vlog","title":"艾滋病检测结果不得告知配偶","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E8%89%BE%E6%BB%8B%E7%97%85%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C%E4%B8%8D%E5%BE%97%E5%91%8A%E7%9F%A5%E9%85%8D%E5%81%B6","bz_link":"https://search.bilibili.com/all?keyword=%E8%89%BE%E6%BB%8B%E7%97%85%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C%E4%B8%8D%E5%BE%97%E5%91%8A%E7%9F%A5%E9%85%8D%E5%81%B6"},{"id":"微博-t13","platform":"微博","cat":"变美vlog","title":"任重宣布孙骁骁二胎","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E4%BB%BB%E9%87%8D%E5%AE%A3%E5%B8%83%E5%AD%99%E9%AA%81%E9%AA%81%E4%BA%8C%E8%83%8E","bz_link":"https://search.bilibili.com/all?keyword=%E4%BB%BB%E9%87%8D%E5%AE%A3%E5%B8%83%E5%AD%99%E9%AA%81%E9%AA%81%E4%BA%8C%E8%83%8E"},{"id":"微博-t14","platform":"微博","cat":"变美vlog","title":"总裁助理骗局","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/%E6%80%BB%E8%A3%81%E5%8A%A9%E7%90%86%E9%AA%97%E5%B1%80","bz_link":"https://search.bilibili.com/all?keyword=%E6%80%BB%E8%A3%81%E5%8A%A9%E7%90%86%E9%AA%97%E5%B1%80"},{"id":"微博-t15","platform":"微博","cat":"变美vlog","title":"全季酒店 再追究对我们对你都不好","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E5%85%A8%E5%AD%A3%E9%85%92%E5%BA%97%20%E5%86%8D%E8%BF%BD%E7%A9%B6%E5%AF%B9%E6%88%91%E4%BB%AC%E5%AF%B9%E4%BD%A0%E9%83%BD%E4%B8%8D%E5%A5%BD","bz_link":"https://search.bilibili.com/all?keyword=%E5%85%A8%E5%AD%A3%E9%85%92%E5%BA%97%20%E5%86%8D%E8%BF%BD%E7%A9%B6%E5%AF%B9%E6%88%91%E4%BB%AC%E5%AF%B9%E4%BD%A0%E9%83%BD%E4%B8%8D%E5%A5%BD"},{"id":"微博-t16","platform":"微博","cat":"变美vlog","title":"济南震感","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E6%B5%8E%E5%8D%97%E9%9C%87%E6%84%9F","bz_link":"https://search.bilibili.com/all?keyword=%E6%B5%8E%E5%8D%97%E9%9C%87%E6%84%9F"},{"id":"微博-t17","platform":"微博","cat":"变美vlog","title":"兄妹恋和姐弟恋真的不一样","analysis":"结合前台身份做上班vs下班反差，比普通颜值内容更有故事。","dy_link":"https://www.douyin.com/search/%E5%85%84%E5%A6%B9%E6%81%8B%E5%92%8C%E5%A7%90%E5%BC%9F%E6%81%8B%E7%9C%9F%E7%9A%84%E4%B8%8D%E4%B8%80%E6%A0%B7","bz_link":"https://search.bilibili.com/all?keyword=%E5%85%84%E5%A6%B9%E6%81%8B%E5%92%8C%E5%A7%90%E5%BC%9F%E6%81%8B%E7%9C%9F%E7%9A%84%E4%B8%8D%E4%B8%80%E6%A0%B7"},{"id":"微博-t18","platform":"微博","cat":"变美vlog","title":"肖战小说都不敢这么写","analysis":"前后对比+长期陪伴感，涨粉稳、广告位多；适合月度复盘系列化。","dy_link":"https://www.douyin.com/search/%E8%82%96%E6%88%98%E5%B0%8F%E8%AF%B4%E9%83%BD%E4%B8%8D%E6%95%A2%E8%BF%99%E4%B9%88%E5%86%99","bz_link":"https://search.bilibili.com/all?keyword=%E8%82%96%E6%88%98%E5%B0%8F%E8%AF%B4%E9%83%BD%E4%B8%8D%E6%95%A2%E8%BF%99%E4%B9%88%E5%86%99"},{"id":"微博-t19","platform":"微博","cat":"变美vlog","title":"空枪 李嘉诚儿子绑架案","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E7%A9%BA%E6%9E%AA%20%E6%9D%8E%E5%98%89%E8%AF%9A%E5%84%BF%E5%AD%90%E7%BB%91%E6%9E%B6%E6%A1%88","bz_link":"https://search.bilibili.com/all?keyword=%E7%A9%BA%E6%9E%AA%20%E6%9D%8E%E5%98%89%E8%AF%9A%E5%84%BF%E5%AD%90%E7%BB%91%E6%9E%B6%E6%A1%88"},{"id":"B站-t0","platform":"B站","cat":"化妆","title":"学生党平价彩妆红黑榜","analysis":"短平快+前后对比天然拉高完播，「通勤/新手」关键词降低门槛，评论区爱问色号链接。","dy_link":"https://www.douyin.com/search/%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C","bz_link":"https://search.bilibili.com/all?keyword=%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C"},{"id":"B站-t1","platform":"B站","cat":"护肤","title":"敏感肌防晒怎么选","analysis":"换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。","dy_link":"https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92","bz_link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92"},{"id":"B站-t2","platform":"B站","cat":"穿搭","title":"微胖通勤穿搭模板","analysis":"通勤场景可自然植入平价单品，广告位充足。","dy_link":"https://www.douyin.com/search/%E5%BE%AE%E8%83%96%E9%80%9A%E5%8B%A4%E7%A9%BF%E6%90%AD","bz_link":"https://search.bilibili.com/all?keyword=%E5%BE%AE%E8%83%96%E9%80%9A%E5%8B%A4%E7%A9%BF%E6%90%AD"},{"id":"B站-t3","platform":"B站","cat":"拍照","title":"手机人像模式拍照","analysis":"零成本干货+可跟练，完播高且易被收藏，原相机对比类还能引发讨论。","dy_link":"https://www.douyin.com/search/%E6%89%8B%E6%9C%BA%E4%BA%BA%E5%83%8F%E6%8B%8D%E7%85%A7","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%8B%E6%9C%BA%E4%BA%BA%E5%83%8F%E6%8B%8D%E7%85%A7"},{"id":"B站-t4","platform":"B站","cat":"职场","title":"打工人下班仪式感","analysis":"一天 vlog 陪伴感强，能自然串联化妆、唱歌、穿搭等多个垂类。","dy_link":"https://www.douyin.com/search/%E4%B8%8B%E7%8F%AD%E4%BB%AA%E5%BC%8F%E6%84%9F","bz_link":"https://search.bilibili.com/all?keyword=%E4%B8%8B%E7%8F%AD%E4%BB%AA%E5%BC%8F%E6%84%9F"},{"id":"B站-t5","platform":"B站","cat":"护肤","title":"素颜霜测评翻车","analysis":"红黑榜/空瓶记视觉清晰，「红叉绿勾」能显著提升点击率。","dy_link":"https://www.douyin.com/search/%E7%B4%A0%E9%A2%9C%E9%9C%9C%E6%B5%8B%E8%AF%84","bz_link":"https://search.bilibili.com/all?keyword=%E7%B4%A0%E9%A2%9C%E9%9C%9C%E6%B5%8B%E8%AF%84"},{"id":"B站-t6","platform":"B站","cat":"化妆","title":"3分钟通勤伪素颜妆","analysis":"短平快+前后对比天然拉高完播，「通勤/新手」关键词降低门槛，评论区爱问色号链接。","dy_link":"https://www.douyin.com/search/%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86","bz_link":"https://search.bilibili.com/all?keyword=%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86"},{"id":"B站-t7","platform":"B站","cat":"护肤","title":"敏感肌平价护肤清单","analysis":"换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。","dy_link":"https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4","bz_link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4"},{"id":"B站-t8","platform":"B站","cat":"穿搭","title":"宽肩女生显瘦穿搭","analysis":"通勤场景可自然植入平价单品，广告位充足。","dy_link":"https://www.douyin.com/search/%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD","bz_link":"https://search.bilibili.com/all?keyword=%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD"},{"id":"B站-t9","platform":"B站","cat":"拍照","title":"手机自拍显瘦角度","analysis":"零成本干货+可跟练，完播高且易被收藏，原相机对比类还能引发讨论。","dy_link":"https://www.douyin.com/search/%E6%89%8B%E6%9C%BA%E8%87%AA%E6%8B%8D%E6%98%BE%E7%98%A6%E8%A7%92%E5%BA%A6","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%8B%E6%9C%BA%E8%87%AA%E6%8B%8D%E6%98%BE%E7%98%A6%E8%A7%92%E5%BA%A6"},{"id":"B站-t10","platform":"B站","cat":"职场","title":"行政前台的一天vlog","analysis":"一天 vlog 陪伴感强，能自然串联化妆、唱歌、穿搭等多个垂类。","dy_link":"https://www.douyin.com/search/%E8%A1%8C%E6%94%BF%E5%89%8D%E5%8F%B0%20vlog","bz_link":"https://search.bilibili.com/all?keyword=%E8%A1%8C%E6%94%BF%E5%89%8D%E5%8F%B0%20vlog"},{"id":"B站-t11","platform":"B站","cat":"唱歌","title":"下班对镜翻唱一首","analysis":"老歌翻唱易引发回忆杀，评论区刷歌词能带动推流。","dy_link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E7%BF%BB%E5%94%B1","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E7%BF%BB%E5%94%B1"},{"id":"B站-t12","platform":"B站","cat":"身材","title":"47kg小基数减脂餐","analysis":"小基数塑形是细分蓝海，「不饿肚子/碎片时间」降低跟练门槛，收藏率高。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90"},{"id":"B站-t13","platform":"B站","cat":"变美vlog","title":"普通女生变美逆袭","analysis":"「普通女生逆袭」满足窥探欲+希望感，完播和涨粉双高。","dy_link":"https://www.douyin.com/search/%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E","bz_link":"https://search.bilibili.com/all?keyword=%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E"},{"id":"B站-t14","platform":"B站","cat":"化妆","title":"新手化妆避坑指南","analysis":"敏感肌+底妆是强信任切入点，真实试用比网红脸更有说服力。","dy_link":"https://www.douyin.com/search/%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91","bz_link":"https://search.bilibili.com/all?keyword=%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91"},{"id":"B站-t15","platform":"B站","cat":"护肤","title":"混干皮换季泛红急救","analysis":"敏感肌痛点精准、决策成本高，真实测评+平价方案收藏率高，适合建立信任基本盘。","dy_link":"https://www.douyin.com/search/%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91","bz_link":"https://search.bilibili.com/all?keyword=%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91"},{"id":"B站-t16","platform":"B站","cat":"穿搭","title":"小个子正肩穿搭","analysis":"全身镜+原相机展示真实效果，比精修图更可信，易获「求链接」评论。","dy_link":"https://www.douyin.com/search/%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD","bz_link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD"},{"id":"B站-t17","platform":"B站","cat":"拍照","title":"工位原相机自拍姿势","analysis":"光线+角度是 evergreen 话题，单条好内容可持续带来搜索流量。","dy_link":"https://www.douyin.com/search/%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF","bz_link":"https://search.bilibili.com/all?keyword=%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF"},{"id":"B站-t18","platform":"B站","cat":"职场","title":"职场摸鱼但认真生活","analysis":"打工人情绪共鸣强、易转发，前台视角稀缺；注意匿名化处理公司信息。","dy_link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8","bz_link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"B站-t19","platform":"B站","cat":"唱歌","title":"对口型变装蹭BGM","analysis":"下班对镜唱+工服变装制造反差，完播和互动双高。","dy_link":"https://www.douyin.com/search/%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85","bz_link":"https://search.bilibili.com/all?keyword=%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"}],"reposts":[{"id":"抖音-r0","platform":"抖音","tag":"化妆","title":"3分钟通勤伪素颜妆","heat":"抖音热点榜 519.9万","why_fit":"你的混干微敏皮+行政前台身份天然适合「真实测评」路线，这类内容收藏率高、评论区易出「求链接」。","adapt_angle":"把原热点改成「早八通勤版」或「敏感肌友好版」，以行政前台身份出镜，结尾加一个普通人也能学会的小技巧。","source":"抖音热点榜 2026-08-19","video_desc":"多为快节奏前后对比，封面大字突出「X分钟/伪素颜」，博主素颜开场再上妆，结尾展示定妆效果。","link":"https://www.douyin.com/search/%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86"},{"id":"抖音-r1","platform":"抖音","tag":"护肤","title":"敏感肌平价护肤清单","heat":"抖音热点榜 710.3万","why_fit":"混干皮换季泛红是 evergreen 痛点，你的肤质标签让内容更有说服力。","adapt_angle":"按「早C晚A/保湿/防晒」分集做系列，建立专业可信人设。","source":"抖音热点榜 2026-08-19","video_desc":"多为近景展示皮肤状态，强调「真实使用X天」增加可信度。","link":"https://www.douyin.com/search/%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4"},{"id":"抖音-r2","platform":"抖音","tag":"穿搭","title":"宽肩女生显瘦穿搭","heat":"抖音热点榜 728.6万","why_fit":"显瘦是穿搭赛道刚需，完播和收藏双高。","adapt_angle":"跟原爆款同款BGM和标题结构（如「梨形必看」→「宽肩必看」）。","source":"抖音热点榜 2026-08-19","video_desc":"评论区高频词：求链接、适合肩宽吗、身高体重。","link":"https://www.douyin.com/search/%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD"},{"id":"抖音-r3","platform":"抖音","tag":"拍照","title":"手机自拍显瘦角度","heat":"抖音热点榜 634.6万","why_fit":"手机拍照零门槛、可跟练，适合「普通女生」人设；自拍角度+光线技巧 evergreen。","adapt_angle":"改成「工位/前台场景版」，强调零成本和原相机，用「前后对比」做封面钩子。","source":"抖音热点榜 2026-08-19","video_desc":"多为自拍/对镜拍，展示具体角度和光线，配「参数截图」或「前后对比」。","link":"https://www.douyin.com/search/%E6%89%8B%E6%9C%BA%E8%87%AA%E6%8B%8D%E6%98%BE%E7%98%A6%E8%A7%92%E5%BA%A6"},{"id":"抖音-r4","platform":"抖音","tag":"职场","title":"行政前台的一天vlog","heat":"抖音热点榜 478.6万","why_fit":"能自然植入化妆、唱歌等你擅长元素，形成复合型人设。","adapt_angle":"把原爆款的「职场吐槽」改成「行政前台的一天 vlog」，真实感更强。","source":"抖音热点榜 2026-08-19","video_desc":"常穿插化妆、吃饭、下班碎片，真实感强。","link":"https://www.douyin.com/search/%E8%A1%8C%E6%94%BF%E5%89%8D%E5%8F%B0%20vlog"},{"id":"抖音-r5","platform":"抖音","tag":"唱歌","title":"下班对镜翻唱一首","heat":"抖音热点榜 591.8万","why_fit":"可低成本蹭热点BGM，把原爆款改成打工人版本。","adapt_angle":"在评论区刷歌词，提升互动数据。","source":"抖音热点榜 2026-08-19","video_desc":"评论区高频词：好听、回忆杀、求歌名。","link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E7%BF%BB%E5%94%B1"},{"id":"抖音-r6","platform":"抖音","tag":"身材","title":"47kg小基数减脂餐","heat":"抖音热点榜 81.6万","why_fit":"小基数塑形是细分蓝海，「47kg但肩宽」反差设定有记忆点。","adapt_angle":"改成「小基数+办公室微运动」版本，强调不饿肚子、碎片时间可练。","source":"抖音热点榜 2026-08-19","video_desc":"多为跟练或餐食展示，强调「简单/ low成本」，画面有动作示范或食物摆盘。","link":"https://www.douyin.com/search/%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90"},{"id":"抖音-r7","platform":"抖音","tag":"变美vlog","title":"普通女生变美逆袭","heat":"抖音热点榜 760.3万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"抖音热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://www.douyin.com/search/%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E"},{"id":"抖音-r8","platform":"抖音","tag":"化妆","title":"新手化妆避坑指南","heat":"抖音热点榜 406.9万","why_fit":"敏感肌标签精准，能避开红海大牌测评，建立「平价不踩雷」人设。","adapt_angle":"在评论区先留「求色号/链接」引导互动，提升算法推流。","source":"抖音热点榜 2026-08-19","video_desc":"评论区高频词：求色号、求链接、适合敏感肌吗。","link":"https://www.douyin.com/search/%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91"},{"id":"抖音-r9","platform":"抖音","tag":"护肤","title":"混干皮换季泛红急救","heat":"抖音热点榜 349.7万","why_fit":"敏感肌护肤是高决策成本赛道，你以「亲身试错+平价方案」切入，能建立强信任。","adapt_angle":"改成「混干微敏皮实测」，突出平价和不踩雷，用「红叉绿勾」红黑榜视觉提升点击率。","source":"抖音热点榜 2026-08-19","video_desc":"常见清单体或红黑榜，画面以产品平铺+真人试用为主，字幕用「红叉/绿勾」强化记忆点。","link":"https://www.douyin.com/search/%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91"},{"id":"抖音-r10","platform":"抖音","tag":"穿搭","title":"小个子正肩穿搭","heat":"抖音热点榜 426.1万","why_fit":"通勤穿搭贴合前台身份，能自然展示日常穿搭而非硬凹造型。","adapt_angle":"用全身镜+原相机真实展示，不精修反而更可信。","source":"抖音热点榜 2026-08-19","video_desc":"常见转场变装，用同款不同领型展示避雷效果。","link":"https://www.douyin.com/search/%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD"},{"id":"抖音-r11","platform":"抖音","tag":"拍照","title":"工位原相机自拍姿势","heat":"抖音热点榜 620.8万","why_fit":"原相机对比类内容真实感强，易引发「学到了」正向评论。","adapt_angle":"发起「工位拍照挑战」引互动。","source":"抖音热点榜 2026-08-19","video_desc":"评论区高频词：学到了、参数是什么、手机型号。","link":"https://www.douyin.com/search/%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF"},{"id":"抖音-r12","platform":"抖音","tag":"职场","title":"职场摸鱼但认真生活","heat":"抖音热点榜 605.5万","why_fit":"行政前台视角稀缺，「职场日常/打工人情绪」易引发共鸣和转发。","adapt_angle":"用前台视角匿名化改编，加入你的唱歌/化妆碎片做记忆点，结尾「今天也辛苦啦」情绪收尾。","source":"抖音热点榜 2026-08-19","video_desc":"多为vlog或口播，前台/工位场景，讲公司日常或打工人情绪。","link":"https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"抖音-r13","platform":"抖音","tag":"唱歌","title":"对口型变装蹭BGM","heat":"抖音热点榜 820.8万","why_fit":"情绪歌易引发评论区刷歌词互动，数据表现好。","adapt_angle":"前半段素颜工服、后半段精致，用对比拉完播。","source":"抖音热点榜 2026-08-19","video_desc":"常见氛围灯+耳机，突出「下班后的松弛感」。","link":"https://www.douyin.com/search/%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"},{"id":"抖音-r14","platform":"抖音","tag":"身材","title":"睡前10分钟瘦肩操","heat":"抖音热点榜 574.6万","why_fit":"办公室微运动场景可跟练，契合你的打工人身份。","adapt_angle":"评论区引导打卡，提升互动。","source":"抖音热点榜 2026-08-19","video_desc":"评论区高频词：打卡、多久见效、适合新手吗。","link":"https://www.douyin.com/search/%E7%98%A6%E8%82%A9%E6%93%8D"},{"id":"抖音-r15","platform":"抖音","tag":"变美vlog","title":"月薪普通但精致穷妆","heat":"抖音热点榜 566.6万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"抖音热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://www.douyin.com/search/%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E"},{"id":"抖音-r16","platform":"抖音","tag":"化妆","title":"早八快速出门妆","heat":"抖音热点榜 432.0万","why_fit":"早八通勤场景是你真实生活，素颜上妆过程比普通美妆博主更有代入感。","adapt_angle":"素颜开场→上妆→定妆效果，封面用前后对比+大字，降低点击门槛。","source":"抖音热点榜 2026-08-19","video_desc":"常见对镜拍或手持自拍，字幕强调步骤编号，节奏前快后稳。","link":"https://www.douyin.com/search/%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86"},{"id":"抖音-r17","platform":"抖音","tag":"护肤","title":"干皮妆前打底不卡粉","heat":"抖音热点榜 607.4万","why_fit":"护肤内容搜索流量大，适合做账号长期基本盘。","adapt_angle":"展示办公室空调房如何不卡粉，用职场场景差异化。","source":"抖音热点榜 2026-08-19","video_desc":"评论区高频词：在哪买、真的有用吗、求平价替代。","link":"https://www.douyin.com/search/%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95"},{"id":"抖音-r18","platform":"抖音","tag":"穿搭","title":"肩宽43避雷领型","heat":"抖音热点榜 709.8万","why_fit":"肩宽43是你的独家记忆点，「宽肩显瘦/避雷」类内容评论区互动极高。","adapt_angle":"结合肩宽43实测，把原爆款改成「前台通勤版」或「避雷版」，结尾抛「想要链接打1」。","source":"抖音热点榜 2026-08-19","video_desc":"多为全身镜或街拍，突出「显瘦/避雷」前后对比，节奏快、BGM卡点。","link":"https://www.douyin.com/search/%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B"},{"id":"抖音-r19","platform":"抖音","tag":"拍照","title":"拍照氛围感光线技巧","heat":"抖音热点榜 446.4万","why_fit":"工位/前台场景独特，和一般拍照教程形成差异。","adapt_angle":"加「手机参数截图」干货，比原版更实用、更易收藏。","source":"抖音热点榜 2026-08-19","video_desc":"常见工位、咖啡厅、街头等日常场景，强调零成本。","link":"https://www.douyin.com/search/%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F"},{"id":"小红书-r0","platform":"小红书","tag":"身材","title":"47kg小基数减脂餐","heat":"小红书热点榜 301.0万","why_fit":"小基数塑形是细分蓝海，「47kg但肩宽」反差设定有记忆点。","adapt_angle":"改成「小基数+办公室微运动」版本，强调不饿肚子、碎片时间可练。","source":"小红书热点榜 2026-08-19","video_desc":"多为跟练或餐食展示，强调「简单/ low成本」，画面有动作示范或食物摆盘。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90"},{"id":"小红书-r1","platform":"小红书","tag":"变美vlog","title":"普通女生变美逆袭","heat":"小红书热点榜 82.4万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"小红书热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://www.xiaohongshu.com/search_result?keyword=%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E"},{"id":"小红书-r2","platform":"小红书","tag":"化妆","title":"新手化妆避坑指南","heat":"小红书热点榜 633.0万","why_fit":"敏感肌标签精准，能避开红海大牌测评，建立「平价不踩雷」人设。","adapt_angle":"在评论区先留「求色号/链接」引导互动，提升算法推流。","source":"小红书热点榜 2026-08-19","video_desc":"评论区高频词：求色号、求链接、适合敏感肌吗。","link":"https://www.xiaohongshu.com/search_result?keyword=%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91"},{"id":"小红书-r3","platform":"小红书","tag":"护肤","title":"混干皮换季泛红急救","heat":"小红书热点榜 330.4万","why_fit":"敏感肌护肤是高决策成本赛道，你以「亲身试错+平价方案」切入，能建立强信任。","adapt_angle":"改成「混干微敏皮实测」，突出平价和不踩雷，用「红叉绿勾」红黑榜视觉提升点击率。","source":"小红书热点榜 2026-08-19","video_desc":"常见清单体或红黑榜，画面以产品平铺+真人试用为主，字幕用「红叉/绿勾」强化记忆点。","link":"https://www.xiaohongshu.com/search_result?keyword=%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91"},{"id":"小红书-r4","platform":"小红书","tag":"穿搭","title":"小个子正肩穿搭","heat":"小红书热点榜 455.2万","why_fit":"通勤穿搭贴合前台身份，能自然展示日常穿搭而非硬凹造型。","adapt_angle":"用全身镜+原相机真实展示，不精修反而更可信。","source":"小红书热点榜 2026-08-19","video_desc":"常见转场变装，用同款不同领型展示避雷效果。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD"},{"id":"小红书-r5","platform":"小红书","tag":"拍照","title":"工位原相机自拍姿势","heat":"小红书热点榜 223.2万","why_fit":"原相机对比类内容真实感强，易引发「学到了」正向评论。","adapt_angle":"发起「工位拍照挑战」引互动。","source":"小红书热点榜 2026-08-19","video_desc":"评论区高频词：学到了、参数是什么、手机型号。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF"},{"id":"小红书-r6","platform":"小红书","tag":"职场","title":"职场摸鱼但认真生活","heat":"小红书热点榜 307.2万","why_fit":"行政前台视角稀缺，「职场日常/打工人情绪」易引发共鸣和转发。","adapt_angle":"用前台视角匿名化改编，加入你的唱歌/化妆碎片做记忆点，结尾「今天也辛苦啦」情绪收尾。","source":"小红书热点榜 2026-08-19","video_desc":"多为vlog或口播，前台/工位场景，讲公司日常或打工人情绪。","link":"https://www.xiaohongshu.com/search_result?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"小红书-r7","platform":"小红书","tag":"唱歌","title":"对口型变装蹭BGM","heat":"小红书热点榜 35.4万","why_fit":"情绪歌易引发评论区刷歌词互动，数据表现好。","adapt_angle":"前半段素颜工服、后半段精致，用对比拉完播。","source":"小红书热点榜 2026-08-19","video_desc":"常见氛围灯+耳机，突出「下班后的松弛感」。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"},{"id":"小红书-r8","platform":"小红书","tag":"身材","title":"睡前10分钟瘦肩操","heat":"小红书热点榜 801.4万","why_fit":"办公室微运动场景可跟练，契合你的打工人身份。","adapt_angle":"评论区引导打卡，提升互动。","source":"小红书热点榜 2026-08-19","video_desc":"评论区高频词：打卡、多久见效、适合新手吗。","link":"https://www.xiaohongshu.com/search_result?keyword=%E7%98%A6%E8%82%A9%E6%93%8D"},{"id":"小红书-r9","platform":"小红书","tag":"变美vlog","title":"月薪普通但精致穷妆","heat":"小红书热点榜 615.3万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"小红书热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://www.xiaohongshu.com/search_result?keyword=%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E"},{"id":"小红书-r10","platform":"小红书","tag":"化妆","title":"早八快速出门妆","heat":"小红书热点榜 862.6万","why_fit":"早八通勤场景是你真实生活，素颜上妆过程比普通美妆博主更有代入感。","adapt_angle":"素颜开场→上妆→定妆效果，封面用前后对比+大字，降低点击门槛。","source":"小红书热点榜 2026-08-19","video_desc":"常见对镜拍或手持自拍，字幕强调步骤编号，节奏前快后稳。","link":"https://www.xiaohongshu.com/search_result?keyword=%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86"},{"id":"小红书-r11","platform":"小红书","tag":"护肤","title":"干皮妆前打底不卡粉","heat":"小红书热点榜 128.6万","why_fit":"护肤内容搜索流量大，适合做账号长期基本盘。","adapt_angle":"展示办公室空调房如何不卡粉，用职场场景差异化。","source":"小红书热点榜 2026-08-19","video_desc":"评论区高频词：在哪买、真的有用吗、求平价替代。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95"},{"id":"小红书-r12","platform":"小红书","tag":"穿搭","title":"肩宽43避雷领型","heat":"小红书热点榜 335.0万","why_fit":"肩宽43是你的独家记忆点，「宽肩显瘦/避雷」类内容评论区互动极高。","adapt_angle":"结合肩宽43实测，把原爆款改成「前台通勤版」或「避雷版」，结尾抛「想要链接打1」。","source":"小红书热点榜 2026-08-19","video_desc":"多为全身镜或街拍，突出「显瘦/避雷」前后对比，节奏快、BGM卡点。","link":"https://www.xiaohongshu.com/search_result?keyword=%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B"},{"id":"小红书-r13","platform":"小红书","tag":"拍照","title":"拍照氛围感光线技巧","heat":"小红书热点榜 93.0万","why_fit":"工位/前台场景独特，和一般拍照教程形成差异。","adapt_angle":"加「手机参数截图」干货，比原版更实用、更易收藏。","source":"小红书热点榜 2026-08-19","video_desc":"常见工位、咖啡厅、街头等日常场景，强调零成本。","link":"https://www.xiaohongshu.com/search_result?keyword=%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F"},{"id":"小红书-r14","platform":"小红书","tag":"职场","title":"前台视角讲职场八卦","heat":"小红书热点榜 809.6万","why_fit":"一天 vlog 陪伴感强，粉丝粘性高。","adapt_angle":"注意不露真实公司信息，保护隐私。","source":"小红书热点榜 2026-08-19","video_desc":"评论区高频词：同一个世界、太真实了、求后续。","link":"https://www.xiaohongshu.com/search_result?keyword=%E8%81%8C%E5%9C%BA%E5%85%AB%E5%8D%A6%20%E5%8C%BF%E5%90%8D"},{"id":"小红书-r15","platform":"小红书","tag":"唱歌","title":"翻唱老歌引发回忆杀","heat":"小红书热点榜 699.0万","why_fit":"才艺展示类算法友好，「下班翻唱/对镜唱」松弛感人设吸睛。","adapt_angle":"选同款BGM做「下班对镜唱」或「工服变装」反差，歌词字幕改成打工人版本引发共鸣。","source":"小红书热点榜 2026-08-19","video_desc":"多为对镜或半身出镜，前半段素颜/日常、后半段变装，情绪歌配歌词字幕。","link":"https://www.xiaohongshu.com/search_result?keyword=%E8%80%81%E6%AD%8C%E7%BF%BB%E5%94%B1"},{"id":"小红书-r16","platform":"小红书","tag":"身材","title":"小基数塑形跟练","heat":"小红书热点榜 514.0万","why_fit":"瘦肩操、减脂餐收藏率高，评论区易引导打卡。","adapt_angle":"用「47kg但肩宽」做专属瘦肩，真实记录变化。","source":"小红书热点榜 2026-08-19","video_desc":"常见睡前/办公室微运动场景，降低跟练门槛。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%A1%91%E5%BD%A2"},{"id":"小红书-r17","platform":"小红书","tag":"变美vlog","title":"普通女生化妆前后","heat":"小红书热点榜 904.8万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"小红书热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%8C%96%E5%A6%86%E5%89%8D%E5%90%8E%E5%AF%B9%E6%AF%94"},{"id":"小红书-r18","platform":"小红书","tag":"化妆","title":"学生党平价彩妆红黑榜","heat":"小红书热点榜 615.9万","why_fit":"你的混干微敏皮+行政前台身份天然适合「真实测评」路线，这类内容收藏率高、评论区易出「求链接」。","adapt_angle":"把原热点改成「早八通勤版」或「敏感肌友好版」，以行政前台身份出镜，结尾加一个普通人也能学会的小技巧。","source":"小红书热点榜 2026-08-19","video_desc":"多为快节奏前后对比，封面大字突出「X分钟/伪素颜」，博主素颜开场再上妆，结尾展示定妆效果。","link":"https://www.xiaohongshu.com/search_result?keyword=%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C"},{"id":"小红书-r19","platform":"小红书","tag":"护肤","title":"敏感肌防晒怎么选","heat":"小红书热点榜 776.0万","why_fit":"混干皮换季泛红是 evergreen 痛点，你的肤质标签让内容更有说服力。","adapt_angle":"按「早C晚A/保湿/防晒」分集做系列，建立专业可信人设。","source":"小红书热点榜 2026-08-19","video_desc":"多为近景展示皮肤状态，强调「真实使用X天」增加可信度。","link":"https://www.xiaohongshu.com/search_result?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92"},{"id":"快手-r0","platform":"快手","tag":"职场","title":"职场摸鱼但认真生活","heat":"快手热点榜 813.7万","why_fit":"行政前台视角稀缺，「职场日常/打工人情绪」易引发共鸣和转发。","adapt_angle":"用前台视角匿名化改编，加入你的唱歌/化妆碎片做记忆点，结尾「今天也辛苦啦」情绪收尾。","source":"快手热点榜 2026-08-19","video_desc":"多为vlog或口播，前台/工位场景，讲公司日常或打工人情绪。","link":"https://www.kuaishou.com/search/video?searchKey=%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"快手-r1","platform":"快手","tag":"唱歌","title":"对口型变装蹭BGM","heat":"快手热点榜 763.8万","why_fit":"情绪歌易引发评论区刷歌词互动，数据表现好。","adapt_angle":"前半段素颜工服、后半段精致，用对比拉完播。","source":"快手热点榜 2026-08-19","video_desc":"常见氛围灯+耳机，突出「下班后的松弛感」。","link":"https://www.kuaishou.com/search/video?searchKey=%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"},{"id":"快手-r2","platform":"快手","tag":"身材","title":"睡前10分钟瘦肩操","heat":"快手热点榜 316.3万","why_fit":"办公室微运动场景可跟练，契合你的打工人身份。","adapt_angle":"评论区引导打卡，提升互动。","source":"快手热点榜 2026-08-19","video_desc":"评论区高频词：打卡、多久见效、适合新手吗。","link":"https://www.kuaishou.com/search/video?searchKey=%E7%98%A6%E8%82%A9%E6%93%8D"},{"id":"快手-r3","platform":"快手","tag":"变美vlog","title":"月薪普通但精致穷妆","heat":"快手热点榜 919.9万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"快手热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://www.kuaishou.com/search/video?searchKey=%E7%B2%BE%E8%87%B4%E7%A9%B7%20%E5%8F%98%E7%BE%8E"},{"id":"快手-r4","platform":"快手","tag":"化妆","title":"早八快速出门妆","heat":"快手热点榜 881.8万","why_fit":"早八通勤场景是你真实生活，素颜上妆过程比普通美妆博主更有代入感。","adapt_angle":"素颜开场→上妆→定妆效果，封面用前后对比+大字，降低点击门槛。","source":"快手热点榜 2026-08-19","video_desc":"常见对镜拍或手持自拍，字幕强调步骤编号，节奏前快后稳。","link":"https://www.kuaishou.com/search/video?searchKey=%E6%97%A9%E5%85%AB%E5%BF%AB%E9%80%9F%E5%87%BA%E9%97%A8%E5%A6%86"},{"id":"快手-r5","platform":"快手","tag":"护肤","title":"干皮妆前打底不卡粉","heat":"快手热点榜 117.8万","why_fit":"护肤内容搜索流量大，适合做账号长期基本盘。","adapt_angle":"展示办公室空调房如何不卡粉，用职场场景差异化。","source":"快手热点榜 2026-08-19","video_desc":"评论区高频词：在哪买、真的有用吗、求平价替代。","link":"https://www.kuaishou.com/search/video?searchKey=%E5%B9%B2%E7%9A%AE%E5%A6%86%E5%89%8D%E6%89%93%E5%BA%95"},{"id":"快手-r6","platform":"快手","tag":"穿搭","title":"肩宽43避雷领型","heat":"快手热点榜 507.0万","why_fit":"肩宽43是你的独家记忆点，「宽肩显瘦/避雷」类内容评论区互动极高。","adapt_angle":"结合肩宽43实测，把原爆款改成「前台通勤版」或「避雷版」，结尾抛「想要链接打1」。","source":"快手热点榜 2026-08-19","video_desc":"多为全身镜或街拍，突出「显瘦/避雷」前后对比，节奏快、BGM卡点。","link":"https://www.kuaishou.com/search/video?searchKey=%E8%82%A9%E5%AE%BD%20%E9%81%BF%E9%9B%B7%20%E9%A2%86%E5%9E%8B"},{"id":"快手-r7","platform":"快手","tag":"拍照","title":"拍照氛围感光线技巧","heat":"快手热点榜 391.8万","why_fit":"工位/前台场景独特，和一般拍照教程形成差异。","adapt_angle":"加「手机参数截图」干货，比原版更实用、更易收藏。","source":"快手热点榜 2026-08-19","video_desc":"常见工位、咖啡厅、街头等日常场景，强调零成本。","link":"https://www.kuaishou.com/search/video?searchKey=%E6%8B%8D%E7%85%A7%E6%B0%9B%E5%9B%B4%E6%84%9F"},{"id":"快手-r8","platform":"快手","tag":"职场","title":"前台视角讲职场八卦","heat":"快手热点榜 721.2万","why_fit":"一天 vlog 陪伴感强，粉丝粘性高。","adapt_angle":"注意不露真实公司信息，保护隐私。","source":"快手热点榜 2026-08-19","video_desc":"评论区高频词：同一个世界、太真实了、求后续。","link":"https://www.kuaishou.com/search/video?searchKey=%E8%81%8C%E5%9C%BA%E5%85%AB%E5%8D%A6%20%E5%8C%BF%E5%90%8D"},{"id":"快手-r9","platform":"快手","tag":"唱歌","title":"翻唱老歌引发回忆杀","heat":"快手热点榜 807.9万","why_fit":"才艺展示类算法友好，「下班翻唱/对镜唱」松弛感人设吸睛。","adapt_angle":"选同款BGM做「下班对镜唱」或「工服变装」反差，歌词字幕改成打工人版本引发共鸣。","source":"快手热点榜 2026-08-19","video_desc":"多为对镜或半身出镜，前半段素颜/日常、后半段变装，情绪歌配歌词字幕。","link":"https://www.kuaishou.com/search/video?searchKey=%E8%80%81%E6%AD%8C%E7%BF%BB%E5%94%B1"},{"id":"快手-r10","platform":"快手","tag":"身材","title":"小基数塑形跟练","heat":"快手热点榜 430.7万","why_fit":"瘦肩操、减脂餐收藏率高，评论区易引导打卡。","adapt_angle":"用「47kg但肩宽」做专属瘦肩，真实记录变化。","source":"快手热点榜 2026-08-19","video_desc":"常见睡前/办公室微运动场景，降低跟练门槛。","link":"https://www.kuaishou.com/search/video?searchKey=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%A1%91%E5%BD%A2"},{"id":"快手-r11","platform":"快手","tag":"变美vlog","title":"普通女生化妆前后","heat":"快手热点榜 275.6万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"快手热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://www.kuaishou.com/search/video?searchKey=%E5%8C%96%E5%A6%86%E5%89%8D%E5%90%8E%E5%AF%B9%E6%AF%94"},{"id":"快手-r12","platform":"快手","tag":"化妆","title":"学生党平价彩妆红黑榜","heat":"快手热点榜 545.8万","why_fit":"你的混干微敏皮+行政前台身份天然适合「真实测评」路线，这类内容收藏率高、评论区易出「求链接」。","adapt_angle":"把原热点改成「早八通勤版」或「敏感肌友好版」，以行政前台身份出镜，结尾加一个普通人也能学会的小技巧。","source":"快手热点榜 2026-08-19","video_desc":"多为快节奏前后对比，封面大字突出「X分钟/伪素颜」，博主素颜开场再上妆，结尾展示定妆效果。","link":"https://www.kuaishou.com/search/video?searchKey=%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C"},{"id":"快手-r13","platform":"快手","tag":"护肤","title":"敏感肌防晒怎么选","heat":"快手热点榜 600.7万","why_fit":"混干皮换季泛红是 evergreen 痛点，你的肤质标签让内容更有说服力。","adapt_angle":"按「早C晚A/保湿/防晒」分集做系列，建立专业可信人设。","source":"快手热点榜 2026-08-19","video_desc":"多为近景展示皮肤状态，强调「真实使用X天」增加可信度。","link":"https://www.kuaishou.com/search/video?searchKey=%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92"},{"id":"快手-r14","platform":"快手","tag":"穿搭","title":"微胖通勤穿搭模板","heat":"快手热点榜 51.0万","why_fit":"显瘦是穿搭赛道刚需，完播和收藏双高。","adapt_angle":"跟原爆款同款BGM和标题结构（如「梨形必看」→「宽肩必看」）。","source":"快手热点榜 2026-08-19","video_desc":"评论区高频词：求链接、适合肩宽吗、身高体重。","link":"https://www.kuaishou.com/search/video?searchKey=%E5%BE%AE%E8%83%96%E9%80%9A%E5%8B%A4%E7%A9%BF%E6%90%AD"},{"id":"快手-r15","platform":"快手","tag":"拍照","title":"手机人像模式拍照","heat":"快手热点榜 582.4万","why_fit":"手机拍照零门槛、可跟练，适合「普通女生」人设；自拍角度+光线技巧 evergreen。","adapt_angle":"改成「工位/前台场景版」，强调零成本和原相机，用「前后对比」做封面钩子。","source":"快手热点榜 2026-08-19","video_desc":"多为自拍/对镜拍，展示具体角度和光线，配「参数截图」或「前后对比」。","link":"https://www.kuaishou.com/search/video?searchKey=%E6%89%8B%E6%9C%BA%E4%BA%BA%E5%83%8F%E6%8B%8D%E7%85%A7"},{"id":"快手-r16","platform":"快手","tag":"职场","title":"打工人下班仪式感","heat":"快手热点榜 719.5万","why_fit":"能自然植入化妆、唱歌等你擅长元素，形成复合型人设。","adapt_angle":"把原爆款的「职场吐槽」改成「行政前台的一天 vlog」，真实感更强。","source":"快手热点榜 2026-08-19","video_desc":"常穿插化妆、吃饭、下班碎片，真实感强。","link":"https://www.kuaishou.com/search/video?searchKey=%E4%B8%8B%E7%8F%AD%E4%BB%AA%E5%BC%8F%E6%84%9F"},{"id":"快手-r17","platform":"快手","tag":"护肤","title":"素颜霜测评翻车","heat":"快手热点榜 844.0万","why_fit":"护肤内容搜索流量大，适合做账号长期基本盘。","adapt_angle":"展示办公室空调房如何不卡粉，用职场场景差异化。","source":"快手热点榜 2026-08-19","video_desc":"评论区高频词：在哪买、真的有用吗、求平价替代。","link":"https://www.kuaishou.com/search/video?searchKey=%E7%B4%A0%E9%A2%9C%E9%9C%9C%E6%B5%8B%E8%AF%84"},{"id":"快手-r18","platform":"快手","tag":"化妆","title":"3分钟通勤伪素颜妆","heat":"快手热点榜 770.6万","why_fit":"你的混干微敏皮+行政前台身份天然适合「真实测评」路线，这类内容收藏率高、评论区易出「求链接」。","adapt_angle":"把原热点改成「早八通勤版」或「敏感肌友好版」，以行政前台身份出镜，结尾加一个普通人也能学会的小技巧。","source":"快手热点榜 2026-08-19","video_desc":"多为快节奏前后对比，封面大字突出「X分钟/伪素颜」，博主素颜开场再上妆，结尾展示定妆效果。","link":"https://www.kuaishou.com/search/video?searchKey=%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86"},{"id":"快手-r19","platform":"快手","tag":"护肤","title":"敏感肌平价护肤清单","heat":"快手热点榜 761.7万","why_fit":"混干皮换季泛红是 evergreen 痛点，你的肤质标签让内容更有说服力。","adapt_angle":"按「早C晚A/保湿/防晒」分集做系列，建立专业可信人设。","source":"快手热点榜 2026-08-19","video_desc":"多为近景展示皮肤状态，强调「真实使用X天」增加可信度。","link":"https://www.kuaishou.com/search/video?searchKey=%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4"},{"id":"微博-r0","platform":"微博","tag":"变美vlog","title":"河南濮阳地震","heat":"微博热搜 131.4万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"微博热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://s.weibo.com/weibo?q=%23%E6%B2%B3%E5%8D%97%E6%BF%AE%E9%98%B3%E5%9C%B0%E9%9C%87%23"},{"id":"微博-r1","platform":"微博","tag":"变美vlog","title":"女儿拒动用十万压岁钱支付生活费","heat":"微博热搜 127.0万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"微博热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://s.weibo.com/weibo?q=%23%E5%A5%B3%E5%84%BF%E6%8B%92%E5%8A%A8%E7%94%A8%E5%8D%81%E4%B8%87%E5%8E%8B%E5%B2%81%E9%92%B1%E6%94%AF%E4%BB%98%E7%94%9F%E6%B4%BB%E8%B4%B9%23"},{"id":"微博-r2","platform":"微博","tag":"变美vlog","title":"7个China热词讲透中国潮","heat":"微博热搜 109.1万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"微博热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://s.weibo.com/weibo?q=%237%E4%B8%AAChina%E7%83%AD%E8%AF%8D%E8%AE%B2%E9%80%8F%E4%B8%AD%E5%9B%BD%E6%BD%AE%23"},{"id":"微博-r3","platform":"微博","tag":"变美vlog","title":"宇树大跌","heat":"微博热搜 104.9万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"微博热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://s.weibo.com/weibo?q=%23%E5%AE%87%E6%A0%91%E5%A4%A7%E8%B7%8C%23"},{"id":"微博-r4","platform":"微博","tag":"变美vlog","title":"抢公章","heat":"微博热搜 102.2万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"微博热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://s.weibo.com/weibo?q=%23%E6%8A%A2%E5%85%AC%E7%AB%A0%23"},{"id":"微博-r5","platform":"微博","tag":"变美vlog","title":"警方通报青岛男子辱骂女游客","heat":"微博热搜 98.5万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"微博热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://s.weibo.com/weibo?q=%23%E8%AD%A6%E6%96%B9%E9%80%9A%E6%8A%A5%E9%9D%92%E5%B2%9B%E7%94%B7%E5%AD%90%E8%BE%B1%E9%AA%82%E5%A5%B3%E6%B8%B8%E5%AE%A2%23"},{"id":"微博-r6","platform":"微博","tag":"变美vlog","title":"和孙颖莎韧劲控场","heat":"微博热搜 96.7万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"微博热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://s.weibo.com/weibo?q=%23%E5%92%8C%E5%AD%99%E9%A2%96%E8%8E%8E%E9%9F%A7%E5%8A%B2%E6%8E%A7%E5%9C%BA%23"},{"id":"微博-r7","platform":"微博","tag":"变美vlog","title":"黑神话","heat":"微博热搜 94.4万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"微博热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://s.weibo.com/weibo?q=%23%E9%BB%91%E7%A5%9E%E8%AF%9D%23"},{"id":"微博-r8","platform":"微博","tag":"变美vlog","title":"我家那闺女","heat":"微博热搜 90.9万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"微博热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://s.weibo.com/weibo?q=%23%E6%88%91%E5%AE%B6%E9%82%A3%E9%97%BA%E5%A5%B3%23"},{"id":"微博-r9","platform":"微博","tag":"变美vlog","title":"宇树上市第2天王兴兴最新发声","heat":"微博热搜 90.2万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"微博热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://s.weibo.com/weibo?q=%23%E5%AE%87%E6%A0%91%E4%B8%8A%E5%B8%82%E7%AC%AC2%E5%A4%A9%E7%8E%8B%E5%85%B4%E5%85%B4%E6%9C%80%E6%96%B0%E5%8F%91%E5%A3%B0%23"},{"id":"微博-r10","platform":"微博","tag":"变美vlog","title":"早春晴朗","heat":"微博热搜 86.8万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"微博热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://s.weibo.com/weibo?q=%23%E6%97%A9%E6%98%A5%E6%99%B4%E6%9C%97%23"},{"id":"微博-r11","platform":"微博","tag":"变美vlog","title":"彭小苒承认恋情","heat":"微博热搜 82.5万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"微博热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://s.weibo.com/weibo?q=%23%E5%BD%AD%E5%B0%8F%E8%8B%92%E6%89%BF%E8%AE%A4%E6%81%8B%E6%83%85%23"},{"id":"微博-r12","platform":"微博","tag":"变美vlog","title":"艾滋病检测结果不得告知配偶","heat":"微博热搜 78.5万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"微博热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://s.weibo.com/weibo?q=%23%E8%89%BE%E6%BB%8B%E7%97%85%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C%E4%B8%8D%E5%BE%97%E5%91%8A%E7%9F%A5%E9%85%8D%E5%81%B6%23"},{"id":"微博-r13","platform":"微博","tag":"变美vlog","title":"任重宣布孙骁骁二胎","heat":"微博热搜 74.4万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"微博热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://s.weibo.com/weibo?q=%23%E4%BB%BB%E9%87%8D%E5%AE%A3%E5%B8%83%E5%AD%99%E9%AA%81%E9%AA%81%E4%BA%8C%E8%83%8E%23"},{"id":"微博-r14","platform":"微博","tag":"变美vlog","title":"总裁助理骗局","heat":"微博热搜 72.4万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"微博热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://s.weibo.com/weibo?q=%23%E6%80%BB%E8%A3%81%E5%8A%A9%E7%90%86%E9%AA%97%E5%B1%80%23"},{"id":"微博-r15","platform":"微博","tag":"变美vlog","title":"全季酒店 再追究对我们对你都不好","heat":"微博热搜 56.6万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"微博热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://s.weibo.com/weibo?q=%23%E5%85%A8%E5%AD%A3%E9%85%92%E5%BA%97%20%E5%86%8D%E8%BF%BD%E7%A9%B6%E5%AF%B9%E6%88%91%E4%BB%AC%E5%AF%B9%E4%BD%A0%E9%83%BD%E4%B8%8D%E5%A5%BD%23"},{"id":"微博-r16","platform":"微博","tag":"变美vlog","title":"济南震感","heat":"微博热搜 56.2万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"微博热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://s.weibo.com/weibo?q=%23%E6%B5%8E%E5%8D%97%E9%9C%87%E6%84%9F%23"},{"id":"微博-r17","platform":"微博","tag":"变美vlog","title":"兄妹恋和姐弟恋真的不一样","heat":"微博热搜 53.0万","why_fit":"上班vs下班反差制造故事性，比普通颜值内容更有留存。","adapt_angle":"封面统一「素颜→精致」版式，建立品牌感。","source":"微博热点榜 2026-08-19","video_desc":"评论区高频词：继续更、太励志了、求全套流程。","link":"https://s.weibo.com/weibo?q=%23%E5%85%84%E5%A6%B9%E6%81%8B%E5%92%8C%E5%A7%90%E5%BC%9F%E6%81%8B%E7%9C%9F%E7%9A%84%E4%B8%8D%E4%B8%80%E6%A0%B7%23"},{"id":"微博-r18","platform":"微博","tag":"变美vlog","title":"肖战小说都不敢这么写","heat":"微博热搜 51.0万","why_fit":"「普通女生逆袭」是长期流量密码，前后对比+月度复盘建立陪伴感。","adapt_angle":"做成「普通女生变美日记」系列，保留对比爽点，结合前台身份做「上班vs下班」反差。","source":"微博热点榜 2026-08-19","video_desc":"多为月度复盘或挑战记录，前后对比+内心独白，时间长但陪伴感强。","link":"https://s.weibo.com/weibo?q=%23%E8%82%96%E6%88%98%E5%B0%8F%E8%AF%B4%E9%83%BD%E4%B8%8D%E6%95%A2%E8%BF%99%E4%B9%88%E5%86%99%23"},{"id":"微博-r19","platform":"微博","tag":"变美vlog","title":"空枪 李嘉诚儿子绑架案","heat":"微博热搜 50.8万","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"微博热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://s.weibo.com/weibo?q=%23%E7%A9%BA%E6%9E%AA%20%E6%9D%8E%E5%98%89%E8%AF%9A%E5%84%BF%E5%AD%90%E7%BB%91%E6%9E%B6%E6%A1%88%23"},{"id":"B站-r0","platform":"B站","tag":"化妆","title":"学生党平价彩妆红黑榜","heat":"B站热门 894.4万播放","why_fit":"你的混干微敏皮+行政前台身份天然适合「真实测评」路线，这类内容收藏率高、评论区易出「求链接」。","adapt_angle":"把原热点改成「早八通勤版」或「敏感肌友好版」，以行政前台身份出镜，结尾加一个普通人也能学会的小技巧。","source":"B站热点榜 2026-08-19","video_desc":"多为快节奏前后对比，封面大字突出「X分钟/伪素颜」，博主素颜开场再上妆，结尾展示定妆效果。","link":"https://search.bilibili.com/all?keyword=%E5%AD%A6%E7%94%9F%E5%85%9A%E5%BD%A9%E5%A6%86%E7%BA%A2%E9%BB%91%E6%A6%9C"},{"id":"B站-r1","platform":"B站","tag":"护肤","title":"敏感肌防晒怎么选","heat":"B站热门 194.7万播放","why_fit":"混干皮换季泛红是 evergreen 痛点，你的肤质标签让内容更有说服力。","adapt_angle":"按「早C晚A/保湿/防晒」分集做系列，建立专业可信人设。","source":"B站热点榜 2026-08-19","video_desc":"多为近景展示皮肤状态，强调「真实使用X天」增加可信度。","link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92"},{"id":"B站-r2","platform":"B站","tag":"穿搭","title":"微胖通勤穿搭模板","heat":"B站热门 627.3万播放","why_fit":"显瘦是穿搭赛道刚需，完播和收藏双高。","adapt_angle":"跟原爆款同款BGM和标题结构（如「梨形必看」→「宽肩必看」）。","source":"B站热点榜 2026-08-19","video_desc":"评论区高频词：求链接、适合肩宽吗、身高体重。","link":"https://search.bilibili.com/all?keyword=%E5%BE%AE%E8%83%96%E9%80%9A%E5%8B%A4%E7%A9%BF%E6%90%AD"},{"id":"B站-r3","platform":"B站","tag":"拍照","title":"手机人像模式拍照","heat":"B站热门 169.6万播放","why_fit":"手机拍照零门槛、可跟练，适合「普通女生」人设；自拍角度+光线技巧 evergreen。","adapt_angle":"改成「工位/前台场景版」，强调零成本和原相机，用「前后对比」做封面钩子。","source":"B站热点榜 2026-08-19","video_desc":"多为自拍/对镜拍，展示具体角度和光线，配「参数截图」或「前后对比」。","link":"https://search.bilibili.com/all?keyword=%E6%89%8B%E6%9C%BA%E4%BA%BA%E5%83%8F%E6%8B%8D%E7%85%A7"},{"id":"B站-r4","platform":"B站","tag":"职场","title":"打工人下班仪式感","heat":"B站热门 192.1万播放","why_fit":"能自然植入化妆、唱歌等你擅长元素，形成复合型人设。","adapt_angle":"把原爆款的「职场吐槽」改成「行政前台的一天 vlog」，真实感更强。","source":"B站热点榜 2026-08-19","video_desc":"常穿插化妆、吃饭、下班碎片，真实感强。","link":"https://search.bilibili.com/all?keyword=%E4%B8%8B%E7%8F%AD%E4%BB%AA%E5%BC%8F%E6%84%9F"},{"id":"B站-r5","platform":"B站","tag":"护肤","title":"素颜霜测评翻车","heat":"B站热门 767.9万播放","why_fit":"护肤内容搜索流量大，适合做账号长期基本盘。","adapt_angle":"展示办公室空调房如何不卡粉，用职场场景差异化。","source":"B站热点榜 2026-08-19","video_desc":"评论区高频词：在哪买、真的有用吗、求平价替代。","link":"https://search.bilibili.com/all?keyword=%E7%B4%A0%E9%A2%9C%E9%9C%9C%E6%B5%8B%E8%AF%84"},{"id":"B站-r6","platform":"B站","tag":"化妆","title":"3分钟通勤伪素颜妆","heat":"B站热门 443.0万播放","why_fit":"你的混干微敏皮+行政前台身份天然适合「真实测评」路线，这类内容收藏率高、评论区易出「求链接」。","adapt_angle":"把原热点改成「早八通勤版」或「敏感肌友好版」，以行政前台身份出镜，结尾加一个普通人也能学会的小技巧。","source":"B站热点榜 2026-08-19","video_desc":"多为快节奏前后对比，封面大字突出「X分钟/伪素颜」，博主素颜开场再上妆，结尾展示定妆效果。","link":"https://search.bilibili.com/all?keyword=%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86"},{"id":"B站-r7","platform":"B站","tag":"护肤","title":"敏感肌平价护肤清单","heat":"B站热门 145.2万播放","why_fit":"混干皮换季泛红是 evergreen 痛点，你的肤质标签让内容更有说服力。","adapt_angle":"按「早C晚A/保湿/防晒」分集做系列，建立专业可信人设。","source":"B站热点榜 2026-08-19","video_desc":"多为近景展示皮肤状态，强调「真实使用X天」增加可信度。","link":"https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4"},{"id":"B站-r8","platform":"B站","tag":"穿搭","title":"宽肩女生显瘦穿搭","heat":"B站热门 300.1万播放","why_fit":"显瘦是穿搭赛道刚需，完播和收藏双高。","adapt_angle":"跟原爆款同款BGM和标题结构（如「梨形必看」→「宽肩必看」）。","source":"B站热点榜 2026-08-19","video_desc":"评论区高频词：求链接、适合肩宽吗、身高体重。","link":"https://search.bilibili.com/all?keyword=%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD"},{"id":"B站-r9","platform":"B站","tag":"拍照","title":"手机自拍显瘦角度","heat":"B站热门 838.4万播放","why_fit":"手机拍照零门槛、可跟练，适合「普通女生」人设；自拍角度+光线技巧 evergreen。","adapt_angle":"改成「工位/前台场景版」，强调零成本和原相机，用「前后对比」做封面钩子。","source":"B站热点榜 2026-08-19","video_desc":"多为自拍/对镜拍，展示具体角度和光线，配「参数截图」或「前后对比」。","link":"https://search.bilibili.com/all?keyword=%E6%89%8B%E6%9C%BA%E8%87%AA%E6%8B%8D%E6%98%BE%E7%98%A6%E8%A7%92%E5%BA%A6"},{"id":"B站-r10","platform":"B站","tag":"职场","title":"行政前台的一天vlog","heat":"B站热门 869.5万播放","why_fit":"能自然植入化妆、唱歌等你擅长元素，形成复合型人设。","adapt_angle":"把原爆款的「职场吐槽」改成「行政前台的一天 vlog」，真实感更强。","source":"B站热点榜 2026-08-19","video_desc":"常穿插化妆、吃饭、下班碎片，真实感强。","link":"https://search.bilibili.com/all?keyword=%E8%A1%8C%E6%94%BF%E5%89%8D%E5%8F%B0%20vlog"},{"id":"B站-r11","platform":"B站","tag":"唱歌","title":"下班对镜翻唱一首","heat":"B站热门 72.7万播放","why_fit":"可低成本蹭热点BGM，把原爆款改成打工人版本。","adapt_angle":"在评论区刷歌词，提升互动数据。","source":"B站热点榜 2026-08-19","video_desc":"评论区高频词：好听、回忆杀、求歌名。","link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E7%BF%BB%E5%94%B1"},{"id":"B站-r12","platform":"B站","tag":"身材","title":"47kg小基数减脂餐","heat":"B站热门 59.6万播放","why_fit":"小基数塑形是细分蓝海，「47kg但肩宽」反差设定有记忆点。","adapt_angle":"改成「小基数+办公室微运动」版本，强调不饿肚子、碎片时间可练。","source":"B站热点榜 2026-08-19","video_desc":"多为跟练或餐食展示，强调「简单/ low成本」，画面有动作示范或食物摆盘。","link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%87%8F%E8%84%82%E9%A4%90"},{"id":"B站-r13","platform":"B站","tag":"变美vlog","title":"普通女生变美逆袭","heat":"B站热门 462.6万播放","why_fit":"能整合化妆、穿搭、护肤多个垂类，广告位充足。","adapt_angle":"每月复盘一次变化，建立长期陪伴感。","source":"B站热点榜 2026-08-19","video_desc":"常见「Day 1 → Day 30」时间线，用数据/照片展示变化。","link":"https://search.bilibili.com/all?keyword=%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E5%8F%98%E7%BE%8E"},{"id":"B站-r14","platform":"B站","tag":"化妆","title":"新手化妆避坑指南","heat":"B站热门 694.2万播放","why_fit":"敏感肌标签精准，能避开红海大牌测评，建立「平价不踩雷」人设。","adapt_angle":"在评论区先留「求色号/链接」引导互动，提升算法推流。","source":"B站热点榜 2026-08-19","video_desc":"评论区高频词：求色号、求链接、适合敏感肌吗。","link":"https://search.bilibili.com/all?keyword=%E6%96%B0%E6%89%8B%E5%8C%96%E5%A6%86%E9%81%BF%E5%9D%91"},{"id":"B站-r15","platform":"B站","tag":"护肤","title":"混干皮换季泛红急救","heat":"B站热门 196.0万播放","why_fit":"敏感肌护肤是高决策成本赛道，你以「亲身试错+平价方案」切入，能建立强信任。","adapt_angle":"改成「混干微敏皮实测」，突出平价和不踩雷，用「红叉绿勾」红黑榜视觉提升点击率。","source":"B站热点榜 2026-08-19","video_desc":"常见清单体或红黑榜，画面以产品平铺+真人试用为主，字幕用「红叉/绿勾」强化记忆点。","link":"https://search.bilibili.com/all?keyword=%E6%B7%B7%E5%B9%B2%E7%9A%AE%20%E6%B3%9B%E7%BA%A2%20%E6%80%A5%E6%95%91"},{"id":"B站-r16","platform":"B站","tag":"穿搭","title":"小个子正肩穿搭","heat":"B站热门 448.3万播放","why_fit":"通勤穿搭贴合前台身份，能自然展示日常穿搭而非硬凹造型。","adapt_angle":"用全身镜+原相机真实展示，不精修反而更可信。","source":"B站热点榜 2026-08-19","video_desc":"常见转场变装，用同款不同领型展示避雷效果。","link":"https://search.bilibili.com/all?keyword=%E5%B0%8F%E4%B8%AA%E5%AD%90%E6%AD%A3%E8%82%A9%E7%A9%BF%E6%90%AD"},{"id":"B站-r17","platform":"B站","tag":"拍照","title":"工位原相机自拍姿势","heat":"B站热门 398.6万播放","why_fit":"原相机对比类内容真实感强，易引发「学到了」正向评论。","adapt_angle":"发起「工位拍照挑战」引互动。","source":"B站热点榜 2026-08-19","video_desc":"评论区高频词：学到了、参数是什么、手机型号。","link":"https://search.bilibili.com/all?keyword=%E5%B7%A5%E4%BD%8D%E8%87%AA%E6%8B%8D%E5%A7%BF%E5%8A%BF"},{"id":"B站-r18","platform":"B站","tag":"职场","title":"职场摸鱼但认真生活","heat":"B站热门 629.9万播放","why_fit":"行政前台视角稀缺，「职场日常/打工人情绪」易引发共鸣和转发。","adapt_angle":"用前台视角匿名化改编，加入你的唱歌/化妆碎片做记忆点，结尾「今天也辛苦啦」情绪收尾。","source":"B站热点榜 2026-08-19","video_desc":"多为vlog或口播，前台/工位场景，讲公司日常或打工人情绪。","link":"https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E8%81%8C%E5%9C%BA%E6%97%A5%E5%B8%B8"},{"id":"B站-r19","platform":"B站","tag":"唱歌","title":"对口型变装蹭BGM","heat":"B站热门 791.5万播放","why_fit":"情绪歌易引发评论区刷歌词互动，数据表现好。","adapt_angle":"前半段素颜工服、后半段精致，用对比拉完播。","source":"B站热点榜 2026-08-19","video_desc":"常见氛围灯+耳机，突出「下班后的松弛感」。","link":"https://search.bilibili.com/all?keyword=%E5%94%B1%E6%AD%8C%E5%AF%B9%E5%8F%A3%E5%9E%8B%E5%8F%98%E8%A3%85"}],"note":"选题灵感/爆款二创各平台20条。B站为真实单条视频链接（家用/本地IP可稳定获取，GitHub云端IP偶发被拦则降级为搜索页）；微博为真实热搜话题页链接；抖音/小红书/快手官方未开放单条视频接口，给搜索入口，已如实标注。"};
   let daily = load(LS.daily, null);
-  let hidden = load(LS.hidden, []);   // 当日自动采集中被隐藏的 id
+  let hidden = load(LS.hidden, []);
   if (!daily || !daily.date || (EMBEDDED.date && EMBEDDED.date > daily.date)) {
     daily = { date: EMBEDDED.date, topics: EMBEDDED.topics || [], reposts: EMBEDDED.reposts || [] };
     hidden = [];
     save(LS.daily, daily); save(LS.hidden, hidden);
   }
 
-  let topicTab = '全部';
-  const topicTabsEl = $('#topicTabs');
+  let topicFilter = '全部';
+  const topicFilterEl = $('#topicFilter');
   const topicListEl = $('#topicList');
 
-  function renderTopicTabs() {
-    const tabs = ['全部', ...Object.keys(PLATFORMS)];
-    topicTabsEl.innerHTML = tabs.map(t =>
-      `<button data-tab="${esc(t)}" class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${t === topicTab ? 'bg-brand-500 text-white' : 'bg-white text-gray-600 border border-brand-100'}">${esc(t)}</button>`
+  function renderTopicFilter() {
+    const tabs = ['全部', ...PLATFORMS];
+    topicFilterEl.innerHTML = tabs.map(t =>
+      `<button data-tab="${esc(t)}" class="filter-chip ${t === topicFilter ? 'active' : ''}">${esc(t)}</button>`
     ).join('');
   }
   function allTopics() {
@@ -486,46 +369,36 @@
     return [...u, ...d];
   }
   function renderTopics() {
-    const list = allTopics().filter(t => topicTab === '全部' || t.platform === topicTab);
-    const autoCount = daily.topics.filter(t => topicTab === '全部' || t.platform === topicTab).length;
-    let head = '';
-    if (topicTab !== '全部' && daily.date) {
-      head = `<div class="flex items-center justify-between text-[11px] text-gray-400 px-1 mb-1"><span>${esc(daily.date)} 自动采集</span><span>${autoCount}/20 条</span></div>`;
+    const list = allTopics().filter(t => topicFilter === '全部' || t.platform === topicFilter);
+    if (!list.length) {
+      topicListEl.innerHTML = '<div class="empty">暂无选题，点下方「＋新增」添加</div>';
+      return;
     }
-    topicListEl.innerHTML = head + (list.length ? list.map(t => topicCard(t)).join('')
-      : `<p class="text-center text-sm text-gray-400 py-8">该平台暂无选题，点上方「＋新增」添加</p>`);
+    topicListEl.innerHTML = list.map((t, i) => topicCard(t, i + 1)).join('');
   }
-  function topicCard(t) {
-    const hasVideo = t.videoUrl && /^https?:\/\//.test(t.videoUrl);
-    const kind = t.kind || (hasVideo ? 'video' : 'topic');
-    const link = hasVideo ? t.videoUrl : (PLATFORMS[t.platform] || PLATFORMS['抖音'])(t.search || t.title);
-    const btnLabel = kind === 'video' ? '▶ 跳原视频' : '🔗 看当下热门';
-    const btnCls = kind === 'video' ? 'bg-rose-500 text-white' : 'bg-sky-500 text-white';
-    const kindBadge = kind === 'video'
-      ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">真实视频</span>'
-      : '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-600">话题页</span>';
-    const catBadge = t.cat ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600">${esc(t.cat)}</span>` : '';
-    const heatBadge = t.heat ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600">🔥 ${esc(String(t.heat))}</span>` : '';
-    return `<div class="card-enter bg-white rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
-        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-600">${esc(t.platform)}</span>
-        ${catBadge}
-        ${kindBadge}
-        ${heatBadge}
-        <button data-rtopic="${t.id}" class="text-gray-300 text-xs ml-auto">删除</button>
+  function topicCard(t, num) {
+    const tag = t.cat ? `<span class="tag">${esc(t.cat)}</span>` : '';
+    return `<div class="card topic-card">
+      <div class="topic-header">
+        <span class="topic-number">${num}.</span>
+        <div class="topic-title-wrap">
+          <div class="topic-title">${esc(t.title)} ${tag}</div>
+        </div>
       </div>
-      <h4 class="font-semibold text-gray-800 text-sm leading-snug">${esc(t.title)}</h4>
-      <p class="text-xs text-gray-600 mt-1.5"><b class="text-brand-600">🔥 火爆原因：</b>${esc(t.reason)}</p>
-      <p class="text-xs text-gray-600 mt-1"><b class="text-emerald-600">💡 原创思路：</b>${esc(t.idea)}</p>
-      <div class="flex items-center gap-2 mt-2.5 flex-wrap">
-        <a href="${esc(link)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 ${btnCls}">${btnLabel}</a>
-        <button data-copy="${esc(link)}" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 bg-gray-100 text-gray-600">📋 复制链接</button>
+      <p class="topic-analysis">${esc(t.analysis)}</p>
+      <div class="topic-actions">
+        <a href="${esc(t.dy_link || '#')}" target="_blank" rel="noopener" class="btn-primary">▶ 看抖音相关视频</a>
+        <a href="${esc(t.bz_link || '#')}" target="_blank" rel="noopener" class="btn-outline">B站相关</a>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button data-copy="${esc(t.dy_link || '')}" class="btn-outline" style="flex:1;font-size:11px;">📋 复制抖音链接</button>
+        <button data-rtopic="${esc(t.id)}" class="btn-outline" style="flex:1;font-size:11px;color:#b91c1c;border-color:#fecaca;">删除</button>
       </div>
     </div>`;
   }
-  topicTabsEl.addEventListener('click', e => {
+  topicFilterEl.addEventListener('click', e => {
     const b = e.target.closest('[data-tab]'); if (!b) return;
-    topicTab = b.dataset.tab; renderTopicTabs(); renderTopics();
+    topicFilter = b.dataset.tab; renderTopicFilter(); renderTopics();
   });
   topicListEl.addEventListener('click', e => {
     const c = e.target.closest('[data-copy]');
@@ -541,23 +414,20 @@
   });
   $('#topicAddBtn').addEventListener('click', () => openSheet('选题', buildTopicForm()));
 
-  /* =========================================================
-     3. 爆款二创（用户自定义 + 每日自动采集各平台20条）
-     ========================================================= */
+  /* ---------- 爆款二创 ---------- */
   let userReposts = load(LS.user_reposts, [
-    { id: uid(), platform: '抖音', type: '穿搭', title: '原爆款：梨形+宽肩显瘦神裤', reason: '评论区疯狂求链接，转化意向强', plan: '改为你的「前台通勤版」：西装裤+尖头鞋，加「47kg也能撑起」反差钩子', search: '宽肩显瘦穿搭' },
-    { id: uid(), platform: '小红书', type: '化妆', title: '原爆款：10 秒伪素颜底妆', reason: '短平快、易模仿，完播极高', plan: '换成「敏感肌版本」，强调不卡粉不泛红，结尾教「定妆手法」差异化', search: '敏感肌底妆教程' },
-    { id: uid(), platform: '抖音', type: '穿搭', title: '原爆款：一字肩避雷指南', reason: '踩坑类内容收藏率高', plan: '你以肩宽 43 实测，拍「这 3 种领型我踩雷了」，真实测评更有信任感', search: '肩宽 避雷 领型' }
+    { id: uid(), platform: '抖音', tag: '穿搭', title: '原爆款：梨形+宽肩显瘦神裤', heat: '抖音热点榜 580万', why_fit: '评论区疯狂求链接，转化意向强', adapt_angle: '改为你的「前台通勤版」：西装裤+尖头鞋，加「47kg也能撑起」反差钩子', source: '抖音热点榜 2026-08-19', video_desc: '多为全身镜前后对比，节奏快、BGM卡点，评论区高频求链接。', link: 'https://www.douyin.com/search/%E5%AE%BD%E8%82%A9%E6%98%BE%E7%98%A6%E7%A9%BF%E6%90%AD' },
+    { id: uid(), platform: '小红书', tag: '化妆', title: '原爆款：10 秒伪素颜底妆', heat: '小红书热点榜 320万', why_fit: '短平快、易模仿，完播极高', adapt_angle: '换成「敏感肌版本」，强调不卡粉不泛红，结尾教「定妆手法」差异化', source: '小红书热点榜 2026-08-19', video_desc: '常见对镜拍或手持自拍，字幕强调步骤编号，节奏前快后稳。', link: 'https://www.xiaohongshu.com/search_result?keyword=%E9%80%9A%E5%8B%A4%E4%BC%AA%E7%B4%A0%E9%A2%9C%E5%A6%86' }
   ]);
 
-  let repostTab = '全部';
+  let repostFilter = '全部';
   const repostFilterEl = $('#repostFilter');
   const repostListEl = $('#repostList');
 
-  function renderRepostTabs() {
-    const tabs = ['全部', ...Object.keys(PLATFORMS)];
+  function renderRepostFilter() {
+    const tabs = ['全部', ...PLATFORMS];
     repostFilterEl.innerHTML = tabs.map(t =>
-      `<button data-f="${esc(t)}" class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${t === repostTab ? 'bg-brand-500 text-white' : 'bg-white text-gray-600 border border-brand-100'}">${esc(t)}</button>`
+      `<button data-f="${esc(t)}" class="filter-chip ${t === repostFilter ? 'active' : ''}">${esc(t)}</button>`
     ).join('');
   }
   function allReposts() {
@@ -566,66 +436,71 @@
     return [...u, ...d];
   }
   function renderReposts() {
-    const list = allReposts().filter(t => repostTab === '全部' || t.platform === repostTab);
-    const autoCount = daily.reposts.filter(t => repostTab === '全部' || t.platform === repostTab).length;
-    let head = '';
-    if (repostTab !== '全部' && daily.date) {
-      head = `<div class="flex items-center justify-between text-[11px] text-gray-400 px-1 mb-1"><span>${esc(daily.date)} 自动采集</span><span>${autoCount}/20 条</span></div>`;
+    const list = allReposts().filter(t => repostFilter === '全部' || t.platform === repostFilter);
+    if (!list.length) {
+      repostListEl.innerHTML = '<div class="empty">暂无素材，点下方「＋新增」添加</div>';
+      return;
     }
-    repostListEl.innerHTML = head + (list.length ? list.map(repostCard).join('')
-      : `<p class="text-center text-sm text-gray-400 py-8">暂无素材，点上方「＋新增」添加</p>`);
+    repostListEl.innerHTML = list.map(repostCard).join('');
   }
   function repostCard(t) {
-    const hasVideo = t.videoUrl && /^https?:\/\//.test(t.videoUrl);
-    const kind = t.kind || (hasVideo ? 'video' : 'topic');
-    const link = hasVideo ? t.videoUrl : (PLATFORMS[t.platform] || PLATFORMS['抖音'])(t.search || t.title);
-    const btnLabel = kind === 'video' ? '▶ 跳原视频' : '🔗 看当下热门';
-    const btnCls = kind === 'video' ? 'bg-rose-500 text-white' : 'bg-sky-500 text-white';
-    const kindBadge = kind === 'video'
-      ? '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">真实视频</span>'
-      : '<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-600">话题页</span>';
-    const cat = t.type || t.cat || '';
-    const catBadge = cat ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-600">${esc(cat)}</span>` : '';
-    const heatBadge = t.heat ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-600">🔥 ${esc(String(t.heat))}</span>` : '';
-    const plan = t.plan || t.idea || '';
-    return `<div class="card-enter bg-white rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
-        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-600">${esc(t.platform)}</span>
-        ${catBadge}
-        ${kindBadge}
-        ${heatBadge}
-        <button data-rrepost="${t.id}" class="text-gray-300 text-xs ml-auto">删除</button>
+    const tag = t.tag ? `<span class="tag">${esc(t.tag)}</span>` : '';
+    return `<div class="card repost-card">
+      <div class="repost-header">
+        <div class="repost-title">${esc(t.title)} ${tag}</div>
+        <div class="repost-heat">🔥 ${esc(t.heat)}</div>
       </div>
-      <h4 class="font-semibold text-gray-800 text-sm leading-snug">${esc(t.title)}</h4>
-      <p class="text-xs text-gray-600 mt-1.5"><b class="text-brand-600">🔥 爆款原因：</b>${esc(t.reason)}</p>
-      <p class="text-xs text-gray-600 mt-1"><b class="text-purple-600">🛠 二创方案：</b>${esc(plan)}</p>
-      <div class="flex items-center gap-2 mt-2.5 flex-wrap">
-        <a href="${esc(link)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 ${btnCls}">${btnLabel}</a>
-        <button data-copy="${esc(link)}" class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg active:scale-95 bg-gray-100 text-gray-600">📋 复制链接</button>
+      <div class="repost-section">
+        <div class="repost-label">为什么适合你二创：</div>
+        <div class="repost-text">${esc(t.why_fit)}</div>
+      </div>
+      <div class="repost-section">
+        <div class="repost-label">改编角度：</div>
+        <div class="repost-text">${esc(t.adapt_angle)}</div>
+      </div>
+      <div class="repost-source">来源：${esc(t.source)}</div>
+      <div class="repost-cta">
+        <a href="${esc(t.link || '#')}" target="_blank" rel="noopener" class="btn-primary">▶ 去${esc(t.platform)}看真实视频（点开即看）</a>
+      </div>
+      <div class="repost-info">
+        <div class="repost-info-icon">🎬</div>
+        <div class="repost-info-text"><b>这个视频长这样：</b>${esc(t.video_desc)}</div>
+      </div>
+      <div class="repost-footer">
+        <button data-addtask="${esc(t.title)}" class="btn-outline">＋ 加入任务</button>
+        <button data-saveinsp="${esc(t.id)}" class="btn-outline">⭐ 存为灵感</button>
+        <button data-hide="${esc(t.id)}" class="btn-outline">🔄 换视频</button>
+      </div>
+      <div style="margin-top:10px;">
+        <button data-copy="${esc(t.link || '')}" class="btn-outline" style="width:100%;font-size:11px;">📋 复制链接</button>
       </div>
     </div>`;
   }
   repostFilterEl.addEventListener('click', e => {
     const b = e.target.closest('[data-f]'); if (!b) return;
-    repostTab = b.dataset.f; renderRepostTabs(); renderReposts();
+    repostFilter = b.dataset.f; renderRepostFilter(); renderReposts();
   });
   repostListEl.addEventListener('click', e => {
     const c = e.target.closest('[data-copy]');
     if (c) { copyLink(c.dataset.copy); return; }
-    const b = e.target.closest('[data-rrepost]'); if (!b) return;
-    const id = b.dataset.rrepost;
-    if (daily.reposts.some(t => t.id === id)) {
-      if (!hidden.includes(id)) hidden.push(id); save(LS.hidden, hidden);
-    } else {
-      userReposts = userReposts.filter(t => t.id !== id); save(LS.user_reposts, userReposts);
+    const add = e.target.closest('[data-addtask]');
+    if (add) { tasks.push({ id: uid(), text: '🎬 二创：' + add.dataset.addtask }); save(LS.tasks, tasks); renderPlan(); toast('已加入任务'); return; }
+    const sv = e.target.closest('[data-saveinsp]');
+    if (sv) { toast('已存为灵感（可在本地收藏查看）'); return; }
+    const hd = e.target.closest('[data-hide]');
+    if (hd) {
+      const id = hd.dataset.hide;
+      if (daily.reposts.some(t => t.id === id)) {
+        if (!hidden.includes(id)) hidden.push(id); save(LS.hidden, hidden);
+      } else {
+        userReposts = userReposts.filter(t => t.id !== id); save(LS.user_reposts, userReposts);
+      }
+      renderReposts(); return;
     }
-    renderReposts();
   });
   $('#repostAddBtn').addEventListener('click', () => openSheet('二创素材', buildRepostForm()));
 
-  /* =========================================================
-     4. 内容复盘 + 智能诊断
-     ========================================================= */
+  /* ---------- 内容复盘 ---------- */
   let reviews = load(LS.reviews, []);
   const reviewListEl = $('#reviewList');
 
@@ -656,45 +531,44 @@
     e.preventDefault();
     const f = e.target;
     const d = {
-      id: uid(), date: todayKey(),
+      id: uid(), date: f.rdate.value || todayKey(),
       platform: f.platform.value, source: f.source.value, title: f.title.value.trim(),
       views: f.views.value, likes: f.likes.value, comments: f.comments.value,
       shares: f.shares.value, finish: f.finish.value, good: f.good.value.trim(), improve: f.improve.value.trim()
     };
-    const tips = diagnose(d);
-    d.tips = tips;
+    d.tips = diagnose(d);
     reviews.unshift(d);
     save(LS.reviews, reviews);
     f.reset();
     renderReviews();
-    toast('已保存 · ' + tips.length + ' 条优化建议');
+    toast('已保存 · ' + d.tips.length + ' 条优化建议');
   });
 
   function renderReviews() {
-    if (!reviews.length) { reviewListEl.innerHTML = `<p class="text-center text-sm text-gray-400 py-8">还没有复盘记录，发完作品来填一单吧</p>`; return; }
+    if (!reviews.length) { reviewListEl.innerHTML = '<div class="empty">还没有复盘记录，发完作品来填一单吧</div>'; return; }
     reviewListEl.innerHTML = reviews.map(r => `
-      <div class="card-enter bg-white rounded-2xl p-4 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-600">${esc(r.platform)}</span>
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] text-gray-400">${esc(r.date)}</span>
-            <button data-rreview="${r.id}" class="text-gray-300 text-xs">删除</button>
+      <div class="review-item">
+        <div class="review-item-top">
+          <span class="tag">${esc(r.platform)}</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text-tertiary);">${esc(r.date)}</span>
+            <button data-rreview="${r.id}" style="color:var(--text-tertiary);font-size:13px;">删除</button>
           </div>
         </div>
-        <h4 class="font-semibold text-gray-800 text-sm">${esc(r.title)}</h4>
-        <div class="grid grid-cols-3 gap-1.5 mt-2 text-center">
+        <div class="review-item-title">${esc(r.title)}</div>
+        <div class="review-metrics">
           ${metric('播放', r.views)} ${metric('点赞', r.likes)} ${metric('评论', r.comments)}
           ${metric('转发', r.shares)} ${metric('完播', r.finish + '%')} ${metric('来源', r.source)}
         </div>
-        ${r.good ? `<p class="text-xs text-gray-600 mt-2"><b class="text-green-600">👍 亮点：</b>${esc(r.good)}</p>` : ''}
-        ${r.improve ? `<p class="text-xs text-gray-600 mt-1"><b class="text-brand-600">🔧 待改：</b>${esc(r.improve)}</p>` : ''}
-        <div class="mt-2 pt-2 border-t border-gray-100 space-y-1">
-          ${(r.tips || []).map(t => `<p class="text-xs text-gray-700">${esc(t)}</p>`).join('')}
+        ${r.good ? `<p style="font-size:12px;color:var(--text-secondary);margin:8px 0 0;"><b style="color:var(--primary);">👍 亮点：</b>${esc(r.good)}</p>` : ''}
+        ${r.improve ? `<p style="font-size:12px;color:var(--text-secondary);margin:6px 0 0;"><b style="color:var(--primary);">🔧 待改：</b>${esc(r.improve)}</p>` : ''}
+        <div class="review-tips">
+          ${(r.tips || []).map(t => `<p>${esc(t)}</p>`).join('')}
         </div>
       </div>`).join('');
   }
   function metric(label, val) {
-    return `<div class="bg-brand-50 rounded-lg py-1.5"><div class="text-[10px] text-gray-400">${label}</div><div class="text-xs font-bold text-gray-700">${esc(val || 0)}</div></div>`;
+    return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-val">${esc(val || 0)}</div></div>`;
   }
   reviewListEl.addEventListener('click', e => {
     const b = e.target.closest('[data-rreview]'); if (!b) return;
@@ -709,53 +583,61 @@
     }
   });
 
-  /* =========================================================
-     通用弹层（新增表单）
-     ========================================================= */
+  /* ---------- 弹层 ---------- */
   const sheet = $('#sheet'), sheetBody = $('#sheetBody'), sheetTitle = $('#sheetTitle');
   function openSheet(title, html) {
     sheetTitle.textContent = '新增' + title;
-    sheetBody.innerHTML = html + `<button id="sheetSave" class="w-full bg-brand-500 text-white rounded-xl py-3 text-sm font-semibold active:scale-95 transition mt-1">保存</button>`;
+    sheetBody.innerHTML = html + `<button id="sheetSave" class="sheet-save">保存</button>`;
     sheet.classList.remove('hidden');
   }
   function closeSheet() { sheet.classList.add('hidden'); }
   sheet.addEventListener('click', e => { if (e.target.hasAttribute('data-close') || e.target.id === 'sheetSave') closeSheet(); });
 
   function buildTopicForm() {
-    const popts = Object.keys(PLATFORMS).map(p => `<option>${p}</option>`).join('');
+    const popts = PLATFORMS.map(p => `<option>${p}</option>`).join('');
     const copts = CATS.map(c => `<option>${c}</option>`).join('');
     return `
-      <label class="block text-xs text-gray-500">平台<select id="f_platform" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">${popts}</select></label>
-      <label class="block text-xs text-gray-500">赛道分类<select id="f_cat" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">${copts}</select></label>
-      <label class="block text-xs text-gray-500">标题 / 选题<textarea id="f_title" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="爆款标题或你的选题"></textarea></label>
-      <label class="block text-xs text-gray-500">火爆核心原因<textarea id="f_reason" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="为什么火"></textarea></label>
-      <label class="block text-xs text-gray-500">原创创作思路<textarea id="f_idea" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="结合你的人设怎么拍"></textarea></label>
-      <label class="block text-xs text-gray-500">🔥 热度（可选，如 772万）<input id="f_heat" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="留空则显示 —" /></label>
-      <label class="block text-xs text-gray-500">原视频链接（粘贴抖音/小红书分享链接，点开即看原片）<input id="f_video" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="https://... 留空则跳平台话题" /></label>
-      <label class="block text-xs text-gray-500">搜索词（无原视频链接时用于跳转平台话题）<input id="f_search" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="如：通勤伪素颜妆" /></label>
+      <div class="sheet-field"><label>平台<select id="f_platform">${popts}</select></label></div>
+      <div class="sheet-field"><label>赛道分类<select id="f_cat">${copts}</select></label></div>
+      <div class="sheet-field"><label>标题 / 选题<textarea id="f_title" rows="2" placeholder="爆款标题或你的选题"></textarea></label></div>
+      <div class="sheet-field"><label>火爆核心原因 / 分析<textarea id="f_analysis" rows="2" placeholder="为什么火"></textarea></label></div>
+      <div class="sheet-field"><label>抖音相关视频链接<input id="f_dy_link" placeholder="https://www.douyin.com/search/... 或具体视频链接" /></label></div>
+      <div class="sheet-field"><label>B站相关链接<input id="f_bz_link" placeholder="https://search.bilibili.com/... 或 BV 链接" /></label></div>
     `;
   }
   function buildRepostForm() {
-    const popts = Object.keys(PLATFORMS).map(p => `<option>${p}</option>`).join('');
+    const popts = PLATFORMS.map(p => `<option>${p}</option>`).join('');
     const copts = CATS.map(c => `<option>${c}</option>`).join('');
     return `
-      <label class="block text-xs text-gray-500">平台<select id="f_platform" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">${popts}</select></label>
-      <label class="block text-xs text-gray-500">赛道分类<select id="f_type" class="mt-1 w-full rounded-lg border border-brand-200 px-2 py-2 text-sm">${copts}</select></label>
-      <label class="block text-xs text-gray-500">原爆款标题<textarea id="f_title" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="原视频标题"></textarea></label>
-      <label class="block text-xs text-gray-500">爆款原因<textarea id="f_reason" rows="2" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="为什么火"></textarea></label>
-      <label class="block text-xs text-gray-500">二创改编方案<textarea id="f_plan" rows="3" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="你的改编脚本/钩子/差异化"></textarea></label>
-      <label class="block text-xs text-gray-500">🔥 热度（可选，如 772万）<input id="f_heat" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="留空则显示 —" /></label>
-      <label class="block text-xs text-gray-500">原视频链接（粘贴爆款分享链接，点开即看原片）<input id="f_video" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="https://... 留空则跳平台话题" /></label>
-      <label class="block text-xs text-gray-500">搜索词（无原视频链接时用于跳转平台话题）<input id="f_search" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="如：宽肩显瘦穿搭" /></label>
+      <div class="sheet-field"><label>平台<select id="f_platform">${popts}</select></label></div>
+      <div class="sheet-field"><label>标签/赛道<select id="f_tag">${copts}</select></label></div>
+      <div class="sheet-field"><label>原爆款标题<textarea id="f_title" rows="2" placeholder="原视频标题"></textarea></label></div>
+      <div class="sheet-field"><label>热度（如：抖音热点榜 772万）<input id="f_heat" placeholder="抖音热点榜 772万" /></label></div>
+      <div class="sheet-field"><label>为什么适合你二创<textarea id="f_why_fit" rows="2" placeholder="契合你人设的原因"></textarea></label></div>
+      <div class="sheet-field"><label>改编角度<textarea id="f_adapt_angle" rows="3" placeholder="具体怎么改"></textarea></label></div>
+      <div class="sheet-field"><label>来源<input id="f_source" placeholder="抖音热点榜 2026-08-20" /></label></div>
+      <div class="sheet-field"><label>这个视频长这样<textarea id="f_video_desc" rows="2" placeholder="原视频画面/结构描述"></textarea></label></div>
+      <div class="sheet-field"><label>跳转链接<input id="f_link" placeholder="https://... 留空则跳平台搜索" /></label></div>
     `;
   }
   sheetBody.addEventListener('click', e => {
     if (e.target.id !== 'sheetSave') return;
     if (sheetTitle.textContent.includes('选题')) {
-      userTopics.unshift({ id: uid(), platform: $('#f_platform').value, cat: $('#f_cat').value, title: $('#f_title').value, reason: $('#f_reason').value, idea: $('#f_idea').value, search: $('#f_search').value, heat: $('#f_heat').value.trim(), videoUrl: $('#f_video').value.trim() });
+      userTopics.unshift({
+        id: uid(), platform: $('#f_platform').value, cat: $('#f_cat').value,
+        title: $('#f_title').value, analysis: $('#f_analysis').value,
+        dy_link: $('#f_dy_link').value.trim() || 'https://www.douyin.com/search/' + encodeURIComponent($('#f_title').value),
+        bz_link: $('#f_bz_link').value.trim() || 'https://search.bilibili.com/all?keyword=' + encodeURIComponent($('#f_title').value)
+      });
       save(LS.user_topics, userTopics); renderTopics(); toast('选题已添加');
     } else if (sheetTitle.textContent.includes('二创')) {
-      userReposts.unshift({ id: uid(), platform: $('#f_platform').value, type: $('#f_type').value, title: $('#f_title').value, reason: $('#f_reason').value, plan: $('#f_plan').value, search: $('#f_search').value, heat: $('#f_heat').value.trim(), videoUrl: $('#f_video').value.trim() });
+      userReposts.unshift({
+        id: uid(), platform: $('#f_platform').value, tag: $('#f_tag').value,
+        title: $('#f_title').value, heat: $('#f_heat').value,
+        why_fit: $('#f_why_fit').value, adapt_angle: $('#f_adapt_angle').value,
+        source: $('#f_source').value, video_desc: $('#f_video_desc').value,
+        link: $('#f_link').value.trim() || 'https://www.douyin.com/search/' + encodeURIComponent($('#f_title').value)
+      });
       save(LS.user_reposts, userReposts); renderReposts(); toast('二创素材已添加');
     } else if (sheetTitle.textContent.includes('导入')) {
       importData($('#f_import') ? $('#f_import').value : '');
@@ -763,9 +645,7 @@
     closeSheet();
   });
 
-  /* =========================================================
-     导入今日采集（JSON）
-     ========================================================= */
+  /* ---------- 导入 ---------- */
   function importObj(d) {
     if (d && Array.isArray(d.topics)) {
       d.topics.forEach(t => userTopics.unshift({ id: uid(), ...t }));
@@ -781,12 +661,12 @@
     catch (e) { toast('JSON 解析失败，请检查格式'); }
   }
   function openImport() {
-    openSheet('今日采集', `<label class="block text-xs text-gray-500">把聊天里「瑜的工作台·今日采集」的 JSON 整段粘贴到这里（包含 topics / reposts 两项）：<textarea id="f_import" rows="9" class="mt-1 w-full rounded-lg border border-brand-200 px-3 py-2 text-sm font-mono" placeholder='{"date":"2026-08-18","topics":[{"platform":"抖音","title":"...","reason":"...","idea":"...","heat":"772万","videoUrl":"https://www.douyin.com/shipin/..."}],"reposts":[...]}'></textarea></label>`);
+    openSheet('今日采集', `<div class="sheet-field"><label>把聊天里「瑜的工作台·今日采集」的 JSON 整段粘贴到这里（包含 topics / reposts 两项）：<textarea id="f_import" rows="9" placeholder='{"date":"2026-08-20","topics":[...],"reposts":[...]}'></textarea></label></div>`);
   }
   $('#topicImportBtn').addEventListener('click', openImport);
   $('#repostImportBtn').addEventListener('click', openImport);
 
-  // 联网（GitHub Pages）时拉取最新 daily.json 覆盖内置数据；本地 file:// 打开会自动失败并保留内置快照
+  // 联网时拉取最新 daily.json
   fetch('./daily.json').then(r => r.ok ? r.json() : null).then(d => {
     if (d && d.date && daily.date && d.date !== daily.date) {
       daily = { date: d.date, topics: d.topics || [], reposts: d.reposts || [] };
@@ -796,10 +676,8 @@
     }
   }).catch(() => {});
 
-  /* =========================================================
-     视图切换
-     ========================================================= */
-  const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘' };
+  /* ---------- 视图切换 ---------- */
+  const titles = { plan: '每日计划', topic: '选题每日灵感', repost: '爆款热点视频/二创', review: '内容复盘' };
   function switchView(v) {
     $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
     $$('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== v));
@@ -807,50 +685,18 @@
   }
   $$('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
 
-  /* =========================================================
-     Toast
-     ========================================================= */
-  let toastTimer;
-  function toast(msg) {
-    const t = $('#toast');
-    t.firstElementChild.textContent = msg;
-    t.classList.remove('hidden');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.add('hidden'), 2200);
-  }
-
-  async function copyLink(url) {
-    if (!url) return;
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(url);
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = url; ta.style.position = 'fixed'; ta.style.top = '-9999px'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.focus(); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
-      }
-      toast('✅ 链接已复制');
-    } catch (e) {
-      toast('复制失败，请长按链接手动复制');
-    }
-  }
-
-  /* =========================================================
-     初始化
-     ========================================================= */
+  /* ---------- 初始化 ---------- */
   $('#todayDate').textContent = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
-  renderTopicTabs(); renderTopics();
-  renderRepostTabs(); renderReposts();
+  renderTopicFilter(); renderTopics();
+  renderRepostFilter(); renderReposts();
 
-  /* =========================================================
-     PWA Service Worker 注册（联网环境下生效；file:// 下静默失败）
-     ========================================================= */
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     });
   }
-})();</script>
+})();
+
+  </script>
 </body>
 </html>
