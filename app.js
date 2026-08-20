@@ -195,26 +195,35 @@
     const m = raw.match(/https?:\/\/[^\s"'<>]+/);
     if (!m) { toast('没找到链接，换个姿势粘贴'); return; }
     let url = m[0].replace(/[)"'<>]+$/, '');
+    // 平台识别（覆盖抖音/快手/小红书/微博/B站，含短链 v.douyin / b23.tv / t.cn）
     let pf = '抖音';
     if (/xiaohongshu|小红书|xhs/.test(url)) pf = '小红书';
     else if (/kuaishou|快手/.test(url)) pf = '快手';
+    else if (/weibo|微博|t\.cn/.test(url)) pf = '微博';
     else if (/bilibili|b23\.tv|BV[0-9A-Za-z]/.test(url)) pf = 'B站';
-    else if (/douyin|抖音|iesdouyin|tiktok/.test(url)) pf = '抖音';
+    else if (/douyin|抖音|iesdouyin|tiktok|v\.douyin/.test(url)) pf = '抖音';
     let title = '（粘贴的真实爆款，点开看原视频）';
+    let originUrl = url; // 短链被重定向后的真实地址（b23.tv→BV页 / t.cn→微博页）
     try {
-      const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url), { mode: 'cors' });
+      // 用 allorigins /get 同时拿到页面 HTML 与最终跳转地址，兼容短链
+      const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url), { mode: 'cors' });
       if (r.ok) {
-        const html = await r.text();
+        const data = await r.json();
+        const html = data.contents || '';
+        if (data.status && data.status.url) originUrl = data.status.url;
         const mm = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)
                  || html.match(/<title>([^<]+)<\/title>/i);
         if (mm) title = mm[1].replace(/\s+/g, ' ').trim().slice(0, 60);
       }
-    } catch (e) { /* 解析标题失败则用占位，不影响主功能 */ }
+    } catch (e) { /* 解析失败则用占位 + 原链接，不影响主功能 */ }
+    // B站卡片副按钮直接跳原视频；其它平台副按钮给 B站搜索兜底
+    const secLink = (pf === 'B站') ? originUrl
+      : 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(title);
     userTopics.unshift({
       id: uid(), platform: pf, cat: '情绪共鸣',
       title, analysis: '这是你粘贴的真实爆款链接，可围绕它做二创。',
       idea: '结合你的人设（行政前台/敏感肌/普通女生）重做一版，保留原爆款的钩子但换成你的视角。',
-      real_url: url, dy_link: url, bz_link: 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(title)
+      real_url: originUrl, dy_link: originUrl, bz_link: secLink
     });
     save(LS.user_topics, userTopics);
     $('#upInput').value = '';
