@@ -352,33 +352,46 @@ TRACKS = {
 RPOST_TITLES = {
     "穿搭": ["原爆款：155微胖通勤穿搭", "原爆款：宽肩显瘦西装", "原爆款：小个子叠穿公式",
              "原爆款：梨形遮胯神裤", "原爆款：极简基础款搭配", "原爆款：避雷显壮领型",
-             "原爆款：早秋通勤三件套", "原爆款：平价显高鞋搭配"],
+             "原爆款：早秋通勤三件套", "原爆款：平价显高鞋搭配",
+             "原爆款：小个子显高公式", "原爆款：梨形通勤穿搭", "原爆款：基础款叠穿"],
     "妆容": ["原爆款：10秒伪素颜底妆", "原爆款：单眼皮放大术", "原爆款：氛围感腮红",
              "原爆款：早八快速出门妆", "原爆款：敏感肌不卡粉", "原爆款：新手化妆红黑榜",
-             "原爆款：通勤伪素颜", "原爆款：新手化妆避坑"],
+             "原爆款：通勤伪素颜", "原爆款：新手化妆避坑",
+             "原爆款：单眼皮眼妆", "原爆款：淡颜伪素颜", "原爆款：黄黑皮口红"],
     "护肤身体护理": ["原爆款：混干皮换季急救", "原爆款：敏感肌平价清单", "原爆款：身体乳红黑榜",
                    "原爆款：干皮妆前打底", "原爆款：敏感肌防晒", "原爆款：平价身体乳",
-                   "原爆款：换季爆皮急救", "原爆款：学生党护肤榜"],
+                   "原爆款：换季爆皮急救", "原爆款：学生党护肤榜",
+                   "原爆款：混干皮水乳", "原爆款：平价身体乳榜", "原爆款：换季爆皮"],
     "测评": ["原爆款：网红化妆刷翻车", "原爆款：平价vs大牌粉底", "原爆款：热门面膜实测",
-             "原爆款：小家电红黑榜", "原爆款：平价香水测评", "原爆款：网红零食实测"],
+             "原爆款：小家电红黑榜", "原爆款：平价香水测评", "原爆款：网红零食实测",
+             "原爆款：平价彩妆实测", "原爆款：网红洗发水测", "原爆款：百元耳机测"],
     "好物": ["原爆款：打工人桌面好物", "原爆款：通勤包里装什么", "原爆款：百元内好物清单",
-             "原爆款：提升幸福感小物", "原爆款：宿舍党平价好物", "原爆款：租房改造好物"],
+             "原爆款：提升幸福感小物", "原爆款：宿舍党平价好物", "原爆款：租房改造好物",
+             "原爆款：通勤神器", "原爆款：桌面收纳", "原爆款：百元仪式感"],
     "鞋履配饰": ["原爆款：小个子显高鞋", "原爆款：通勤舒服鞋", "原爆款：宽肩搭包技巧",
-                 "原爆款：平价项链红黑榜", "原爆款：方头鞋避雷", "原爆款：通勤耳环推荐"],
+                 "原爆款：平价项链红黑榜", "原爆款：方头鞋避雷", "原爆款：通勤耳环推荐",
+                 "原爆款：通勤乐福鞋", "原爆款：宽肩丝巾", "原爆款：平价耳饰"],
     "网购避坑": ["原爆款：网购衣服避坑", "原爆款：直播间套路揭秘", "原爆款：退货维权实操",
-                 "原爆款：网红同款翻车", "原爆款：尺码陷阱破解", "原爆款：凑单陷阱"],
+                 "原爆款：网红同款翻车", "原爆款：尺码陷阱破解", "原爆款：凑单陷阱",
+                 "原爆款：预售陷阱", "原爆款：好评返现", "原爆款：山寨鉴别"],
     "情绪共鸣": ["原爆款：普通女生的20岁", "原爆款：下班后的松弛感", "原爆款：一个人也挺好",
-                 "原爆款：打工人崩溃瞬间", "原爆款：努力但平凡的我", "原爆款：允许自己普通"],
+                 "原爆款：打工人崩溃瞬间", "原爆款：努力但平凡的我", "原爆款：允许自己普通",
+                 "原爆款：普通但快乐", "原爆款：20岁迷茫", "原爆款：独居治愈"],
     "女性成长": ["原爆款：女生必学技能", "原爆款：普通女孩搞钱", "原爆款：拒绝内耗指南",
-                 "原爆款：独居女生安全", "原爆款：提升气质习惯", "原爆款：读书变现"],
+                 "原爆款：独居女生安全", "原爆款：提升气质习惯", "原爆款：读书变现",
+                 "原爆款：女生存钱", "原爆款：拒绝内耗", "原爆款：提升气场"],
     "审美建立": ["原爆款：什么是高级感", "原爆款：普通人穿搭审美", "原爆款：拍照构图审美",
-                 "原爆款：家居配色审美", "原爆款：极简生活美学", "原爆款：氛围感怎么来"],
+                 "原爆款：家居配色审美", "原爆款：极简生活美学", "原爆款：氛围感怎么来",
+                 "原爆款：穿搭高级感", "原爆款：拍照氛围感", "原爆款：配色公式"],
     "消费观": ["原爆款：穷但精致怎么花", "原爆款：不盲目跟风", "原爆款：平价替代大牌",
-               "原爆款：攒钱但爱自己", "原爆款：拒绝消费主义", "原爆款：100元过一周"],
+               "原爆款：攒钱但爱自己", "原爆款：拒绝消费主义", "原爆款：100元过一周",
+               "原爆款：理性消费", "原爆款：抠门但爽", "原爆款：平替清单"],
     "vlog日常": ["原爆款：行政前台的一天", "原爆款：早八通勤vlog", "原爆款：下班后的我",
-                 "原爆款：周末独居vlog", "原爆款：打工人24h", "原爆款：一个人吃饭"],
+                 "原爆款：周末独居vlog", "原爆款：打工人24h", "原爆款：一个人吃饭",
+                 "原爆款：前台工作碎片", "原爆款：周末治愈", "原爆款：一人食"],
     "唱歌碎片": ["原爆款：下班对镜翻唱", "原爆款：工服变装唱", "原爆款：老歌回忆杀",
-                 "原爆款：洗澡歌单分享", "原爆款：素颜清唱"],
+                 "原爆款：洗澡歌单分享", "原爆款：素颜清唱",
+                 "原爆款：对镜清唱", "原爆款：老歌翻唱", "原爆款：工间弹唱"],
 }
 
 
@@ -573,41 +586,68 @@ def build_repost(platform, track, title, idx, source_date, real=None):
     }
 
 
-def gen_topics(platform, p_idx, real_items):
+def gen_topics(platform, p_idx, real_items, seen):
     out = []
     # 真实接口优先（广撒网，不过滤）
     for it in real_items[:20]:
         track = it.get("cat") or "情绪共鸣"
-        entry = build_topic(platform, track, it["title"], len(out), real=it)
+        title = (it["title"] or "").strip()
+        if not title or title in seen:
+            continue
+        seen.add(title)
+        entry = build_topic(platform, track, title, len(out), real=it)
         out.append(entry)
     # 用全赛道词池补足到 20（广撒网，含大众赛道）
     start = p_idx * 4
     n = 0
+    guard = 0
     while len(out) < 20:
         track = ALL_TRACKS[(start + n) % len(ALL_TRACKS)]
         title = pick(TRACKS[track]["titles"], p_idx * 3 + n)
-        entry = build_topic(platform, track, title, len(out))
+        guard += 1
+        if guard > 600:  # 兜底：标题池耗尽时允许重复，避免死循环
+            entry = build_topic(platform, track, title, len(out))
+            out.append(entry); n += 1; continue
+        if title in seen:
+            n += 1
+            continue
+        seen.add(title)
+        entry = build_topic(platform, track, title,	len(out))
         out.append(entry)
         n += 1
     return out[:20]
 
 
-def gen_reposts(platform, p_idx, real_items, source_date):
+def gen_reposts(platform, p_idx, real_items, source_date, seen):
+    """seen: 全局已用标题（含选题），保证二创不再放重复内容"""
     out = []
     # 真实接口优先，但只保留瑜适合的赛道
     for it in real_items[:20]:
         track = it.get("cat") or "情绪共鸣"
         if track not in YU_TRACKS:
             continue
-        entry = build_repost(platform, track, it["title"], len(out), source_date, real=it)
+        title = (it["title"] or "").strip()
+        if not title or title in seen:
+            continue
+        seen.add(title)
+        entry = build_repost(platform, track, title, len(out), source_date, real=it)
         out.append(entry)
     # 用瑜专属「原爆款视频」词池补足到 20（与选题灵感的热点池完全分开）
     start = p_idx * 3
     n = 0
+    guard = 0
     while len(out) < 20:
         track = YU_TRACKS[(start + n) % len(YU_TRACKS)]
         rpool = RPOST_TITLES.get(track, TRACKS[track]["titles"])
         title = pick(rpool, p_idx * 3 + n)
+        guard += 1
+        if guard > 600:  # 兜底：标题池耗尽时允许重复，避免死循环
+            entry = build_repost(platform, track, title, len(out), source_date)
+            out.append(entry); n += 1; continue
+        if title in seen:
+            n += 1
+            continue
+        seen.add(title)
         entry = build_repost(platform, track, title, len(out), source_date)
         out.append(entry)
         n += 1
@@ -631,9 +671,12 @@ def main():
     real_repost = {"抖音": douyin, "小红书": [], "快手": kuaishou, "微博": weibo, "B站": bili}
 
     topics, reposts = [], []
+    seen = set()  # 全局去重：选题内部 + 二创内部 + 选题/二创之间 三处都不重复
     for i, p in enumerate(PLATFORMS_ORDER):
-        topics.extend(gen_topics(p, i, real_topic[p]))
-        reposts.extend(gen_reposts(p, i, real_repost[p], yesterday_str))
+        ts = gen_topics(p, i, real_topic[p], seen)
+        topics.extend(ts)
+    for i, p in enumerate(PLATFORMS_ORDER):
+        reposts.extend(gen_reposts(p, i, real_repost[p], yesterday_str, seen))
 
     data = {
         "date": today_str,
