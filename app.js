@@ -117,6 +117,7 @@
   const EMBEDDED = __EMBEDDED_JSON__;
   let daily = load(LS.daily, null);
   let hidden = load(LS.hidden, []);
+  let archive = { topics: [], reposts: [] };  // 历史归档：刷新不丢的真实爆款
   if (!daily || !daily.date || (EMBEDDED.date && EMBEDDED.date > daily.date)) {
     daily = { date: EMBEDDED.date, topics: EMBEDDED.topics || [], reposts: EMBEDDED.reposts || [] };
     hidden = [];
@@ -133,9 +134,21 @@
       `<button data-tab="${esc(t)}" class="filter-chip ${t === topicFilter ? 'active' : ''}">${esc(t)}</button>`
     ).join('');
   }
+  function mergeHist(dailyArr, archArr) {
+    const seenIds = new Set(dailyArr.map(t => t.id));
+    const seenKeys = new Set(dailyArr.map(t => (t.platform || '') + '|' + (t.title || '')));
+    const out = dailyArr.filter(t => !hidden.includes(t.id)).map(t => ({ ...t }));
+    (archArr || []).forEach(t => {
+      if (hidden.includes(t.id)) return;
+      const key = (t.platform || '') + '|' + (t.title || '');
+      if (seenIds.has(t.id) || seenKeys.has(key)) return;  // 今天已显示，历史不重复
+      out.push({ ...t, _hist: true });
+    });
+    return out;
+  }
   function allTopics() {
     const u = userTopics.map(t => ({ ...t }));
-    const d = daily.topics.filter(t => !hidden.includes(t.id)).map(t => ({ ...t }));
+    const d = mergeHist(daily.topics, archive.topics);
     return [...u, ...d];
   }
   function renderTopics() {
@@ -151,6 +164,7 @@
   }
   function topicCard(t, num) {
     const tag = t.cat ? `<span class="tag">${esc(t.cat)}</span>` : '';
+    const histBadge = t._hist ? `<span class="hist-badge">📅 历史 ${esc((t.seen_date || '').slice(5))}</span>` : '';
     const hasReal = !!t.real_url;
     const mainLink = hasReal ? t.real_url : (t.dy_link || '#');
     const mainLabel = hasReal ? '▶ 看原爆款（真实视频/热榜）' : '▶ 看抖音相关视频';
@@ -158,7 +172,7 @@
       <div class="topic-header">
         <span class="topic-number">${num}.</span>
         <div class="topic-title-wrap">
-          <div class="topic-title">${esc(t.title)} ${tag}</div>
+          <div class="topic-title">${esc(t.title)} ${tag} ${histBadge}</div>
         </div>
       </div>
       <p class="topic-analysis"><b style="color:var(--primary)">🔥 火爆核心原因：</b><br>${esc(t.analysis)}</p>
@@ -252,7 +266,7 @@
   }
   function allReposts() {
     const u = userReposts.map(t => ({ ...t }));
-    const d = daily.reposts.filter(t => !hidden.includes(t.id)).map(t => ({ ...t }));
+    const d = mergeHist(daily.reposts, archive.reposts);
     return [...u, ...d];
   }
   function renderReposts() {
@@ -268,11 +282,12 @@
   }
   function repostCard(t, num) {
     const tag = t.tag ? `<span class="tag">${esc(t.tag)}</span>` : '';
+    const histBadge = t._hist ? `<span class="hist-badge">📅 历史 ${esc((t.seen_date || '').slice(5))}</span>` : '';
     return `<div class="card repost-card">
       <div class="repost-header">
         <div style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;">
           <span class="topic-number">${num}.</span>
-          <div class="repost-title">${esc(t.title)} ${tag}</div>
+          <div class="repost-title">${esc(t.title)} ${tag} ${histBadge}</div>
         </div>
         <div class="repost-heat">🔥 ${esc(t.heat)}</div>
       </div>
@@ -500,6 +515,14 @@
       hidden = []; save(LS.daily, daily); save(LS.hidden, hidden);
       renderTopics(); renderReposts();
       toast('已更新到 ' + d.date + ' 采集');
+    }
+  }).catch(() => {});
+
+  // 拉取历史归档（真实爆款累积，刷新不丢）
+  fetch('./archive.json').then(r => r.ok ? r.json() : null).then(a => {
+    if (a && (a.topics || a.reposts)) {
+      archive = { topics: a.topics || [], reposts: a.reposts || [] };
+      renderTopics(); renderReposts();
     }
   }).catch(() => {});
 
