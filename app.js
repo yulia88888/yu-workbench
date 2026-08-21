@@ -124,6 +124,13 @@
     save(LS.daily, daily); save(LS.hidden, hidden);
   }
 
+  let topicBatch = false;
+  const topicSel = new Set();
+  function updateTopicBatchInfo() {
+    const total = allTopics().filter(t => topicFilter === '全部' || t.platform === topicFilter).length;
+    $('#topicSelInfo').textContent = '已选 ' + topicSel.size;
+    $('#topicSelAll').checked = topicSel.size > 0 && topicSel.size === total;
+  }
   let topicFilter = '全部';
   const topicFilterEl = $('#topicFilter');
   const topicListEl = $('#topicList');
@@ -165,11 +172,13 @@
   function topicCard(t, num) {
     const tag = t.cat ? `<span class="tag">${esc(t.cat)}</span>` : '';
     const histBadge = t._hist ? `<span class="hist-badge">📅 历史 ${esc((t.seen_date || '').slice(5))}</span>` : '';
+    const chk = topicBatch ? `<input type="checkbox" class="batch-chk" data-batch="${esc(t.id)}" ${topicSel.has(t.id) ? 'checked' : ''} />` : '';
     const hasReal = !!t.real_url;
     const mainLink = hasReal ? t.real_url : (t.dy_link || '#');
     const mainLabel = hasReal ? '▶ 看原爆款（真实视频/热榜）' : '▶ 看抖音相关视频';
     return `<div class="card topic-card">
       <div class="topic-header">
+        ${chk}
         <span class="topic-number">${num}.</span>
         <div class="topic-title-wrap">
           <div class="topic-title">${esc(t.title)} ${tag} ${histBadge}</div>
@@ -183,7 +192,7 @@
       </div>
       <div style="margin-top:10px;display:flex;gap:8px;">
         <button data-copy="${esc(mainLink)}" class="btn-outline" style="flex:1;font-size:11px;">📋 复制 ${hasReal ? '原链接' : '抖音链接'}</button>
-        <button data-rtopic="${esc(t.id)}" class="btn-outline" style="flex:1;font-size:11px;color:#b91c1c;border-color:#fecaca;">删除</button>
+        ${topicBatch ? '' : `<button data-rtopic="${esc(t.id)}" class="btn-outline" style="flex:1;font-size:11px;color:#b91c1c;border-color:#fecaca;">删除</button>`}
       </div>
     </div>`;
   }
@@ -194,6 +203,13 @@
   topicListEl.addEventListener('click', e => {
     const c = e.target.closest('[data-copy]');
     if (c) { copyLink(c.dataset.copy); return; }
+    const cb = e.target.closest('[data-batch]');
+    if (cb) {
+      const id = cb.dataset.batch;
+      if (cb.checked) topicSel.add(id); else topicSel.delete(id);
+      updateTopicBatchInfo();
+      return;
+    }
     const b = e.target.closest('[data-rtopic]'); if (!b) return;
     const id = b.dataset.rtopic;
     if (daily.topics.some(t => t.id === id)) {
@@ -204,6 +220,42 @@
     renderTopics();
   });
   $('#topicAddBtn').addEventListener('click', () => openSheet('选题', buildTopicForm()));
+
+  // 批量删除管理（选题）
+  function exitTopicBatch() {
+    topicBatch = false;
+    topicSel.clear();
+    $('#topicBatchBar').classList.add('hidden');
+    $('#topicBatchBtn').textContent = '批量管理';
+    $('#topicSelAll').checked = false;
+    renderTopics();
+  }
+  $('#topicBatchBtn').addEventListener('click', () => {
+    topicBatch = !topicBatch;
+    if (!topicBatch) topicSel.clear();
+    $('#topicBatchBar').classList.toggle('hidden', !topicBatch);
+    $('#topicBatchBtn').textContent = topicBatch ? '取消' : '批量管理';
+    $('#topicSelAll').checked = false;
+    renderTopics();
+  });
+  $('#topicSelAll').addEventListener('change', e => {
+    topicSel.clear();
+    if (e.target.checked) allTopics().forEach(t => topicSel.add(t.id));
+    renderTopics();
+  });
+  $('#topicBatchDone').addEventListener('click', exitTopicBatch);
+  $('#topicBatchDel').addEventListener('click', () => {
+    if (!topicSel.size) { toast('请先勾选要删除的记录'); return; }
+    let n = 0;
+    topicSel.forEach(id => {
+      if (userTopics.some(t => t.id === id)) { userTopics = userTopics.filter(t => t.id !== id); }
+      else if (!hidden.includes(id)) { hidden.push(id); }
+      n++;
+    });
+    save(LS.user_topics, userTopics); save(LS.hidden, hidden);
+    toast('已删除 ' + n + ' 条选题');
+    exitTopicBatch();
+  });
 
   /* ---------- 链接升级：粘贴分享短链 → 灵感卡片 ---------- */
   $('#upBtn').addEventListener('click', async () => {
@@ -283,9 +335,11 @@
   function repostCard(t, num) {
     const tag = t.tag ? `<span class="tag">${esc(t.tag)}</span>` : '';
     const histBadge = t._hist ? `<span class="hist-badge">📅 历史 ${esc((t.seen_date || '').slice(5))}</span>` : '';
+    const chk = repostBatch ? `<input type="checkbox" class="batch-chk" data-batch="${esc(t.id)}" ${repostSel.has(t.id) ? 'checked' : ''} />` : '';
     return `<div class="card repost-card">
       <div class="repost-header">
         <div style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;">
+          ${chk}
           <span class="topic-number">${num}.</span>
           <div class="repost-title">${esc(t.title)} ${tag} ${histBadge}</div>
         </div>
@@ -307,14 +361,14 @@
         <div class="repost-info-icon">🎬</div>
         <div class="repost-info-text"><b>这个视频长这样：</b>${esc(t.video_desc)}</div>
       </div>
-      <div class="repost-footer">
+      ${repostBatch ? '' : `<div class="repost-footer">
         <button data-addtask="${esc(t.title)}" class="btn-outline">＋ 加入任务</button>
         <button data-saveinsp="${esc(t.id)}" class="btn-outline">⭐ 存为灵感</button>
         <button data-hide="${esc(t.id)}" class="btn-outline">🔄 换视频</button>
       </div>
       <div style="margin-top:10px;">
         <button data-copy="${esc(t.link || '')}" class="btn-outline" style="width:100%;font-size:11px;">📋 复制链接</button>
-      </div>
+      </div>`}
     </div>`;
   }
   repostFilterEl.addEventListener('click', e => {
@@ -324,6 +378,13 @@
   repostListEl.addEventListener('click', e => {
     const c = e.target.closest('[data-copy]');
     if (c) { copyLink(c.dataset.copy); return; }
+    const cb = e.target.closest('[data-batch]');
+    if (cb) {
+      const id = cb.dataset.batch;
+      if (cb.checked) repostSel.add(id); else repostSel.delete(id);
+      updateRepostBatchInfo();
+      return;
+    }
     const add = e.target.closest('[data-addtask]');
     if (add) { tasks.push({ id: uid(), text: '🎬 二创：' + add.dataset.addtask }); save(LS.tasks, tasks); renderPlan(); toast('已加入任务'); return; }
     const sv = e.target.closest('[data-saveinsp]');
@@ -340,6 +401,49 @@
     }
   });
   $('#repostAddBtn').addEventListener('click', () => openSheet('二创素材', buildRepostForm()));
+
+  // 批量删除管理（二创）
+  let repostBatch = false;
+  const repostSel = new Set();
+  function updateRepostBatchInfo() {
+    const total = allReposts().filter(t => repostFilter === '全部' || t.platform === repostFilter).length;
+    $('#repostSelInfo').textContent = '已选 ' + repostSel.size;
+    $('#repostSelAll').checked = repostSel.size > 0 && repostSel.size === total;
+  }
+  function exitRepostBatch() {
+    repostBatch = false;
+    repostSel.clear();
+    $('#repostBatchBar').classList.add('hidden');
+    $('#repostBatchBtn').textContent = '批量管理';
+    $('#repostSelAll').checked = false;
+    renderReposts();
+  }
+  $('#repostBatchBtn').addEventListener('click', () => {
+    repostBatch = !repostBatch;
+    if (!repostBatch) repostSel.clear();
+    $('#repostBatchBar').classList.toggle('hidden', !repostBatch);
+    $('#repostBatchBtn').textContent = repostBatch ? '取消' : '批量管理';
+    $('#repostSelAll').checked = false;
+    renderReposts();
+  });
+  $('#repostSelAll').addEventListener('change', e => {
+    repostSel.clear();
+    if (e.target.checked) allReposts().forEach(t => repostSel.add(t.id));
+    renderReposts();
+  });
+  $('#repostBatchDone').addEventListener('click', exitRepostBatch);
+  $('#repostBatchDel').addEventListener('click', () => {
+    if (!repostSel.size) { toast('请先勾选要删除的记录'); return; }
+    let n = 0;
+    repostSel.forEach(id => {
+      if (userReposts.some(t => t.id === id)) { userReposts = userReposts.filter(t => t.id !== id); }
+      else if (!hidden.includes(id)) { hidden.push(id); }
+      n++;
+    });
+    save(LS.user_reposts, userReposts); save(LS.hidden, hidden);
+    toast('已删除 ' + n + ' 条二创');
+    exitRepostBatch();
+  });
 
   /* ---------- 内容复盘 ---------- */
   let reviews = load(LS.reviews, []);
