@@ -20,6 +20,7 @@
   - 抖音/小红书/快手：官方未开放单条视频接口，给搜索入口（标注「话题页/搜索页」）
 """
 import json
+import os
 import ssl
 import re
 import urllib.request
@@ -583,6 +584,7 @@ def build_repost(platform, track, title, idx, source_date, real=None):
         "source": f"{platform}热点榜 {source_date}",
         "video_desc": pick(meta["video_desc"], idx),
         "link": link,
+        "real_url": real.get("url") if real else "",
     }
 
 
@@ -654,6 +656,38 @@ def gen_reposts(platform, p_idx, real_items, source_date, seen):
     return out[:20]
 
 
+def load_archive():
+    """读取历史归档 archive.json（累积的真实爆款，刷新不丢）。"""
+    try:
+        if os.path.exists("archive.json"):
+            with open("archive.json", encoding="utf-8") as f:
+                d = json.load(f)
+            return {"topics": d.get("topics", []), "reposts": d.get("reposts", [])}
+    except Exception:
+        pass
+    return {"topics": [], "reposts": []}
+
+
+def save_archive(topics, reposts, today_str, cap=700):
+    """把当天真实爆款（带真实链接）并入历史归档，去重后保留最近 cap 条。"""
+    arch = load_archive()
+    at = {(t.get("platform"), t.get("title")): t for t in arch["topics"] if t.get("title")}
+    ar = {(t.get("platform"), t.get("title")): t for t in arch["reposts"] if t.get("title")}
+    for t in topics:
+        if t.get("real_url"):
+            k = (t["platform"], t["title"]); e = dict(t); e["seen_date"] = today_str
+            at[k] = e
+    for t in reposts:
+        if t.get("real_url"):
+            k = (t["platform"], t["title"]); e = dict(t); e["seen_date"] = today_str
+            ar[k] = e
+    at = dict(list(at.items())[-cap:])
+    ar = dict(list(ar.items())[-cap:])
+    with open("archive.json", "w", encoding="utf-8") as f:
+        json.dump({"topics": list(at.values()), "reposts": list(ar.values())},
+                  f, ensure_ascii=False, indent=2)
+
+
 def main():
     today = datetime.date.today()
     today_str = today.strftime("%Y-%m-%d")
@@ -690,6 +724,13 @@ def main():
 
     with open("daily.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+    # 历史归档：真实爆款累积进 archive.json，6 小时刷新也不丢
+    try:
+        save_archive(topics, reposts, today_str)
+        print("[archive] 真实爆款已并入历史归档")
+    except Exception as e:
+        print("[warn] archive failed:", e)
 
     print(f"date={today_str} topics={len(topics)} reposts={len(reposts)}")
     print("选题各平台:", {p: sum(1 for t in topics if t["platform"] == p) for p in PLATFORMS_ORDER})
