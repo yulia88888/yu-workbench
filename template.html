@@ -154,6 +154,19 @@
     #scrollThumb:active{background:rgba(107,142,66,.85);}
     #backTop{position:fixed;right:9px;bottom:70px;width:42px;height:42px;border-radius:50%;background:rgba(107,142,66,.92);color:#fff;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:31;}
     #backTop:active{transform:scale(.94);}
+
+    /* 批量管理 */
+    .list-count-row{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 8px;}
+    .batch-enter{font-size:12px;font-weight:600;color:var(--primary);background:#fff;border:1px solid var(--primary);border-radius:999px;padding:5px 14px;}
+    .batch-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--primary-soft);border-radius:12px;margin-bottom:10px;}
+    .batch-bar.hidden{display:none;}
+    .batch-all{font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:5px;white-space:nowrap;}
+    .batch-all input{accent-color:var(--primary);width:16px;height:16px;}
+    .batch-info{font-size:12px;color:var(--text-tertiary);flex:1;padding-left:4px;}
+    .batch-del{font-size:12px;font-weight:600;color:#fff;background:#dc2626;border-radius:999px;padding:6px 14px;}
+    .batch-del:active{transform:scale(.96);}
+    .batch-done{font-size:12px;font-weight:600;color:var(--primary);background:#fff;border:1px solid var(--primary);border-radius:999px;padding:6px 14px;}
+    .batch-chk{width:18px;height:18px;flex-shrink:0;accent-color:var(--primary);margin-top:3px;}
   </style>
 </head>
 <body>
@@ -190,7 +203,16 @@
 
         <div data-panel="topic" class="hidden">
           <div id="topicFilter" class="filter-bar"></div>
-          <div class="list-count" id="topicCount"></div>
+          <div class="list-count-row">
+            <span class="list-count" id="topicCount"></span>
+            <button id="topicBatchBtn" class="batch-enter">批量管理</button>
+          </div>
+          <div class="batch-bar hidden" id="topicBatchBar">
+            <label class="batch-all"><input type="checkbox" id="topicSelAll" /> 全选</label>
+            <span class="batch-info" id="topicSelInfo">已选 0</span>
+            <button id="topicBatchDel" class="batch-del">删除选中</button>
+            <button id="topicBatchDone" class="batch-done">完成</button>
+          </div>
           <div class="upgrade-box">
             <div class="upgrade-title">🔗 链接升级 · 粘贴分享链接</div>
             <textarea id="upInput" class="upgrade-input" placeholder="把抖音/小红书/快手/B站 的「分享→复制链接」整段粘贴进来（如 v.douyin.com/xxx），自动转成可跳转灵感卡片"></textarea>
@@ -204,7 +226,16 @@
 
         <div data-panel="repost" class="hidden">
           <div id="repostFilter" class="filter-bar"></div>
-          <div class="list-count" id="repostCount"></div>
+          <div class="list-count-row">
+            <span class="list-count" id="repostCount"></span>
+            <button id="repostBatchBtn" class="batch-enter">批量管理</button>
+          </div>
+          <div class="batch-bar hidden" id="repostBatchBar">
+            <label class="batch-all"><input type="checkbox" id="repostSelAll" /> 全选</label>
+            <span class="batch-info" id="repostSelInfo">已选 0</span>
+            <button id="repostBatchDel" class="batch-del">删除选中</button>
+            <button id="repostBatchDone" class="batch-done">完成</button>
+          </div>
           <div id="repostList"></div>
           <button id="repostAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增二创素材</button>
           <button id="repostImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
