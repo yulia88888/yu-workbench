@@ -683,9 +683,17 @@ def save_archive(topics, reposts, today_str, cap=700):
             ar[k] = e
     at = dict(list(at.items())[-cap:])
     ar = dict(list(ar.items())[-cap:])
+    # 归档条目赋予唯一 id（带平台+日期+序号），避免与每日 daily 的 id 冲突导致误删历史
+    at_list = []
+    for i, v in enumerate(at.values()):
+        v = dict(v); v["id"] = "arch-%s-%s-%d" % (v.get("platform", ""), v.get("seen_date", ""), i)
+        at_list.append(v)
+    ar_list = []
+    for i, v in enumerate(ar.values()):
+        v = dict(v); v["id"] = "arch-%s-%s-%d" % (v.get("platform", ""), v.get("seen_date", ""), i)
+        ar_list.append(v)
     with open("archive.json", "w", encoding="utf-8") as f:
-        json.dump({"topics": list(at.values()), "reposts": list(ar.values())},
-                  f, ensure_ascii=False, indent=2)
+        json.dump({"topics": at_list, "reposts": ar_list}, f, ensure_ascii=False, indent=2)
 
 
 def main():
