@@ -140,11 +140,14 @@
   }
   function renderTopics() {
     const list = allTopics().filter(t => topicFilter === '全部' || t.platform === topicFilter);
+    $('#topicCount').textContent = `共 ${list.length} 条${topicFilter !== '全部' ? '（' + topicFilter + '）' : ''}`;
     if (!list.length) {
       topicListEl.innerHTML = '<div class="empty">暂无选题，点下方「＋新增」添加</div>';
+      updateScrollUI();
       return;
     }
     topicListEl.innerHTML = list.map((t, i) => topicCard(t, i + 1)).join('');
+    updateScrollUI();
   }
   function topicCard(t, num) {
     const tag = t.cat ? `<span class="tag">${esc(t.cat)}</span>` : '';
@@ -254,17 +257,23 @@
   }
   function renderReposts() {
     const list = allReposts().filter(t => repostFilter === '全部' || t.platform === repostFilter);
+    $('#repostCount').textContent = `共 ${list.length} 条${repostFilter !== '全部' ? '（' + repostFilter + '）' : ''}`;
     if (!list.length) {
       repostListEl.innerHTML = '<div class="empty">暂无素材，点下方「＋新增」添加</div>';
+      updateScrollUI();
       return;
     }
-    repostListEl.innerHTML = list.map(repostCard).join('');
+    repostListEl.innerHTML = list.map((t, i) => repostCard(t, i + 1)).join('');
+    updateScrollUI();
   }
-  function repostCard(t) {
+  function repostCard(t, num) {
     const tag = t.tag ? `<span class="tag">${esc(t.tag)}</span>` : '';
     return `<div class="card repost-card">
       <div class="repost-header">
-        <div class="repost-title">${esc(t.title)} ${tag}</div>
+        <div style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;">
+          <span class="topic-number">${num}.</span>
+          <div class="repost-title">${esc(t.title)} ${tag}</div>
+        </div>
         <div class="repost-heat">🔥 ${esc(t.heat)}</div>
       </div>
       <div class="repost-section">
@@ -500,8 +509,56 @@
     $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
     $$('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== v));
     $('#viewTitle').textContent = titles[v];
+    updateScrollUI();
   }
   $$('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+
+  /* ---------- 半透明滚动拉杆 + 回到顶部 ---------- */
+  const content = $('#content');
+  const track = $('#scrollTrack');
+  const thumb = $('#scrollThumb');
+  const backTop = $('#backTop');
+
+  function updateScrollUI() {
+    const rect = content.getBoundingClientRect();
+    const vh = content.clientHeight;
+    const sh = content.scrollHeight;
+    const overflow = sh - vh;
+    if (overflow <= 4) { track.style.display = 'none'; backTop.style.display = 'none'; return; }
+    track.style.display = 'block';
+    const trackH = rect.height;
+    const thumbH = Math.max(28, trackH * vh / sh);
+    const maxThumb = trackH - thumbH;
+    const ratio = overflow > 0 ? content.scrollTop / overflow : 0;
+    track.style.top = rect.top + 'px';
+    track.style.height = trackH + 'px';
+    thumb.style.height = thumbH + 'px';
+    thumb.style.top = (rect.top + ratio * maxThumb) + 'px';
+    backTop.style.display = content.scrollTop > 300 ? 'flex' : 'none';
+  }
+
+  let sd = false, sy = 0, st0 = 0;
+  thumb.addEventListener('pointerdown', e => {
+    sd = true; sy = e.clientY; st0 = parseFloat(thumb.style.top) || 0;
+    thumb.setPointerCapture && thumb.setPointerCapture(e.pointerId);
+  });
+  window.addEventListener('pointermove', e => {
+    if (!sd) return;
+    const rect = content.getBoundingClientRect();
+    const trackH = rect.height;
+    const thumbH = parseFloat(thumb.style.height) || 28;
+    const maxThumb = trackH - thumbH;
+    let ny = st0 + (e.clientY - sy);
+    ny = Math.max(rect.top, Math.min(rect.top + maxThumb, ny));
+    thumb.style.top = ny + 'px';
+    const ratio = maxThumb > 0 ? (ny - rect.top) / maxThumb : 0;
+    const overflow = content.scrollHeight - content.clientHeight;
+    content.scrollTop = ratio * overflow;
+  });
+  window.addEventListener('pointerup', () => { sd = false; });
+  content.addEventListener('scroll', updateScrollUI, { passive: true });
+  window.addEventListener('resize', updateScrollUI);
+  backTop.addEventListener('click', () => content.scrollTo({ top: 0, behavior: 'smooth' }));
 
   /* ---------- 初始化 ---------- */
   $('#todayDate').textContent = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
