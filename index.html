@@ -949,6 +949,19 @@
         <h4 style="margin:0 0 6px;">✍️ 我有别的需求</h4>
         <input id="massageNeed" placeholder="写下你此刻最想解决的，如「熬夜脸救急」" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px;" />
         <button class="btn-primary" style="width:100%;margin-top:10px;" id="massageMatch">匹配方案</button>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <h4 style="margin:0 0 10px;">📺 跟练视频（真实教学）</h4>
+        <div class="video-item" data-bv="BV1Vs41167Xq" data-page="1" data-title="田中瘦脸操">
+          <div class="video-info"><div class="video-title">1. 田中宥久子瘦脸操（每天3分钟大饼脸变V脸）</div><div class="video-meta">📚 真实跟练视频</div></div>
+          <div class="video-actions"><button class="btn-outline video-play" data-action="play">本页播放</button><a href="https://www.bilibili.com/video/BV1Vs41167Xq" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a></div>
+          <div class="video-player"></div>
+        </div>
+        <div class="video-item" data-bv="BV1ma4y1T7Ys" data-page="1" data-title="5分钟面部瑜伽">
+          <div class="video-info"><div class="video-title">2. 5分钟面部瑜伽（零成本抗衰·紧致轮廓）</div><div class="video-meta">📚 真实跟练视频</div></div>
+          <div class="video-actions"><button class="btn-outline video-play" data-action="play">本页播放</button><a href="https://www.bilibili.com/video/BV1ma4y1T7Ys" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a></div>
+          <div class="video-player"></div>
+        </div>
       </div>`;
   }
 
@@ -1011,6 +1024,7 @@
       const s = getSkinData(); s.diary = s.diary || []; s.diary.push({ date: todayKey(), mood, tags, note });
       setSkinData(s); renderSkinTab('diary'); toast('日记已保存'); return;
     }
+    if (handleVideoControls(e)) return;
     const mass = e.target.closest('[data-massage]');
     if (mass) { openMassagePlay(mass.dataset.massage); return; }
     const match = e.target.closest('#massageMatch');
@@ -1056,24 +1070,24 @@
   /* ---------- 电子琴 ---------- */
   const PIANO_VIDEOS = {
     0: [
-      { title: '电子琴零基础：认识键盘与C大调音阶', bv: 'BV1Xs411Q7CH', t: 5 },
-      { title: '零基础手型与指法入门', bv: 'BV1ub411G7xG', t: 6 },
-      { title: '单手弹奏《小星星》', bv: 'BV1Kb411G7P3', t: 4 }
+      { title: '电子琴新手教学：认识键盘与基本操作', bv: 'BV1KE41157m9', t: 13 },
+      { title: '电子琴入门：从零开始学弹奏', bv: 'BV1Ct4y1v7Ac', t: 12 },
+      { title: '乐理入门（音律屋）：识谱/音名/唱名', bv: 'BV1Hg411w7n2', t: 10 }
     ],
     1: [
-      { title: '双手简单配合《欢乐颂》', bv: 'BV1ab411G7V2', t: 7 },
-      { title: '基础节奏型与和弦伴奏', bv: 'BV1cb411G7N1', t: 8 },
-      { title: '入门曲目《天空之城》简版', bv: 'BV1db411G7M5', t: 10 }
+      { title: '电子琴新手教学：认识键盘与基本操作', bv: 'BV1KE41157m9', t: 13 },
+      { title: '电子琴入门：从零开始学弹奏', bv: 'BV1Ct4y1v7Ac', t: 12 },
+      { title: '📚 零基础学电子琴·完整系统课合集（112课）', url: 'https://b23.tv/NI2PuJM', t: 0 }
     ],
     2: [
-      { title: '常用三和弦与转位', bv: 'BV1eb411G7L4', t: 9 },
-      { title: '进阶曲目《卡农》简化版', bv: 'BV1fb411G7K3', t: 12 },
-      { title: '即兴伴奏入门', bv: 'BV1gb411G7J2', t: 11 }
+      { title: '乐理入门（音律屋）：识谱/音名/唱名', bv: 'BV1Hg411w7n2', t: 10 },
+      { title: '📚 完整系统课合集（进阶曲目：小白船/樱花/送别…）', url: 'https://b23.tv/NI2PuJM', t: 0 },
+      { title: '电子琴入门：从零开始学弹奏', bv: 'BV1Ct4y1v7Ac', t: 12 }
     ],
     3: [
-      { title: '流行钢琴即兴技巧', bv: 'BV1hb411G7H1', t: 13 },
-      { title: '复杂曲目《梦中的婚礼》', bv: 'BV1ib411G7F9', t: 15 },
-      { title: '扒谱与编曲思路', bv: 'BV1jb411G7D8', t: 14 }
+      { title: '📚 完整系统课合集（熟练曲目：致野玫瑰/献给爱丽丝/国际歌…）', url: 'https://b23.tv/NI2PuJM', t: 0 },
+      { title: '电子琴新手教学：认识键盘与基本操作', bv: 'BV1KE41157m9', t: 13 },
+      { title: '乐理入门（音律屋）：识谱/音名/唱名', bv: 'BV1Hg411w7n2', t: 10 }
     ]
   };
   function getPianoData() { const p = load(LS.personal, {}); return p.piano || { level: 0, streak: 0, xp: 0, hp: 5, history: [], progress: { 音阶: 0, 音调: 0, 简单曲目: 0, 和弦: 0 } }; }
@@ -1090,20 +1104,40 @@
     }
   }
   function bvidUrl(bv) { return 'https://www.bilibili.com/video/' + bv; }
-  function bvidPlayer(bv, start) { return 'https://player.bilibili.com/player.html?bvid=' + bv + '&page=1&high_quality=1' + (start ? '&t=' + start : ''); }
+  function bvidPlayer(bv, start, page) { return 'https://player.bilibili.com/player.html?bvid=' + bv + '&page=' + (page || 1) + '&high_quality=1' + (start ? '&t=' + start : ''); }
+  function handleVideoControls(e) {
+    const play = e.target.closest('.video-play');
+    if (play) {
+      const item = play.closest('.video-item');
+      const box = item.querySelector('.video-player');
+      const bv = item.dataset.bv;
+      const page = item.dataset.page ? Number(item.dataset.page) : null;
+      if (box.innerHTML) { box.innerHTML = ''; play.textContent = '本页播放'; }
+      else { box.innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="${bvidPlayer(bv, null, page)}" allowfullscreen></iframe></div><div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`; play.textContent = '收起视频'; }
+      return true;
+    }
+    const mirror = e.target.closest('[data-mirror]');
+    if (mirror) { const wrap = mirror.closest('.video-player').querySelector('.vp-wrap'); wrap.style.transform = wrap.style.transform === 'scaleX(-1)' ? 'scaleX(1)' : 'scaleX(-1)'; return true; }
+    const jump = e.target.closest('[data-jump]');
+    if (jump) { const iframe = jump.closest('.video-player').querySelector('.vp-iframe'); const t = prompt('跳转到第几秒？', '30'); if (t && iframe) iframe.src = iframe.src.replace(/&t=\d+/, '') + '&t=' + t; return true; }
+    return false;
+  }
   function videoListHTML(videos, levelName) {
     return `<div class="card"><h4 style="margin:0 0 10px;">▶️ ${levelName} 教学视频</h4>
-      ${videos.map((v, i) => `<div class="video-item" data-bv="${esc(v.bv)}" data-title="${esc(v.title)}">
-        <div class="video-info">
-          <div class="video-title">${i + 1}. ${esc(v.title)}</div>
-          <div class="video-meta">⏱ ${v.t}分钟 · ${esc(levelName)}</div>
-        </div>
-        <div class="video-actions">
-          <button class="btn-outline video-play" data-action="play">本页播放</button>
-          <a href="${bvidUrl(v.bv)}" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a>
-        </div>
-        <div class="video-player"></div>
-      </div>`).join('')}
+      ${videos.map((v, i) => {
+        const hasBv = v.bv && /^BV/i.test(v.bv);
+        return `<div class="video-item" data-bv="${esc(v.bv || '')}" data-page="${esc(v.page || 1)}" data-title="${esc(v.title)}">
+          <div class="video-info">
+            <div class="video-title">${i + 1}. ${esc(v.title)}</div>
+            <div class="video-meta">${!v.t ? '📚 完整系统课合集' : '⏱ ' + v.t + '分钟 · ' + esc(levelName)}</div>
+          </div>
+          <div class="video-actions">
+            ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
+            <a href="${hasBv ? bvidUrl(v.bv) : esc(v.url || '#')}" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a>
+          </div>
+          <div class="video-player"></div>
+        </div>`;
+      }).join('')}
     </div>`;
   }
   function renderPiano() {
@@ -1136,33 +1170,7 @@
       if (back) { closeSubpage(); return; }
       const tab = e.target.closest('[data-pl]');
       if (tab) { const d = getPianoData(); d.level = Number(tab.dataset.pl); setPianoData(d); renderPiano(); }
-      const play = e.target.closest('.video-play');
-      if (play) {
-        const item = play.closest('.video-item');
-        const box = item.querySelector('.video-player');
-        const bv = item.dataset.bv;
-        if (box.innerHTML) { box.innerHTML = ''; play.textContent = '本页播放'; }
-        else {
-          box.innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="${bvidPlayer(bv)}" allowfullscreen></iframe></div>
-            <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
-          play.textContent = '收起视频';
-        }
-        return;
-      }
-      const mirror = e.target.closest('[data-mirror]');
-      if (mirror) {
-        const wrap = mirror.closest('.video-player').querySelector('.vp-wrap');
-        wrap.style.transform = wrap.style.transform === 'scaleX(-1)' ? 'scaleX(1)' : 'scaleX(-1)';
-        toast(wrap.style.transform === 'scaleX(-1)' ? '已镜像' : '已还原');
-        return;
-      }
-      const jump = e.target.closest('[data-jump]');
-      if (jump) {
-        const iframe = jump.closest('.video-player').querySelector('.vp-iframe');
-        const t = prompt('跳转到第几秒？', '30');
-        if (t && iframe) iframe.src = iframe.src.replace(/&t=\d+/, '') + '&t=' + t;
-        return;
-      }
+      if (handleVideoControls(e)) return;
       const ask = e.target.closest('#pianoAsk');
       if (ask) {
         const q = $('#pianoInput').value.trim(); if (!q) { toast('请先描述你的问题'); return; }
@@ -1187,24 +1195,24 @@
   /* ---------- 唱歌 ---------- */
   const SING_VIDEOS = {
     0: [
-      { title: '零基础练声：打嘟唇颤音', bv: 'BV1zA411b7cR', t: 4 },
-      { title: '五音不全自救：ma-ma-ma 音阶', bv: 'BV1Kt411G7F1', t: 5 },
-      { title: '气息不足？腹式呼吸 3 分钟', bv: 'BV1Lt411G7E2', t: 3 }
+      { title: 'Jason老湿 108集零基础唱歌教程（全集）', bv: 'BV1VN1iYLExq', page: 1, t: 0 },
+      { title: 'Jason 99集零基础教唱歌（全集）', bv: 'BV1Ae411B7Dm', page: 1, t: 0 },
+      { title: '官方99集 Jason零基础唱歌系统课', bv: 'BV1okAVeaELv', page: 1, t: 0 }
     ],
     1: [
-      { title: '音准训练：跟唱 do-re-mi', bv: 'BV1Mt411G7D3', t: 6 },
-      { title: '入门曲目《小星星》C调', bv: 'BV1Nt411G7C4', t: 5 },
-      { title: '节奏训练：拍手打拍子', bv: 'BV1Pt411G7B5', t: 4 }
+      { title: 'Jason老湿 108集零基础唱歌教程（第20集起）', bv: 'BV1VN1iYLExq', page: 20, t: 0 },
+      { title: 'Jason 99集零基础教唱歌（第15集起）', bv: 'BV1Ae411B7Dm', page: 15, t: 0 },
+      { title: '官方99集 Jason零基础唱歌系统课（第20集起）', bv: 'BV1okAVeaELv', page: 20, t: 0 }
     ],
     2: [
-      { title: '进阶：真假声转换练习', bv: 'BV1Qt411G7A6', t: 8 },
-      { title: '进阶曲目《月亮代表我的心》', bv: 'BV1Rt411G797', t: 7 },
-      { title: '共鸣训练：胸腔+头腔', bv: 'BV1St411G786', t: 6 }
+      { title: 'Jason老湿 108集零基础唱歌教程（第50集起·混声）', bv: 'BV1VN1iYLExq', page: 50, t: 0 },
+      { title: '官方99集 Jason零基础唱歌系统课（第50集起）', bv: 'BV1okAVeaELv', page: 50, t: 0 },
+      { title: 'Jason 99集零基础教唱歌（第50集起）', bv: 'BV1Ae411B7Dm', page: 50, t: 0 }
     ],
     3: [
-      { title: '熟练：高音拓展技巧', bv: 'BV1Tt411G775', t: 9 },
-      { title: '熟练：情感表达与咬字', bv: 'BV1Ut411G764', t: 8 },
-      { title: '完整演绎一首歌', bv: 'BV1Vt411G753', t: 10 }
+      { title: 'Jason老湿 108集零基础唱歌教程（第80集起·高音）', bv: 'BV1VN1iYLExq', page: 80, t: 0 },
+      { title: '官方99集 Jason零基础唱歌系统课（第80集起）', bv: 'BV1okAVeaELv', page: 80, t: 0 },
+      { title: 'Jason 99集零基础教唱歌（第80集起）', bv: 'BV1Ae411B7Dm', page: 80, t: 0 }
     ]
   };
   function getSingData() { const p = load(LS.personal, {}); return p.singing || { streak: 0, xp: 0, hp: 5, level: 0, history: [], progress: { 练声: 0, 音准: 0, 气息: 0, 节奏: 0 } }; }
@@ -1239,33 +1247,7 @@
       if (back) { closeSubpage(); return; }
       const tab = e.target.closest('[data-sl]');
       if (tab) { const d = getSingData(); d.level = Number(tab.dataset.sl); setSingData(d); renderSinging(); }
-      const play = e.target.closest('.video-play');
-      if (play) {
-        const item = play.closest('.video-item');
-        const box = item.querySelector('.video-player');
-        const bv = item.dataset.bv;
-        if (box.innerHTML) { box.innerHTML = ''; play.textContent = '本页播放'; }
-        else {
-          box.innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="${bvidPlayer(bv)}" allowfullscreen></iframe></div>
-            <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
-          play.textContent = '收起视频';
-        }
-        return;
-      }
-      const mirror = e.target.closest('[data-mirror]');
-      if (mirror) {
-        const wrap = mirror.closest('.video-player').querySelector('.vp-wrap');
-        wrap.style.transform = wrap.style.transform === 'scaleX(-1)' ? 'scaleX(1)' : 'scaleX(-1)';
-        toast(wrap.style.transform === 'scaleX(-1)' ? '已镜像' : '已还原');
-        return;
-      }
-      const jump = e.target.closest('[data-jump]');
-      if (jump) {
-        const iframe = jump.closest('.video-player').querySelector('.vp-iframe');
-        const t = prompt('跳转到第几秒？', '30');
-        if (t && iframe) iframe.src = iframe.src.replace(/&t=\d+/, '') + '&t=' + t;
-        return;
-      }
+      if (handleVideoControls(e)) return;
       const ask = e.target.closest('#singAsk');
       if (ask) {
         const q = $('#singInput').value.trim(); if (!q) { toast('请先描述问题'); return; }
@@ -1385,14 +1367,14 @@
           <h4 style="margin:0 0 10px;">▶️ 听力视频</h4>
           <div id="listenPlayer" class="empty" style="padding:20px;">点击下方按钮播放听力视频</div>
           <button class="btn-outline" id="listenPlay" style="width:100%;margin-top:10px;">▶ 播放听力视频</button>
-          <a href="https://www.bilibili.com/video/BV1u4411K7jN" target="_blank" rel="noopener" class="btn-outline" style="width:100%;margin-top:8px;display:block;text-align:center;">跳转原视频 ↗</a>
+          <a href="https://www.bilibili.com/video/BV1E9HPzEE5X" target="_blank" rel="noopener" class="btn-outline" style="width:100%;margin-top:8px;display:block;text-align:center;">跳转原视频 ↗</a>
         </div>
         <button class="btn-primary" id="engListenDone" style="width:100%;margin-top:10px;">完成听力打卡</button>
       `);
       $('#subpageBody').addEventListener('click', e => {
         if (e.target.closest('[data-engback]')) { renderEnglish(); return; }
         if (e.target.closest('#listenPlay')) {
-          $('#listenPlayer').innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="https://player.bilibili.com/player.html?bvid=BV1u4411K7jN&page=1&high_quality=1" allowfullscreen></iframe></div>
+          $('#listenPlayer').innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="https://player.bilibili.com/player.html?bvid=BV1E9HPzEE5X&page=1&high_quality=1" allowfullscreen></iframe></div>
             <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
           $('#listenPlayer').classList.remove('empty');
         }
