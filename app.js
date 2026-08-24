@@ -374,11 +374,13 @@
     $('#backBtn').classList.add('show');
     $('#subpageBody').innerHTML = html;
     $('#subpage').classList.remove('hidden');
+    $('#subpage').classList.add('show');
     $('#content').scrollTop = 0;
     $('#subpage').scrollTop = 0;
     setTimeout(updateScrollUI, 60);
   }
   function closeSubpage() {
+    $('#subpage').classList.remove('show');
     $('#subpage').classList.add('hidden');
     $('#subpageBody').innerHTML = '';
     $('#viewTitle').textContent = titles[currentView];
