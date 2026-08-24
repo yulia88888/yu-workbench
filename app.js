@@ -585,7 +585,11 @@
     const pTab = e.target.closest('[data-pl]');
     if (pTab) { const d = getPianoData(); d.level = Number(pTab.dataset.pl); setPianoData(d); renderPiano(); return; }
     const pMap = e.target.closest('[data-map^="piano:"]');
-    if (pMap) { const k = pMap.dataset.map.split(':')[1]; const d = getPianoData(); d.progress[k] = Math.min(100, (d.progress[k] || 0) + 10); setPianoData(d); toast(`${k} +10%`); renderPiano(); return; }
+    if (pMap) { const k = pMap.dataset.map.split(':')[1]; renderPianoModule(k); return; }
+    const pBack = e.target.closest('[data-plback]');
+    if (pBack) { renderPiano(); return; }
+    const pModCheck = e.target.closest('[data-modcheck^="piano:"]');
+    if (pModCheck) { const k = pModCheck.dataset.modcheck.split(':')[1]; const d = getPianoData(); d.progress[k] = Math.min(100, (d.progress[k] || 0) + 15); d.xp += 5; setPianoData(d); toast(`${k} +15%`); renderPianoModule(k); return; }
     const pAsk = e.target.closest('#pianoAsk');
     if (pAsk) {
       const q = $('#pianoInput') && $('#pianoInput').value.trim();
@@ -610,7 +614,11 @@
     const sTab = e.target.closest('[data-sl]');
     if (sTab) { const d = getSingData(); d.level = Number(sTab.dataset.sl); setSingData(d); renderSinging(); return; }
     const sMap = e.target.closest('[data-map^="sing:"]');
-    if (sMap) { const k = sMap.dataset.map.split(':')[1]; const d = getSingData(); d.progress[k] = Math.min(100, (d.progress[k] || 0) + 10); setSingData(d); toast(`${k} +10%`); renderSinging(); return; }
+    if (sMap) { const k = sMap.dataset.map.split(':')[1]; renderSingModule(k); return; }
+    const sBack = e.target.closest('[data-slback]');
+    if (sBack) { renderSinging(); return; }
+    const sModCheck = e.target.closest('[data-modcheck^="sing:"]');
+    if (sModCheck) { const k = sModCheck.dataset.modcheck.split(':')[1]; const d = getSingData(); d.progress[k] = Math.min(100, (d.progress[k] || 0) + 15); d.xp += 5; setSingData(d); toast(`${k} +15%`); renderSingModule(k); return; }
     const sAsk = e.target.closest('#singAsk');
     if (sAsk) {
       const q = $('#singInput') && $('#singInput').value.trim();
@@ -633,55 +641,244 @@
 
     // ---------- 英语 ----------
     const eTab = e.target.closest('[data-el]');
-    if (eTab) { const d = getEngData(); d.level = Number(eTab.dataset.el); setEngData(d); renderEnglish(); return; }
+    if (eTab) { const s = getEngState(); s.level = Number(eTab.dataset.el); setEngState(s); renderEnglish(); return; }
     const eMap = e.target.closest('[data-map^="eng:"]');
-    if (eMap) { const k = eMap.dataset.map.split(':')[1]; const d = getEngData(); d.map[k] = Math.min(100, (d.map[k] || 0) + 10); setEngData(d); toast(`${k} +10%`); renderEnglish(); return; }
+    if (eMap) { const k = eMap.dataset.map.split(':')[1]; renderEnglishModule(k); return; }
+    const eMapCheck = e.target.closest('[data-mapcheck^="eng:"]');
+    if (eMapCheck) { const k = eMapCheck.dataset.mapcheck.split(':')[1]; const s = getEngState(); s.map[k] = Math.min(100, (s.map[k] || 0) + 10); s.xp += 3; setEngState(s); toast(`${k} +10%`); renderEnglishModule(k); return; }
     const ePage = e.target.closest('[data-epage]');
-    if (ePage) { renderEnglishPage(ePage.dataset.epage); return; }
-    // 英语子页面
-    const wordMean = $('#wordMean');
-    if (e.target.closest('#wordReveal') && wordMean) { wordMean.classList.add('show'); return; }
-    if (e.target.closest('#engAgain')) {
-      const d = getEngData();
-      const words = WORD_BANK[ENGLISH_LEVELS[d.level]] || WORD_BANK['入门'];
-      const idx = d.xp % words.length; const w = words[idx];
-      d.srs.push({ en: w.en, level: d.level, next: Date.now() + 60000 }); checkLevelAdjust(d, 30); setEngData(d); toast('已加入1分钟后复习'); renderEnglishPage('word'); return;
-    }
-    if (e.target.closest('#engKnow')) {
-      const d = getEngData();
-      const words = WORD_BANK[ENGLISH_LEVELS[d.level]] || WORD_BANK['入门'];
-      const idx = d.xp % words.length; const w = words[idx];
-      d.xp += 5; d.map['词汇'] = Math.min(100, d.map['词汇'] + 5); d.today.done = true;
-      d.srs.push({ en: w.en, level: d.level, next: Date.now() + 24 * 3600 * 1000 });
-      checkLevelAdjust(d, 90); setEngData(d); toast('太棒了，已记录进度'); renderEnglishPage('word'); return;
-    }
-    if (e.target.closest('#listenPlay')) {
-      const lp = $('#listenPlayer');
-      if (lp) {
-        lp.innerHTML = `<div class="vp-tip">视频加载后，需再点播放器内 ▶ 播放按钮。若卡住请用「跳转原视频」。</div>
-          <div class="vp-wrap"><iframe class="vp-iframe" src="https://player.bilibili.com/player.html?bvid=BV1E9HPzEE5X&page=1&high_quality=1&autoplay=0" allowfullscreen frameborder="0" scrolling="no" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" loading="eager"></iframe></div>
-          <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
-        lp.classList.remove('empty');
-      }
+    if (ePage) {
+      const page = ePage.dataset.epage;
+      if (page === 'tasks') renderEnglishTasks();
+      else if (page === 'listen') renderEnglishListen(0);
+      else if (page.startsWith('listen:')) renderEnglishListen(Number(page.split(':')[1]));
+      else if (page === 'speak') renderEnglishSpeak();
+      else if (page === 'errors') renderEnglishErrors();
+      else if (page === 'review') renderEnglishReview();
+      else if (page === 'placement') renderEnglishPlacement();
       return;
     }
-    if (e.target.closest('#engListenDone')) { const d = getEngData(); d.map['听力'] = Math.min(100, d.map['听力'] + 10); d.xp += 5; checkLevelAdjust(d, 85); setEngData(d); toast('听力打卡成功'); renderEnglish(); return; }
-    if (e.target.closest('#engRecord')) { const sr = $('#speakResult'); if (sr) { sr.style.display = 'block'; sr.innerHTML = '<b>AI 口语反馈：</b><br/>发音清晰，重音在「would like」上。建议把「please」读得更轻一些。'; } return; }
-    if (e.target.closest('#engSpeakDone')) { const d = getEngData(); d.map['口语'] = Math.min(100, d.map['口语'] + 10); d.xp += 5; checkLevelAdjust(d, 80); setEngData(d); toast('口语打卡成功'); renderEnglish(); return; }
-    if (e.target.closest('#engWriteDone')) { const d = getEngData(); d.map['默写'] = Math.min(100, d.map['默写'] + 10); d.xp += 5; checkLevelAdjust(d, 75); setEngData(d); toast('默写打卡成功'); renderEnglish(); return; }
-    const srsDone = e.target.closest('[data-srsdone]');
-    if (srsDone) { const en = srsDone.dataset.srsdone; const d = getEngData(); d.srs = d.srs.filter(x => x.en !== en); setEngData(d); renderEnglishPage('srs'); toast('复习完成'); return; }
+    const doTask = e.target.closest('[data-dotask]');
+    if (doTask) {
+      const tasks = generateDailyTasks();
+      const idx = Number(doTask.dataset.dotask);
+      const t = tasks[idx];
+      if (!t) return;
+      if (t.type === 'new') renderEnglishWord(t.en, true);
+      else renderEnglishDictation(t.en, true);
+      return;
+    }
+    const knowNew = e.target.closest('[data-knownew]');
+    if (knowNew) {
+      const en = knowNew.dataset.knownew;
+      const info = getWordInfo(en);
+      ensureWordState(info, info.levelIdx);
+      const s = getEngState(); s.xp += 5; s.map['词汇'] = Math.min(100, s.map['词汇'] + 5); setEngState(s);
+      toast('太棒了，已记录进度');
+      renderEnglishTasks();
+      return;
+    }
+    const speakBtn = e.target.closest('[data-speak]');
+    if (speakBtn) {
+      const text = speakBtn.dataset.speak;
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US'; u.rate = 0.9;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+      } else toast('当前浏览器不支持语音朗读');
+      return;
+    }
+    const checkSpell = e.target.closest('[data-checkspell]');
+    if (checkSpell) {
+      const en = checkSpell.dataset.checkspell;
+      const input = $('#dictInput');
+      if (!input) return;
+      const val = input.value.trim().toLowerCase();
+      const info = getWordInfo(en);
+      const correct = en.toLowerCase();
+      const fb = $('#dictFeedback');
+      fb.style.display = 'block';
+      const diff = Array.from(correct).filter((c, i) => val[i] !== c).length + Math.abs(val.length - correct.length);
+      let accuracy = 50;
+      if (val === correct) {
+        fb.innerHTML = '<b style="color:#2E7D32;">✅ 完全正确！</b>';
+        updateWordState(en, w => { w.consecutiveCorrect++; w.lastPracticed = todayKey(); if (w.consecutiveCorrect >= 3) { w.mastered = true; w.reviewRound = 0; w.nextReview = Date.now() + 24 * 3600 * 1000; } });
+        const s = getEngState(); s.xp += 10; s.map['默写'] = Math.min(100, s.map['默写'] + 5); setEngState(s);
+        accuracy = 95;
+      } else if (diff <= 1) {
+        fb.innerHTML = `<b>差一点点！</b><br/>正确拼写是 <b>${correct}</b><br/>💡 ${info.memoryTip.text}`;
+        updateWordState(en, w => { w.lastPracticed = todayKey(); });
+        accuracy = 70;
+      } else {
+        fb.innerHTML = `<b style="color:#C62828;">❌ 拼写错误</b><br/>正确拼写是 <b>${correct}</b><br/>💡 ${info.memoryTip.text}<br/>常见错误：漏字母或多字母`;
+        updateWordState(en, w => { w.consecutiveCorrect = 0; w.wrongCount++; w.lastPracticed = todayKey(); w.wrongSpellings.push(val); });
+        const s = getEngState(); s.hp = Math.max(1, s.hp - 1); setEngState(s);
+        accuracy = 30;
+      }
+      checkEngLevelAdjust(accuracy);
+      return;
+    }
+    const listenPlay = e.target.closest('[data-listenplay]');
+    if (listenPlay) {
+      const idx = Number(listenPlay.dataset.listenplay);
+      const s = getEngState();
+      const item = englishCurriculum[ENGLISH_LEVELS[s.level]].listen[idx];
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(item.text);
+        u.lang = 'en-US'; u.rate = 0.85;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+        toast('正在朗读…');
+      } else toast('当前浏览器不支持语音朗读');
+      return;
+    }
+    const answerBtn = e.target.closest('[data-answer]');
+    if (answerBtn) {
+      const [qidx, oidx] = answerBtn.dataset.answer.split(':').map(Number);
+      const s = getEngState();
+      const item = englishCurriculum[ENGLISH_LEVELS[s.level]].listen[Number($('#engListenDone').dataset.listendone || 0)];
+      const correct = item.questions[qidx].answer;
+      const card = answerBtn.closest('.card');
+      $$('.option-chip', card).forEach((btn, i) => {
+        btn.disabled = true;
+        btn.classList.toggle('correct', i === correct);
+        btn.classList.toggle('wrong', i === oidx && i !== correct);
+      });
+      if (oidx === correct) toast('回答正确');
+      else toast('回答错误，已加入复习');
+      return;
+    }
+    const listenDone = e.target.closest('#engListenDone');
+    if (listenDone) {
+      const s = getEngState(); s.xp += 5; s.map['听力'] = Math.min(100, s.map['听力'] + 10); s.map['综合'] = Math.min(100, s.map['综合'] + 3); setEngState(s);
+      checkEngLevelAdjust(85); toast('听力打卡成功'); renderEnglish(); return;
+    }
+    const speakScene = e.target.closest('[data-speakscene]');
+    if (speakScene) { renderEnglishSpeakScene(speakScene.dataset.speakscene); return; }
+    const sendScene = e.target.closest('[data-sendscene]');
+    if (sendScene) {
+      const input = $('#speakInput');
+      if (!input || !input.value.trim()) { toast('请先输入回复'); return; }
+      speakFeedback(sendScene.dataset.sendscene, input.value.trim());
+      input.value = '';
+      return;
+    }
+    const micScene = e.target.closest('[data-micscene]');
+    if (micScene) {
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const rec = new SR();
+      rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+      rec.onresult = ev => { const txt = ev.results[0][0].transcript; $('#speakInput').value = txt; toast('语音识别完成'); };
+      rec.onerror = () => toast('语音识别失败，请手动输入');
+      rec.start();
+      return;
+    }
+    const practiceErrors = e.target.closest('[data-practiceerrors]');
+    if (practiceErrors) {
+      const all = getAllWordStates().filter(w => !w.mastered);
+      if (!all.length) { toast('暂无错题'); return; }
+      renderEnglishDictation(all[0].en, false);
+      return;
+    }
+    const doReview = e.target.closest('[data-doreview]');
+    if (doReview) { renderEnglishReviewQuiz(doReview.dataset.doreview); return; }
+    const checkReview = e.target.closest('[data-checkreview]');
+    if (checkReview) {
+      const en = checkReview.dataset.checkreview;
+      const info = getWordInfo(en);
+      const w = getWordState(en);
+      const input = $('#reviewInput');
+      const val = input ? input.value.trim().toLowerCase() : '';
+      const round = w.reviewRound || 0;
+      let correct = false;
+      if (round % 6 === 3) correct = val === info.mean.toLowerCase();
+      else correct = val === en.toLowerCase();
+      if (correct) {
+        updateWordState(en, x => { x.reviewRound = (x.reviewRound || 0) + 1; x.nextReview = Date.now() + reviewIntervals(x.reviewRound) * 24 * 3600 * 1000; });
+        const s = getEngState(); s.xp += 5; s.map['综合'] = Math.min(100, s.map['综合'] + 2); setEngState(s);
+        toast('回顾正确 +5经验');
+        const x = getWordState(en);
+        if (x.reviewRound >= 6) {
+          const a = getAchievements(); a.vocabularyMaster++; setAchievements(a);
+          toast('🌟 永久掌握！词汇大师+1');
+        }
+      } else {
+        updateWordState(en, x => { x.mastered = false; x.consecutiveCorrect = 0; x.reviewRound = 0; x.nextReview = 0; });
+        toast('回顾答错，已打回学习中');
+      }
+      renderEnglishReview();
+      return;
+    }
+    const placementSubmit = e.target.closest('#engPlacementSubmit');
+    if (placementSubmit) {
+      let score = 0;
+      $$('.placement-ans').forEach(inp => {
+        if (inp.value.trim().toLowerCase() === inp.dataset.ans.toLowerCase()) score++;
+      });
+      const s = getEngState();
+      if (score <= 2) s.level = 0;
+      else if (score >= 9) s.level = Math.min(3, s.level + 1);
+      else s.level = Math.min(3, Math.max(0, s.level));
+      s.placementDone = true; s.xp += score * 2; setEngState(s);
+      toast(`自测得分 ${score}/3，定级为 ${ENGLISH_LEVELS[s.level]}`);
+      renderEnglish();
+      return;
+    }
 
     // ---------- 运动 ----------
     if (e.target.closest('#sportCheck')) { toast('运动打卡成功！'); return; }
   });
   function openMassagePlay(name) {
-    const steps = [
-      { t: '眼周放松', s: '无名指从内眼角轻点滑到太阳穴，重复5次。', tip: '只用无名指，力道最轻。', sec: 30 },
-      { t: '法令纹提拉', s: '从鼻翼两侧沿颧骨向上提拉至太阳穴，重复8次。', tip: '保持手部润滑，不要干搓。', sec: 30 },
-      { t: '下颌线收紧', s: '从下巴中心沿下颌线推至耳后，重复10次。', tip: '稍微加大力度，感受到淋巴引流。', sec: 40 },
-      { t: '额头舒展', s: '从眉心向上推至发际线，再向两侧分开，重复8次。', tip: '动作慢而稳，配合呼吸。', sec: 30 }
-    ];
+    const plans = {
+      '去水肿': {
+        steps: [
+          { t: '锁骨引流', s: '用指腹从耳后沿着颈部两侧，轻轻推至锁骨凹陷处，重复8次。', tip: '力度要轻，像把废水往下推。', sec: 40 },
+          { t: '眼下轻拍', s: '无名指从内眼角下方，轻轻点拍至太阳穴，重复10次。', tip: '不要拉扯皮肤，点到即可。', sec: 35 },
+          { t: '脸颊提升', s: '从嘴角沿着鼻翼两侧向上推至耳前，重复8次。', tip: '配合深呼吸，呼气时向上推。', sec: 35 },
+          { t: '全脸按压', s: '双手掌心搓热，轻轻按压额头、脸颊、下巴各5秒。', tip: '最后一步收尾，帮助精华吸收。', sec: 30 }
+        ],
+        video: { title: '晨间去水肿按摩（3分钟急救）', bv: 'BV1ma4y1T7Ys' }
+      },
+      '紧致下颌线': {
+        steps: [
+          { t: '下巴推提', s: '握拳用指节从下巴中心，沿下颌线推至耳后，重复10次。', tip: '感受到轻微酸胀即可，别太用力。', sec: 40 },
+          { t: '颈部拉伸', s: '头微微后仰，从喉结下方向上推至下巴，重复8次。', tip: '脖子皮肤薄，力度放最轻。', sec: 35 },
+          { t: '咬肌放松', s: '用指腹打圈按摩咬肌（咬牙时鼓起的位置）30秒。', tip: '适合吃东西多、爱嚼口香糖的人。', sec: 35 },
+          { t: '淋巴收尾', s: '从耳后沿脖子两侧推至锁骨，重复8次。', tip: '把代谢废物引向淋巴出口。', sec: 30 }
+        ],
+        video: { title: '下颌线紧致按摩', bv: 'BV1Vs41167Xq' }
+      },
+      '淡化颈纹': {
+        steps: [
+          { t: '横向抚纹', s: '手掌从颈根向上轻轻抚平至下巴，重复10次。', tip: '方向只能向上，不能来回搓。', sec: 40 },
+          { t: '竖向提拉', s: '双手交替从颈侧向上提拉，左右各8次。', tip: '动作慢，给皮肤充分延展。', sec: 35 },
+          { t: '纹路透润', s: '用指腹在颈纹明显处打小圈，顺时针、逆时针各15圈。', tip: '可以涂多点颈霜或乳液。', sec: 35 },
+          { t: '锁骨引流', s: '从耳后推至锁骨，重复8次，帮助代谢。', tip: '最后一步收尾。', sec: 30 }
+        ],
+        video: { title: '颈部护理去颈纹按摩', bv: 'BV1Vs41167Xq' }
+      },
+      '提高肤色': {
+        steps: [
+          { t: '全脸激活', s: '双手快速搓热，捂住脸10秒，重复3次。', tip: '通过温度促进微循环。', sec: 35 },
+          { t: '颧骨提亮', s: '从鼻翼旁沿颧骨下方，斜向上推至太阳穴，重复10次。', tip: '这条线经过面颊高点，有助提亮。', sec: 40 },
+          { t: '额头唤醒', s: '从眉心向上推至发际线，再向两侧分开，重复8次。', tip: '额头暗沉常和循环差有关。', sec: 35 },
+          { t: '点穴收尾', s: '用指腹按压太阳穴、迎香穴、睛明穴各3秒。', tip: '每个穴位按3秒，按2轮。', sec: 30 }
+        ],
+        video: { title: '提亮肤色面部按摩', bv: 'BV1ma4y1T7Ys' }
+      },
+      '舒缓助眠': {
+        steps: [
+          { t: '眉心舒缓', s: '用大拇指指腹从眉心向两侧眉尾推，重复10次。', tip: '睡前做这个动作特别放松。', sec: 40 },
+          { t: '眼周画圈', s: '无名指沿眼眶轻轻画小圈，顺时针、逆时针各10圈。', tip: '动作越慢越助眠。', sec: 35 },
+          { t: '脸颊安抚', s: '掌心贴脸，从下巴向耳前轻轻抚过，重复8次。', tip: '像给自己盖被子一样轻柔。', sec: 35 },
+          { t: '呼吸收尾', s: '双手捂脸，闭眼深呼吸5次。', tip: '配合腹式呼吸，做完直接睡。', sec: 40 }
+        ],
+        video: { title: '睡前放松面部按摩', bv: 'BV1ma4y1T7Ys' }
+      }
+    };
+    const plan = plans[name] || plans['去水肿'];
+    const steps = plan.steps;
+    const hasBv = plan.video.bv && /^BV/i.test(plan.video.bv);
     openSubpage(`${name} · 跟练`, `
       <button class="back-row" data-mback>← 返回护肤日常</button>
       <div class="sub-header"><h2>${esc(name)}</h2><p>跟着语音提示完成每一步</p></div>
@@ -697,6 +894,17 @@
         <button class="btn-outline" id="msPrev" style="flex:1;">上一步</button>
         <button class="btn-primary" id="msStart" style="flex:1;">▶ 开始</button>
         <button class="btn-outline" id="msNext" style="flex:1;">下一步</button>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <h4 style="margin:0 0 10px;">📺 推荐跟练视频</h4>
+        <div class="video-item" data-bv="${esc(plan.video.bv)}" data-page="1" data-title="${esc(plan.video.title)}">
+          <div class="video-info"><div class="video-title">${esc(plan.video.title)}</div><div class="video-meta">📚 真实跟练视频</div></div>
+          <div class="video-actions">
+            ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
+            <a href="${hasBv ? bvidUrl(plan.video.bv) : '#' }" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a>
+          </div>
+          <div class="video-player"></div>
+        </div>
       </div>
     `);
     let cur = 0, timer = null, running = false, left = steps[0].sec;
@@ -813,6 +1021,33 @@
       <button class="btn-primary" style="width:100%;" id="pianoNext">打卡完成，更新下一课 →</button>
     `);
   }
+  function renderPianoModule(k) {
+    const d = getPianoData();
+    const guides = {
+      音阶: { i: '🎹', t: '认识 C 大调音阶', s: '从中央 C 开始，右手 1-2-3-4-5 指弹 do-re-mi-fa-sol，再倒回来。每天慢速 10 遍。', video: { title: '电子琴新手教学：认识键盘与基本操作', bv: 'BV1KE41157m9', page: 1 } },
+      音调: { i: '🎵', t: '音名与唱名', s: '记住 7 个音名 C-D-E-F-G-A-B 对应唱名 do-re-mi-fa-sol-la-si。试着看到谱子就唱出来。', video: { title: '乐理入门（音律屋）：识谱/音名/唱名', bv: 'BV1Hg411w7n2', page: 1 } },
+      简单曲目: { i: '🎼', t: '单手弹《小星星》', s: '用 5 个手指弹 1155665-4433221，注意每个音时值均匀，不要着急。', video: { title: '电子琴入门：从零开始学弹奏', bv: 'BV1Ct4y1v7Ac', page: 1 } },
+      和弦: { i: '🎸', t: 'C 和弦入门', s: '左手同时按下 C-E-G 三个音，保持 2 秒后松开。反复直到手指能同时站稳。', video: { title: '零基础学电子琴完整系统课', bv: 'BV1KE41157m9', page: 1 } }
+    };
+    const g = guides[k] || guides['音阶'];
+    const hasBv = g.video.bv && /^BV/i.test(g.video.bv);
+    openSubpage(`${k} 专项练习 🎹`, `
+      <button class="back-row" data-plback>← 返回电子琴学习</button>
+      <div class="sub-header"><h2>${g.i} ${esc(k)}</h2><p>${esc(g.t)}</p></div>
+      <div class="card"><h4 style="margin:0 0 8px;">📋 今日练习目标</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">${esc(g.s)}</p></div>
+      <div class="card"><h4 style="margin:0 0 10px;">▶️ 推荐视频</h4>
+        <div class="video-item" data-bv="${esc(g.video.bv)}" data-page="${esc(g.video.page || 1)}" data-title="${esc(g.video.title)}">
+          <div class="video-info"><div class="video-title">${esc(g.video.title)}</div><div class="video-meta">📚 专项跟练</div></div>
+          <div class="video-actions">
+            ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
+            <a href="${hasBv ? bvidUrl(g.video.bv) : '#' }" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a>
+          </div>
+          <div class="video-player"></div>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;" data-modcheck="piano:${esc(k)}">✅ 完成练习，${esc(k)} +15%</button>
+    `);
+  }
 
   /* ---------- 唱歌 ---------- */
   const SING_VIDEOS = {
@@ -862,113 +1097,560 @@
       <button class="btn-primary" style="width:100%;" id="singNext">练完打卡，更新进度 →</button>
     `);
   }
-
-  /* ---------- 英语 ---------- */
-  const WORD_BANK = {
-    入门: [
-      { en: 'apple', phonetic: '/ˈæp.əl/', mean: '苹果' }, { en: 'book', phonetic: '/bʊk/', mean: '书' },
-      { en: 'cat', phonetic: '/kæt/', mean: '猫' }, { en: 'dog', phonetic: '/dɒɡ/', mean: '狗' },
-      { en: 'water', phonetic: '/ˈwɔː.tər/', mean: '水' }, { en: 'hello', phonetic: '/həˈləʊ/', mean: '你好' },
-      { en: 'thank', phonetic: '/θæŋk/', mean: '感谢' }, { en: 'happy', phonetic: '/ˈhæp.i/', mean: '开心的' }
-    ],
-    初级: [
-      { en: 'weather', phonetic: '/ˈweð.ər/', mean: '天气' }, { en: 'journey', phonetic: '/ˈdʒɜː.ni/', mean: '旅行' },
-      { en: 'delicious', phonetic: '/dɪˈlɪʃ.əs/', mean: '美味的' }, { en: 'friendship', phonetic: '/ˈfrend.ʃɪp/', mean: '友谊' }
-    ],
-    中级: [
-      { en: 'environment', phonetic: '/ɪnˈvaɪ.rən.mənt/', mean: '环境' }, { en: 'opportunity', phonetic: '/ˌɒp.əˈtʃuː.nɪ.ti/', mean: '机会' },
-      { en: 'responsibility', phonetic: '/rɪˌspɒn.sɪˈbɪl.ɪ.ti/', mean: '责任' }, { en: 'confidence', phonetic: '/ˈkɒn.fɪ.dəns/', mean: '自信' }
-    ],
-    高级: [
-      { en: 'sustainable', phonetic: '/səˈsteɪ.nə.bəl/', mean: '可持续的' }, { en: 'perspective', phonetic: '/pəˈspek.tɪv/', mean: '视角' },
-      { en: 'controversial', phonetic: '/ˌkɒn.trəˈvɜː.ʃəl/', mean: '有争议的' }, { en: 'entrepreneur', phonetic: '/ˌɒn.trə.prəˈnɜːr/', mean: '企业家' }
-    ]
-  };
-  const ENGLISH_LEVELS = ['入门', '初级', '中级', '高级'];
-  function getEngData() { const p = load(LS.personal, {}); return p.english || { level: 0, streak: 0, xp: 0, hp: 5, history: [], map: { 词汇: 0, 听力: 0, 默写: 0, 口语: 0, 语法: 0, 综合: 0 }, today: { done: false, words: [] }, srs: [] }; }
-  function setEngData(d) { const p = load(LS.personal, {}); p.english = d; save(LS.personal, p); }
-  function renderEnglish() {
-    const d = getEngData();
-    const mapKeys = Object.keys(d.map);
-    openSubpage('英语学习 🌍', `
-      <button class="back-row" data-back>← 返回每日计划</button>
-      <div class="sub-header"><h2>英语学习 🌍</h2><p>场景化闯关 · 当前难度「${ENGLISH_LEVELS[d.level]}」</p></div>
-      <div class="stat-row">
-        <div class="stat-item"><div class="stat-icon">🔥</div><div class="stat-num">${d.streak}</div><div class="stat-label">连续天</div></div>
-        <div class="stat-item"><div class="stat-icon">⭐</div><div class="stat-num">${d.xp}</div><div class="stat-label">经验值</div></div>
-        <div class="stat-item"><div class="stat-icon">❤️</div><div class="stat-num">${d.hp}</div><div class="stat-label">生命值</div></div>
+  function renderSingModule(k) {
+    const d = getSingData();
+    const guides = {
+      练声: { i: '🎤', t: '打嘟唇颤音 2 分钟', s: '双唇放松，发出「嘟——」的声音，像摩托车启动。从低音滑到高音再滑下来，每天 2 分钟。', video: { title: 'Jason老湿 108集零基础唱歌教程（第1集·练声）', bv: 'BV1VN1iYLExq', page: 1 } },
+      音准: { i: '🎵', t: '跟唱 do-re-mi', s: '用钢琴或手机 App 弹一个音，跟唱「do」，依次弹 do-re-mi-fa-sol-la-si-do，跟着唱。', video: { title: 'Jason 99集零基础教唱歌（音准篇）', bv: 'BV1Ae411B7Dm', page: 1 } },
+      气息: { i: '💨', t: '腹式呼吸 3 分钟', s: '手放肚子上，吸气时肚子鼓起，呼气时慢慢收紧。发「嘶——」声，尽量拖长。', video: { title: '官方99集 Jason零基础唱歌系统课（气息篇）', bv: 'BV1okAVeaELv', page: 1 } },
+      节奏: { i: '🥁', t: '拍手打拍子', s: '选一首慢歌，用手打拍子：1-2-3-4，嘴里念节奏型 ta-ta-ta-ta。', video: { title: 'Jason老湿 108集零基础唱歌教程（节奏篇）', bv: 'BV1VN1iYLExq', page: 5 } }
+    };
+    const g = guides[k] || guides['练声'];
+    const hasBv = g.video.bv && /^BV/i.test(g.video.bv);
+    openSubpage(`${k} 专项练习 🎤`, `
+      <button class="back-row" data-slback>← 返回唱歌</button>
+      <div class="sub-header"><h2>${g.i} ${esc(k)}</h2><p>${esc(g.t)}</p></div>
+      <div class="card"><h4 style="margin:0 0 8px;">📋 今日练习目标</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">${esc(g.s)}</p></div>
+      <div class="card"><h4 style="margin:0 0 10px;">▶️ 推荐视频</h4>
+        <div class="video-item" data-bv="${esc(g.video.bv)}" data-page="${esc(g.video.page || 1)}" data-title="${esc(g.video.title)}">
+          <div class="video-info"><div class="video-title">${esc(g.video.title)}</div><div class="video-meta">📚 专项跟练</div></div>
+          <div class="video-actions">
+            ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
+            <a href="${hasBv ? bvidUrl(g.video.bv) : '#' }" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a>
+          </div>
+          <div class="video-player"></div>
+        </div>
       </div>
-      <div style="font-size:13px;font-weight:700;margin:0 0 8px 4px;">难度等级</div>
-      <div class="diff-tabs">${ENGLISH_LEVELS.map((l, i) => `<button class="diff-tab ${i === d.level ? 'active' : ''}" data-el="${i}">${l}</button>`).join('')}</div>
-      <div class="card"><h4 style="margin:0 0 10px;">🗺️ 学习地图（点击打卡）</h4><div class="map-row">${mapKeys.map(k => `<div class="map-circle ${d.map[k] >= 100 ? 'done' : ''}" data-map="eng:${k}"><div class="map-icon">${engIcon(k)}</div><div class="map-label">${k}</div><div class="map-pct">${d.map[k]}%</div></div>`).join('')}</div></div>
-      <div class="menu-row" data-epage="word"><div class="menu-row-left"><div class="menu-row-icon">📖</div><div class="menu-row-title">今日学习任务</div></div><span style="color:var(--text-tertiary);">›</span></div>
-      <div class="menu-row" data-epage="listen"><div class="menu-row-left"><div class="menu-row-icon">🎧</div><div class="menu-row-title">听力训练</div></div><span style="color:var(--text-tertiary);">›</span></div>
-      <div class="menu-row" data-epage="speak"><div class="menu-row-left"><div class="menu-row-icon">💬</div><div class="menu-row-title">口语对练</div></div><span style="color:var(--text-tertiary);">›</span></div>
-      <div class="menu-row" data-epage="write"><div class="menu-row-left"><div class="menu-row-icon">✍️</div><div class="menu-row-title">默写错题本</div></div><span style="color:var(--text-tertiary);">›</span></div>
-      <div class="menu-row" data-epage="srs"><div class="menu-row-left"><div class="menu-row-icon">🔄</div><div class="menu-row-title">间隔重复复习</div></div><span style="color:var(--text-tertiary);">›</span></div>
+      <button class="btn-primary" style="width:100%;" data-modcheck="sing:${esc(k)}">✅ 完成练习，${esc(k)} +15%</button>
     `);
   }
-  function engIcon(k) { return { 词汇: 'A', 听力: '🎧', 默写: '✍️', 口语: '💬', 语法: '∠', 综合: '🎯' }[k] || '•'; }
-  function renderEnglishPage(page) {
-    const d = getEngData();
-    if (page === 'word') {
-      const words = WORD_BANK[ENGLISH_LEVELS[d.level]] || WORD_BANK['入门'];
-      const idx = d.xp % words.length; const w = words[idx];
-      openSubpage('今日学习任务', `
-        <button class="back-row" data-engback>← 返回英语学习</button>
-        <div class="sub-header"><h2>📖 今日学习任务</h2><p>${ENGLISH_LEVELS[d.level]} · 间隔重复 · 循序渐进</p></div>
-        <div class="word-card">
-          <div class="word-en">${w.en}</div>
-          <div class="word-phonetic">${w.phonetic}</div>
-          <div class="word-meaning word-reveal" id="wordMean">${w.mean}</div>
-          <button class="btn-outline" id="wordReveal" style="width:100%;">👀 显示释义</button>
-        </div>
-        <div class="card"><h4 style="margin:0 0 8px;">📝 例句</h4><p style="font-size:13px;color:var(--text-secondary);">This is a simple sentence using the word <b>${w.en}</b>.</p></div>
-        <div style="display:flex;gap:10px;">
-          <button class="btn-outline" id="engAgain" style="flex:1;">😵 陌生</button>
-          <button class="btn-primary" id="engKnow" style="flex:1;">✅ 认识</button>
-        </div>
-        <p class="plan-tip">词库覆盖小学、BBC、英语三四六级及雅思核心词，难度随等级提升。</p>
-      `);
-    } else if (page === 'listen') {
-      openSubpage('听力训练', `
-        <button class="back-row" data-engback>← 返回英语学习</button>
-        <div class="sub-header"><h2>🎧 听力训练</h2><p>从慢速短句开始</p></div>
-        <div class="card"><h4 style="margin:0 0 10px;">今日听力</h4><p style="font-size:14px;line-height:1.7;">播放三遍，写下你听到的关键词。</p><p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">"The weather is nice today, so I decided to take a walk in the park."</p></div>
-        <div class="card">
-          <h4 style="margin:0 0 10px;">▶️ 听力视频</h4>
-          <div id="listenPlayer" class="empty" style="padding:20px;">点击下方按钮播放听力视频</div>
-          <button class="btn-outline" id="listenPlay" style="width:100%;margin-top:10px;">▶ 播放听力视频</button>
-          <a href="https://www.bilibili.com/video/BV1E9HPzEE5X" target="_blank" rel="noopener" class="btn-outline" style="width:100%;margin-top:8px;display:block;text-align:center;">跳转原视频 ↗</a>
-        </div>
-        <button class="btn-primary" id="engListenDone" style="width:100%;margin-top:10px;">完成听力打卡</button>
-      `);
-    } else if (page === 'speak') {
-      openSubpage('口语对练', `
-        <button class="back-row" data-engback>← 返回英语学习</button>
-        <div class="sub-header"><h2>💬 口语对练</h2><p>跟读 + 录音 + AI 打分</p></div>
-        <div class="card"><h4 style="margin:0 0 8px;">今日跟读句</h4><p style="font-size:16px;font-weight:700;">I would like a cup of tea, please.</p><p style="font-size:13px;color:var(--text-secondary);">我想要一杯茶，谢谢。</p></div>
-        <button class="btn-primary" style="width:100%;margin-bottom:10px;" id="engRecord">🎙️ 开始录音</button>
-        <div class="ai-result" id="speakResult" style="display:none;"></div>
-        <button class="btn-outline" id="engSpeakDone" style="width:100%;margin-top:10px;">完成口语打卡</button>
-      `);
-    } else if (page === 'write') {
-      openSubpage('默写错题本', `
-        <button class="back-row" data-engback>← 返回英语学习</button>
-        <div class="sub-header"><h2>✍️ 默写错题本</h2><p>拼写不过关的单词自动收录</p></div>
-        <div id="writeList">${(d.srs || []).filter(x => x.next <= Date.now()).map(x => `<div class="product-card"><div class="product-info"><h4>${esc(x.en)}</h4><p>难度：${ENGLISH_LEVELS[x.level]}</p></div></div>`).join('') || '<div class="empty">暂无错题</div>'}</div>
-        <button class="btn-primary" id="engWriteDone" style="width:100%;margin-top:10px;">完成默写打卡</button>
-      `);
-    } else if (page === 'srs') {
-      const now = Date.now();
-      const due = (d.srs || []).filter(x => x.next <= now);
-      openSubpage('间隔重复复习', `
-        <button class="back-row" data-engback>← 返回英语学习</button>
-        <div class="sub-header"><h2>🔄 间隔重复</h2><p>到期的单词：${due.length} 个</p></div>
-        ${due.length ? due.map(x => `<div class="product-card"><div class="product-info"><h4>${esc(x.en)}</h4><p>${ENGLISH_LEVELS[x.level]}</p></div><button class="btn-outline" data-srsdone="${esc(x.en)}">记住了</button></div>`).join('') : '<div class="empty">没有到期复习的单词，继续学习新词吧！</div>'}
-      `);
+
+  /* ---------- 英语 ---------- */
+  const ENGLISH_LEVELS = ['入门', '初级', '中级', '高级'];
+  const ENGLISH_KEYS = ['词汇', '听力', '默写', '口语', '语法', '综合'];
+  const WB_ENGLISH_STATE = 'wb_english_state';
+  const WB_ENGLISH_WORDS = 'wb_english_words';
+  const WB_ENGLISH_TASKS = 'wb_english_tasks';
+  const WB_ENGLISH_ACHIEVE = 'wb_english_achievements';
+  const getWB = (k, def) => load(k, def);
+  const setWB = (k, v) => save(k, v);
+
+  function initEngState() { return { level: 0, streak: 0, xp: 0, hp: 5, history: [], map: { 词汇: 0, 听力: 0, 默写: 0, 口语: 0, 语法: 0, 综合: 0 }, lastStudyDate: '', placementDone: false }; }
+  function getEngState() { return getWB(WB_ENGLISH_STATE, initEngState()); }
+  function setEngState(s) { setWB(WB_ENGLISH_STATE, s); }
+  function getAllWordStates() { return getWB(WB_ENGLISH_WORDS, []); }
+  function setAllWordStates(arr) { setWB(WB_ENGLISH_WORDS, arr); }
+  function getWordState(en) { const arr = getAllWordStates(); return arr.find(x => x.en === en); }
+  function updateWordState(en, updater) { const arr = getAllWordStates(); const i = arr.findIndex(x => x.en === en); if (i >= 0) { updater(arr[i]); setAllWordStates(arr); return arr[i]; } return null; }
+  function ensureWordState(w, levelIdx) { let arr = getAllWordStates(); if (!arr.find(x => x.en === w.en)) { arr.push({ en: w.en, level: levelIdx, consecutiveCorrect: 0, wrongCount: 0, mastered: false, reviewRound: 0, nextReview: 0, lastPracticed: '', memoryTip: w.memoryTip, wrongSpellings: [] }); setAllWordStates(arr); } return arr.find(x => x.en === w.en); }
+  function getAchievements() { return getWB(WB_ENGLISH_ACHIEVE, { vocabularyMaster: 0 }); }
+  function setAchievements(a) { setWB(WB_ENGLISH_ACHIEVE, a); }
+
+  const englishCurriculum = {
+    入门: {
+      words: [
+        { en: 'apple', phonetic: '/ˈæp.əl/', mean: '苹果', image: '🍎', memoryTip: { type: '谐音法', text: 'apple→阿婆→阿婆爱吃苹果' }, example: 'I eat an apple every day.' },
+        { en: 'banana', phonetic: '/bəˈnɑː.nə/', mean: '香蕉', image: '🍌', memoryTip: { type: '联想法', text: 'banana→爸爸拿→爸爸拿香蕉' }, example: 'She likes bananas.' },
+        { en: 'hello', phonetic: '/həˈləʊ/', mean: '你好', image: '👋', memoryTip: { type: '谐音法', text: 'hello→哈啰→见面说哈啰' }, example: 'Hello, nice to meet you.' },
+        { en: 'book', phonetic: '/bʊk/', mean: '书', image: '📖', memoryTip: { type: '拆词法', text: 'book→boo(600)+k→600K本书' }, example: 'This is my book.' },
+        { en: 'cat', phonetic: '/kæt/', mean: '猫', image: '🐱', memoryTip: { type: '谐音法', text: 'cat→凯特→凯特养了一只猫' }, example: 'The cat is sleeping.' },
+        { en: 'dog', phonetic: '/dɒɡ/', mean: '狗', image: '🐶', memoryTip: { type: '谐音法', text: 'dog→多哥→多哥家养了狗' }, example: 'I have a dog.' },
+        { en: 'water', phonetic: '/ˈwɔː.tər/', mean: '水', image: '💧', memoryTip: { type: '联想法', text: 'water→沃特→沃特爱喝水' }, example: 'Please drink more water.' },
+        { en: 'happy', phonetic: '/ˈhæp.i/', mean: '开心的', image: '😊', memoryTip: { type: '谐音法', text: 'happy→嗨皮→嗨皮就是开心' }, example: 'I feel happy today.' },
+        { en: 'thank', phonetic: '/θæŋk/', mean: '感谢', image: '🙏', memoryTip: { type: '谐音法', text: 'thank→三克→三克油=谢谢' }, example: 'Thank you very much.' },
+        { en: 'morning', phonetic: '/ˈmɔː.nɪŋ/', mean: '早晨', image: '🌅', memoryTip: { type: '拆词法', text: 'morning→mor(摸)+ning(宁)→早晨摸宁宁的头' }, example: 'Good morning!' }
+      ],
+      listen: [
+        { title: '公园散步', text: 'The weather is nice today, so I decided to take a walk in the park. I saw many flowers and birds. Some children were playing games.', translation: '今天天气很好，所以我决定去公园散步。我看到很多花和鸟。一些孩子在玩游戏。', questions: [
+          { q: 'Where did the speaker go?', options: ['A park', 'A school', 'A shop'], answer: 0 },
+          { q: 'What did the speaker see?', options: ['Cars and buses', 'Flowers and birds', 'Books and pens'], answer: 1 },
+          { q: 'Who was playing games?', options: ['Teachers', 'Children', 'Dogs'], answer: 1 }
+        ]},
+        { title: '我的家庭', text: 'There are three people in my family. My father is a doctor. My mother is a teacher. I am a student. We love each other.', translation: '我家有三口人。我爸爸是医生。我妈妈是老师。我是学生。我们彼此相爱。', questions: [
+          { q: 'How many people are there in the family?', options: ['Two', 'Three', 'Four'], answer: 1 },
+          { q: "What is the father's job?", options: ['Teacher', 'Doctor', 'Student'], answer: 1 },
+          { q: "What is the mother's job?", options: ['Doctor', 'Teacher', 'Worker'], answer: 1 }
+        ]}
+      ]
+    },
+    初级: {
+      words: [
+        { en: 'schedule', phonetic: '/ˈʃedʒ.uːl/', mean: '日程表', image: '📅', memoryTip: { type: '谐音法', text: 'schedule→死车堵→死车堵了要改日程' }, example: 'What is your schedule today?' },
+        { en: 'colleague', phonetic: '/ˈkɒl.iːɡ/', mean: '同事', image: '👔', memoryTip: { type: '联想法', text: 'colleague→co(一起)+league(联盟)→一起联盟的同事' }, example: 'My colleague is very kind.' },
+        { en: 'confirm', phonetic: '/kənˈfɜːm/', mean: '确认', image: '✅', memoryTip: { type: '谐音法', text: 'confirm→肯分→肯分给你才确认' }, example: 'Please confirm your order.' },
+        { en: 'meeting', phonetic: '/ˈmiː.tɪŋ/', mean: '会议', image: '🤝', memoryTip: { type: '拆词法', text: 'meeting→meet(见面)+ing→见面就是开会' }, example: 'We have a meeting at 3 PM.' },
+        { en: 'invitation', phonetic: '/ˌɪn.vɪˈteɪ.ʃən/', mean: '邀请', image: '💌', memoryTip: { type: '联想法', text: 'in(里面)+vi(六)+tation→六张邀请函在里面' }, example: 'Thank you for the invitation.' },
+        { en: 'restaurant', phonetic: '/ˈres.tər.ɒnt/', mean: '餐厅', image: '🍽️', memoryTip: { type: '谐音法', text: 'restaurant→瑞死特忍特→在餐厅忍住不吃' }, example: 'Let us go to a restaurant.' },
+        { en: 'weather', phonetic: '/ˈweð.ər/', mean: '天气', image: '🌤️', memoryTip: { type: '联想法', text: 'wea(我们)+ther(ther)→我们聊天气' }, example: 'How is the weather?' },
+        { en: 'journey', phonetic: '/ˈdʒɜː.ni/', mean: '旅行', image: '✈️', memoryTip: { type: '谐音法', text: 'journey→ journeys→旅行的 journey' }, example: 'The journey was long but fun.' },
+        { en: 'delicious', phonetic: '/dɪˈlɪʃ.əs/', mean: '美味的', image: '😋', memoryTip: { type: '谐音法', text: 'delicious→地里舍斯→地里的食物 delicious' }, example: 'This cake is delicious.' },
+        { en: 'friendship', phonetic: '/ˈfrend.ʃɪp/', mean: '友谊', image: '❤️', memoryTip: { type: '拆词法', text: 'friend(朋友)+ship(船)→友谊的小船' }, example: 'Our friendship is important.' },
+        { en: 'appointment', phonetic: '/əˈpɔɪnt.mənt/', mean: '预约', image: '📆', memoryTip: { type: '谐音法', text: 'appointment→额跑因特门特→预约才能进门' }, example: 'I have an appointment at 10.' },
+        { en: 'experience', phonetic: '/ɪkˈspɪə.ri.əns/', mean: '经验', image: '💼', memoryTip: { type: '拆词法', text: 'ex(前)+perience(经历)→以前的经历就是经验' }, example: 'She has rich experience.' },
+        { en: 'department', phonetic: '/dɪˈpɑːt.mənt/', mean: '部门', image: '🏢', memoryTip: { type: '谐音法', text: 'department→低怕特门特→低怕特部门' }, example: 'Which department do you work in?' },
+        { en: 'conference', phonetic: '/ˈkɒn.fər.əns/', mean: '会议', image: '🎤', memoryTip: { type: '谐音法', text: 'conference→看佛润斯→看佛润斯开会' }, example: 'The conference starts tomorrow.' },
+        { en: 'available', phonetic: '/əˈveɪ.lə.bəl/', mean: '有空的', image: '🟢', memoryTip: { type: '联想法', text: 'a(一)+vailable(微信)→一个微信说明有空' }, example: 'Are you available tomorrow?' }
+      ],
+      listen: [
+        { title: '办公室一天', text: 'I arrived at the office at nine. I checked my emails and made a schedule for the day. At noon, I had lunch with a colleague. In the afternoon, we had a meeting about the new project.', translation: '我九点到办公室。我查看了邮件并制定了日程。中午和同事吃午饭。下午我们开了一个关于新项目的会议。', questions: [
+          { q: 'When did the speaker arrive at the office?', options: ['At eight', 'At nine', 'At ten'], answer: 1 },
+          { q: 'What did the speaker do first?', options: ['Had lunch', 'Checked emails', 'Had a meeting'], answer: 1 },
+          { q: 'Who did the speaker have lunch with?', options: ['A client', 'A colleague', 'A friend'], answer: 1 }
+        ]},
+        { title: '餐厅订位', text: 'I would like to book a table for two at 7 PM. Do you have any seats near the window? Also, is there a vegetarian menu?', translation: '我想订晚上7点两人的桌。有靠窗的位置吗？另外有素食菜单吗？', questions: [
+          { q: 'How many people is the table for?', options: ['One', 'Two', 'Three'], answer: 1 },
+          { q: 'What time is the booking?', options: ['6 PM', '7 PM', '8 PM'], answer: 1 },
+          { q: 'What special menu does the speaker ask about?', options: ['Vegetarian', 'Seafood', 'Dessert'], answer: 0 }
+        ]}
+      ]
+    },
+    中级: {
+      words: [
+        { en: 'cooperation', phonetic: '/kəʊˌɒp.ərˈeɪ.ʃən/', mean: '合作', image: '🤝', memoryTip: { type: '拆词法', text: 'co(共同)+operation(操作)→共同操作=合作' }, example: 'We need close cooperation.' },
+        { en: 'deadline', phonetic: '/ˈded.laɪn/', mean: '截止日期', image: '⏰', memoryTip: { type: '拆词法', text: 'dead(死)+line(线)→死线=截止日期' }, example: 'The deadline is next Friday.' },
+        { en: 'negotiate', phonetic: '/nɪˈɡəʊ.ʃi.eɪt/', mean: '谈判', image: '⚖️', memoryTip: { type: '谐音法', text: 'negotiate→你够谁特→你够谁谈判' }, example: 'We need to negotiate the price.' },
+        { en: 'responsibility', phonetic: '/rɪˌspɒn.sɪˈbɪl.ɪ.ti/', mean: '责任', image: '📋', memoryTip: { type: '拆词法', text: 'response(回应)+ibility→能回应=有责任' }, example: 'It is my responsibility.' },
+        { en: 'confidence', phonetic: '/ˈkɒn.fɪ.dəns/', mean: '自信', image: '💪', memoryTip: { type: '谐音法', text: 'confidence→看非等死→自信地看' }, example: 'I have confidence in you.' },
+        { en: 'opportunity', phonetic: '/ˌɒp.əˈtʃuː.nɪ.ti/', mean: '机会', image: '🚪', memoryTip: { type: '谐音法', text: 'opportunity→我扑推你蒂→抓住机会' }, example: 'This is a great opportunity.' },
+        { en: 'environment', phonetic: '/ɪnˈvaɪ.rən.mənt/', mean: '环境', image: '🌍', memoryTip: { type: '拆词法', text: 'en(使)+viron(周围)+ment→周围的一切=环境' }, example: 'We should protect the environment.' },
+        { en: 'contribution', phonetic: '/ˌkɒn.trɪˈbjuː.ʃən/', mean: '贡献', image: '🎁', memoryTip: { type: '拆词法', text: 'con(一起)+tribute(给予)+tion→一起给予=贡献' }, example: 'Your contribution is valuable.' },
+        { en: 'presentation', phonetic: '/ˌprez.ənˈteɪ.ʃən/', mean: '演示', image: '📊', memoryTip: { type: '谐音法', text: 'presentation→破阵特神→演示破阵' }, example: 'I will give a presentation.' },
+        { en: 'performance', phonetic: '/pəˈfɔː.məns/', mean: '表现', image: '📈', memoryTip: { type: '谐音法', text: 'performance→破佛慢死→表现慢吞吞' }, example: 'His performance was excellent.' },
+        { en: 'suggestion', phonetic: '/səˈdʒestʃ.ən/', mean: '建议', image: '💡', memoryTip: { type: '谐音法', text: 'suggestion→色个神→给个好建议' }, example: 'Do you have any suggestion?' },
+        { en: 'evaluation', phonetic: '/ɪˌvæl.juˈeɪ.ʃən/', mean: '评估', image: '📉', memoryTip: { type: '拆词法', text: 'e(出)+value(价值)+ation→评估价值' }, example: 'We need an evaluation report.' },
+        { en: 'commitment', phonetic: '/kəˈmɪt.mənt/', mean: '承诺', image: '🤝', memoryTip: { type: '谐音法', text: 'commitment→可迷特门特→承诺迷住门特' }, example: 'I keep my commitment.' },
+        { en: 'strategy', phonetic: '/ˈstræt.ə.dʒi/', mean: '策略', image: '♟️', memoryTip: { type: '谐音法', text: 'strategy→死抓特吉→死抓策略' }, example: 'What is our strategy?' },
+        { en: 'efficiency', phonetic: '/ɪˈfɪʃ.ən.si/', mean: '效率', image: '⚡', memoryTip: { type: '谐音法', text: 'efficiency→一飞神戏→效率一飞冲天' }, example: 'We should improve efficiency.' },
+        { en: 'perspective', phonetic: '/pəˈspek.tɪv/', mean: '视角', image: '🔭', memoryTip: { type: '谐音法', text: 'perspective→婆死拍特务→换个视角' }, example: 'From my perspective...' },
+        { en: 'innovation', phonetic: '/ˌɪn.əˈveɪ.ʃən/', mean: '创新', image: '💡', memoryTip: { type: '拆词法', text: 'in(进入)+nov(新)+ation→进入新的=创新' }, example: 'Innovation drives progress.' },
+        { en: 'acquisition', phonetic: '/ˌæk.wɪˈzɪʃ.ən/', mean: '获得；收购', image: '📦', memoryTip: { type: '谐音法', text: 'acquisition→爱可亏贼神→获得爱' }, example: 'The company made an acquisition.' },
+        { en: 'sustainability', phonetic: '/səˌsteɪ.nəˈbɪl.ɪ.ti/', mean: '可持续性', image: '🌱', memoryTip: { type: '拆词法', text: 'sus(下)+tain(拿)+ability→能持续拿=可持续' }, example: 'Sustainability is important.' },
+        { en: 'entrepreneur', phonetic: '/ˌɒn.trə.prəˈnɜːr/', mean: '企业家', image: '💼', memoryTip: { type: '谐音法', text: 'entrepreneur→昂特婆润牛→企业家很牛' }, example: 'He is a young entrepreneur.' }
+      ],
+      listen: [
+        { title: '项目汇报', text: 'Our team has finished the first phase of the project. We met all deadlines and stayed within budget. The next step is user testing. I believe we can launch the product next month.', translation: '我们团队已完成项目第一阶段。我们按时完成并控制在预算内。下一步是用户测试。我相信下个月可以发布产品。', questions: [
+          { q: 'What phase has the team finished?', options: ['The first', 'The second', 'The final'], answer: 0 },
+          { q: 'What is the next step?', options: ['Marketing', 'User testing', 'Sales'], answer: 1 },
+          { q: 'When can they launch?', options: ['This week', 'Next month', 'Next year'], answer: 1 }
+        ]},
+        { title: '职业选择', text: 'Choosing a career is not easy. You should consider your interests, skills, and market demand. Sometimes you need to try different jobs before finding the right one.', translation: '选择职业不容易。你应该考虑兴趣、技能和市场需求。有时你需要尝试不同工作才能找到合适的。', questions: [
+          { q: 'What should you consider when choosing a career?', options: ['Only salary', 'Interests and skills', 'Location only'], answer: 1 },
+          { q: 'What might you need to do before finding the right job?', options: ['Take a long vacation', 'Try different jobs', 'Move abroad'], answer: 1 },
+          { q: 'What does the speaker think about career choice?', options: ['Easy', 'Difficult', 'Boring'], answer: 1 }
+        ]}
+      ]
+    },
+    高级: {
+      words: [
+        { en: 'sustainability', phonetic: '/səˌsteɪ.nəˈbɪl.ɪ.ti/', mean: '可持续性', image: '🌿', memoryTip: { type: '拆词法', text: 'sustain(维持)+ability(能力)→能维持=可持续' }, example: 'Corporate sustainability is key.' },
+        { en: 'acquisition', phonetic: '/ˌæk.wɪˈzɪʃ.ən/', mean: '收购', image: '🏢', memoryTip: { type: '谐音法', text: 'acquisition→阿亏贼神→收购亏了贼神' }, example: 'The acquisition was successful.' },
+        { en: 'strategic', phonetic: '/strəˈtiː.dʒɪk/', mean: '战略的', image: '♟️', memoryTip: { type: '拆词法', text: 'strategy(策略)+ic→策略的=战略的' }, example: 'This is a strategic decision.' },
+        { en: 'perspective', phonetic: '/pəˈspek.tɪv/', mean: '视角', image: '👁️', memoryTip: { type: '谐音法', text: 'perspective→婆死拍特务→换个视角' }, example: 'From a global perspective...' },
+        { en: 'controversial', phonetic: '/ˌkɒn.trəˈvɜː.ʃəl/', mean: '有争议的', image: '⚡', memoryTip: { type: '拆词法', text: 'contro(反)+vers(转)+ial→反转的=有争议的' }, example: 'It is a controversial topic.' },
+        { en: 'entrepreneur', phonetic: '/ˌɒn.trə.prəˈnɜːr/', mean: '企业家', image: '🚀', memoryTip: { type: '谐音法', text: 'entrepreneur→昂特婆润牛→企业家很牛' }, example: 'The entrepreneur took risks.' },
+        { en: 'infrastructure', phonetic: '/ˈɪn.frəˌstrʌk.tʃər/', mean: '基础设施', image: '🌉', memoryTip: { type: '拆词法', text: 'infra(下)+structure(结构)→下面的结构=基础设施' }, example: 'We need better infrastructure.' },
+        { en: 'optimization', phonetic: '/ˌɒp.tɪ.maɪˈzeɪ.ʃən/', mean: '优化', image: '⚙️', memoryTip: { type: '拆词法', text: 'optim(最好)+ization→做到最好=优化' }, example: 'Process optimization saves time.' },
+        { en: 'differentiation', phonetic: '/ˌdɪf.ər.en.ʃiˈeɪ.ʃən/', mean: '差异化', image: '🎨', memoryTip: { type: '拆词法', text: 'different(不同)+iation→差异化' }, example: 'Product differentiation matters.' },
+        { en: 'diversification', phonetic: '/daɪˌvɜː.sɪ.fɪˈkeɪ.ʃən/', mean: '多元化', image: '🌈', memoryTip: { type: '拆词法', text: 'diverse(多样)+ification→多元化' }, example: 'Diversification reduces risk.' },
+        { en: 'accountability', phonetic: '/əˌkaʊn.təˈbɪl.ɪ.ti/', mean: '问责制', image: '⚖️', memoryTip: { type: '拆词法', text: 'account(账户)+ability→能算清账=问责' }, example: 'Accountability builds trust.' },
+        { en: 'sophisticated', phonetic: '/səˈfɪs.tɪ.keɪ.tɪd/', mean: '复杂的；精密的', image: '🤖', memoryTip: { type: '谐音法', text: 'sophisticated→输飞思替Kated→复杂到输' }, example: 'It is a sophisticated system.' },
+        { en: 'disruptive', phonetic: '/dɪsˈrʌp.tɪv/', mean: '颠覆性的', image: '💥', memoryTip: { type: '拆词法', text: 'dis(分开)+rupt(断裂)+ive→断裂的=颠覆' }, example: 'Disruptive technology changes markets.' },
+        { en: 'stakeholder', phonetic: '/ˈsteɪkˌhəʊl.dər/', mean: '利益相关者', image: '🧑‍🤝‍🧑', memoryTip: { type: '拆词法', text: 'stake(赌注)+holder(持有者)→利益相关者' }, example: 'We must consider all stakeholders.' },
+        { en: 'benchmark', phonetic: '/ˈbentʃ.mɑːk/', mean: '基准', image: '📏', memoryTip: { type: '拆词法', text: 'bench(长凳)+mark(标记)→板凳上的标记=基准' }, example: 'This is the industry benchmark.' },
+        { en: 'synergy', phonetic: '/ˈsɪn.ə.dʒi/', mean: '协同效应', image: '🔗', memoryTip: { type: '谐音法', text: 'synergy→吸拿鸡→协同效应吸金' }, example: 'The merger created synergy.' },
+        { en: 'scalability', phonetic: '/ˌskeɪ.ləˈbɪl.ɪ.ti/', mean: '可扩展性', image: '📈', memoryTip: { type: '拆词法', text: 'scale(规模)+ability→能规模化=可扩展' }, example: 'Scalability is crucial for startups.' },
+        { en: 'resilience', phonetic: '/rɪˈzɪl.i.əns/', mean: '韧性', image: '🌲', memoryTip: { type: '谐音法', text: 'resilience→瑞贼林思→韧性十足' }, example: 'Resilience helps us recover.' },
+        { en: 'proposition', phonetic: '/ˌprɒp.əˈzɪʃ.ən/', mean: '主张；提案', image: '📄', memoryTip: { type: '拆词法', text: 'pro(向前)+position(位置)→向前放=提案' }, example: 'What is your value proposition?' },
+        { en: 'marginal', phonetic: '/ˈmɑː.dʒɪ.nəl/', mean: '边缘的；微小的', image: '↔️', memoryTip: { type: '拆词法', text: 'margin(边缘)+al→边缘的' }, example: 'The improvement is marginal.' },
+        { en: 'volatile', phonetic: '/ˈvɒl.ə.taɪl/', mean: '波动的', image: '📉', memoryTip: { type: '谐音法', text: 'volatile→我来太哦→市场波动我来' }, example: 'The market is volatile.' },
+        { en: 'pragmatic', phonetic: '/præɡˈmæt.ɪk/', mean: '务实的', image: '🛠️', memoryTip: { type: '谐音法', text: 'pragmatic→扑来个Matt→务实的Matt' }, example: 'We need a pragmatic approach.' },
+        { en: 'consolidate', phonetic: '/kənˈsɒl.ɪ.deɪt/', mean: '巩固；合并', image: '🧱', memoryTip: { type: '拆词法', text: 'con(一起)+solid(固体)+ate→变 solid=巩固' }, example: 'We need to consolidate gains.' },
+        { en: 'compliance', phonetic: '/kəmˈplaɪ.əns/', mean: '合规', image: '📜', memoryTip: { type: '谐音法', text: 'compliance→看扑来安斯→合规才安心' }, example: 'Compliance is mandatory.' },
+        { en: 'differentiate', phonetic: '/ˌdɪf.əˈren.ʃi.eɪt/', mean: '区分', image: '🔍', memoryTip: { type: '拆词法', text: 'different(不同)+iate→使不同=区分' }, example: 'How do you differentiate?' }
+      ],
+      listen: [
+        { title: '全球化战略', text: 'Globalization offers both opportunities and challenges. Companies must adapt to local cultures while maintaining global standards. Those who balance these two forces often gain a competitive advantage.', translation: '全球化既带来机遇也带来挑战。公司必须适应本地文化同时保持全球标准。能平衡这两者的公司往往获得竞争优势。', questions: [
+          { q: 'What does globalization offer?', options: ['Only risks', 'Opportunities and challenges', 'Only profits'], answer: 1 },
+          { q: 'What must companies do?', options: ['Ignore local culture', 'Adapt to local cultures', 'Close local offices'], answer: 1 },
+          { q: 'What can balanced companies gain?', options: ['Competitive advantage', 'Lower quality', 'Higher costs'], answer: 0 }
+        ]},
+        { title: '领导力', text: 'Leadership is not about titles. It is about influence, vision, and the ability to inspire others. Great leaders listen more than they speak and empower their teams to grow.', translation: '领导力不在于头衔。它关乎影响力、愿景和激励他人的能力。伟大的领导者多听少说，赋能团队成长。', questions: [
+          { q: 'What is leadership about?', options: ['Titles only', 'Influence and vision', 'Working alone'], answer: 1 },
+          { q: 'What do great leaders do more?', options: ['Speak', 'Listen', 'Rest'], answer: 1 },
+          { q: 'What do great leaders do for their teams?', options: ['Control everything', 'Empower them to grow', 'Ignore them'], answer: 1 }
+        ]}
+      ]
     }
+  };
+
+  const speakScenarios = {
+    reception: { title: '前台接待', icon: '🏢', difficulty: '入门', time: '约5分钟', steps: [
+      { ai: 'Good morning, welcome to our company.', keywords: ['good', 'morning', 'welcome', 'company'], highlight: '问候语使用正确', improve: '可补充自我介绍，如 I am XXX', bonus: 'Nice to meet you' },
+      { ai: 'May I have your name, please?', keywords: ['name', 'i am', 'my name', 'call'], highlight: '回答清楚', improve: '可补充来访目的，如 I am here for the meeting', bonus: 'Nice to meet you too' },
+      { ai: 'Nice to meet you, have a seat.', keywords: ['nice', 'meet', 'seat', 'thank'], highlight: '回应礼貌', improve: '可补充感谢，如 Thank you', bonus: 'Have a nice day' }
+    ]},
+    email: { title: '邮件沟通', icon: '📧', difficulty: '初级', time: '约8分钟', steps: [
+      { ai: 'I hope this email finds you well.', keywords: ['hope', 'email', 'well'], highlight: '邮件开头礼貌', improve: '可说明写信目的，如 I am writing to ask about...', bonus: 'I look forward to your reply' },
+      { ai: 'Could you please send me the report by Friday?', keywords: ['report', 'friday', 'send'], highlight: '请求清楚', improve: '可确认截止时间，如 by 5 PM Friday', bonus: 'Thank you in advance' },
+      { ai: 'Sure, I will send it this afternoon.', keywords: ['send', 'afternoon', 'will'], highlight: '回复明确', improve: '可补充附件说明，如 Please find the attachment', bonus: 'Best regards' }
+    ]},
+    blogger: { title: '博主连线', icon: '📹', difficulty: '初级', time: '约8分钟', steps: [
+      { ai: 'Hi, thanks for joining this live stream!', keywords: ['hi', 'thanks', 'live'], highlight: '开场自然', improve: '可自我介绍，如 I am a lifestyle blogger', bonus: 'Nice to connect with you' },
+      { ai: 'What kind of content do you usually create?', keywords: ['content', 'create', 'usually'], highlight: '问题表达清楚', improve: '可举例，如 makeup, vlog or review', bonus: 'That sounds interesting' },
+      { ai: 'I mostly share daily skincare and makeup tips.', keywords: ['skincare', 'makeup', 'tips'], highlight: '回答具体', improve: '可邀请互动，如 Feel free to ask me anything', bonus: 'Let us stay in touch' }
+    ]},
+    travel: { title: '出差旅行', icon: '✈️', difficulty: '入门', time: '约5分钟', steps: [
+      { ai: 'Hello, I would like to check in, please.', keywords: ['check', 'in', 'like'], highlight: '表达清楚', improve: '可给出姓名和预订号，如 My name is...', bonus: 'I have a reservation' },
+      { ai: 'May I see your passport?', keywords: ['passport', 'here', 'is'], highlight: '回应得体', improve: '可主动递上，如 Here you are', bonus: 'Thank you so much' },
+      { ai: 'Here is your room key. Have a nice stay.', keywords: ['room', 'key', 'stay'], highlight: '礼貌回应', improve: '可询问早餐时间，如 What time is breakfast?', bonus: 'Have a wonderful day' }
+    ]},
+    chat: { title: '自由聊天', icon: '💬', difficulty: '进阶', time: '约10分钟', steps: [
+      { ai: 'What do you usually do in your free time?', keywords: ['free', 'time', 'usually', 'do'], highlight: '问题自然', improve: '可更具体，如 Do you prefer reading or sports?', bonus: 'That is a great hobby' },
+      { ai: 'I enjoy taking photos and learning new things.', keywords: ['enjoy', 'photos', 'learning'], highlight: '表达流畅', improve: '可补充原因，如 because it helps me relax', bonus: 'We have a lot in common' },
+      { ai: 'That is cool. What is your favorite city?', keywords: ['favorite', 'city', 'like'], highlight: '回应积极', improve: '可反问对方，如 How about you?', bonus: 'I would love to visit someday' }
+    ]}
+  };
+
+  function engMapColorClass(pct) {
+    if (pct <= 0) return 'map-gray';
+    if (pct <= 30) return 'map-red';
+    if (pct <= 70) return 'map-orange';
+    if (pct < 100) return 'map-blue';
+    return 'map-green';
   }
+  function engIcon(k) { return { 词汇: 'A', 听力: '🎧', 默写: '✍️', 口语: '💬', 语法: '∠', 综合: '🎯' }[k] || '•'; }
+
+  function checkEngLevelAdjust(accuracy) {
+    const s = getEngState();
+    s.history.push({ date: todayKey(), acc: accuracy });
+    if (s.history.length > 10) s.history.shift();
+    const recent = s.history.slice(-3);
+    if (recent.length >= 3 && recent.every(x => x.acc >= 90) && s.level < 3) { s.level += 1; s.history = []; toast('🎉 连续3天高正确率，难度升级！'); }
+    else if (recent.length >= 3 && recent.every(x => x.acc <= 50) && s.level > 0) { s.level -= 1; s.history = []; toast('难度降低，先巩固基础 💪'); }
+    setEngState(s);
+  }
+
+  function reviewIntervals(round) {
+    const intervals = [1, 3, 7, 15, 30, 60];
+    return intervals[Math.min(round, intervals.length - 1)];
+  }
+  function reviewQuestionType(round) {
+    const types = ['看中文默写英文', '听发音默写英文', '补全单词（给首字母）', '看英文默写中文', '听发音默写英文+中文', '随机题型'];
+    return types[Math.min(round, types.length - 1)];
+  }
+
+  function generateDailyTasks(force = false) {
+    const today = todayKey();
+    const stored = getWB(WB_ENGLISH_TASKS, null);
+    if (!force && stored && stored.date === today) return stored.tasks;
+    const s = getEngState();
+    const all = getAllWordStates();
+    const levelName = ENGLISH_LEVELS[s.level];
+    const levelWords = englishCurriculum[levelName].words;
+    const now = Date.now();
+    const tasks = [];
+    const used = new Set();
+    all.filter(w => !w.mastered && w.consecutiveCorrect < 3 && w.lastPracticed !== today).sort((a, b) => b.wrongCount - a.wrongCount).slice(0, 5).forEach(w => { tasks.push({ type: 'dictation', en: w.en, source: 'error' }); used.add(w.en); });
+    all.filter(w => w.mastered && w.nextReview && w.nextReview <= now).slice(0, 3).forEach(w => { if (!used.has(w.en)) { tasks.push({ type: 'review', en: w.en, round: w.reviewRound }); used.add(w.en); } });
+    const learned = new Set(all.map(w => w.en));
+    let idx = 0;
+    while (tasks.length < 10 && idx < levelWords.length) {
+      const w = levelWords[idx];
+      if (!learned.has(w.en) && !used.has(w.en)) { tasks.push({ type: 'new', en: w.en }); used.add(w.en); }
+      idx++;
+    }
+    idx = 0;
+    while (tasks.length < 10 && idx < levelWords.length) {
+      const w = levelWords[idx];
+      if (!used.has(w.en)) { tasks.push({ type: 'dictation', en: w.en, source: 'fill' }); used.add(w.en); }
+      idx++;
+    }
+    setWB(WB_ENGLISH_TASKS, { date: today, tasks });
+    s.lastStudyDate = today; setEngState(s);
+    return tasks;
+  }
+  function dueReviewCount() {
+    const now = Date.now();
+    return getAllWordStates().filter(w => w.mastered && w.nextReview && w.nextReview <= now).length;
+  }
+  function errorWordCount() {
+    return getAllWordStates().filter(w => !w.mastered).length;
+  }
+  function getWordInfo(en) {
+    for (const lv of ENGLISH_LEVELS) { const w = englishCurriculum[lv].words.find(x => x.en === en); if (w) return { ...w, levelName: lv, levelIdx: ENGLISH_LEVELS.indexOf(lv) }; }
+    return null;
+  }
+
+  /* ---------- 英语 UI ---------- */
+  function renderEnglish() {
+    const s = getEngState();
+    const due = dueReviewCount();
+    const err = errorWordCount();
+    const mapKeys = ENGLISH_KEYS;
+    openSubpage('英语学习 🌍', `
+      <button class="back-row" data-back>← 返回每日计划</button>
+      <div class="sub-header"><h2>英语学习 🌍</h2><p>场景化闯关 · 当前难度「${ENGLISH_LEVELS[s.level]}」</p></div>
+      <div class="clover-card">
+        <div class="clover-section clover-cut-left"><div class="clover-icon">🔥</div><div class="clover-num">${s.streak}</div><div class="clover-label">连续天</div></div>
+        <div class="clover-section clover-cut-mid"><div class="clover-icon">⭐</div><div class="clover-num">${s.xp}</div><div class="clover-label">经验值</div></div>
+        <div class="clover-section clover-cut-right"><div class="clover-icon">❤️</div><div class="clover-num">${s.hp}</div><div class="clover-label">生命值</div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;margin:0 0 8px 4px;">难度等级</div>
+      <div class="diff-tabs">${ENGLISH_LEVELS.map((l, i) => `<button class="diff-tab ${i === s.level ? 'active' : ''}" data-el="${i}">${l}</button>`).join('')}</div>
+      <div class="card"><h4 style="margin:0 0 10px;">🗺️ 学习地图（点击打卡）</h4>
+        <div class="map-row eng-map">${mapKeys.slice(0, 3).map(k => engMapCircle(k, s.map[k])).join('')}</div>
+        <div class="map-row eng-map">${mapKeys.slice(3).map(k => engMapCircle(k, s.map[k])).join('')}</div>
+      </div>
+      ${!s.placementDone ? '<div class="card" style="background:linear-gradient(90deg,#E1BEE7,#C5CAE9);color:#4A148C;"><h4 style="margin:0 0 6px;">🎯 开局自测定级</h4><p style="font-size:13px;margin:0;">3道题测出你的真实水平，学习更高效。</p><button class="btn-primary" data-epage="placement" style="width:100%;margin-top:10px;background:#fff;color:#4A148C;">开始自测</button></div>' : ''}
+      <div class="eng-menu-row" data-epage="tasks"><div class="eng-menu-left"><div class="eng-menu-icon">📖</div><div><div class="eng-menu-title">今日学习任务</div><div class="eng-menu-sub">每日10题 · 错题优先</div></div></div><span style="color:var(--text-tertiary);">›</span></div>
+      <div class="eng-menu-row" data-epage="listen"><div class="eng-menu-left"><div class="eng-menu-icon">🎧</div><div><div class="eng-menu-title">听力训练</div><div class="eng-menu-sub">短文+选择题 · 每难度2篇</div></div></div><span style="color:var(--text-tertiary);">›</span></div>
+      <div class="eng-menu-row" data-epage="speak"><div class="eng-menu-left"><div class="eng-menu-icon">💬</div><div><div class="eng-menu-title">AI口语对练</div><div class="eng-menu-sub">场景对话 · 关键词评分</div></div></div><span style="color:var(--text-tertiary);">›</span></div>
+      <div class="eng-menu-row" data-epage="errors"><div class="eng-menu-left"><div class="eng-menu-icon">✍️</div><div><div class="eng-menu-title">默写错题本</div><div class="eng-menu-sub">连续3天正确才掌握</div></div></div><div class="eng-menu-right">${err ? `<span class="due-badge">${err}</span>` : ''}<span style="color:var(--text-tertiary);">›</span></div></div>
+      <div class="eng-menu-row" data-epage="review"><div class="eng-menu-left"><div class="eng-menu-icon">🔄</div><div><div class="eng-menu-title">艾宾浩斯回顾</div><div class="eng-menu-sub">6轮间隔重复 · 永久掌握</div></div></div><div class="eng-menu-right">${due ? `<span class="due-badge">${due}</span>` : ''}<span style="color:var(--text-tertiary);">›</span></div></div>
+    `);
+  }
+  function engMapCircle(k, pct) {
+    const cls = engMapColorClass(pct);
+    const check = pct >= 100 ? '<div class="map-check">✓</div>' : '';
+    return `<div class="map-circle ${cls}" data-map="eng:${k}"><div class="map-icon">${engIcon(k)}</div><div class="map-label">${k}</div>${check}<div class="map-pct">${pct}%</div></div>`;
+  }
+
+  function renderEnglishModule(type) {
+    const s = getEngState();
+    const infos = {
+      词汇: { i: 'A', t: '词汇积累', desc: '每天学习新单词，用谐音/联想/拆词法记忆，连续3天正确即掌握。', action: '去背单词' },
+      听力: { i: '🎧', t: '听力训练', desc: '听短文，做3道选择题。听完对照原文和译文。', action: '去练听力' },
+      默写: { i: '✍️', t: '默写拼写', desc: '看中文写英文，错1个字母以内给提示，错2个以上清零重新背。', action: '去默写' },
+      口语: { i: '💬', t: '口语对练', desc: '选择场景和AI对话，关键词匹配+Web Speech评分。', action: '去对话' },
+      语法: { i: '∠', t: '语法要点', desc: '掌握当前难度的核心语法规则。', action: '去学语法' },
+      综合: { i: '🎯', t: '综合测评', desc: '完成自测定级，检验真实水平。', action: '去自测' }
+    };
+    const info = infos[type];
+    openSubpage(`${info.t} 🌍`, `
+      <button class="back-row" data-engback>← 返回英语学习</button>
+      <div class="sub-header"><h2>${info.i} ${info.t}</h2><p>${ENGLISH_LEVELS[s.level]} · 当前进度 ${s.map[type]}%</p></div>
+      <div class="card"><p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin:0;">${info.desc}</p></div>
+      ${type === '词汇' ? '<button class="btn-primary" data-epage="tasks" style="width:100%;margin-bottom:10px;">'+info.action+'</button>' : ''}
+      ${type === '听力' ? '<button class="btn-primary" data-epage="listen" style="width:100%;margin-bottom:10px;">'+info.action+'</button>' : ''}
+      ${type === '默写' ? '<button class="btn-primary" data-epage="errors" style="width:100%;margin-bottom:10px;">'+info.action+'</button>' : ''}
+      ${type === '口语' ? '<button class="btn-primary" data-epage="speak" style="width:100%;margin-bottom:10px;">'+info.action+'</button>' : ''}
+      ${type === '语法' ? grammarHTML(s.level) : ''}
+      ${type === '综合' ? '<button class="btn-primary" data-epage="placement" style="width:100%;margin-bottom:10px;">'+info.action+'</button>' : ''}
+      <button class="btn-outline" data-mapcheck="eng:${type}" style="width:100%;">✅ 完成打卡，${type} +10%</button>
+    `);
+  }
+  function grammarHTML(level) {
+    const tips = [
+      { title: 'a/an 用法', content: 'a 用于辅音音素开头的单词前；an 用于元音音素开头的单词前。', ex: 'an apple, a book' },
+      { title: '一般现在时', content: '表示经常性、习惯性的动作。主语是第三人称单数时，动词加 -s/-es。', ex: 'She goes to work by bus.' },
+      { title: '形容词比较级', content: '单音节形容词加 -er；多音节前加 more。', ex: 'taller, more beautiful' },
+      { title: '过去时', content: '表示过去发生的动作。规则动词加 -ed，不规则动词需记忆。', ex: 'I worked yesterday. I went home.' }
+    ];
+    const t = tips[level] || tips[0];
+    return `<div class="card"><h4 style="margin:0 0 8px;">📐 ${t.title}</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 8px;">${t.content}</p><p style="font-size:13px;color:var(--primary);margin:0;">例：${t.ex}</p></div>`;
+  }
+
+  function renderEnglishTasks() {
+    const tasks = generateDailyTasks();
+    openSubpage('今日学习任务 📖', `
+      <button class="back-row" data-engback>← 返回英语学习</button>
+      <div class="sub-header"><h2>📖 今日学习任务</h2><p>共 ${tasks.length} 题 · 错题优先 · 新词补齐</p></div>
+      ${tasks.length ? tasks.map((t, i) => `<div class="eng-menu-row" data-dotask="${i}"><div class="eng-menu-left"><div class="eng-menu-icon">${t.type === 'new' ? '🆕' : t.type === 'review' ? '🔄' : '✍️'}</div><div><div class="eng-menu-title">${i + 1}. ${esc(t.en)}</div><div class="eng-menu-sub">${t.type === 'new' ? '新词学习' : t.type === 'review' ? `艾宾浩斯第${(t.round || 0) + 1}轮回顾` : '错题巩固'}</div></div></div><span style="color:var(--text-tertiary);">›</span></div>`).join('') : '<div class="empty">今日任务已清空，明天见！</div>'}
+    `);
+  }
+
+  function renderEnglishWord(en, backToTasks = false) {
+    const info = getWordInfo(en);
+    const ws = ensureWordState(info, info.levelIdx);
+    openSubpage(`${en} · 新词学习`, `
+      <button class="back-row" data-engback>${backToTasks ? '← 返回任务列表' : '← 返回英语学习'}</button>
+      <div class="sub-header"><h2>📖 新词学习</h2><p>${ENGLISH_LEVELS[info.levelIdx]} · ${esc(info.en)}</p></div>
+      <div class="word-card">
+        <div class="word-en">${info.image} ${info.en}</div>
+        <div class="word-phonetic">${info.phonetic} <button class="btn-outline" data-speak="${esc(info.en)}" style="padding:4px 10px;font-size:12px;">🔊 朗读</button></div>
+        <div class="word-meaning">${info.mean}</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-top:10px;">例句：${info.example}</div>
+      </div>
+      <div class="card"><h4 style="margin:0 0 8px;">💡 记忆口诀 · ${info.memoryTip.type}</h4><p style="font-size:13px;color:var(--text-secondary);margin:0;">${info.memoryTip.text}</p></div>
+      <button class="btn-primary" data-knownew="${esc(en)}" style="width:100%;">✅ 我记住了，+5经验</button>
+    `);
+  }
+
+  function renderEnglishDictation(en, backToTasks = false) {
+    const info = getWordInfo(en);
+    const ws = ensureWordState(info, info.levelIdx);
+    openSubpage(`${en} · 默写`, `
+      <button class="back-row" data-engback>${backToTasks ? '← 返回任务列表' : '← 返回英语学习'}</button>
+      <div class="sub-header"><h2>✍️ 单词默写</h2><p>${ENGLISH_LEVELS[info.levelIdx]} · 连续3天正确才掌握</p></div>
+      <div class="dictation-card">
+        <div class="dictation-word">${info.image} ${info.mean}</div>
+        <div class="dictation-tip">${info.phonetic} <button class="btn-outline" data-speak="${esc(info.en)}" style="padding:4px 10px;font-size:12px;">🔊 听发音</button></div>
+        <input id="dictInput" class="dictation-input" placeholder="输入英文拼写" autocomplete="off" />
+        <div id="dictFeedback" style="margin-top:12px;display:none;"></div>
+        <button class="btn-primary" data-checkspell="${esc(en)}" style="width:100%;margin-top:12px;">提交</button>
+      </div>
+      <div class="card"><h4 style="margin:0 0 8px;">📊 当前状态</h4><p style="font-size:13px;color:var(--text-secondary);margin:0;">连续正确 ${ws.consecutiveCorrect}/3 · 错误 ${ws.wrongCount} 次</p><div class="progress-mini"><div class="progress-mini-fill" style="width:${Math.min(100, ws.consecutiveCorrect / 3 * 100)}%"></div></div></div>
+    `);
+  }
+
+  function renderEnglishListen(idx) {
+    const s = getEngState();
+    const items = englishCurriculum[ENGLISH_LEVELS[s.level]].listen;
+    const i = Math.min(idx, items.length - 1);
+    const item = items[i];
+    openSubpage(`听力训练 ${i + 1}/${items.length} 🎧`, `
+      <button class="back-row" data-engback>← 返回英语学习</button>
+      <div class="sub-header"><h2>🎧 ${esc(item.title)}</h2><p>${ENGLISH_LEVELS[s.level]} · 听短文做选择题</p></div>
+      <div class="card"><button class="btn-primary" data-listenplay="${i}" style="width:100%;">🔊 播放短文（Web Speech）</button></div>
+      <div class="card"><h4 style="margin:0 0 10px;">原文</h4><p style="font-size:14px;line-height:1.7;margin:0;">${esc(item.text)}</p></div>
+      <div class="card"><h4 style="margin:0 0 10px;">译文</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0;">${esc(item.translation)}</p></div>
+      <div id="listenQuestions">${item.questions.map((q, qi) => `<div class="card" data-qidx="${qi}"><h4 style="margin:0 0 10px;">${qi + 1}. ${esc(q.q)}</h4><div class="option-list">${q.options.map((opt, oi) => `<button class="option-chip" data-answer="${qi}:${oi}">${esc(opt)}</button>`).join('')}</div></div>`).join('')}</div>
+      <button class="btn-primary" id="engListenDone" data-listendone="${i}" style="width:100%;margin-top:10px;">完成听力打卡</button>
+      ${i < items.length - 1 ? `<button class="btn-outline" data-epage="listen:${i + 1}" style="width:100%;margin-top:10px;">下一篇 →</button>` : ''}
+    `);
+  }
+
+  function renderEnglishSpeak() {
+    const ids = Object.keys(speakScenarios);
+    openSubpage('AI口语对练 💬', `
+      <button class="back-row" data-engback>← 返回英语学习</button>
+      <div class="sub-header"><h2>💬 AI口语对练</h2><p>选一个场景开始对话</p></div>
+      <div class="scene-card" style="background:linear-gradient(90deg,#F3E5F5,#fff);">
+        <div class="scene-icon">🎙️</div>
+        <div class="scene-info"><div class="scene-title">AI口语对练</div><div class="scene-meta">关键词匹配评分 · Web Speech语音输入</div></div>
+      </div>
+      ${ids.map(id => {
+        const sc = speakScenarios[id];
+        return `<div class="scene-card" data-speakscene="${esc(id)}"><div class="scene-icon">${sc.icon}</div><div class="scene-info"><div class="scene-title">${esc(sc.title)}</div><div class="scene-meta">${sc.difficulty} · ${sc.time} · ${sc.steps.length}轮对话</div><div class="scene-script">${sc.steps[0].ai}</div></div><span style="color:var(--text-tertiary);">›</span></div>`;
+      }).join('')}
+    `);
+  }
+
+  function renderEnglishSpeakScene(sceneId) {
+    const sc = speakScenarios[sceneId];
+    openSubpage(`${sc.title} 💬`, `
+      <button class="back-row" data-engback>← 返回场景选择</button>
+      <div class="sub-header"><h2>${sc.icon} ${sc.title}</h2><p>${sc.difficulty} · 完成 ${sc.steps.length} 轮对话</p></div>
+      <div id="speakChat" class="chat-wrap">
+        <div class="chat-bubble chat-ai">${esc(sc.steps[0].ai)}</div>
+      </div>
+      <div class="chat-input-row">
+        <input id="speakInput" placeholder="输入你的回复，或点麦克风说话…" />
+        <button id="speakMic" class="mic-btn" data-micscene="${esc(sceneId)}">🎙️</button>
+        <button id="speakSend" data-sendscene="${esc(sceneId)}">➤</button>
+      </div>
+      <div id="speakResult" class="chat-feedback" style="display:none;"></div>
+    `);
+    window.__speakScene = sceneId;
+    window.__speakStep = 0;
+    window.__speakStars = 0;
+  }
+
+  function speakFeedback(sceneId, userText) {
+    const sc = speakScenarios[sceneId];
+    const step = sc.steps[window.__speakStep];
+    const chat = $('#speakChat');
+    const userBubble = document.createElement('div'); userBubble.className = 'chat-bubble chat-user'; userBubble.textContent = userText || '…'; chat.appendChild(userBubble);
+    const lower = (userText || '').toLowerCase();
+    let stars = 0;
+    step.keywords.forEach(kw => { if (lower.includes(kw.toLowerCase())) stars++; });
+    if (lower.includes(step.bonus.toLowerCase())) stars++;
+    stars = Math.min(5, Math.max(1, stars));
+    window.__speakStars += stars;
+    const hasKw = step.keywords.some(kw => lower.includes(kw.toLowerCase()));
+    const hasBonus = lower.includes(step.bonus.toLowerCase());
+    const fb = `<b>⭐ ${stars}/5</b><br/>${hasKw ? '✅ ' + esc(step.highlight) : '💡 ' + esc(step.improve)}${hasBonus ? '<br/>🎉 加分表达：' + esc(step.bonus) : ''}`;
+    const fbDiv = document.createElement('div'); fbDiv.className = 'chat-feedback'; fbDiv.innerHTML = fb; chat.appendChild(fbDiv);
+    window.__speakStep++;
+    if (window.__speakStep < sc.steps.length) {
+      setTimeout(() => { const next = document.createElement('div'); next.className = 'chat-bubble chat-ai'; next.textContent = sc.steps[window.__speakStep].ai; chat.appendChild(next); chat.scrollTop = chat.scrollHeight; }, 800);
+    } else {
+      const total = window.__speakStars;
+      const avg = Math.round(total / sc.steps.length);
+      setTimeout(() => {
+        const end = document.createElement('div'); end.className = 'chat-feedback';
+        end.innerHTML = `<b>🎉 对话结束</b><br/>总星数：${total} ⭐ · 平均 ${avg}/5<br/>${avg >= 4 ? '表现很棒，继续加油！' : avg >= 3 ? '还不错，注意关键词匹配。' : '建议多练基础句型。'}`;
+        chat.appendChild(end);
+        const s = getEngState(); s.xp += 10; s.map['口语'] = Math.min(100, s.map['口语'] + 10); if (avg >= 4) s.streak += 1; setEngState(s);
+        toast('口语对练完成 +10经验');
+        chat.scrollTop = chat.scrollHeight;
+      }, 800);
+    }
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function renderEnglishErrors() {
+    const all = getAllWordStates().filter(w => !w.mastered).sort((a, b) => {
+      if (a.lastPracticed !== todayKey() && b.lastPracticed === todayKey()) return -1;
+      if (a.lastPracticed === todayKey() && b.lastPracticed !== todayKey()) return 1;
+      return b.wrongCount - a.wrongCount;
+    });
+    openSubpage('默写错题本 ✍️', `
+      <button class="back-row" data-engback>← 返回英语学习</button>
+      <div class="sub-header"><h2>✍️ 默写错题本</h2><p>连续3天正确才能移出</p></div>
+      ${all.length ? `<button class="btn-primary" data-practiceerrors style="width:100%;margin-bottom:12px;">巩固练习（${all.length}个）</button>` + all.map(w => {
+        let status = '', cls = '';
+        if (w.consecutiveCorrect === 0) { status = '🔴 连续0天'; cls = 'status-red'; }
+        else if (w.consecutiveCorrect === 1) { status = '🟡 连续1天'; cls = 'status-yellow'; }
+        else if (w.consecutiveCorrect === 2) { status = '🟢 连续2天'; cls = 'status-lightgreen'; }
+        else { status = '✅ 已掌握'; cls = 'status-green'; }
+        const info = getWordInfo(w.en);
+        return `<div class="error-card"><div class="error-top"><span class="error-en">${esc(w.en)}</span><span class="word-status ${cls}">${status}</span></div><p style="font-size:12px;color:var(--text-secondary);margin:0;">${info ? info.mean : ''} · 错误 ${w.wrongCount} 次</p><p style="font-size:12px;color:var(--text-tertiary);margin:6px 0 0;">💡 ${info ? info.memoryTip.text : ''}</p></div>`;
+      }).join('') : '<div class="empty">暂无错题，继续保持！</div>'}
+    `);
+  }
+
+  function renderEnglishReview() {
+    const now = Date.now();
+    const due = getAllWordStates().filter(w => w.mastered && w.nextReview && w.nextReview <= now);
+    openSubpage('艾宾浩斯回顾 🔄', `
+      <button class="back-row" data-engback>← 返回英语学习</button>
+      <div class="sub-header"><h2>🔄 艾宾浩斯回顾</h2><p>今日到期：${due.length} 个</p></div>
+      ${due.length ? due.map(w => `<div class="eng-menu-row" data-doreview="${esc(w.en)}"><div class="eng-menu-left"><div class="eng-menu-icon">🔄</div><div><div class="eng-menu-title">${esc(w.en)}</div><div class="eng-menu-sub">第 ${w.reviewRound + 1} 轮 · ${reviewQuestionType(w.reviewRound)}</div></div></div><span style="color:var(--text-tertiary);">›</span></div>`).join('') : '<div class="empty">没有到期复习的单词，继续学习新词吧！</div>'}
+    `);
+  }
+
+  function renderEnglishReviewQuiz(en) {
+    const w = getWordState(en);
+    const info = getWordInfo(en);
+    const round = w.reviewRound || 0;
+    const type = reviewQuestionType(round);
+    let q = '', hint = '';
+    if (round % 6 === 0) { q = `看中文写英文：${info.mean}`; }
+    else if (round % 6 === 1) { q = '听发音写英文'; hint = `<button class="btn-outline" data-speak="${esc(en)}" style="padding:4px 10px;font-size:12px;">🔊 播放发音</button>`; }
+    else if (round % 6 === 2) { q = `补全单词：${en[0]}${'_'.repeat(en.length - 1)}`; }
+    else if (round % 6 === 3) { q = `看英文写中文：${en}`; }
+    else { q = '听发音写英文+中文'; hint = `<button class="btn-outline" data-speak="${esc(en)}" style="padding:4px 10px;font-size:12px;">🔊 播放发音</button>`; }
+    openSubpage(`回顾 · ${en} 🔄`, `
+      <button class="back-row" data-engback>← 返回回顾列表</button>
+      <div class="sub-header"><h2>🔄 第 ${round + 1} 轮回顾</h2><p>${type}</p></div>
+      <div class="dictation-card"><div class="dictation-word">${q}</div>${hint}<input id="reviewInput" class="dictation-input" placeholder="输入答案" autocomplete="off" /></div>
+      <button class="btn-primary" data-checkreview="${esc(en)}" style="width:100%;">提交答案</button>
+    `);
+  }
+
+  function renderEnglishPlacement() {
+    const questions = [
+      { q: '苹果的英语是？', audio: 'apple', answer: 'apple' },
+      { q: '书的英语是？', audio: 'book', answer: 'book' },
+      { q: '请听发音，写出这个单词', audio: 'water', answer: 'water' }
+    ];
+    openSubpage('开局自测定级 🎯', `
+      <button class="back-row" data-engback>← 返回英语学习</button>
+      <div class="sub-header"><h2>🎯 开局自测定级</h2><p>3道题 · 纯默写 · 答完自动定级</p></div>
+      ${questions.map((q, i) => `<div class="dictation-card" style="margin-bottom:10px;"><div style="font-size:14px;font-weight:700;margin-bottom:8px;">${i + 1}. ${q.q}</div><button class="btn-outline" data-speak="${esc(q.audio)}" style="margin-bottom:10px;">🔊 播放发音</button><input class="dictation-input placement-ans" data-idx="${i}" data-ans="${esc(q.answer)}" placeholder="输入英文" autocomplete="off" /></div>`).join('')}
+      <button class="btn-primary" id="engPlacementSubmit" style="width:100%;">提交定级</button>
+    `);
+  }
+
+  /* 旧的兼容数据迁移 */
+  (function migrateOldEng() {
+    const p = load(LS.personal, {});
+    if (p.english && !getWB(WB_ENGLISH_STATE, null)) {
+      const old = p.english;
+      setEngState({ level: old.level || 0, streak: old.streak || 0, xp: old.xp || 0, hp: old.hp || 5, history: old.history || [], map: old.map || initEngState().map, lastStudyDate: '', placementDone: false });
+    }
+  })();
 
   /* ---------- 运动 ---------- */
   function renderSport() {
