@@ -27,6 +27,9 @@
       --info-bg:#F6F8F2;
       --shadow:0 2px 10px rgba(107,142,66,.08);
       --radius:16px;
+      --pink:#FF5E9C;
+      --pink-light:#FFF0F5;
+      --pink-gradient:linear-gradient(90deg,#FF7EB3,#FF5E9C);
     }
     *{box-sizing:border-box;}
     html,body{height:100%;margin:0;overscroll-behavior:none;}
@@ -41,9 +44,12 @@
     .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;flex:1;border-radius:14px;color:rgba(255,255,255,.88);font-size:11px;font-weight:500;gap:4px;transition:all .15s ease;}
     .nav-btn.active{background:#fff;color:var(--primary-dark);box-shadow:0 4px 14px rgba(0,0,0,.14);}
     .nav-btn span:first-child{font-size:22px;line-height:1;}
-    .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+    .main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;}
 
     .topbar{flex-shrink:0;padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:relative;z-index:10;}
+    .topbar-left{display:flex;align-items:center;gap:8px;}
+    .back-btn{display:none;font-size:20px;padding:4px;color:var(--text);}
+    .back-btn.show{display:block;}
     .topbar-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.2px;}
     .topbar-date{font-size:12px;color:var(--text-tertiary);white-space:nowrap;}
 
@@ -65,30 +71,38 @@
     .btn-primary:active{transform:scale(.97);box-shadow:0 1px 4px rgba(107,142,66,.2);}
     .btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#fff;border:1px solid var(--border);color:var(--text-secondary);font-size:12px;font-weight:500;padding:7px 12px;border-radius:999px;transition:all .15s;}
     .btn-outline:active{transform:scale(.97);background:var(--primary-soft);}
+    .btn-pink{background:var(--pink-gradient);color:#fff;}
+    .btn-pink-outline{border-color:var(--pink);color:var(--pink);background:#fff;}
 
-    .topic-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
-    .topic-number{flex-shrink:0;font-size:20px;font-weight:800;color:var(--primary);line-height:1.1;margin-top:1px;}
-    .topic-title-wrap{flex:1;min-width:0;}
-    .topic-title{font-size:16px;font-weight:700;color:var(--text);line-height:1.35;}
-    .topic-analysis{font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:12px;}
-    .topic-actions{display:flex;gap:10px;}
-    .topic-actions .btn-primary{flex:1;}
-    .topic-actions .btn-outline{flex:1;color:var(--primary);border-color:var(--primary);}
+    /* 顶部切换标签 */
+    .seg-tabs{display:flex;gap:8px;margin-bottom:12px;}
+    .seg-tab{flex:1;padding:9px 6px;border-radius:999px;font-size:13px;font-weight:600;text-align:center;background:#fff;color:var(--text-secondary);border:1px solid var(--border);transition:all .15s;}
+    .seg-tab.active{background:var(--pink-gradient);color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(255,94,156,.25);}
 
-    .repost-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
-    .repost-title{font-size:17px;font-weight:700;color:var(--text);line-height:1.35;flex:1;min-width:0;}
-    .repost-heat{flex-shrink:0;display:flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--heat);white-space:nowrap;margin-top:2px;}
-    .repost-section{margin-bottom:10px;}
-    .repost-label{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:3px;}
-    .repost-text{font-size:13px;color:var(--text-secondary);line-height:1.65;}
-    .repost-source{font-size:11px;color:var(--text-tertiary);margin:10px 0 12px;}
-    .repost-cta{margin-bottom:12px;}
-    .repost-info{background:var(--info-bg);border-radius:12px;padding:12px;display:flex;gap:8px;margin-bottom:14px;}
+    /* 爆款笔记分析卡片（图2） */
+    .note-card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px;animation:pop .22s ease;}
+    .note-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+    .note-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+    .note-title-wrap{flex:1;min-width:0;}
+    .note-title{font-size:16px;font-weight:700;color:var(--text);line-height:1.35;}
+    .note-tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 6px;}
+    .note-tag-pf{background:#FF2D55;color:#fff;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;}
+    .note-tag-cat{background:#E8F5E9;color:var(--primary);padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;}
+    .note-stats{font-size:12px;color:var(--text-secondary);margin-bottom:10px;}
+    .note-reason{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
+    .note-reason-label{flex-shrink:0;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#8D6E63;color:#fff;}
+    .note-reason-label.green{background:#66BB6A;}
+    .note-reason-text{font-size:13px;color:var(--text-secondary);line-height:1.55;flex:1;}
+    .note-actions2{display:flex;gap:10px;margin-top:12px;}
+    .note-actions2 .btn-outline{flex:1;}
+    .note-actions2 .btn-primary{flex:1;}
+    .note-batch{flex-shrink:0;margin-top:2px;}
+
+    .repost-source{font-size:11px;color:var(--text-tertiary);margin:8px 0 10px;}
+    .repost-info{background:var(--info-bg);border-radius:12px;padding:12px;display:flex;gap:8px;margin-bottom:12px;}
     .repost-info-icon{flex-shrink:0;font-size:16px;}
     .repost-info-text{flex:1;font-size:12px;color:var(--text-secondary);line-height:1.6;}
     .repost-info-text b{color:var(--primary);font-weight:700;}
-    .repost-footer{display:flex;gap:8px;}
-    .repost-footer .btn-outline{flex:1;padding:8px 4px;font-size:12px;}
 
     .plan-progress-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;}
     .plan-progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
@@ -108,6 +122,96 @@
     .plan-add input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
     .plan-add button{background:var(--primary);color:#fff;border-radius:12px;padding:0 18px;font-size:14px;font-weight:600;}
     .plan-tip{font-size:11px;color:var(--text-tertiary);margin-top:10px;line-height:1.5;}
+
+    /* 个人日常（图3） */
+    .personal-daily{margin-top:22px;}
+    .pd-header{background:var(--pink-gradient);color:#fff;border-radius:999px;padding:11px;text-align:center;font-size:15px;font-weight:700;margin-bottom:12px;box-shadow:0 4px 12px rgba(255,94,156,.2);}
+    .pd-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);}
+    .pd-icon{font-size:32px;flex-shrink:0;}
+    .pd-info{flex:1;min-width:0;}
+    .pd-title{font-size:15px;font-weight:700;color:var(--text);}
+    .pd-desc{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+
+    /* 子页面 */
+    #subpage{position:absolute;inset:0;background:var(--bg);z-index:25;display:none;flex-direction:column;}
+    #subpage.show{display:flex;}
+    #subpage .content{padding-bottom:30px;}
+    .sub-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    .sub-header h2{font-size:20px;font-weight:700;margin:0;}
+    .sub-header p{font-size:12px;color:var(--text-secondary);margin:2px 0 0;}
+    .sub-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none;}
+    .sub-tabs::-webkit-scrollbar{display:none;}
+    .sub-tab{flex-shrink:0;padding:6px 13px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text-secondary);}
+    .sub-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .sub-section{display:none;}
+    .sub-section.active{display:block;}
+
+    /* 护肤 */
+    .shelf-banner{background:linear-gradient(90deg,#F8BBD0,#E1BEE7);border-radius:18px;padding:18px;color:#fff;margin-bottom:14px;}
+    .shelf-banner h3{margin:0 0 6px;font-size:17px;}
+    .shelf-banner p{margin:0;font-size:12px;opacity:.95;}
+    .product-card{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:12px 14px;border-radius:14px;margin-bottom:8px;}
+    .product-info h4{margin:0 0 2px;font-size:14px;}
+    .product-info p{margin:0;font-size:11px;color:var(--text-tertiary);}
+    .chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
+    .chip{padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:13px;color:var(--text-secondary);}
+    .chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .mood-row{display:flex;justify-content:space-between;gap:6px;margin:12px 0;}
+    .mood-item{flex:1;text-align:center;padding:10px 4px;border-radius:12px;background:#fff;border:1px solid var(--border);}
+    .mood-item.active{background:var(--pink-light);border-color:var(--pink);}
+    .mood-emoji{font-size:26px;}
+    .mood-label{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+    .massage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .massage-item{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow);}
+    .massage-icon{font-size:28px;margin-bottom:6px;}
+    .massage-title{font-size:14px;font-weight:700;}
+    .massage-desc{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+    .face-wrap{width:140px;height:180px;margin:14px auto;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;}
+    .face-wrap span{font-size:48px;opacity:.5;}
+    .step-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;}
+    .step-title{font-size:14px;font-weight:700;margin-bottom:6px;}
+    .step-tip{background:#FFF3F5;border-radius:10px;padding:10px;font-size:12px;color:var(--text-secondary);margin-bottom:10px;}
+    .timer-bar{height:6px;background:var(--primary-light);border-radius:999px;overflow:hidden;margin-bottom:8px;}
+    .timer-fill{height:100%;background:var(--pink);border-radius:999px;transition:width .2s linear;}
+
+    /* 电子琴 / 唱歌 / 英语 通用 */
+    .stat-row{display:flex;justify-content:space-around;background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;}
+    .stat-item{text-align:center;}
+    .stat-icon{font-size:26px;}
+    .stat-num{font-size:18px;font-weight:800;color:var(--text);margin-top:2px;}
+    .stat-label{font-size:11px;color:var(--text-secondary);}
+    .diff-tabs{display:flex;gap:8px;margin-bottom:14px;}
+    .diff-tab{flex:1;text-align:center;padding:8px;border-radius:999px;background:#fff;font-size:13px;font-weight:500;color:var(--text-secondary);border:1px solid var(--border);}
+    .diff-tab.active{background:var(--pink);color:#fff;border-color:var(--pink);}
+    .map-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+    .map-circle{width:68px;height:68px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--border);background:#fff;}
+    .map-circle.done{border-color:var(--primary);}
+    .map-icon{font-size:20px;}
+    .map-label{font-size:11px;font-weight:600;margin-top:1px;}
+    .map-pct{font-size:10px;color:var(--text-secondary);}
+    .menu-row{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);}
+    .menu-row-left{display:flex;align-items:center;gap:10px;}
+    .menu-row-icon{font-size:20px;}
+    .menu-row-title{font-size:14px;font-weight:700;}
+
+    /* 视频跟练 */
+    .vp-wrap{position:relative;background:#000;border-radius:18px;overflow:hidden;margin-bottom:12px;}
+    .vp-media{width:100%;height:220px;object-fit:contain;transition:transform .2s;background:#111;}
+    .vp-iframe{width:100%;height:220px;border:none;}
+    .vp-controls{position:absolute;bottom:10px;left:10px;right:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+    .vp-btn{background:rgba(255,255,255,.9);color:var(--text);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;}
+    .ai-form{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;}
+    .ai-form label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:8px;}
+    .ai-form textarea,.ai-form input{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:14px;outline:none;margin-top:4px;}
+    .ai-result{background:#F3F8FF;border-left:4px solid #4A90E2;padding:12px;border-radius:10px;font-size:13px;color:var(--text-secondary);line-height:1.6;}
+
+    /* 英语单词卡片 */
+    .word-card{background:var(--card);border-radius:18px;padding:18px;text-align:center;margin-bottom:14px;box-shadow:var(--shadow);}
+    .word-en{font-size:28px;font-weight:800;margin-bottom:4px;}
+    .word-phonetic{font-size:14px;color:var(--text-secondary);margin-bottom:12px;}
+    .word-meaning{font-size:16px;color:var(--primary);font-weight:700;margin-bottom:16px;}
+    .word-reveal{display:none;}
+    .word-reveal.show{display:block;}
 
     .upgrade-box{background:var(--card);border:1.5px dashed var(--primary);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
     .upgrade-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
@@ -150,7 +254,7 @@
     /* 列表计数 + 半透明滚动拉杆 + 回到顶部 */
     .list-count{font-size:12px;font-weight:600;color:var(--text-tertiary);padding:2px 6px 8px;}
     #scrollTrack{position:fixed;right:5px;width:6px;background:rgba(107,142,66,.10);border-radius:999px;z-index:30;display:none;}
-    #scrollThumb{position:absolute;left:0;top: 0;width:100%;background:rgba(107,142,66,.5);border-radius:999px;cursor:grab;touch-action:none;}
+    #scrollThumb{position:absolute;left:0;top:0;width:100%;background:rgba(107,142,66,.5);border-radius:999px;cursor:grab;touch-action:none;}
     #scrollThumb:active{background:rgba(107,142,66,.85);}
     #backTop{position:fixed;right:9px;bottom:70px;width:42px;height:42px;border-radius:50%;background:rgba(107,142,66,.92);color:#fff;display:none;align-items:center;justify-content:center;font-size:20px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:31;}
     #backTop:active{transform:scale(.94);}
@@ -182,7 +286,10 @@
 
     <main class="main">
       <header class="topbar">
-        <h1 class="topbar-title" id="viewTitle">每日计划</h1>
+        <div class="topbar-left">
+          <button id="backBtn" class="back-btn">←</button>
+          <h1 class="topbar-title" id="viewTitle">每日计划</h1>
+        </div>
         <span class="topbar-date" id="todayDate"></span>
       </header>
 
@@ -198,10 +305,43 @@
             <input id="taskInput" type="text" placeholder="添加新任务，回车确认…" />
             <button id="taskAdd">添加</button>
           </div>
-          <p class="plan-tip">提示：每天 0 点后任务会自动重置为未完成，任务清单本身长期保留。完成后点圆圈打勾即可。</p>
+          <p class="plan-tip">提示：每天 0 点后任务会自动重置为未完成，任务清单本身长期保留。</p>
+
+          <div class="personal-daily">
+            <div class="pd-header">个人日常</div>
+            <div class="pd-card" data-sub="skincare">
+              <div class="pd-icon">✨</div>
+              <div class="pd-info"><div class="pd-title">护肤日常</div><div class="pd-desc">日程·护肤品·肤质测试·日记·面部按摩</div></div>
+              <span style="color:var(--text-tertiary);">›</span>
+            </div>
+            <div class="pd-card" data-sub="piano">
+              <div class="pd-icon">🎹</div>
+              <div class="pd-info"><div class="pd-title">电子琴学习</div><div class="pd-desc">C大调音阶·AI教练纠错</div></div>
+              <span style="color:var(--text-tertiary);">›</span>
+            </div>
+            <div class="pd-card" data-sub="singing">
+              <div class="pd-icon">🎤</div>
+              <div class="pd-info"><div class="pd-title">唱歌</div><div class="pd-desc">每日练声·AI唱歌老师</div></div>
+              <span style="color:var(--text-tertiary);">›</span>
+            </div>
+            <div class="pd-card" data-sub="english">
+              <div class="pd-icon">🌍</div>
+              <div class="pd-info"><div class="pd-title">英语练习 半小时</div><div class="pd-desc">场景化闯关·口语对练</div></div>
+              <span style="color:var(--text-tertiary);">›</span>
+            </div>
+            <div class="pd-card" data-sub="sport">
+              <div class="pd-icon">💪</div>
+              <div class="pd-info"><div class="pd-title">运动计划</div><div class="pd-desc">八段锦·力量拉伸·姨妈期</div></div>
+              <span style="color:var(--text-tertiary);">›</span>
+            </div>
+          </div>
         </div>
 
         <div data-panel="topic" class="hidden">
+          <div class="seg-tabs">
+            <button class="seg-tab active" data-tmode="today">🔥 今日内容</button>
+            <button class="seg-tab" data-tmode="history">🗂️ 历史记录</button>
+          </div>
           <div id="topicFilter" class="filter-bar"></div>
           <div class="list-count-row">
             <span class="list-count" id="topicCount"></span>
@@ -213,18 +353,26 @@
             <button id="topicBatchDel" class="batch-del">删除选中</button>
             <button id="topicBatchDone" class="batch-done">完成</button>
           </div>
-          <div class="upgrade-box">
-            <div class="upgrade-title">🔗 链接升级 · 粘贴分享链接</div>
-            <textarea id="upInput" class="upgrade-input" placeholder="把抖音/小红书/快手/B站 的「分享→复制链接」整段粘贴进来（如 v.douyin.com/xxx），自动转成可跳转灵感卡片"></textarea>
-            <button id="upBtn" class="btn-primary" style="width:100%;margin-top:10px;">⤴ 升级成灵感卡片</button>
+          <div id="topicTools" class="today-only">
+            <div class="upgrade-box">
+              <div class="upgrade-title">🔗 链接升级 · 粘贴分享链接</div>
+              <textarea id="upInput" class="upgrade-input" placeholder="把抖音/小红书/快手/B站 的「分享→复制链接」整段粘贴进来（如 v.douyin.com/xxx），自动转成可跳转灵感卡片"></textarea>
+              <button id="upBtn" class="btn-primary" style="width:100%;margin-top:10px;">⤴ 升级成灵感卡片</button>
+            </div>
           </div>
           <div id="topicList"></div>
-          <button id="topicAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增一条选题</button>
-          <button id="topicImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
-          <p class="plan-tip">各平台赛道「当日爆款」广撒网扫描（含美食/旅行/搞笑/影视/知识/健身/数码/职场等大众赛道，不过滤是否适合你），逐条给火爆核心原因 + 原创创作思路。抖音/快手卡片的「看原爆款」是真实视频/热榜链接；微博/B站为真实页；小红书为搜索页。下方「链接升级」可把分享短链转成卡片。</p>
+          <div id="topicFoot" class="today-only">
+            <button id="topicAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增一条选题</button>
+            <button id="topicImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
+          </div>
+          <p id="topicTip" class="plan-tip">各平台赛道「当日爆款」广撒网扫描。抖音/快手卡片的「看相关视频」是真实视频/热榜链接；微博/B站为真实页；小红书为搜索页。</p>
         </div>
 
         <div data-panel="repost" class="hidden">
+          <div class="seg-tabs">
+            <button class="seg-tab active" data-rmode="today">🔥 今日内容</button>
+            <button class="seg-tab" data-rmode="history">🗂️ 历史记录</button>
+          </div>
           <div id="repostFilter" class="filter-bar"></div>
           <div class="list-count-row">
             <span class="list-count" id="repostCount"></span>
@@ -237,9 +385,11 @@
             <button id="repostBatchDone" class="batch-done">完成</button>
           </div>
           <div id="repostList"></div>
-          <button id="repostAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增二创素材</button>
-          <button id="repostImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
-          <p class="plan-tip">从全网热点中筛选适合你的 13 个方向（穿搭/妆容/测评/鞋履配饰/网购避坑/护肤身体护理/好物/情绪共鸣/女性成长/审美建立/消费观/vlog/唱歌碎片），逐条给出「为什么适合你二创 + 详细改编方案」。点击绿色按钮进入对应平台查看真实视频/话题流。</p>
+          <div id="repostFoot" class="today-only">
+            <button id="repostAddBtn" class="btn-outline" style="width:100%;margin-top:8px;padding:10px;">＋ 新增二创素材</button>
+            <button id="repostImportBtn" class="btn-primary" style="width:100%;margin-top:10px;">📥 粘贴导入今日采集（JSON）</button>
+          </div>
+          <p id="repostTip" class="plan-tip">从全网热点中筛选适合你的方向，逐条给出「为什么适合你二创 + 详细改编方案」。</p>
         </div>
 
         <div data-panel="review" class="hidden">
@@ -266,6 +416,11 @@
           <div id="reviewList"></div>
         </div>
 
+      </section>
+
+      <!-- 子页面浮层 -->
+      <section id="subpage" class="content hidden">
+        <div id="subpageBody"></div>
       </section>
     </main>
   </div>
