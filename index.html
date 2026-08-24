@@ -182,7 +182,9 @@
     .stat-label{font-size:11px;color:var(--text-secondary);}
     .diff-tabs{display:flex;gap:8px;margin-bottom:14px;}
     .diff-tab{flex:1;text-align:center;padding:8px;border-radius:999px;background:#fff;font-size:13px;font-weight:500;color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;}
-    .diff-tab.active{background:var(--pink);color:#fff;border-color:var(--pink);}
+    .diff-tab.active{background:var(--pink);color:#fff;border-color:var(--pink);position:relative;overflow:visible;}
+    .diff-tab .diff-pulse{position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.7);animation:pulse 1.6s infinite;}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.7);}70%{box-shadow:0 0 0 8px rgba(255,255,255,0);}100%{box-shadow:0 0 0 0 rgba(255,255,255,0);}}
     .map-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
     .map-circle{width:68px;height:68px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--border);background:#fff;cursor:pointer;transition:transform .1s;}
     .map-circle:active{transform:scale(0.96);}
@@ -1203,6 +1205,7 @@
       ensureWordState(info, info.levelIdx);
       updateWordState(en, w => { w.lastPracticed = todayKey(); });
       const s = getEngState(); s.xp += 5; s.map['词汇'] = Math.min(100, s.map['词汇'] + 5); setEngState(s);
+      checkEngLevelAdjust(85);
       toast('太棒了，已记录进度');
       if (taskIdx >= 0) goNextTask(taskIdx);
       else renderEnglishTasks();
@@ -1361,6 +1364,7 @@
       if (val === en.toLowerCase()) {
         fb.innerHTML = '<b style="color:#2E7D32;">✅ 正确</b>';
         const s = getEngState(); s.xp += 3; setEngState(s);
+        checkEngLevelAdjust(90);
         if (idx + 1 < total) setTimeout(() => renderEnglishDailyDictation(window.__dailyNewWords, idx + 1), 500);
         else { toast('默写巩固完成'); setTimeout(() => renderEnglishDailyComplete(), 500); }
       } else {
@@ -1381,6 +1385,7 @@
       if (val === en.toLowerCase()) {
         fb.innerHTML = '<b style="color:#2E7D32;">✅ 正确</b>';
         const s = getEngState(); s.xp += 3; setEngState(s);
+        checkEngLevelAdjust(90);
         if (idx + 1 < total) setTimeout(() => renderEnglishDailyListen(window.__dailyNewWords, idx + 1), 500);
         else { toast('听写巩固完成'); setTimeout(() => renderEnglishDailyComplete(), 500); }
       } else {
@@ -1401,6 +1406,7 @@
       if (val === en.toLowerCase()) {
         fb.innerHTML = '<b style="color:#2E7D32;">✅ 正确</b>';
         const s = getEngState(); s.xp += 3; s.map['语法'] = Math.min(100, s.map['语法'] + 5); setEngState(s);
+        checkEngLevelAdjust(90);
         if (idx + 1 < total) setTimeout(() => renderEnglishDailyGrammar(window.__dailyNewWords, idx + 1), 500);
         else { toast('语法运用完成'); setTimeout(() => renderEnglishDailyComplete(), 500); }
       } else {
@@ -1416,11 +1422,17 @@
         if (inp.value.trim().toLowerCase() === inp.dataset.ans.toLowerCase()) score++;
       });
       const s = getEngState();
-      if (score <= 2) s.level = 0;
-      else if (score >= 9) s.level = Math.min(3, s.level + 1);
-      else s.level = Math.min(3, Math.max(0, s.level));
-      s.placementDone = true; s.xp += score * 2; setEngState(s);
-      toast(`自测得分 ${score}/3，定级为 ${ENGLISH_LEVELS[s.level]}`);
+      // 自测只升不降：根据答对题数给出建议等级，但不会把已手动/自动升到的高级降回去
+      const recommended = score === 3 ? 2 : score === 2 ? 1 : 0;
+      const oldLevel = s.level;
+      s.level = Math.max(oldLevel, recommended);
+      s.placementDone = true;
+      s.xp += score * 2;
+      // 记录一次学习历史，帮助后续连续升级判断
+      s.history.push({ date: todayKey(), acc: score === 0 ? 30 : score === 1 ? 60 : score === 2 ? 85 : 95 });
+      if (s.history.length > 10) s.history.shift();
+      setEngState(s);
+      toast(`自测得分 ${score}/3，难度自动调整为 ${ENGLISH_LEVELS[s.level]}`);
       renderEnglish();
       return;
     }
@@ -1918,6 +1930,15 @@
     ]}
   };
 
+  function getEngLevelHint(s) {
+    const recent = s.history.slice(-3);
+    if (!recent.length) return '完成今日学习即可开始记录学习表现';
+    const avg = Math.round(recent.reduce((a, b) => a + b.acc, 0) / recent.length);
+    if (recent.length < 3) return `再坚持 ${3 - recent.length} 天，系统会根据正确率自动调整难度`;
+    if (avg >= 90 && s.level < 3) return '最近表现很棒，继续高分即可升级 ⤴️';
+    if (avg <= 50 && s.level > 0) return '当前难度可能偏高，巩固基础后会自动降级 ⤵️';
+    return `最近平均正确率 ${avg}%，当前难度适合你`;
+  }
   function engMapColorClass(pct) {
     if (pct <= 0) return 'map-gray';
     if (pct <= 30) return 'map-red';
@@ -1929,11 +1950,21 @@
 
   function checkEngLevelAdjust(accuracy) {
     const s = getEngState();
-    s.history.push({ date: todayKey(), acc: accuracy });
+    const today = todayKey();
+    const last = s.history[s.history.length - 1];
+    // 每天只保留一条学习表现记录，多次学习取平均
+    if (last && last.date === today) {
+      last.acc = Math.round((last.acc + accuracy) / 2);
+    } else {
+      s.history.push({ date: today, acc: accuracy });
+    }
     if (s.history.length > 10) s.history.shift();
     const recent = s.history.slice(-3);
-    if (recent.length >= 3 && recent.every(x => x.acc >= 90) && s.level < 3) { s.level += 1; s.history = []; toast('🎉 连续3天高正确率，难度升级！'); }
-    else if (recent.length >= 3 && recent.every(x => x.acc <= 50) && s.level > 0) { s.level -= 1; s.history = []; toast('难度降低，先巩固基础 💪'); }
+    if (recent.length >= 3 && recent.every(x => x.acc >= 90) && s.level < 3) {
+      s.level += 1; s.history = []; toast('🎉 连续3天表现优秀，难度自动升级！');
+    } else if (recent.length >= 3 && recent.every(x => x.acc <= 50) && s.level > 0) {
+      s.level -= 1; s.history = []; toast('难度已自动降低，先巩固基础 💪');
+    }
     setEngState(s);
   }
 
@@ -1995,15 +2026,21 @@
     const err = errorWordCount();
     const mapKeys = ENGLISH_KEYS;
     openSubpage('英语学习 🌍', `
-      <button class="back-row" data-back>← 返回每日计划</button>
-      <div class="sub-header"><h2>英语学习 🌍</h2><p>场景化闯关 · 当前难度「${ENGLISH_LEVELS[s.level]}」</p></div>
+      <button class="back-row" data-back>← 返回</button>
+      <div class="sub-header"><h2>英语学习 🌍</h2><p>场景化闯关 · 当前难度自动匹配</p></div>
       <div class="clover-card">
         <div class="clover-section clover-cut-left"><div class="clover-icon">🔥</div><div class="clover-num">${s.streak}</div><div class="clover-label">连续天</div></div>
         <div class="clover-section clover-cut-mid"><div class="clover-icon">⭐</div><div class="clover-num">${s.xp}</div><div class="clover-label">经验值</div></div>
         <div class="clover-section clover-cut-right"><div class="clover-icon">❤️</div><div class="clover-num">${s.hp}</div><div class="clover-label">生命值</div></div>
       </div>
-      <div style="font-size:13px;font-weight:700;margin:0 0 8px 4px;">难度等级</div>
-      <div class="diff-tabs">${ENGLISH_LEVELS.map((l, i) => `<button class="diff-tab ${i === s.level ? 'active' : ''}" data-el="${i}">${l}</button>`).join('')}</div>
+      <div class="card" style="padding:14px 16px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:13px;font-weight:700;">难度等级 <span style="font-size:11px;color:var(--text-tertiary);font-weight:500;">(自动调整)</span></div>
+          <div style="font-size:12px;color:var(--pink);font-weight:700;">当前：${ENGLISH_LEVELS[s.level]}</div>
+        </div>
+        <div class="diff-tabs">${ENGLISH_LEVELS.map((l, i) => `<button class="diff-tab ${i === s.level ? 'active' : ''}" data-el="${i}">${l}${i === s.level ? '<span class="diff-pulse"></span>' : ''}</button>`).join('')}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">${getEngLevelHint(s)} · 连续3天≥90%升级 / ≤50%降级</div>
+      </div>
       <div class="card"><h4 style="margin:0 0 10px;">🗺️ 学习地图（点击打卡）</h4>
         <div class="map-row eng-map">${mapKeys.slice(0, 3).map(k => engMapCircle(k, s.map[k])).join('')}</div>
         <div class="map-row eng-map">${mapKeys.slice(3).map(k => engMapCircle(k, s.map[k])).join('')}</div>
@@ -2188,18 +2225,20 @@
     window.__speakStep++;
     if (window.__speakStep < sc.steps.length) {
       setTimeout(() => { const next = document.createElement('div'); next.className = 'chat-bubble chat-ai'; next.textContent = sc.steps[window.__speakStep].ai; chat.appendChild(next); chat.scrollTop = chat.scrollHeight; }, 800);
-    } else {
-      const total = window.__speakStars;
-      const avg = Math.round(total / sc.steps.length);
-      setTimeout(() => {
-        const end = document.createElement('div'); end.className = 'chat-feedback';
-        end.innerHTML = `<b>🎉 对话结束</b><br/>总星数：${total} ⭐ · 平均 ${avg}/5<br/>${avg >= 4 ? '表现很棒，继续加油！' : avg >= 3 ? '还不错，注意关键词匹配。' : '建议多练基础句型。'}`;
-        chat.appendChild(end);
-        const s = getEngState(); s.xp += 10; s.map['口语'] = Math.min(100, s.map['口语'] + 10); if (avg >= 4) s.streak += 1; setEngState(s);
-        toast('口语对练完成 +10经验');
-        chat.scrollTop = chat.scrollHeight;
-      }, 800);
-    }
+      } else {
+        const total = window.__speakStars;
+        const avg = Math.round(total / sc.steps.length);
+        const acc = avg >= 4 ? 90 : avg >= 3 ? 75 : 55;
+        setTimeout(() => {
+          const end = document.createElement('div'); end.className = 'chat-feedback';
+          end.innerHTML = `<b>🎉 对话结束</b><br/>总星数：${total} ⭐ · 平均 ${avg}/5<br/>${avg >= 4 ? '表现很棒，继续加油！' : avg >= 3 ? '还不错，注意关键词匹配。' : '建议多练基础句型。'}`;
+          chat.appendChild(end);
+          const s = getEngState(); s.xp += 10; s.map['口语'] = Math.min(100, s.map['口语'] + 10); if (avg >= 4) s.streak += 1; setEngState(s);
+          checkEngLevelAdjust(acc);
+          toast('口语对练完成 +10经验');
+          chat.scrollTop = chat.scrollHeight;
+        }, 800);
+      }
     chat.scrollTop = chat.scrollHeight;
   }
 
@@ -2257,14 +2296,15 @@
 
   function renderEnglishPlacement() {
     const questions = [
-      { q: '苹果的英语是？', audio: 'apple', answer: 'apple' },
-      { q: '书的英语是？', audio: 'book', answer: 'book' },
-      { q: '请听发音，写出这个单词', audio: 'water', answer: 'water' }
+      { q: '入门：苹果的英语是？', levelHint: '入门', audio: 'apple', answer: 'apple' },
+      { q: '初级：日程表的英语是？', levelHint: '初级', audio: 'schedule', answer: 'schedule' },
+      { q: '中级：截止日期的英语是？', levelHint: '中级', audio: 'deadline', answer: 'deadline' }
     ];
     openSubpage('开局自测定级 🎯', `
-      <button class="back-row" data-engback>← 返回英语学习</button>
-      <div class="sub-header"><h2>🎯 开局自测定级</h2><p>3道题 · 纯默写 · 答完自动定级</p></div>
-      ${questions.map((q, i) => `<div class="dictation-card" style="margin-bottom:10px;"><div style="font-size:14px;font-weight:700;margin-bottom:8px;">${i + 1}. ${q.q}</div><button class="btn-outline" data-speak="${esc(q.audio)}" style="margin-bottom:10px;">🔊 播放发音</button><input class="dictation-input placement-ans" data-idx="${i}" data-ans="${esc(q.answer)}" placeholder="输入英文" autocomplete="off" /></div>`).join('')}
+      <button class="back-row" data-engback>← 返回</button>
+      <div class="sub-header"><h2>🎯 开局自测定级</h2><p>3道题 · 答完自动跳到对应难度</p></div>
+      <div class="card" style="background:var(--primary-light);margin-bottom:12px;"><p style="font-size:13px;color:var(--text-secondary);margin:0;line-height:1.6;">系统会根据你的答案自动推荐最适合的初始难度，之后仍会根据每日学习表现继续自动升降。</p></div>
+      ${questions.map((q, i) => `<div class="dictation-card" style="margin-bottom:10px;"><div style="font-size:14px;font-weight:700;margin-bottom:8px;">${i + 1}. ${q.q} <span style="font-size:11px;color:var(--text-tertiary);font-weight:500;">(${q.levelHint})</span></div><button class="btn-outline" data-speak="${esc(q.audio)}" style="margin-bottom:10px;">🔊 播放发音</button><input class="dictation-input placement-ans" data-idx="${i}" data-ans="${esc(q.answer)}" placeholder="输入英文" autocomplete="off" /></div>`).join('')}
       <button class="btn-primary" id="engPlacementSubmit" style="width:100%;">提交定级</button>
     `);
   }
