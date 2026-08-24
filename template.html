@@ -181,10 +181,11 @@
     .stat-num{font-size:18px;font-weight:800;color:var(--text);margin-top:2px;}
     .stat-label{font-size:11px;color:var(--text-secondary);}
     .diff-tabs{display:flex;gap:8px;margin-bottom:14px;}
-    .diff-tab{flex:1;text-align:center;padding:8px;border-radius:999px;background:#fff;font-size:13px;font-weight:500;color:var(--text-secondary);border:1px solid var(--border);}
+    .diff-tab{flex:1;text-align:center;padding:8px;border-radius:999px;background:#fff;font-size:13px;font-weight:500;color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;}
     .diff-tab.active{background:var(--pink);color:#fff;border-color:var(--pink);}
     .map-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
-    .map-circle{width:68px;height:68px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--border);background:#fff;}
+    .map-circle{width:68px;height:68px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--border);background:#fff;cursor:pointer;transition:transform .1s;}
+    .map-circle:active{transform:scale(0.96);}
     .map-circle.done{border-color:var(--primary);}
     .map-icon{font-size:20px;}
     .map-label{font-size:11px;font-weight:600;margin-top:1px;}
@@ -211,6 +212,7 @@
     .vp-wrap{position:relative;background:#000;border-radius:18px;overflow:hidden;margin-bottom:12px;}
     .vp-media{width:100%;height:220px;object-fit:contain;transition:transform .2s;background:#111;}
     .vp-iframe{width:100%;height:220px;border:none;}
+    .vp-tip{font-size:11px;color:var(--text-secondary);text-align:center;padding:6px 10px;background:var(--card);border-radius:8px;margin-bottom:8px;}
     .vp-controls{position:absolute;bottom:10px;left:10px;right:10px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
     .vp-btn{background:rgba(255,255,255,.9);color:var(--text);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;}
     .ai-form{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;}
