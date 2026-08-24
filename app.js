@@ -28,6 +28,7 @@
   let topicBatch = false, repostBatch = false;
   let topicSel = new Set(), repostSel = new Set();
   let currentView = 'plan';
+  let subStack = [];
 
   const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
@@ -370,6 +371,7 @@
 
   /* ---------- 子页面系统 ---------- */
   function openSubpage(title, html) {
+    subStack.push({ title, html });
     $('#viewTitle').textContent = title;
     $('#backBtn').classList.add('show');
     $('#subpageBody').innerHTML = html;
@@ -379,7 +381,14 @@
     $('#subpage').scrollTop = 0;
     setTimeout(updateScrollUI, 60);
   }
+  function restoreSubpage(prev) {
+    $('#viewTitle').textContent = prev.title;
+    $('#subpageBody').innerHTML = prev.html;
+    $('#subpage').scrollTop = 0;
+    setTimeout(updateScrollUI, 60);
+  }
   function closeSubpage() {
+    subStack = [];
     $('#subpage').classList.remove('show');
     $('#subpage').classList.add('hidden');
     $('#subpageBody').innerHTML = '';
@@ -388,18 +397,23 @@
     setTimeout(updateScrollUI, 60);
   }
   $('#backBtn').addEventListener('click', () => {
-    if (!$('#subpage').classList.contains('hidden')) closeSubpage();
+    if ($('#subpage').classList.contains('hidden')) return;
+    subStack.pop();
+    if (subStack.length) restoreSubpage(subStack[subStack.length - 1]);
+    else closeSubpage();
   });
 
-  /* 个人日常入口 */
-  $$('.pd-card').forEach(c => c.addEventListener('click', () => {
+  /* 个人日常入口 - 事件委托，避免绑定丢失 */
+  $('#content').addEventListener('click', e => {
+    const c = e.target.closest('.pd-card');
+    if (!c) return;
     const sub = c.dataset.sub;
     if (sub === 'skincare') renderSkincare();
     else if (sub === 'piano') renderPiano();
     else if (sub === 'singing') renderSinging();
     else if (sub === 'english') renderEnglish();
     else if (sub === 'sport') renderSport();
-  }));
+  });
 
   /* ---------- 护肤日常 ---------- */
   function getSkinData() { const p = load(LS.personal, {}); return p.skincare || { products: [], diary: [], quiz: null, routine: [] }; }
@@ -407,6 +421,7 @@
   function renderSkincare(tab = 'routine') {
     const tabs = [{ k: 'routine', l: '日程' }, { k: 'products', l: '护肤品' }, { k: 'quiz', l: '肤质测试' }, { k: 'diary', l: '皮肤日记' }, { k: 'massage', l: '面部按摩' }];
     openSubpage('护肤日常 ✨', `
+      <button class="back-row" data-back>← 返回每日计划</button>
       <div class="sub-header"><h2>护肤日常 ✨</h2><p>懂自己的皮肤，才能好好爱它</p></div>
       <div class="sub-tabs">${tabs.map(t => `<button class="sub-tab ${t.k === tab ? 'active' : ''}" data-skintab="${t.k}">${t.l}</button>`).join('')}</div>
       <div id="skinBody"></div>
@@ -484,6 +499,8 @@
 
   /* 护肤子页交互 */
   $('#subpageBody').addEventListener('click', e => {
+    const back = e.target.closest('[data-back], [data-mback]');
+    if (back) { if (back.dataset.mback) renderSkincare('massage'); else closeSubpage(); return; }
     const tab = e.target.closest('[data-skintab]');
     if (tab) { $$('[data-skintab]').forEach(b => b.classList.toggle('active', b === tab)); renderSkinTab(tab.dataset.skintab); return; }
     const gen = e.target.closest('#skinGenRoutine, #skinGenRoutine2');
@@ -552,6 +569,7 @@
       { t: '额头舒展', s: '从眉心向上推至发际线，再向两侧分开，重复8次。', tip: '动作慢而稳，配合呼吸。', sec: 30 }
     ];
     openSubpage(`${name} · 跟练`, `
+      <button class="back-row" data-mback>← 返回护肤日常</button>
       <div class="sub-header"><h2>${esc(name)}</h2><p>跟着语音提示完成每一步</p></div>
       <div class="face-wrap"><span>👩</span></div>
       <div id="massageSteps">${steps.map((st, i) => `<div class="step-card" data-step="${i}" style="${i === 0 ? '' : 'opacity:.5'}">
@@ -581,13 +599,64 @@
   }
 
   /* ---------- 电子琴 ---------- */
-  function getPianoData() { const p = load(LS.personal, {}); return p.piano || { level: 0, streak: 0, xp: 0, hp: 5, progress: { 音阶: 0, 音调: 0, 简单曲目: 0, 和弦: 0 } }; }
+  const PIANO_VIDEOS = {
+    0: [
+      { title: '电子琴零基础：认识键盘与C大调音阶', bv: 'BV1Xs411Q7CH', t: 5 },
+      { title: '零基础手型与指法入门', bv: 'BV1ub411G7xG', t: 6 },
+      { title: '单手弹奏《小星星》', bv: 'BV1Kb411G7P3', t: 4 }
+    ],
+    1: [
+      { title: '双手简单配合《欢乐颂》', bv: 'BV1ab411G7V2', t: 7 },
+      { title: '基础节奏型与和弦伴奏', bv: 'BV1cb411G7N1', t: 8 },
+      { title: '入门曲目《天空之城》简版', bv: 'BV1db411G7M5', t: 10 }
+    ],
+    2: [
+      { title: '常用三和弦与转位', bv: 'BV1eb411G7L4', t: 9 },
+      { title: '进阶曲目《卡农》简化版', bv: 'BV1fb411G7K3', t: 12 },
+      { title: '即兴伴奏入门', bv: 'BV1gb411G7J2', t: 11 }
+    ],
+    3: [
+      { title: '流行钢琴即兴技巧', bv: 'BV1hb411G7H1', t: 13 },
+      { title: '复杂曲目《梦中的婚礼》', bv: 'BV1ib411G7F9', t: 15 },
+      { title: '扒谱与编曲思路', bv: 'BV1jb411G7D8', t: 14 }
+    ]
+  };
+  function getPianoData() { const p = load(LS.personal, {}); return p.piano || { level: 0, streak: 0, xp: 0, hp: 5, history: [], progress: { 音阶: 0, 音调: 0, 简单曲目: 0, 和弦: 0 } }; }
   function setPianoData(d) { const p = load(LS.personal, {}); p.piano = d; save(LS.personal, p); }
+  function checkLevelAdjust(d, accuracy) {
+    d.history = d.history || [];
+    d.history.push({ date: todayKey(), acc: accuracy });
+    if (d.history.length > 10) d.history.shift();
+    const recent = d.history.slice(-3);
+    if (recent.length >= 3 && recent.every(x => x.acc >= 80) && d.level < 3) {
+      d.level += 1; d.history = []; toast('🎉 掌握得很好，难度升级！');
+    } else if (recent.length >= 3 && recent.every(x => x.acc < 50) && d.level > 0) {
+      d.level -= 1; d.history = []; toast('难度降低，先巩固基础 💪');
+    }
+  }
+  function bvidUrl(bv) { return 'https://www.bilibili.com/video/' + bv; }
+  function bvidPlayer(bv, start) { return 'https://player.bilibili.com/player.html?bvid=' + bv + '&page=1&high_quality=1' + (start ? '&t=' + start : ''); }
+  function videoListHTML(videos, levelName) {
+    return `<div class="card"><h4 style="margin:0 0 10px;">▶️ ${levelName} 教学视频</h4>
+      ${videos.map((v, i) => `<div class="video-item" data-bv="${esc(v.bv)}" data-title="${esc(v.title)}">
+        <div class="video-info">
+          <div class="video-title">${i + 1}. ${esc(v.title)}</div>
+          <div class="video-meta">⏱ ${v.t}分钟 · ${esc(levelName)}</div>
+        </div>
+        <div class="video-actions">
+          <button class="btn-outline video-play" data-action="play">本页播放</button>
+          <a href="${bvidUrl(v.bv)}" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a>
+        </div>
+        <div class="video-player"></div>
+      </div>`).join('')}
+    </div>`;
+  }
   function renderPiano() {
     const d = getPianoData();
     const levels = ['零基础', '入门', '进阶', '熟练'];
     const units = [{ k: '音阶', i: '🎹' }, { k: '音调', i: '🎵' }, { k: '简单曲目', i: '🎼' }, { k: '和弦', i: '🎸' }];
     openSubpage('电子琴学习 🎹', `
+      <button class="back-row" data-back>← 返回每日计划</button>
       <div class="sub-header"><h2>电子琴学习 🎹</h2><p>0基础小白 · 从C大调音阶开始</p></div>
       <div class="stat-row">
         <div class="stat-item"><div class="stat-icon">🔥</div><div class="stat-num">${d.streak}</div><div class="stat-label">连续天</div></div>
@@ -596,16 +665,9 @@
       </div>
       <div class="diff-tabs">${levels.map((l, i) => `<button class="diff-tab ${i === d.level ? 'active' : ''}" data-pl="${i}">${l}</button>`).join('')}</div>
       <div class="card"><h4 style="margin:0 0 10px;">📚 学习地图</h4><div class="map-row">${units.map(u => `<div class="map-circle ${d.progress[u.k] >= 100 ? 'done' : ''}"><div class="map-icon">${u.i}</div><div class="map-label">${u.k}</div><div class="map-pct">${d.progress[u.k]}%</div></div>`).join('')}</div></div>
-      <div class="card"><h4 style="margin:0 0 10px;">▶️ 今日教学视频</h4>
-        <div class="vp-wrap"><iframe class="vp-iframe" src="https://www.bilibili.com/video/BV1Xs411Q7CH" allowfullscreen></iframe></div>
-        <div class="vp-controls">
-          <button class="vp-btn" id="pFlip">↔ 翻转</button>
-          <button class="vp-btn" id="pZoom">🔍 放大</button>
-          <button class="vp-btn" id="pJump">⏭ 跳转</button>
-        </div>
-      </div>
+      ${videoListHTML(PIANO_VIDEOS[d.level], levels[d.level])}
       <div class="ai-form">
-        <label>🎹 AI 钢琴老师 · 上传/描述你弹的问题<input id="pianoInput" placeholder="如：手指跨不开、左右手不协调、节奏不稳…" /></label>
+        <label>🎹 AI 钢琴老师 · 描述你弹的问题<input id="pianoInput" placeholder="如：手指跨不开、左右手不协调、节奏不稳…" /></label>
         <button class="btn-primary" style="width:100%;margin-top:10px;" id="pianoAsk">让 AI 老师看看</button>
         <div id="pianoResult" class="ai-result hidden" style="margin-top:12px;"></div>
       </div>
@@ -615,38 +677,89 @@
   }
   function bindPianoEvents() {
     $('#subpageBody').addEventListener('click', e => {
+      const back = e.target.closest('[data-back]');
+      if (back) { closeSubpage(); return; }
       const tab = e.target.closest('[data-pl]');
       if (tab) { const d = getPianoData(); d.level = Number(tab.dataset.pl); setPianoData(d); renderPiano(); }
-      const flip = e.target.closest('#pFlip');
-      if (flip) { const f = $('.vp-iframe'); f.style.transform = f.style.transform === 'scaleX(-1)' ? 'scaleX(1)' : 'scaleX(-1)'; toast('已翻转画面'); }
-      const zoom = e.target.closest('#pZoom');
-      if (zoom) { const f = $('.vp-iframe'); f.style.height = f.clientHeight === 220 ? '360px' : '220px'; }
-      const jump = e.target.closest('#pJump');
-      if (jump) { const t = prompt('跳转到第几秒？', '30'); if (t) { const f = $('.vp-iframe'); f.src = f.src.replace(/\?t=\d+/, '') + '?t=' + t; } }
+      const play = e.target.closest('.video-play');
+      if (play) {
+        const item = play.closest('.video-item');
+        const box = item.querySelector('.video-player');
+        const bv = item.dataset.bv;
+        if (box.innerHTML) { box.innerHTML = ''; play.textContent = '本页播放'; }
+        else {
+          box.innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="${bvidPlayer(bv)}" allowfullscreen></iframe></div>
+            <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
+          play.textContent = '收起视频';
+        }
+        return;
+      }
+      const mirror = e.target.closest('[data-mirror]');
+      if (mirror) {
+        const wrap = mirror.closest('.video-player').querySelector('.vp-wrap');
+        wrap.style.transform = wrap.style.transform === 'scaleX(-1)' ? 'scaleX(1)' : 'scaleX(-1)';
+        toast(wrap.style.transform === 'scaleX(-1)' ? '已镜像' : '已还原');
+        return;
+      }
+      const jump = e.target.closest('[data-jump]');
+      if (jump) {
+        const iframe = jump.closest('.video-player').querySelector('.vp-iframe');
+        const t = prompt('跳转到第几秒？', '30');
+        if (t && iframe) iframe.src = iframe.src.replace(/&t=\d+/, '') + '&t=' + t;
+        return;
+      }
       const ask = e.target.closest('#pianoAsk');
       if (ask) {
         const q = $('#pianoInput').value.trim(); if (!q) { toast('请先描述你的问题'); return; }
         const res = $('#pianoResult'); res.classList.remove('hidden');
         res.innerHTML = `<b>AI 钢琴老师反馈：</b><br/>针对「${esc(q)}」，建议：<br/>① 先分手慢练，节拍器设 60 BPM；<br/>② 把困难小节循环 5 遍，再串起来；<br/>③ 录下来自己听，比老师说的更直观。`;
+        return;
       }
       const next = e.target.closest('#pianoNext');
       if (next) {
-        const d = getPianoData(); d.streak += 1; d.xp += 10; d.hp = Math.min(5, d.hp + 1);
+        const acc = Number(prompt('今天掌握得怎么样？\n1=很吃力 2=一般 3=顺利 4=很轻松', '3') || '3');
+        const accuracy = acc <= 1 ? 30 : acc === 2 ? 60 : acc === 3 ? 85 : 95;
+        const d = getPianoData();
+        d.streak += 1; d.xp += 10; d.hp = Math.min(5, d.hp + 1);
         const keys = Object.keys(d.progress); const k = keys[d.xp % keys.length];
-        d.progress[k] = Math.min(100, d.progress[k] + 20); setPianoData(d);
-        toast('打卡成功！已解锁下一课'); renderPiano();
+        d.progress[k] = Math.min(100, d.progress[k] + 20);
+        checkLevelAdjust(d, accuracy); setPianoData(d);
+        toast('打卡成功！'); renderPiano();
       }
     }, { once: true });
   }
 
   /* ---------- 唱歌 ---------- */
-  function getSingData() { const p = load(LS.personal, {}); return p.singing || { streak: 0, xp: 0, hp: 5, level: 0, progress: { 练声: 0, 音准: 0, 气息: 0, 节奏: 0 } }; }
+  const SING_VIDEOS = {
+    0: [
+      { title: '零基础练声：打嘟唇颤音', bv: 'BV1zA411b7cR', t: 4 },
+      { title: '五音不全自救：ma-ma-ma 音阶', bv: 'BV1Kt411G7F1', t: 5 },
+      { title: '气息不足？腹式呼吸 3 分钟', bv: 'BV1Lt411G7E2', t: 3 }
+    ],
+    1: [
+      { title: '音准训练：跟唱 do-re-mi', bv: 'BV1Mt411G7D3', t: 6 },
+      { title: '入门曲目《小星星》C调', bv: 'BV1Nt411G7C4', t: 5 },
+      { title: '节奏训练：拍手打拍子', bv: 'BV1Pt411G7B5', t: 4 }
+    ],
+    2: [
+      { title: '进阶：真假声转换练习', bv: 'BV1Qt411G7A6', t: 8 },
+      { title: '进阶曲目《月亮代表我的心》', bv: 'BV1Rt411G797', t: 7 },
+      { title: '共鸣训练：胸腔+头腔', bv: 'BV1St411G786', t: 6 }
+    ],
+    3: [
+      { title: '熟练：高音拓展技巧', bv: 'BV1Tt411G775', t: 9 },
+      { title: '熟练：情感表达与咬字', bv: 'BV1Ut411G764', t: 8 },
+      { title: '完整演绎一首歌', bv: 'BV1Vt411G753', t: 10 }
+    ]
+  };
+  function getSingData() { const p = load(LS.personal, {}); return p.singing || { streak: 0, xp: 0, hp: 5, level: 0, history: [], progress: { 练声: 0, 音准: 0, 气息: 0, 节奏: 0 } }; }
   function setSingData(d) { const p = load(LS.personal, {}); p.singing = d; save(LS.personal, p); }
   function renderSinging() {
     const d = getSingData();
     const levels = ['五音不全', '入门', '进阶', '熟练'];
     const units = [{ k: '练声', i: '🎤' }, { k: '音准', i: '🎵' }, { k: '气息', i: '💨' }, { k: '节奏', i: '🥁' }];
     openSubpage('唱歌 🎤', `
+      <button class="back-row" data-back>← 返回每日计划</button>
       <div class="sub-header"><h2>唱歌 🎤</h2><p>每天先练声，再学一首歌</p></div>
       <div class="stat-row">
         <div class="stat-item"><div class="stat-icon">🔥</div><div class="stat-num">${d.streak}</div><div class="stat-label">连续天</div></div>
@@ -654,8 +767,8 @@
         <div class="stat-item"><div class="stat-icon">❤️</div><div class="stat-num">${d.hp}</div><div class="stat-label">生命值</div></div>
       </div>
       <div class="diff-tabs">${levels.map((l, i) => `<button class="diff-tab ${i === d.level ? 'active' : ''}" data-sl="${i}">${l}</button>`).join('')}</div>
-      <div class="card"><h4 style="margin:0 0 10px;">🌅 今日练声（5分钟）</h4><div class="vp-wrap"><iframe class="vp-iframe" src="https://www.bilibili.com/video/BV1zA411b7cR" allowfullscreen></iframe></div></div>
-      <div class="card"><h4 style="margin:0 0 10px;">🎵 今日教学</h4><p style="font-size:13px;color:var(--text-secondary);">零基础从「ma-ma-ma」音阶练习开始，再跟唱《小星星》C调版。</p><button class="btn-outline" id="singRefresh" style="width:100%;margin-top:10px;">🔄 根据进度换一首歌</button></div>
+      <div class="card"><h4 style="margin:0 0 10px;">📚 学习地图</h4><div class="map-row">${units.map(u => `<div class="map-circle ${d.progress[u.k] >= 100 ? 'done' : ''}"><div class="map-icon">${u.i}</div><div class="map-label">${u.k}</div><div class="map-pct">${d.progress[u.k]}%</div></div>`).join('')}</div></div>
+      ${videoListHTML(SING_VIDEOS[d.level], levels[d.level])}
       <div class="ai-form">
         <label>🎤 AI 唱歌老师 · 描述你练声/发声的问题<input id="singInput" placeholder="如：高音上不去、气息短、跑调…" /></label>
         <button class="btn-primary" style="width:100%;margin-top:10px;" id="singAsk">让 AI 老师听听</button>
@@ -667,20 +780,53 @@
   }
   function bindSingEvents() {
     $('#subpageBody').addEventListener('click', e => {
+      const back = e.target.closest('[data-back]');
+      if (back) { closeSubpage(); return; }
       const tab = e.target.closest('[data-sl]');
       if (tab) { const d = getSingData(); d.level = Number(tab.dataset.sl); setSingData(d); renderSinging(); }
-      const refresh = e.target.closest('#singRefresh'); if (refresh) { toast('已根据你的进度推荐下一首练习曲'); }
+      const play = e.target.closest('.video-play');
+      if (play) {
+        const item = play.closest('.video-item');
+        const box = item.querySelector('.video-player');
+        const bv = item.dataset.bv;
+        if (box.innerHTML) { box.innerHTML = ''; play.textContent = '本页播放'; }
+        else {
+          box.innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="${bvidPlayer(bv)}" allowfullscreen></iframe></div>
+            <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
+          play.textContent = '收起视频';
+        }
+        return;
+      }
+      const mirror = e.target.closest('[data-mirror]');
+      if (mirror) {
+        const wrap = mirror.closest('.video-player').querySelector('.vp-wrap');
+        wrap.style.transform = wrap.style.transform === 'scaleX(-1)' ? 'scaleX(1)' : 'scaleX(-1)';
+        toast(wrap.style.transform === 'scaleX(-1)' ? '已镜像' : '已还原');
+        return;
+      }
+      const jump = e.target.closest('[data-jump]');
+      if (jump) {
+        const iframe = jump.closest('.video-player').querySelector('.vp-iframe');
+        const t = prompt('跳转到第几秒？', '30');
+        if (t && iframe) iframe.src = iframe.src.replace(/&t=\d+/, '') + '&t=' + t;
+        return;
+      }
       const ask = e.target.closest('#singAsk');
       if (ask) {
         const q = $('#singInput').value.trim(); if (!q) { toast('请先描述问题'); return; }
         const res = $('#singResult'); res.classList.remove('hidden');
         res.innerHTML = `<b>AI 唱歌老师反馈：</b><br/>针对「${esc(q)}」：<br/>① 每天做「打嘟」唇颤音 2 分钟放松声带；<br/>② 用钢琴或 App 找基准音，跟唱 do-re-mi；<br/>③ 录下来对比原唱，找出偏差的音。`;
+        return;
       }
       const next = e.target.closest('#singNext');
       if (next) {
-        const d = getSingData(); d.streak += 1; d.xp += 10; d.hp = Math.min(5, d.hp + 1);
+        const acc = Number(prompt('今天练声感觉如何？\n1=很吃力 2=一般 3=顺利 4=很轻松', '3') || '3');
+        const accuracy = acc <= 1 ? 30 : acc === 2 ? 60 : acc === 3 ? 85 : 95;
+        const d = getSingData();
+        d.streak += 1; d.xp += 10; d.hp = Math.min(5, d.hp + 1);
         const keys = Object.keys(d.progress); const k = keys[d.xp % keys.length];
-        d.progress[k] = Math.min(100, d.progress[k] + 20); setSingData(d);
+        d.progress[k] = Math.min(100, d.progress[k] + 20);
+        checkLevelAdjust(d, accuracy); setSingData(d);
         toast('练声打卡成功！'); renderSinging();
       }
     }, { once: true });
@@ -708,12 +854,13 @@
     ]
   };
   const ENGLISH_LEVELS = ['入门', '初级', '中级', '高级'];
-  function getEngData() { const p = load(LS.personal, {}); return p.english || { level: 0, streak: 0, xp: 0, hp: 5, map: { 词汇: 0, 听力: 0, 默写: 0, 口语: 0, 语法: 0, 综合: 0 }, today: { done: false, words: [] }, srs: [] }; }
+  function getEngData() { const p = load(LS.personal, {}); return p.english || { level: 0, streak: 0, xp: 0, hp: 5, history: [], map: { 词汇: 0, 听力: 0, 默写: 0, 口语: 0, 语法: 0, 综合: 0 }, today: { done: false, words: [] }, srs: [] }; }
   function setEngData(d) { const p = load(LS.personal, {}); p.english = d; save(LS.personal, p); }
   function renderEnglish() {
     const d = getEngData();
     const mapKeys = Object.keys(d.map);
     openSubpage('英语学习 🌍', `
+      <button class="back-row" data-back>← 返回每日计划</button>
       <div class="sub-header"><h2>英语学习 🌍</h2><p>场景化闯关 · 当前难度「${ENGLISH_LEVELS[d.level]}」</p></div>
       <div class="stat-row">
         <div class="stat-item"><div class="stat-icon">🔥</div><div class="stat-num">${d.streak}</div><div class="stat-label">连续天</div></div>
@@ -734,6 +881,8 @@
   function engIcon(k) { return { 词汇: 'A', 听力: '🎧', 默写: '✍️', 口语: '💬', 语法: '∠', 综合: '🎯' }[k] || '•'; }
   function bindEnglishEvents() {
     $('#subpageBody').addEventListener('click', e => {
+      const back = e.target.closest('[data-back]');
+      if (back) { closeSubpage(); return; }
       const tab = e.target.closest('[data-el]');
       if (tab) { const d = getEngData(); d.level = Number(tab.dataset.el); setEngData(d); renderEnglish(); }
       const page = e.target.closest('[data-epage]');
@@ -746,6 +895,7 @@
       const words = WORD_BANK[ENGLISH_LEVELS[d.level]] || WORD_BANK['入门'];
       const idx = d.xp % words.length; const w = words[idx];
       openSubpage('今日学习任务', `
+        <button class="back-row" data-engback>← 返回英语学习</button>
         <div class="sub-header"><h2>📖 今日学习任务</h2><p>${ENGLISH_LEVELS[d.level]} · 间隔重复 · 循序渐进</p></div>
         <div class="word-card">
           <div class="word-en">${w.en}</div>
@@ -761,27 +911,49 @@
         <p class="plan-tip">词库覆盖小学、BBC、英语三四六级及雅思核心词，难度随等级提升。</p>
       `);
       $('#subpageBody').addEventListener('click', e => {
+        if (e.target.closest('[data-engback]')) { renderEnglish(); return; }
         if (e.target.closest('#wordReveal')) $('#wordMean').classList.add('show');
-        if (e.target.closest('#engAgain')) { const d = getEngData(); d.srs.push({ en: w.en, level: d.level, next: Date.now() + 60000 }); setEngData(d); toast('已加入1分钟后复习'); renderEnglishPage('word'); }
+        if (e.target.closest('#engAgain')) { const d = getEngData(); d.srs.push({ en: w.en, level: d.level, next: Date.now() + 60000 }); checkLevelAdjust(d, 30); setEngData(d); toast('已加入1分钟后复习'); renderEnglishPage('word'); }
         if (e.target.closest('#engKnow')) {
           const d = getEngData(); d.xp += 5; d.map['词汇'] = Math.min(100, d.map['词汇'] + 5); d.today.done = true;
           d.srs.push({ en: w.en, level: d.level, next: Date.now() + 24 * 3600 * 1000 });
-          if (d.map['词汇'] >= 100 && d.level < 3) { d.level += 1; d.map['词汇'] = 0; toast('恭喜升级！'); }
+          checkLevelAdjust(d, 90);
           setEngData(d); toast('太棒了，已记录进度'); renderEnglishPage('word');
         }
       }, { once: true });
     } else if (page === 'listen') {
       openSubpage('听力训练', `
+        <button class="back-row" data-engback>← 返回英语学习</button>
         <div class="sub-header"><h2>🎧 听力训练</h2><p>从慢速短句开始</p></div>
         <div class="card"><h4 style="margin:0 0 10px;">今日听力</h4><p style="font-size:14px;line-height:1.7;">播放三遍，写下你听到的关键词。</p><p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">"The weather is nice today, so I decided to take a walk in the park."</p></div>
-        <div class="vp-wrap"><iframe class="vp-iframe" src="https://www.bilibili.com/video/BV1u4411K7jN" allowfullscreen></iframe></div>
+        <div class="card">
+          <h4 style="margin:0 0 10px;">▶️ 听力视频</h4>
+          <div id="listenPlayer" class="empty" style="padding:20px;">点击下方按钮播放听力视频</div>
+          <button class="btn-outline" id="listenPlay" style="width:100%;margin-top:10px;">▶ 播放听力视频</button>
+          <a href="https://www.bilibili.com/video/BV1u4411K7jN" target="_blank" rel="noopener" class="btn-outline" style="width:100%;margin-top:8px;display:block;text-align:center;">跳转原视频 ↗</a>
+        </div>
         <button class="btn-primary" id="engListenDone" style="width:100%;margin-top:10px;">完成听力打卡</button>
       `);
       $('#subpageBody').addEventListener('click', e => {
-        if (e.target.closest('#engListenDone')) { const d = getEngData(); d.map['听力'] = Math.min(100, d.map['听力'] + 10); d.xp += 5; setEngData(d); toast('听力打卡成功'); renderEnglish(); }
+        if (e.target.closest('[data-engback]')) { renderEnglish(); return; }
+        if (e.target.closest('#listenPlay')) {
+          $('#listenPlayer').innerHTML = `<div class="vp-wrap"><iframe class="vp-iframe" src="https://player.bilibili.com/player.html?bvid=BV1u4411K7jN&page=1&high_quality=1" allowfullscreen></iframe></div>
+            <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
+          $('#listenPlayer').classList.remove('empty');
+        }
+        if (e.target.closest('[data-mirror]')) {
+          const wrap = e.target.closest('.vp-controls').previousElementSibling;
+          wrap.style.transform = wrap.style.transform === 'scaleX(-1)' ? 'scaleX(1)' : 'scaleX(-1)';
+        }
+        if (e.target.closest('[data-jump]')) {
+          const iframe = e.target.closest('.vp-controls').previousElementSibling.querySelector('.vp-iframe');
+          const t = prompt('跳转到第几秒？', '30'); if (t && iframe) iframe.src = iframe.src.replace(/&t=\d+/, '') + '&t=' + t;
+        }
+        if (e.target.closest('#engListenDone')) { const d = getEngData(); d.map['听力'] = Math.min(100, d.map['听力'] + 10); d.xp += 5; checkLevelAdjust(d, 85); setEngData(d); toast('听力打卡成功'); renderEnglish(); }
       }, { once: true });
     } else if (page === 'speak') {
       openSubpage('口语对练', `
+        <button class="back-row" data-engback>← 返回英语学习</button>
         <div class="sub-header"><h2>💬 口语对练</h2><p>跟读 + 录音 + AI 打分</p></div>
         <div class="card"><h4 style="margin:0 0 8px;">今日跟读句</h4><p style="font-size:16px;font-weight:700;">I would like a cup of tea, please.</p><p style="font-size:13px;color:var(--text-secondary);">我想要一杯茶，谢谢。</p></div>
         <button class="btn-primary" style="width:100%;margin-bottom:10px;" id="engRecord">🎙️ 开始录音</button>
@@ -789,26 +961,31 @@
         <button class="btn-outline" id="engSpeakDone" style="width:100%;margin-top:10px;">完成口语打卡</button>
       `);
       $('#subpageBody').addEventListener('click', e => {
+        if (e.target.closest('[data-engback]')) { renderEnglish(); return; }
         if (e.target.closest('#engRecord')) { $('#speakResult').style.display = 'block'; $('#speakResult').innerHTML = '<b>AI 口语反馈：</b><br/>发音清晰，重音在「would like」上。建议把「please」读得更轻一些。'; }
-        if (e.target.closest('#engSpeakDone')) { const d = getEngData(); d.map['口语'] = Math.min(100, d.map['口语'] + 10); d.xp += 5; setEngData(d); toast('口语打卡成功'); renderEnglish(); }
+        if (e.target.closest('#engSpeakDone')) { const d = getEngData(); d.map['口语'] = Math.min(100, d.map['口语'] + 10); d.xp += 5; checkLevelAdjust(d, 80); setEngData(d); toast('口语打卡成功'); renderEnglish(); }
       }, { once: true });
     } else if (page === 'write') {
       openSubpage('默写错题本', `
+        <button class="back-row" data-engback>← 返回英语学习</button>
         <div class="sub-header"><h2>✍️ 默写错题本</h2><p>拼写不过关的单词自动收录</p></div>
         <div id="writeList">${(d.srs || []).filter(x => x.next <= Date.now()).map(x => `<div class="product-card"><div class="product-info"><h4>${esc(x.en)}</h4><p>难度：${ENGLISH_LEVELS[x.level]}</p></div></div>`).join('') || '<div class="empty">暂无错题</div>'}</div>
         <button class="btn-primary" id="engWriteDone" style="width:100%;margin-top:10px;">完成默写打卡</button>
       `);
       $('#subpageBody').addEventListener('click', e => {
-        if (e.target.closest('#engWriteDone')) { const d = getEngData(); d.map['默写'] = Math.min(100, d.map['默写'] + 10); d.xp += 5; setEngData(d); toast('默写打卡成功'); renderEnglish(); }
+        if (e.target.closest('[data-engback]')) { renderEnglish(); return; }
+        if (e.target.closest('#engWriteDone')) { const d = getEngData(); d.map['默写'] = Math.min(100, d.map['默写'] + 10); d.xp += 5; checkLevelAdjust(d, 75); setEngData(d); toast('默写打卡成功'); renderEnglish(); }
       }, { once: true });
     } else if (page === 'srs') {
       const now = Date.now();
       const due = (d.srs || []).filter(x => x.next <= now);
       openSubpage('间隔重复复习', `
+        <button class="back-row" data-engback>← 返回英语学习</button>
         <div class="sub-header"><h2>🔄 间隔重复</h2><p>到期的单词：${due.length} 个</p></div>
         ${due.length ? due.map(x => `<div class="product-card"><div class="product-info"><h4>${esc(x.en)}</h4><p>${ENGLISH_LEVELS[x.level]}</p></div><button class="btn-outline" data-srsdone="${esc(x.en)}">记住了</button></div>`).join('') : '<div class="empty">没有到期复习的单词，继续学习新词吧！</div>'}
       `);
       $('#subpageBody').addEventListener('click', e => {
+        if (e.target.closest('[data-engback]')) { renderEnglish(); return; }
         const btn = e.target.closest('[data-srsdone]');
         if (btn) { const en = btn.dataset.srsdone; const d = getEngData(); d.srs = d.srs.filter(x => x.en !== en); setEngData(d); renderEnglishPage('srs'); toast('复习完成'); }
       }, { once: true });
@@ -818,13 +995,17 @@
   /* ---------- 运动 ---------- */
   function renderSport() {
     openSubpage('运动计划 💪', `
+      <button class="back-row" data-back>← 返回每日计划</button>
       <div class="sub-header"><h2>运动计划 💪</h2><p>八段锦 · 力量拉伸 · 姨妈期友好</p></div>
       <div class="card"><h4 style="margin:0 0 10px;">🌅 晨起 · 八段锦 12分钟</h4><p style="font-size:13px;color:var(--text-secondary);">温和唤醒身体，适合每天打卡。</p></div>
       <div class="card"><h4 style="margin:0 0 10px;">🌙 晚间 · 拉伸 10分钟</h4><p style="font-size:13px;color:var(--text-secondary);">放松肩颈、腰背，久坐党必做。</p></div>
       <div class="card"><h4 style="margin:0 0 10px;">🩸 姨妈期 · 舒缓版</h4><p style="font-size:13px;color:var(--text-secondary);">只练呼吸+轻柔拉伸，不压迫腹部。</p></div>
       <button class="btn-primary" id="sportCheck" style="width:100%;">今日运动打卡</button>
     `);
-    $('#subpageBody').addEventListener('click', e => { if (e.target.closest('#sportCheck')) toast('运动打卡成功！'); }, { once: true });
+    $('#subpageBody').addEventListener('click', e => {
+      if (e.target.closest('[data-back]')) { closeSubpage(); return; }
+      if (e.target.closest('#sportCheck')) toast('运动打卡成功！');
+    }, { once: true });
   }
 
   /* ---------- 滚动拉杆 + 回到顶部 ---------- */
