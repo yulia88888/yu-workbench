@@ -743,7 +743,7 @@ def gen_news():
 
 
 AIPRODUCT_POOL = [
-    ("便携式制冷杯", "hot", "爆款", "2.3w+", "25%", "4.8", "“夏天办公室没有冰箱？这个制冷杯3秒冰镇你的饮料！”→展示对比普通杯子 vs 制冷杯→上手演示→价格锚定“一杯奶茶钱”"),
+    ("便携式制冷杯", "hot", "爆款", "2.3w+", "25%", "4.8", "“夏天办公室没有冰箱？这个制冷杯3秒冰镇你的饮料！”→对比普通杯 vs 制冷杯→上手演示→价格锚定“一杯奶茶钱”"),
     ("防晒空顶帽", "trend", "趋势", "5.6w+", "20%", "4.9", "“军训/通勤不晒黑的秘密”→紫外线测试卡对比→多场景佩戴展示→强调“不闷热不勒头”痛点解决"),
     ("冷泡茶随身杯", "new", "新品", "1.8w+", "30%", "4.7", "“打工人续命水，冷水也能泡好茶”→30秒冷泡演示→对比瓶装茶价格→“一个月省下200块奶茶钱”"),
     ("次抛洗护旅行装", "potential", "潜力", "9.8k+", "22%", "4.6", "“出差党的救星，一次一片不脏手”→拆箱展示→飞机/酒店场景演示→“比酒店小瓶靠谱10倍”"),
@@ -759,14 +759,46 @@ AIPRODUCT_POOL = [
     ("便携榨汁杯", "hot", "爆款", "2.8w+", "23%", "4.7", "“早八人自带奶昔”→30秒榨汁演示→清洗便利性→“比外卖果汁便宜一半”"),
     ("防晒冰袖", "trend", "趋势", "4.1w+", "16%", "4.5", "“骑车/练车不晒黑”→紫外线卡测试→多色搭配→“冰感面料真的不闷热”"),
     ("颈椎按摩仪", "new", "新品", "1.5w+", "20%", "4.8", "“久坐前台脖子僵？”→佩戴演示→多档位热敷→“每天15分钟续命”"),
+    ("折叠泡脚桶", "potential", "潜力", "6.6k+", "18%", "4.6", "“睡前泡脚助眠”→折叠收纳演示→恒温测试→“冬天幸福感拉满”"),
+    ("桌面香薰机", "hot", "爆款", "2.2w+", "27%", "4.7", "“工位也需要仪式感”→雾量/灯光演示→精油搭配→“香气治愈一整天”"),
+    ("懒人免煮燕麦杯", "trend", "趋势", "3.8w+", "20%", "4.6", "“减脂期早餐救星”→冷水/牛奶冲泡演示→配料搭配→“30秒搞定营养一餐”"),
+    ("蒸汽眼罩礼盒", "new", "新品", "1.1w+", "29%", "4.9", "“熬夜党的眼睛SPA”→佩戴展示→发热时长测试→“午休/经期都能用”"),
+    ("迷你投影仪", "potential", "潜力", "5.5k+", "14%", "4.5", "“租房党私人影院”→投屏效果对比→便携性展示→“几百块拥有大屏”"),
+    ("电动牙刷情侣款", "hot", "爆款", "4.2w+", "22%", "4.8", "“情侣仪式感好物”→清洁力对比→多档模式→“送自己/送对象都合适”"),
+    ("便携挂烫机", "trend", "趋势", "2.6w+", "19%", "4.6", "“衣服皱了不用愁”→除皱前后对比→小巧便携→“出差行李箱常备”"),
+    ("护手霜礼盒", "new", "新品", "1.4w+", "26%", "4.8", "“前台打工人的手”→质地演示→香味描述→“秋冬必备不油腻”"),
+    ("重力感应夜灯", "potential", "潜力", "8.1k+", "21%", "4.5", "“起夜不怕黑”→感应演示→续航测试→“老人小孩都适合”"),
 ]
+
+AIP_PLATS = ["抖音", "快手", "小红书"]
+AIP_TIMES = ["每日", "每周", "每月"]
+
+
+def _aip_item(t):
+    return {"title": t[0], "tag": t[1], "tagText": t[2], "sales": t[3], "commission": t[4], "rating": t[5], "script": t[6]}
 
 
 def gen_aiproduct():
-    n = len(AIPRODUCT_POOL)
-    start = int(datetime.date.today().strftime("%Y%m%d")) % n
-    ordered = AIPRODUCT_POOL[start:] + AIPRODUCT_POOL[:start]
-    return [{"title": t, "tag": code, "tagText": text, "sales": s, "commission": c, "rating": r, "script": sc} for (t, code, text, s, c, r, sc) in ordered[:12]]
+    """按 平台 × 时间维度 生成爆品灵感；每日随日期刷新、每周随周次、每月随月份。"""
+    pool = AIPRODUCT_POOL
+    today = datetime.date.today()
+    iso = today.isocalendar()
+    result = {}
+    for pi, plat in enumerate(AIP_PLATS):
+        result[plat] = {}
+        for ti, t in enumerate(AIP_TIMES):
+            if t == "每日":
+                seed = int(today.strftime("%Y%m%d")) + pi * 101 + ti
+            elif t == "每周":
+                seed = iso[0] * 100 + iso[1] + pi * 53 + ti
+            else:
+                seed = int(today.strftime("%Y%m")) + pi * 31 + ti
+            rnd = random.Random(seed)
+            order = list(range(len(pool)))
+            rnd.shuffle(order)
+            chosen = [pool[i] for i in order[:6]]
+            result[plat][t] = [_aip_item(x) for x in chosen]
+    return result
 
 
 def main():
