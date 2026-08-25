@@ -467,15 +467,37 @@
       "id": "快手-t2",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "“5A级菜市场”靠什么爆火",
+      "title": "我国一箭七星成功发射",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E2%80%9C5A%E7%BA%A7%E8%8F%9C%E5%B8%82%E5%9C%BA%E2%80%9D%E9%9D%A0%E4%BB%80%E4%B9%88%E7%88%86%E7%81%AB&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E2%80%9C5A%E7%BA%A7%E8%8F%9C%E5%B8%82%E5%9C%BA%E2%80%9D%E9%9D%A0%E4%BB%80%E4%B9%88%E7%88%86%E7%81%AB",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E2%80%9C5A%E7%BA%A7%E8%8F%9C%E5%B8%82%E5%9C%BA%E2%80%9D%E9%9D%A0%E4%BB%80%E4%B9%88%E7%88%86%E7%81%AB"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%88%91%E5%9B%BD%E4%B8%80%E7%AE%AD%E4%B8%83%E6%98%9F%E6%88%90%E5%8A%9F%E5%8F%91%E5%B0%84&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E6%88%91%E5%9B%BD%E4%B8%80%E7%AE%AD%E4%B8%83%E6%98%9F%E6%88%90%E5%8A%9F%E5%8F%91%E5%B0%84",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%88%91%E5%9B%BD%E4%B8%80%E7%AE%AD%E4%B8%83%E6%98%9F%E6%88%90%E5%8A%9F%E5%8F%91%E5%B0%84"
     },
     {
       "id": "快手-t3",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "官方确认扶老人赔1.9万店主无错",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%AE%98%E6%96%B9%E7%A1%AE%E8%AE%A4%E6%89%B6%E8%80%81%E4%BA%BA%E8%B5%941.9%E4%B8%87%E5%BA%97%E4%B8%BB%E6%97%A0%E9%94%99&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%AE%98%E6%96%B9%E7%A1%AE%E8%AE%A4%E6%89%B6%E8%80%81%E4%BA%BA%E8%B5%941.9%E4%B8%87%E5%BA%97%E4%B8%BB%E6%97%A0%E9%94%99",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%AE%98%E6%96%B9%E7%A1%AE%E8%AE%A4%E6%89%B6%E8%80%81%E4%BA%BA%E8%B5%941.9%E4%B8%87%E5%BA%97%E4%B8%BB%E6%97%A0%E9%94%99"
+    },
+    {
+      "id": "快手-t4",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "遭索赔家属回应网传1.9万获返还",
+      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
+      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E9%81%AD%E7%B4%A2%E8%B5%94%E5%AE%B6%E5%B1%9E%E5%9B%9E%E5%BA%94%E7%BD%91%E4%BC%A01.9%E4%B8%87%E8%8E%B7%E8%BF%94%E8%BF%98&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E9%81%AD%E7%B4%A2%E8%B5%94%E5%AE%B6%E5%B1%9E%E5%9B%9E%E5%BA%94%E7%BD%91%E4%BC%A01.9%E4%B8%87%E8%8E%B7%E8%BF%94%E8%BF%98",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E9%81%AD%E7%B4%A2%E8%B5%94%E5%AE%B6%E5%B1%9E%E5%9B%9E%E5%BA%94%E7%BD%91%E4%BC%A01.9%E4%B8%87%E8%8E%B7%E8%BF%94%E8%BF%98"
+    },
+    {
+      "id": "快手-t5",
       "platform": "快手",
       "cat": "情绪共鸣",
       "title": "台风紫檀将登陆两广",
@@ -486,48 +508,26 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%8F%B0%E9%A3%8E%E7%B4%AB%E6%AA%80%E5%B0%86%E7%99%BB%E9%99%86%E4%B8%A4%E5%B9%BF"
     },
     {
-      "id": "快手-t4",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "5岁女童误吞50克金条",
-      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
-      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=5%E5%B2%81%E5%A5%B3%E7%AB%A5%E8%AF%AF%E5%90%9E50%E5%85%8B%E9%87%91%E6%9D%A1&rankType=1",
-      "dy_link": "https://www.douyin.com/search/5%E5%B2%81%E5%A5%B3%E7%AB%A5%E8%AF%AF%E5%90%9E50%E5%85%8B%E9%87%91%E6%9D%A1",
-      "bz_link": "https://search.bilibili.com/all?keyword=5%E5%B2%81%E5%A5%B3%E7%AB%A5%E8%AF%AF%E5%90%9E50%E5%85%8B%E9%87%91%E6%9D%A1"
-    },
-    {
-      "id": "快手-t5",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "店家支付的1.9万元获全额返还",
-      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
-      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%BA%97%E5%AE%B6%E6%94%AF%E4%BB%98%E7%9A%841.9%E4%B8%87%E5%85%83%E8%8E%B7%E5%85%A8%E9%A2%9D%E8%BF%94%E8%BF%98&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%BA%97%E5%AE%B6%E6%94%AF%E4%BB%98%E7%9A%841.9%E4%B8%87%E5%85%83%E8%8E%B7%E5%85%A8%E9%A2%9D%E8%BF%94%E8%BF%98",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%BA%97%E5%AE%B6%E6%94%AF%E4%BB%98%E7%9A%841.9%E4%B8%87%E5%85%83%E8%8E%B7%E5%85%A8%E9%A2%9D%E8%BF%94%E8%BF%98"
-    },
-    {
       "id": "快手-t6",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "台风沙德尔最新路径研判",
+      "title": "东北饭包其实有点复杂",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%8F%B0%E9%A3%8E%E6%B2%99%E5%BE%B7%E5%B0%94%E6%9C%80%E6%96%B0%E8%B7%AF%E5%BE%84%E7%A0%94%E5%88%A4&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%8F%B0%E9%A3%8E%E6%B2%99%E5%BE%B7%E5%B0%94%E6%9C%80%E6%96%B0%E8%B7%AF%E5%BE%84%E7%A0%94%E5%88%A4",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8F%B0%E9%A3%8E%E6%B2%99%E5%BE%B7%E5%B0%94%E6%9C%80%E6%96%B0%E8%B7%AF%E5%BE%84%E7%A0%94%E5%88%A4"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E4%B8%9C%E5%8C%97%E9%A5%AD%E5%8C%85%E5%85%B6%E5%AE%9E%E6%9C%89%E7%82%B9%E5%A4%8D%E6%9D%82&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E4%B8%9C%E5%8C%97%E9%A5%AD%E5%8C%85%E5%85%B6%E5%AE%9E%E6%9C%89%E7%82%B9%E5%A4%8D%E6%9D%82",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E4%B8%9C%E5%8C%97%E9%A5%AD%E5%8C%85%E5%85%B6%E5%AE%9E%E6%9C%89%E7%82%B9%E5%A4%8D%E6%9D%82"
     },
     {
       "id": "快手-t7",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "东北饭包其实有点复杂",
+      "title": "5岁女童误吞50克金条",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E4%B8%9C%E5%8C%97%E9%A5%AD%E5%8C%85%E5%85%B6%E5%AE%9E%E6%9C%89%E7%82%B9%E5%A4%8D%E6%9D%82&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E4%B8%9C%E5%8C%97%E9%A5%AD%E5%8C%85%E5%85%B6%E5%AE%9E%E6%9C%89%E7%82%B9%E5%A4%8D%E6%9D%82",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E4%B8%9C%E5%8C%97%E9%A5%AD%E5%8C%85%E5%85%B6%E5%AE%9E%E6%9C%89%E7%82%B9%E5%A4%8D%E6%9D%82"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=5%E5%B2%81%E5%A5%B3%E7%AB%A5%E8%AF%AF%E5%90%9E50%E5%85%8B%E9%87%91%E6%9D%A1&rankType=1",
+      "dy_link": "https://www.douyin.com/search/5%E5%B2%81%E5%A5%B3%E7%AB%A5%E8%AF%AF%E5%90%9E50%E5%85%8B%E9%87%91%E6%9D%A1",
+      "bz_link": "https://search.bilibili.com/all?keyword=5%E5%B2%81%E5%A5%B3%E7%AB%A5%E8%AF%AF%E5%90%9E50%E5%85%8B%E9%87%91%E6%9D%A1"
     },
     {
       "id": "快手-t8",
@@ -577,23 +577,23 @@
       "id": "快手-t12",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "小舞生日",
+      "title": "郑钦文时隔14个月大满贯赢球",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%B0%8F%E8%88%9E%E7%94%9F%E6%97%A5&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%B0%8F%E8%88%9E%E7%94%9F%E6%97%A5",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%8F%E8%88%9E%E7%94%9F%E6%97%A5"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E9%83%91%E9%92%A6%E6%96%87%E6%97%B6%E9%9A%9414%E4%B8%AA%E6%9C%88%E5%A4%A7%E6%BB%A1%E8%B4%AF%E8%B5%A2%E7%90%83&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E9%83%91%E9%92%A6%E6%96%87%E6%97%B6%E9%9A%9414%E4%B8%AA%E6%9C%88%E5%A4%A7%E6%BB%A1%E8%B4%AF%E8%B5%A2%E7%90%83",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E9%83%91%E9%92%A6%E6%96%87%E6%97%B6%E9%9A%9414%E4%B8%AA%E6%9C%88%E5%A4%A7%E6%BB%A1%E8%B4%AF%E8%B5%A2%E7%90%83"
     },
     {
       "id": "快手-t13",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "谁还没跳来宾摇",
+      "title": "小舞生日",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E8%B0%81%E8%BF%98%E6%B2%A1%E8%B7%B3%E6%9D%A5%E5%AE%BE%E6%91%87&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E8%B0%81%E8%BF%98%E6%B2%A1%E8%B7%B3%E6%9D%A5%E5%AE%BE%E6%91%87",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E8%B0%81%E8%BF%98%E6%B2%A1%E8%B7%B3%E6%9D%A5%E5%AE%BE%E6%91%87"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%B0%8F%E8%88%9E%E7%94%9F%E6%97%A5&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%B0%8F%E8%88%9E%E7%94%9F%E6%97%A5",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%8F%E8%88%9E%E7%94%9F%E6%97%A5"
     },
     {
       "id": "快手-t14",
@@ -610,26 +610,48 @@
       "id": "快手-t15",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "8月你拆散了多少对情侣",
+      "title": "原来石家庄真是国际庄",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=8%E6%9C%88%E4%BD%A0%E6%8B%86%E6%95%A3%E4%BA%86%E5%A4%9A%E5%B0%91%E5%AF%B9%E6%83%85%E4%BE%A3&rankType=1",
-      "dy_link": "https://www.douyin.com/search/8%E6%9C%88%E4%BD%A0%E6%8B%86%E6%95%A3%E4%BA%86%E5%A4%9A%E5%B0%91%E5%AF%B9%E6%83%85%E4%BE%A3",
-      "bz_link": "https://search.bilibili.com/all?keyword=8%E6%9C%88%E4%BD%A0%E6%8B%86%E6%95%A3%E4%BA%86%E5%A4%9A%E5%B0%91%E5%AF%B9%E6%83%85%E4%BE%A3"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%8E%9F%E6%9D%A5%E7%9F%B3%E5%AE%B6%E5%BA%84%E7%9C%9F%E6%98%AF%E5%9B%BD%E9%99%85%E5%BA%84&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%8E%9F%E6%9D%A5%E7%9F%B3%E5%AE%B6%E5%BA%84%E7%9C%9F%E6%98%AF%E5%9B%BD%E9%99%85%E5%BA%84",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8E%9F%E6%9D%A5%E7%9F%B3%E5%AE%B6%E5%BA%84%E7%9C%9F%E6%98%AF%E5%9B%BD%E9%99%85%E5%BA%84"
     },
     {
       "id": "快手-t16",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "千夜奇谭官宣李兰迪何与",
+      "title": "台风沙德尔最新路径研判",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%8D%83%E5%A4%9C%E5%A5%87%E8%B0%AD%E5%AE%98%E5%AE%A3%E6%9D%8E%E5%85%B0%E8%BF%AA%E4%BD%95%E4%B8%8E&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%8D%83%E5%A4%9C%E5%A5%87%E8%B0%AD%E5%AE%98%E5%AE%A3%E6%9D%8E%E5%85%B0%E8%BF%AA%E4%BD%95%E4%B8%8E",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8D%83%E5%A4%9C%E5%A5%87%E8%B0%AD%E5%AE%98%E5%AE%A3%E6%9D%8E%E5%85%B0%E8%BF%AA%E4%BD%95%E4%B8%8E"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%8F%B0%E9%A3%8E%E6%B2%99%E5%BE%B7%E5%B0%94%E6%9C%80%E6%96%B0%E8%B7%AF%E5%BE%84%E7%A0%94%E5%88%A4&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%8F%B0%E9%A3%8E%E6%B2%99%E5%BE%B7%E5%B0%94%E6%9C%80%E6%96%B0%E8%B7%AF%E5%BE%84%E7%A0%94%E5%88%A4",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8F%B0%E9%A3%8E%E6%B2%99%E5%BE%B7%E5%B0%94%E6%9C%80%E6%96%B0%E8%B7%AF%E5%BE%84%E7%A0%94%E5%88%A4"
     },
     {
       "id": "快手-t17",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "神总是孤独的",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E7%A5%9E%E6%80%BB%E6%98%AF%E5%AD%A4%E7%8B%AC%E7%9A%84&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E7%A5%9E%E6%80%BB%E6%98%AF%E5%AD%A4%E7%8B%AC%E7%9A%84",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E7%A5%9E%E6%80%BB%E6%98%AF%E5%AD%A4%E7%8B%AC%E7%9A%84"
+    },
+    {
+      "id": "快手-t18",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "8月你拆散了多少对情侣",
+      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
+      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=8%E6%9C%88%E4%BD%A0%E6%8B%86%E6%95%A3%E4%BA%86%E5%A4%9A%E5%B0%91%E5%AF%B9%E6%83%85%E4%BE%A3&rankType=1",
+      "dy_link": "https://www.douyin.com/search/8%E6%9C%88%E4%BD%A0%E6%8B%86%E6%95%A3%E4%BA%86%E5%A4%9A%E5%B0%91%E5%AF%B9%E6%83%85%E4%BE%A3",
+      "bz_link": "https://search.bilibili.com/all?keyword=8%E6%9C%88%E4%BD%A0%E6%8B%86%E6%95%A3%E4%BA%86%E5%A4%9A%E5%B0%91%E5%AF%B9%E6%83%85%E4%BE%A3"
+    },
+    {
+      "id": "快手-t19",
       "platform": "快手",
       "cat": "情绪共鸣",
       "title": "刘亦菲芭莎首位单人三封",
@@ -638,28 +660,6 @@
       "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%88%98%E4%BA%A6%E8%8F%B2%E8%8A%AD%E8%8E%8E%E9%A6%96%E4%BD%8D%E5%8D%95%E4%BA%BA%E4%B8%89%E5%B0%81&rankType=1",
       "dy_link": "https://www.douyin.com/search/%E5%88%98%E4%BA%A6%E8%8F%B2%E8%8A%AD%E8%8E%8E%E9%A6%96%E4%BD%8D%E5%8D%95%E4%BA%BA%E4%B8%89%E5%B0%81",
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%88%98%E4%BA%A6%E8%8F%B2%E8%8A%AD%E8%8E%8E%E9%A6%96%E4%BD%8D%E5%8D%95%E4%BA%BA%E4%B8%89%E5%B0%81"
-    },
-    {
-      "id": "快手-t18",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "官方确认扶老人赔1.9万店主无错",
-      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
-      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%AE%98%E6%96%B9%E7%A1%AE%E8%AE%A4%E6%89%B6%E8%80%81%E4%BA%BA%E8%B5%941.9%E4%B8%87%E5%BA%97%E4%B8%BB%E6%97%A0%E9%94%99&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%AE%98%E6%96%B9%E7%A1%AE%E8%AE%A4%E6%89%B6%E8%80%81%E4%BA%BA%E8%B5%941.9%E4%B8%87%E5%BA%97%E4%B8%BB%E6%97%A0%E9%94%99",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%AE%98%E6%96%B9%E7%A1%AE%E8%AE%A4%E6%89%B6%E8%80%81%E4%BA%BA%E8%B5%941.9%E4%B8%87%E5%BA%97%E4%B8%BB%E6%97%A0%E9%94%99"
-    },
-    {
-      "id": "快手-t19",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "郑钦文时隔14个月大满贯赢球",
-      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
-      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E9%83%91%E9%92%A6%E6%96%87%E6%97%B6%E9%9A%9414%E4%B8%AA%E6%9C%88%E5%A4%A7%E6%BB%A1%E8%B4%AF%E8%B5%A2%E7%90%83&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E9%83%91%E9%92%A6%E6%96%87%E6%97%B6%E9%9A%9414%E4%B8%AA%E6%9C%88%E5%A4%A7%E6%BB%A1%E8%B4%AF%E8%B5%A2%E7%90%83",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E9%83%91%E9%92%A6%E6%96%87%E6%97%B6%E9%9A%9414%E4%B8%AA%E6%9C%88%E5%A4%A7%E6%BB%A1%E8%B4%AF%E8%B5%A2%E7%90%83"
     },
     {
       "id": "微博-t0",
@@ -675,13 +675,13 @@
     {
       "id": "微博-t1",
       "platform": "微博",
-      "cat": "vlog日常",
-      "title": "神23乘组天宫vlog上新",
-      "analysis": "真实记录比精致摆拍更易引发「我也能拍」的跟拍欲。",
-      "idea": "原创思路：做「前台的一天」系列，真实记录+碎片才艺，建立立体人设。",
-      "real_url": "https://s.weibo.com/weibo?q=%23%E7%A5%9E23%E4%B9%98%E7%BB%84%E5%A4%A9%E5%AE%ABvlog%E4%B8%8A%E6%96%B0%23",
-      "dy_link": "https://www.douyin.com/search/%E7%A5%9E23%E4%B9%98%E7%BB%84%E5%A4%A9%E5%AE%ABvlog%E4%B8%8A%E6%96%B0",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E7%A5%9E23%E4%B9%98%E7%BB%84%E5%A4%A9%E5%AE%ABvlog%E4%B8%8A%E6%96%B0"
+      "cat": "护肤身体护理",
+      "title": "惠英红吃纸这段看得人头皮发麻",
+      "analysis": "换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。",
+      "idea": "原创思路：做「混干微敏皮实测」系列，按早C晚A/保湿/防晒分集，用红叉绿勾视觉提升点击。",
+      "real_url": "https://s.weibo.com/weibo?q=%23%E6%83%A0%E8%8B%B1%E7%BA%A2%E5%90%83%E7%BA%B8%E8%BF%99%E6%AE%B5%E7%9C%8B%E5%BE%97%E4%BA%BA%E5%A4%B4%E7%9A%AE%E5%8F%91%E9%BA%BB%23",
+      "dy_link": "https://www.douyin.com/search/%E6%83%A0%E8%8B%B1%E7%BA%A2%E5%90%83%E7%BA%B8%E8%BF%99%E6%AE%B5%E7%9C%8B%E5%BE%97%E4%BA%BA%E5%A4%B4%E7%9A%AE%E5%8F%91%E9%BA%BB",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%83%A0%E8%8B%B1%E7%BA%A2%E5%90%83%E7%BA%B8%E8%BF%99%E6%AE%B5%E7%9C%8B%E5%BE%97%E4%BA%BA%E5%A4%B4%E7%9A%AE%E5%8F%91%E9%BA%BB"
     },
     {
       "id": "微博-t2",
@@ -697,28 +697,6 @@
     {
       "id": "微博-t3",
       "platform": "微博",
-      "cat": "护肤身体护理",
-      "title": "惠英红吃纸这段看得人头皮发麻",
-      "analysis": "换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。",
-      "idea": "原创思路：做「混干微敏皮实测」系列，按早C晚A/保湿/防晒分集，用红叉绿勾视觉提升点击。",
-      "real_url": "https://s.weibo.com/weibo?q=%23%E6%83%A0%E8%8B%B1%E7%BA%A2%E5%90%83%E7%BA%B8%E8%BF%99%E6%AE%B5%E7%9C%8B%E5%BE%97%E4%BA%BA%E5%A4%B4%E7%9A%AE%E5%8F%91%E9%BA%BB%23",
-      "dy_link": "https://www.douyin.com/search/%E6%83%A0%E8%8B%B1%E7%BA%A2%E5%90%83%E7%BA%B8%E8%BF%99%E6%AE%B5%E7%9C%8B%E5%BE%97%E4%BA%BA%E5%A4%B4%E7%9A%AE%E5%8F%91%E9%BA%BB",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E6%83%A0%E8%8B%B1%E7%BA%A2%E5%90%83%E7%BA%B8%E8%BF%99%E6%AE%B5%E7%9C%8B%E5%BE%97%E4%BA%BA%E5%A4%B4%E7%9A%AE%E5%8F%91%E9%BA%BB"
-    },
-    {
-      "id": "微博-t4",
-      "platform": "微博",
-      "cat": "vlog日常",
-      "title": "运动可以解决生活中很多问题",
-      "analysis": "vlog陪伴感强，能自然串联化妆、唱歌、穿搭多个垂类，粉丝粘性高。",
-      "idea": "原创思路：用「固定栏目+随机碎片」结构，降低日更压力。",
-      "real_url": "https://s.weibo.com/weibo?q=%23%E8%BF%90%E5%8A%A8%E5%8F%AF%E4%BB%A5%E8%A7%A3%E5%86%B3%E7%94%9F%E6%B4%BB%E4%B8%AD%E5%BE%88%E5%A4%9A%E9%97%AE%E9%A2%98%23",
-      "dy_link": "https://www.douyin.com/search/%E8%BF%90%E5%8A%A8%E5%8F%AF%E4%BB%A5%E8%A7%A3%E5%86%B3%E7%94%9F%E6%B4%BB%E4%B8%AD%E5%BE%88%E5%A4%9A%E9%97%AE%E9%A2%98",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E8%BF%90%E5%8A%A8%E5%8F%AF%E4%BB%A5%E8%A7%A3%E5%86%B3%E7%94%9F%E6%B4%BB%E4%B8%AD%E5%BE%88%E5%A4%9A%E9%97%AE%E9%A2%98"
-    },
-    {
-      "id": "微博-t5",
-      "platform": "微博",
       "cat": "唱歌碎片",
       "title": "素颜清唱",
       "analysis": "唱歌碎片穿插在vlog里，能低成本吸才艺粉又不抢主线。",
@@ -728,7 +706,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%B4%A0%E9%A2%9C%E6%B8%85%E5%94%B1"
     },
     {
-      "id": "微博-t6",
+      "id": "微博-t4",
       "platform": "微博",
       "cat": "美食",
       "title": "空气炸锅食谱",
@@ -739,7 +717,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%A9%BA%E6%B0%94%E7%82%B8%E9%94%85%E9%A3%9F%E8%B0%B1"
     },
     {
-      "id": "微博-t7",
+      "id": "微博-t5",
       "platform": "微博",
       "cat": "旅行",
       "title": "拍照机位分享",
@@ -750,7 +728,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%8B%8D%E7%85%A7%E6%9C%BA%E4%BD%8D%E5%88%86%E4%BA%AB"
     },
     {
-      "id": "微博-t8",
+      "id": "微博-t6",
       "platform": "微博",
       "cat": "搞笑",
       "title": "社恐日常",
@@ -761,7 +739,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%A4%BE%E6%81%90%E6%97%A5%E5%B8%B8"
     },
     {
-      "id": "微博-t9",
+      "id": "微博-t7",
       "platform": "微博",
       "cat": "影视",
       "title": "纪录片推荐",
@@ -772,7 +750,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%BA%AA%E5%BD%95%E7%89%87%E6%8E%A8%E8%8D%90"
     },
     {
-      "id": "微博-t10",
+      "id": "微博-t8",
       "platform": "微博",
       "cat": "知识",
       "title": "职场潜规则",
@@ -783,7 +761,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E8%81%8C%E5%9C%BA%E6%BD%9C%E8%A7%84%E5%88%99"
     },
     {
-      "id": "微博-t11",
+      "id": "微博-t9",
       "platform": "微博",
       "cat": "健身",
       "title": "办公室拉伸",
@@ -794,7 +772,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%8A%9E%E5%85%AC%E5%AE%A4%E6%8B%89%E4%BC%B8"
     },
     {
-      "id": "微博-t12",
+      "id": "微博-t10",
       "platform": "微博",
       "cat": "数码",
       "title": "平价耳机推荐",
@@ -805,7 +783,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%B9%B3%E4%BB%B7%E8%80%B3%E6%9C%BA%E6%8E%A8%E8%8D%90"
     },
     {
-      "id": "微博-t13",
+      "id": "微博-t11",
       "platform": "微博",
       "cat": "职场",
       "title": "副业思路",
@@ -816,7 +794,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%89%AF%E4%B8%9A%E6%80%9D%E8%B7%AF"
     },
     {
-      "id": "微博-t14",
+      "id": "微博-t12",
       "platform": "微博",
       "cat": "穿搭",
       "title": "正肩T恤显瘦密码",
@@ -827,7 +805,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%AD%A3%E8%82%A9T%E6%81%A4%E6%98%BE%E7%98%A6%E5%AF%86%E7%A0%81"
     },
     {
-      "id": "微博-t15",
+      "id": "微博-t13",
       "platform": "微博",
       "cat": "妆容",
       "title": "早八5分钟出门妆",
@@ -838,7 +816,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%97%A9%E5%85%AB5%E5%88%86%E9%92%9F%E5%87%BA%E9%97%A8%E5%A6%86"
     },
     {
-      "id": "微博-t16",
+      "id": "微博-t14",
       "platform": "微博",
       "cat": "护肤身体护理",
       "title": "敏感肌防晒怎么选",
@@ -849,7 +827,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E9%98%B2%E6%99%92%E6%80%8E%E4%B9%88%E9%80%89"
     },
     {
-      "id": "微博-t17",
+      "id": "微博-t15",
       "platform": "微博",
       "cat": "测评",
       "title": "小家电红黑榜",
@@ -860,7 +838,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%AE%B6%E7%94%B5%E7%BA%A2%E9%BB%91%E6%A6%9C"
     },
     {
-      "id": "微博-t18",
+      "id": "微博-t16",
       "platform": "微博",
       "cat": "好物",
       "title": "百元内好物清单",
@@ -871,7 +849,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%99%BE%E5%85%83%E5%86%85%E5%A5%BD%E7%89%A9%E6%B8%85%E5%8D%95"
     },
     {
-      "id": "微博-t19",
+      "id": "微博-t17",
       "platform": "微博",
       "cat": "鞋履配饰",
       "title": "通勤耳环推荐",
@@ -880,6 +858,28 @@
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E9%80%9A%E5%8B%A4%E8%80%B3%E7%8E%AF%E6%8E%A8%E8%8D%90",
       "bz_link": "https://search.bilibili.com/all?keyword=%E9%80%9A%E5%8B%A4%E8%80%B3%E7%8E%AF%E6%8E%A8%E8%8D%90"
+    },
+    {
+      "id": "微博-t18",
+      "platform": "微博",
+      "cat": "网购避坑",
+      "title": "网购衣服避坑指南",
+      "analysis": "避坑类情绪价值高、易转发，踩过的坑比种草更让人记住，评论区爱补充。",
+      "idea": "原创思路：以「帮姐妹省钱」的立场输出，建立靠谱人设。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E7%BD%91%E8%B4%AD%E8%A1%A3%E6%9C%8D%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E7%BD%91%E8%B4%AD%E8%A1%A3%E6%9C%8D%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97"
+    },
+    {
+      "id": "微博-t19",
+      "platform": "微博",
+      "cat": "情绪共鸣",
+      "title": "下班后的松弛感",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E4%B8%8B%E7%8F%AD%E5%90%8E%E7%9A%84%E6%9D%BE%E5%BC%9B%E6%84%9F",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E4%B8%8B%E7%8F%AD%E5%90%8E%E7%9A%84%E6%9D%BE%E5%BC%9B%E6%84%9F"
     },
     {
       "id": "B站-t0",
@@ -2983,5 +2983,6 @@
       ]
     }
   },
+  "aiproduct_real": false,
   "note": "选题灵感=各平台赛道当日爆款广撒网扫描（含瑜不做的大众赛道），逐条给火爆核心原因+原创创作思路；爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。抖音=真实单条视频链接（via tophub 聚合）；快手=真实热搜页；B站=真实视频（云端IP可则）；微博=真实热搜话题页。小红书官方未开放接口，给搜索入口，已如实标注。「链接升级」可粘贴分享短链解析为原视频卡片。AI爆品/新闻=每日自动更新（新闻抓新华网/人民网 RSS）。"
 }
