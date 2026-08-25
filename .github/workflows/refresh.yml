@@ -24,6 +24,8 @@ jobs:
           python-version: "3.11"
 
       - name: 生成 daily.json
+        env:
+          AI_PRODUCT_TOKEN: ${{ secrets.AI_PRODUCT_TOKEN }}
         run: python gen_daily.py
 
       - name: 提交更新
