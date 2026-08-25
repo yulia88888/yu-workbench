@@ -2126,9 +2126,13 @@
         <span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>
       </div>
       <div class="aip-stats">
-        <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val">${esc(p.sales)}</span></div>
-        <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(p.commission)}</span></div>
-        <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val">${esc(p.rating)}</span></div>
+        ${p.real
+          ? `<div class="aip-stat"><span class="aip-stat-icon">🔥</span>热度 <span class="aip-stat-val">${esc(p.heat || '实时')}</span></div>
+             <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val aip-dim">趋势参考</span></div>
+             <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val aip-dim">趋势参考</span></div>`
+          : `<div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val">${esc(p.sales)}</span></div>
+             <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(p.commission)}</span></div>
+             <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val">${esc(p.rating)}</span></div>`}
       </div>
       <div class="aip-script-box">
         <div class="aip-script-label">📝 脚本方向</div>
@@ -2164,7 +2168,7 @@
     } else {
       const list = collect(aipPlat, aipTime);
       const foot = daily.aiproduct_real
-        ? '<div class="aip-foot aip-foot-real">✅ 已接入真实平台商品榜（数据服务商 API · 每日自动更新）</div>'
+        ? '<div class="aip-foot aip-foot-real">✅ 真实平台热搜（抖音/快手/小红书）· 热度为真实数据，每日更新 · 商品销量/佣金为趋势参考（需商业后台数据）</div>'
         : '<div class="aip-foot">数据每日 AI 更新 · 为内容选品灵感参考（销量/佣金/评分为趋势参考值，非平台官方后台数据）</div>';
       bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>') + foot;
     }
