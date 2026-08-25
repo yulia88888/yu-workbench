@@ -12,7 +12,7 @@
   const LS = {
     tasks: 'yu_tasks', check: 'yu_check', daily: 'yu_daily', archive: 'yu_archive', hidden: 'yu_hidden',
     userTopics: 'yu_userTopics', userReposts: 'yu_userReposts', reviews: 'yu_reviews',
-    personal: 'yu_personal', historyExtra: 'yu_historyExtra'
+    personal: 'yu_personal', historyExtra: 'yu_historyExtra', aipHistory: 'yu_aipHistory'
   };
   const load = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } };
   const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
@@ -427,8 +427,10 @@
     else if (sub === 'sport') renderSport();
   });
   $('#content').addEventListener('click', e => {
-    const a = e.target.closest('[data-aipcat]');
-    if (a) { aipCat = a.dataset.aipcat; renderAiproduct(); return; }
+    const t = e.target.closest('[data-aiptime]');
+    if (t) { aipTime = t.dataset.aiptime; renderAiproduct(); return; }
+    const p = e.target.closest('[data-aipplat]');
+    if (p) { aipPlat = p.dataset.aipplat; renderAiproduct(); return; }
     const n = e.target.closest('[data-newscat]');
     if (n) { newsCat = n.dataset.newscat; renderNews(); return; }
   });
@@ -2082,8 +2084,8 @@
   }
 
   /* ---------- AI爆品 / 新闻 ---------- */
-  let aipCat = '全部', newsCat = '全部';
-  const AIPRODUCT_FALLBACK = [
+  let aipTime = '每日', aipPlat = '全部', newsCat = '全部';
+  const AIP_FLAT = [
     { title: '便携式制冷杯', tag: 'hot', tagText: '爆款', sales: '2.3w+', commission: '25%', rating: '4.8', script: '“夏天办公室没有冰箱？这个制冷杯3秒冰镇你的饮料！”→展示对比普通杯子 vs 制冷杯→上手演示→价格锚定“一杯奶茶钱”' },
     { title: '防晒空顶帽', tag: 'trend', tagText: '趋势', sales: '5.6w+', commission: '20%', rating: '4.9', script: '“军训/通勤不晒黑的秘密”→紫外线测试卡对比→多场景佩戴展示→强调“不闷热不勒头”痛点解决' },
     { title: '冷泡茶随身杯', tag: 'new', tagText: '新品', sales: '1.8w+', commission: '30%', rating: '4.7', script: '“打工人续命水，冷水也能泡好茶”→30秒冷泡演示→对比瓶装茶价格→“一个月省下200块奶茶钱”' },
@@ -2097,15 +2099,20 @@
     { title: '披肩外搭空调衫', tag: 'trend', tagText: '趋势', sales: '1.9w+', commission: '19%', rating: '4.6', script: '“办公室冷气太猛？这件空调衫拯救老寒肩”→搭配吊带/连衣裙→面料透气测试→“通勤防晒两不误”' },
     { title: '凉感冰丝枕', tag: 'new', tagText: '新品', sales: '3.4w+', commission: '17%', rating: '4.8', script: '“夏天睡觉一头汗？”→测温对比→仰卧/侧睡支撑展示→“不开空调也凉快”' }
   ];
+  const AIP_PLATS = ['抖音', '快手', '小红书'];
+  const AIP_TIMES = ['每日', '每周', '每月'];
+  function buildAipNested(flat) {
+    const res = {};
+    AIP_PLATS.forEach(p => { res[p] = {}; AIP_TIMES.forEach(t => { res[p][t] = flat.slice(0, 6); }); });
+    return res;
+  }
+  const AIPRODUCT_FALLBACK = buildAipNested(AIP_FLAT);
   const NEWS_FALLBACK = [
     { source: '新华网', cat: '时政', title: '今日要闻将在每次自动刷新后更新', summary: '新闻模块已接入每日自动抓取（新华网/人民网等），打开即可看到当天最新内容。', time: '每日更新' },
     { source: '人民网', cat: '民生', title: '便民政策早知道', summary: '社保、医保、出行等民生资讯每日汇总。', time: '每日更新' }
   ];
   function renderAiproduct() {
-    const all = (daily.aiproduct && daily.aiproduct.length) ? daily.aiproduct : AIPRODUCT_FALLBACK;
-    const todayList = all.slice(0, Math.min(6, all.length));
-    const histList = all.slice(6);
-    const list = aipCat === '历史记录' ? histList : todayList;
+    const aipData = (daily.aiproduct && daily.aiproduct['抖音']) ? daily.aiproduct : AIPRODUCT_FALLBACK;
     const tagClass = t => {
       if (t === '爆款' || t === 'hot') return 'hot';
       if (t === '趋势' || t === 'trend') return 'trend';
@@ -2113,6 +2120,53 @@
       return 'potential';
     };
     const tagText = p => p.tagText || ({ hot: '爆款', trend: '趋势', new: '新品', potential: '潜力' }[p.tag] || '潜力');
+    const aipCard = (p, showPlat) => `<div class="aip-card">
+      <div class="aip-card-head">
+        <div class="aip-card-title">${esc(p.title)}${showPlat ? `<span class="aip-plat-tag">${esc(p._plat || '')}</span>` : ''}</div>
+        <span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>
+      </div>
+      <div class="aip-stats">
+        <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val">${esc(p.sales)}</span></div>
+        <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(p.commission)}</span></div>
+        <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val">${esc(p.rating)}</span></div>
+      </div>
+      <div class="aip-script-box">
+        <div class="aip-script-label">📝 脚本方向</div>
+        <div class="aip-script-text">${esc(p.script)}</div>
+      </div>
+    </div>`;
+    const collect = (plat, time) => {
+      if (plat === '全部') {
+        let arr = [];
+        AIP_PLATS.forEach(p => { (aipData[p] && aipData[p][time] || []).forEach(it => arr.push(Object.assign({}, it, { _plat: p }))); });
+        return arr;
+      }
+      return (aipData[plat] && aipData[plat][time]) || [];
+    };
+    let bodyHtml;
+    if (aipTime === '历史记录') {
+      const ah = load(LS.aipHistory, {});
+      const dates = Object.keys(ah).sort().reverse();
+      if (!dates.length) {
+        bodyHtml = '<div class="empty">暂无历史记录（次日自动归档前一天的爆品）</div>';
+      } else {
+        bodyHtml = dates.map(d => {
+          const snap = ah[d] || {};
+          let items = [];
+          if (aipPlat === '全部') {
+            AIP_PLATS.forEach(p => { (snap[p] && snap[p]['每日'] || []).forEach(it => items.push(Object.assign({}, it, { _plat: p }))); });
+          } else {
+            items = (snap[aipPlat] && snap[aipPlat]['每日']) || [];
+          }
+          return `<div class="aip-hist-date">📅 ${esc(d)}</div>` + (items.length ? items.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">该日无记录</div>');
+        }).join('');
+      }
+    } else {
+      const list = collect(aipPlat, aipTime);
+      bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>')
+        + `<div class="aip-foot">数据每日 AI 更新 · 为内容选品灵感参考（销量/佣金/评分为趋势参考值，非平台官方后台数据）</div>`;
+    }
+    const times = [['每日', '🔥 每日爆品'], ['每周', '📅 每周爆品'], ['每月', '📆 每月爆品'], ['历史记录', '🗂️ 历史记录']];
     $('#aiproductBody').innerHTML = `
       <div class="aip-page">
         <div class="aip-header">
@@ -2123,26 +2177,12 @@
           <div class="aip-header-right">AI选品</div>
         </div>
         <div class="aip-tabs">
-          <button class="aip-tab ${aipCat === '历史记录' ? '' : 'active'}" data-aipcat="今日爆品">🔥 今日爆品</button>
-          <button class="aip-tab ${aipCat === '历史记录' ? 'active' : ''}" data-aipcat="历史记录">🗂️ 历史记录</button>
+          ${times.map(t => `<button class="aip-tab ${aipTime === t[0] ? 'active' : ''}" data-aiptime="${t[0]}">${t[1]}</button>`).join('')}
         </div>
-        <div class="aip-list">
-          ${list.map((p, i) => `<div class="aip-card">
-            <div class="aip-card-head">
-              <div class="aip-card-title">${esc(p.title)}</div>
-              <span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>
-            </div>
-            <div class="aip-stats">
-              <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val">${esc(p.sales)}</span></div>
-              <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(p.commission)}</span></div>
-              <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val">${esc(p.rating)}</span></div>
-            </div>
-            <div class="aip-script-box">
-              <div class="aip-script-label">📝 脚本方向</div>
-              <div class="aip-script-text">${esc(p.script)}</div>
-            </div>
-          </div>`).join('') || '<div class="empty">暂无记录</div>'}
+        <div class="cat-bar" style="padding:0 16px 12px;">
+          ${['全部', ...AIP_PLATS].map(p => `<button class="cat-chip ${aipPlat === p ? 'active' : ''}" data-aipplat="${esc(p)}">${esc(p)}</button>`).join('')}
         </div>
+        <div class="aip-list">${bodyHtml}</div>
       </div>
     `;
   }
@@ -2210,6 +2250,8 @@
             oldReposts.forEach(t => { const k = (t.title || '') + '|' + (t.source || ''); if (!seenR.has(k)) { he.reposts.unshift(t); seenR.add(k); } });
             save(LS.historyExtra, he);
           }
+          const oldAip = daily.aiproduct;
+          if (oldAip && daily.date) { const ah = load(LS.aipHistory, {}); ah[daily.date] = oldAip; save(LS.aipHistory, ah); }
           daily = d; save(LS.daily, daily); hidden = []; save(LS.hidden, hidden);
           toast('已更新到 ' + d.date + ' 数据');
           if (currentView === 'topic') renderTopics(); if (currentView === 'repost') renderReposts();
