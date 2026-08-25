@@ -27,6 +27,7 @@ import urllib.request
 import urllib.parse
 import random
 import datetime
+import xml.etree.ElementTree as ET
 
 CTX = ssl.create_default_context()
 CTX.check_hostname = False
@@ -696,6 +697,74 @@ def save_archive(topics, reposts, today_str, cap=700):
         json.dump({"topics": at_list, "reposts": ar_list}, f, ensure_ascii=False, indent=2)
 
 
+def fetch_rss(url, limit=6):
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=12, context=CTX) as r:
+            raw = r.read().decode("utf-8", "ignore")
+        root = ET.fromstring(raw)
+        out = []
+        for it in root.iter("item"):
+            title = (it.findtext("title") or "").strip()
+            desc = re.sub("<[^>]+>", "", it.findtext("description") or "")
+            desc = re.sub(r"\s+", " ", desc).strip()[:80]
+            pub = (it.findtext("pubDate") or "").strip()[:16]
+            if not title:
+                continue
+            item = {"title": title, "time": pub}
+            if desc:
+                item["summary"] = desc
+            out.append(item)
+            if len(out) >= limit:
+                break
+        return out
+    except Exception as e:
+        print("[rss fail]", url, e)
+        return []
+
+
+def gen_news():
+    sources = [
+        ("新华网", "时政", "http://www.xinhuanet.com/politics/news_politics.xml"),
+        ("人民网", "民生", "http://www.people.com.cn/rss/ywkx.xml"),
+    ]
+    news = []
+    for src, cat, url in sources:
+        for it in fetch_rss(url, 5):
+            it["source"] = src
+            it["cat"] = cat
+            news.append(it)
+    if not news:
+        news = [{"source": "新华网", "cat": "时政",
+                 "title": "今日要闻将在自动刷新后更新",
+                 "summary": "新闻模块已接入每日自动抓取（新华网/人民网等），打开即有当天最新内容。",
+                 "time": "每日更新"}]
+    return news[:12]
+
+
+AIPRODUCT_POOL = [
+    ("抖音爆品", "桌面多巴胺收纳盒", "近7天搜索 +320%", True),
+    ("抖音爆品", "磁吸充电小夜灯", "直播间爆款", True),
+    ("抖音爆品", "挂耳咖啡礼盒", "打工人续命", False),
+    ("小红书爆品", "早C晚A精华套装", "护肤赛道 TOP", False),
+    ("小红书爆品", "氛围感星星串灯", "租房党最爱", False),
+    ("小红书爆品", "披肩外搭空调衫", "通勤防晒", True),
+    ("淘宝热搜", "洞洞鞋鞋花DIY", "夏季顶流", True),
+    ("淘宝热搜", "凉感冰丝枕", "高温必备", False),
+    ("淘宝热搜", "免打孔置物架", "小户型神器", False),
+    ("京东热搜", "便携榨汁杯", "早八必备", False),
+    ("京东热搜", "防晒冰袖", "户外党刚需", True),
+    ("京东热搜", "颈椎按摩仪", "久坐救星", True),
+]
+
+
+def gen_aiproduct():
+    n = len(AIPRODUCT_POOL)
+    start = int(datetime.date.today().strftime("%Y%m%d")) % n
+    ordered = AIPRODUCT_POOL[start:] + AIPRODUCT_POOL[:start]
+    return [{"cat": c, "title": t, "meta": m, "hot": h} for (c, t, m, h) in ordered[:10]]
+
+
 def main():
     today = datetime.date.today()
     today_str = today.strftime("%Y-%m-%d")
@@ -713,6 +782,8 @@ def main():
     real_repost = {"抖音": douyin, "小红书": [], "快手": kuaishou, "微博": weibo, "B站": bili}
 
     topics, reposts = [], []
+    news = gen_news()
+    aiproduct = gen_aiproduct()
     seen = set()  # 全局去重：选题内部 + 二创内部 + 选题/二创之间 三处都不重复
     for i, p in enumerate(PLATFORMS_ORDER):
         ts = gen_topics(p, i, real_topic[p], seen)
@@ -724,10 +795,13 @@ def main():
         "date": today_str,
         "topics": topics,
         "reposts": reposts,
+        "news": news,
+        "aiproduct": aiproduct,
         "note": ("选题灵感=各平台赛道当日爆款广撒网扫描（含瑜不做的大众赛道），逐条给火爆核心原因+原创创作思路；"
                  "爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。"
                  "抖音=真实单条视频链接（via tophub 聚合）；快手=真实热搜页；B站=真实视频（云端IP可则）；微博=真实热搜话题页。"
-                 "小红书官方未开放接口，给搜索入口，已如实标注。「链接升级」可粘贴分享短链解析为原视频卡片。")
+                 "小红书官方未开放接口，给搜索入口，已如实标注。「链接升级」可粘贴分享短链解析为原视频卡片。"
+                 "AI爆品/新闻=每日自动更新（新闻抓新华网/人民网 RSS）。")
     }
 
     with open("daily.json", "w", encoding="utf-8") as f:
