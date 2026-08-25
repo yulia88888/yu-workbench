@@ -12,7 +12,7 @@
   const LS = {
     tasks: 'yu_tasks', check: 'yu_check', daily: 'yu_daily', archive: 'yu_archive', hidden: 'yu_hidden',
     userTopics: 'yu_userTopics', userReposts: 'yu_userReposts', reviews: 'yu_reviews',
-    personal: 'yu_personal'
+    personal: 'yu_personal', historyExtra: 'yu_historyExtra'
   };
   const load = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } };
   const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
@@ -30,11 +30,13 @@
   let currentView = 'plan';
   let subStack = [];
 
-  const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘' };
+  const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
 
   function mergeHist(list, type) {
-    const hist = (archive[type] || []).filter(t => !hidden.includes(t.id)).map(t => ({ ...t, _hist: true }));
+    const extra = load(LS.historyExtra, { topics: [], reposts: [] })[type] || [];
+    const hist = [...(archive[type] || []), ...extra]
+      .filter(t => !hidden.includes(t.id)).map(t => ({ ...t, _hist: true }));
     const out = [...list];
     const ids = new Set(out.map(t => t.id));
     hist.forEach(t => { if (!ids.has(t.id)) { out.push(t); ids.add(t.id); } });
@@ -64,6 +66,8 @@
     if (v === 'topic') renderTopics();
     if (v === 'repost') renderReposts();
     if (v === 'review') renderReviews();
+    if (v === 'aiproduct') renderAiproduct();
+    if (v === 'news') renderNews();
     setTimeout(updateScrollUI, 60);
   }
 
@@ -422,6 +426,12 @@
     else if (sub === 'english') renderEnglish();
     else if (sub === 'sport') renderSport();
   });
+  $('#content').addEventListener('click', e => {
+    const a = e.target.closest('[data-aipcat]');
+    if (a) { aipCat = a.dataset.aipcat; renderAiproduct(); return; }
+    const n = e.target.closest('[data-newscat]');
+    if (n) { newsCat = n.dataset.newscat; renderNews(); return; }
+  });
 
   /* ---------- 护肤日常 ---------- */
   function getSkinData() { const p = load(LS.personal, {}); return p.skincare || { products: [], diary: [], quiz: null, routine: [] }; }
@@ -587,7 +597,36 @@
 
     // ---------- 电子琴 ----------
     const pTab = e.target.closest('[data-pl]');
-    if (pTab) { const d = getPianoData(); d.level = Number(pTab.dataset.pl); setPianoData(d); renderPiano(); return; }
+    if (pTab) {
+      const lv = Number(pTab.dataset.pl); const d = getPianoData();
+      if (lv > d.level) { toast('🔒 继续练习当前阶段，练满后自动解锁下一阶'); return; }
+      d.level = lv; setPianoData(d); renderPiano(); return;
+    }
+    const pianoMic = e.target.closest('#pianoMic');
+    if (pianoMic) {
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const rec = new SR(); rec.lang = 'zh-CN'; rec.interimResults = false; rec.maxAlternatives = 1;
+      rec.onresult = ev => { const t = ev.results[0][0].transcript; const inp = $('#pianoInput'); if (inp) inp.value = t; toast('已识别，点「让AI教练看看」'); };
+      rec.onerror = () => toast('语音识别失败，请手动输入');
+      rec.start(); return;
+    }
+    const vkKey = e.target.closest('.vk-white, .vk-black');
+    if (vkKey) {
+      playNote(Number(vkKey.dataset.freq));
+      vkKey.classList.add('active'); setTimeout(() => vkKey.classList.remove('active'), 150);
+      if (window.__vkTarget) {
+        const hint = $('#vkHint'); window.__vkInput.push(vkKey.dataset.note);
+        if (window.__vkInput.length >= window.__vkTarget.length) {
+          const ok = window.__vkInput.every((n, i) => n === window.__vkTarget[i]);
+          hint.innerHTML = ok ? '🎉 完全正确！音阶弹对了～' : '❌ 顺序或音错了，正确答案是 C→D→E→F→G，再试一次';
+          if (!ok) window.__vkInput = [];
+        } else { hint.innerHTML = '继续弹：<b>' + window.__vkTarget.slice(window.__vkInput.length).join(' → ') + '</b>'; }
+      }
+      return;
+    }
+    const vkTest = e.target.closest('#vkTest');
+    if (vkTest) { window.__vkTarget = ['C4', 'D4', 'E4', 'F4', 'G4']; window.__vkInput = []; $('#vkHint').innerHTML = '请依次弹：<b>C → D → E → F → G</b>'; return; }
     const pMap = e.target.closest('[data-map^="piano:"]');
     if (pMap) { const k = pMap.dataset.map.split(':')[1]; renderPianoModule(k); return; }
     const pModCheck = e.target.closest('[data-modcheck^="piano:"]');
@@ -597,7 +636,9 @@
       const q = $('#pianoInput') && $('#pianoInput').value.trim();
       if (!q) { toast('请先描述你的问题'); return; }
       const res = $('#pianoResult'); res.classList.remove('hidden');
-      res.innerHTML = `<b>AI 钢琴老师反馈：</b><br/>针对「${esc(q)}」，建议：<br/>① 先分手慢练，节拍器设 60 BPM；<br/>② 把困难小节循环 5 遍，再串起来；<br/>③ 录下来自己听，比老师说的更直观。`;
+      const reply = `针对「${q}」，建议：第一，先分手慢练，节拍器设 60；第二，把困难小节循环练五遍再串起来；第三，录下来自己听，比老师说的更直观。`;
+      res.innerHTML = `<b>🎹 AI 钢琴教练：</b><br/>${esc(reply)}<br/><br/>💡 小技巧：手型保持「握鸡蛋」弧度，指尖立起来触键，节奏不稳就先只练右手。`;
+      speakText(reply, 'zh-CN', 0.95);
       return;
     }
     const pNext = e.target.closest('#pianoNext');
@@ -758,6 +799,18 @@
     }
     const speakScene = e.target.closest('[data-speakscene]');
     if (speakScene) { renderEnglishSpeakScene(speakScene.dataset.speakscene); return; }
+    const speakStart = e.target.closest('#speakStart');
+    if (speakStart) {
+      window.__speakPhase = 'dialog';
+      const inp = $('#speakInput'); inp.disabled = false; inp.placeholder = '输入你的回复，或点麦克风说话…';
+      $('#speakMic').disabled = false; $('#speakSend').disabled = false;
+      speakStart.style.display = 'none';
+      const sc = speakScenarios[window.__speakScene];
+      const chat = $('#speakChat');
+      const b = document.createElement('div'); b.className = 'chat-bubble chat-ai'; b.textContent = sc.steps[0].ai; chat.appendChild(b); chat.scrollTop = chat.scrollHeight;
+      inp.focus();
+      return;
+    }
     const sendScene = e.target.closest('[data-sendscene]');
     if (sendScene) {
       const input = $('#speakInput');
@@ -911,7 +964,28 @@
     }
 
     // ---------- 运动 ----------
-    if (e.target.closest('#sportCheck')) { toast('运动打卡成功！'); return; }
+    const sportToggle = e.target.closest('#sportToggle');
+    if (sportToggle) { const d = getSportData(); d.periodMode = !d.periodMode; d.date = ''; setSportData(d); renderSport(); return; }
+    const sportChange = e.target.closest('#sportChange');
+    if (sportChange) { sportDailyPick(true); renderSport(); return; }
+    const feel = e.target.closest('[data-feel]');
+    if (feel) { feel.classList.toggle('active'); return; }
+    const sportCoach = e.target.closest('#sportCoach');
+    if (sportCoach) {
+      const feels = $$('#sportFeel .chip.active').map(c => c.dataset.feel);
+      const res = $('#sportCoachResult'); res.classList.remove('hidden');
+      const d = getSportData(); d.feedback = feels; setSportData(d);
+      let plan = '今天建议以<b>低强度有氧+拉伸</b>为主，' + (d.periodMode ? '姨妈期避免卷腹和倒置动作，' : '');
+      const prec = [];
+      if (feels.includes('腰酸')) { plan += '加入猫牛式放松腰部；'; prec.push('避免久坐，每小时起身活动'); }
+      if (feels.includes('腿软')) { plan += '减少腿部力量，改靠墙静蹲或散步；'; prec.push('运动后补蛋白质+电解质'); }
+      if (feels.includes('乏力')) { plan += '时长缩至 15 分钟内，以八段锦/呼吸为主；'; prec.push('保证睡眠，避免超负荷'); }
+      if (feels.includes('膝盖不适')) { plan += '跳过深蹲/箭步蹲，改游泳或骑车；'; prec.push('膝盖不超脚尖，可戴护膝'); }
+      if (feels.includes('肩颈酸')) { plan += '加做肩颈拉伸；'; prec.push('手机抬高至视线，减少低头'); }
+      if (!feels.length || feels.includes('状态很好')) { plan += '可正常完成今日推荐，并加一组核心；'; }
+      res.innerHTML = `<b>AI 运动教练建议</b><br/>${plan}<br/><br/>⚠️ 注意事项：${prec.length ? prec.join('；') : '量力而行，循序渐进'}。<br/><br/>📺 跟练：去 B站搜「${d.periodMode ? '经期瑜伽' : '八段锦 拉伸'}」。`;
+      toast('已生成专属计划'); return;
+    }
   });
   function openMassagePlay(name) {
     const plans = {
@@ -1008,24 +1082,24 @@
   /* ---------- 电子琴 ---------- */
   const PIANO_VIDEOS = {
     0: [
-      { title: '电子琴新手教学：认识键盘与基本操作', bv: 'BV1KE41157m9', t: 13 },
-      { title: '电子琴入门：从零开始学弹奏', bv: 'BV1Ct4y1v7Ac', t: 12 },
+      { title: '电子琴新手教学：认识键盘与基本操作（坐姿/手型）', bv: 'BV1KE41157m9', t: 13 },
+      { title: '电子琴指法教学：正确手型与运指', bv: 'BV1Hq4y127um', t: 11 },
       { title: '乐理入门（音律屋）：识谱/音名/唱名', bv: 'BV1Hg411w7n2', t: 10 }
     ],
     1: [
-      { title: '电子琴新手教学：认识键盘与基本操作', bv: 'BV1KE41157m9', t: 13 },
-      { title: '电子琴入门：从零开始学弹奏', bv: 'BV1Ct4y1v7Ac', t: 12 },
-      { title: '📚 零基础学电子琴·完整系统课合集（112课）', url: 'https://b23.tv/NI2PuJM', t: 0 }
+      { title: '电子琴入门：从零开始学弹奏（C大调音阶）', bv: 'BV1Ct4y1v7Ac', t: 12 },
+      { title: '📚 零基础学电子琴·完整系统课合集（112课）', url: 'https://b23.tv/NI2PuJM', t: 0 },
+      { title: '电子琴指法练习：双手协调训练', bv: 'BV1Hq4y127um', t: 11 }
     ],
     2: [
-      { title: '乐理入门（音律屋）：识谱/音名/唱名', bv: 'BV1Hg411w7n2', t: 10 },
       { title: '📚 完整系统课合集（进阶曲目：小白船/樱花/送别…）', url: 'https://b23.tv/NI2PuJM', t: 0 },
-      { title: '电子琴入门：从零开始学弹奏', bv: 'BV1Ct4y1v7Ac', t: 12 }
+      { title: '电子琴入门：从零开始学弹奏（巩固）', bv: 'BV1Ct4y1v7Ac', t: 12 },
+      { title: '认识键盘与基本操作（进阶巩固）', bv: 'BV1KE41157m9', t: 13 }
     ],
     3: [
       { title: '📚 完整系统课合集（熟练曲目：致野玫瑰/献给爱丽丝/国际歌…）', url: 'https://b23.tv/NI2PuJM', t: 0 },
-      { title: '电子琴新手教学：认识键盘与基本操作', bv: 'BV1KE41157m9', t: 13 },
-      { title: '乐理入门（音律屋）：识谱/音名/唱名', bv: 'BV1Hg411w7n2', t: 10 }
+      { title: '乐理入门（音律屋）：和声与编配', bv: 'BV1Hg411w7n2', t: 10 },
+      { title: '电子琴演奏技巧提升', bv: 'BV1Ct4y1v7Ac', t: 12 }
     ]
   };
   function getPianoData() { const p = load(LS.personal, {}); return p.piano || { level: 0, streak: 0, xp: 0, hp: 5, history: [], progress: { 音阶: 0, 音调: 0, 简单曲目: 0, 和弦: 0 } }; }
@@ -1052,8 +1126,8 @@
       const page = item.dataset.page ? Number(item.dataset.page) : null;
       if (box.innerHTML) { box.innerHTML = ''; play.textContent = '本页播放'; }
       else {
-        box.innerHTML = `<div class="vp-tip">视频加载后，需再点播放器内 ▶ 播放按钮。若卡住请用「跳转原视频」。</div>
-          <div class="vp-wrap"><iframe class="vp-iframe" src="${bvidPlayer(bv, null, page)}" allowfullscreen frameborder="0" scrolling="no" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" loading="eager"></iframe></div>
+        box.innerHTML = `<div class="vp-tip">加载后点播放器内 ▶ 播放。若仍黑屏请用「跳转原视频」在 B 站 App 看。</div>
+          <div class="vp-wrap"><iframe class="vp-iframe" src="${bvidPlayer(bv, null, page)}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen="true" frameborder="0" scrolling="no" referrerpolicy="no-referrer-when-downgrade" loading="lazy"></iframe></div>
           <div class="vp-controls"><button class="vp-btn" data-mirror>↔ 镜像</button><button class="vp-btn" data-jump>⏭ 跳转</button></div>`;
         play.textContent = '收起视频';
       }
@@ -1072,7 +1146,7 @@
         return `<div class="video-item" data-bv="${esc(v.bv || '')}" data-page="${esc(v.page || 1)}" data-title="${esc(v.title)}">
           <div class="video-info">
             <div class="video-title">${i + 1}. ${esc(v.title)}</div>
-            <div class="video-meta">${!v.t ? '📚 完整系统课合集' : '⏱ ' + v.t + '分钟 · ' + esc(levelName)}</div>
+            <div class="video-meta">${v.teacher ? '🎓 ' + esc(v.teacher) + ' · ' : ''}${!v.t ? '📚 完整系统课合集' : '⏱ ' + v.t + '分钟 · ' + esc(levelName)}</div>
           </div>
           <div class="video-actions">
             ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
@@ -1082,6 +1156,27 @@
         </div>`;
       }).join('')}
     </div>`;
+  }
+  let _audioCtx = null;
+  function playNote(freq) {
+    try {
+      _audioCtx = _audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = _audioCtx.createOscillator(); const g = _audioCtx.createGain();
+      o.frequency.value = freq; o.type = 'sine'; o.connect(g); g.connect(_audioCtx.destination);
+      g.gain.setValueAtTime(0.2, _audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, _audioCtx.currentTime + 0.6);
+      o.start(); o.stop(_audioCtx.currentTime + 0.6);
+    } catch (e) {}
+  }
+  function buildKeyboard() {
+    const vk = $('#vk'); if (!vk) return;
+    const whites = [['C4', 261.63], ['D4', 293.66], ['E4', 329.63], ['F4', 349.23], ['G4', 392.00], ['A4', 440.00], ['B4', 493.88], ['C5', 523.25]];
+    const blacks = { 0: ['C#4', 277.18], 1: ['D#4', 311.13], 3: ['F#4', 369.99], 4: ['G#4', 415.30], 5: ['A#4', 466.16] };
+    let html = '';
+    whites.forEach((w, i) => {
+      html += `<div class="vk-white" data-note="${w[0]}" data-freq="${w[1]}">${w[0]}</div>`;
+      if (blacks[i]) html += `<div class="vk-black" style="left:${i * 40 + 27}px;" data-note="${blacks[i][0]}" data-freq="${blacks[i][1]}">${blacks[i][0][0]}</div>`;
+    });
+    vk.innerHTML = html;
   }
   function renderPiano() {
     const d = getPianoData();
@@ -1095,16 +1190,25 @@
         <div class="stat-item"><div class="stat-icon">⭐</div><div class="stat-num">${d.xp}</div><div class="stat-label">经验值</div></div>
         <div class="stat-item"><div class="stat-icon">❤️</div><div class="stat-num">${d.hp}</div><div class="stat-label">生命值</div></div>
       </div>
-      <div class="diff-tabs">${levels.map((l, i) => `<button class="diff-tab ${i === d.level ? 'active' : ''}" data-pl="${i}">${l}</button>`).join('')}</div>
+      <div class="diff-tabs">${levels.map((l, i) => `<button class="diff-tab ${i === d.level ? 'active' : ''}" data-pl="${i}">${l}${i > d.level ? ' 🔒' : ''}</button>`).join('')}</div>
       <div class="card"><h4 style="margin:0 0 10px;">📚 学习地图（点击打卡）</h4><div class="map-row">${units.map(u => `<div class="map-circle ${d.progress[u.k] >= 100 ? 'done' : ''}" data-map="piano:${u.k}"><div class="map-icon">${u.i}</div><div class="map-label">${u.k}</div><div class="map-pct">${d.progress[u.k]}%</div></div>`).join('')}</div></div>
       ${videoListHTML(PIANO_VIDEOS[d.level], levels[d.level])}
+      <div class="card"><h4 style="margin:0 0 8px;">🎹 虚拟键盘（弹一弹）</h4>
+        <div class="vk-wrap"><div class="vk" id="vk"></div></div>
+        <div class="vk-hint" id="vkHint">点击琴键听音；点「跟弹练习」考你 C-D-E-F-G 音阶</div>
+        <button class="btn-outline" id="vkTest" style="width:100%;margin-top:8px;">🎯 跟弹练习：弹 C→D→E→F→G</button>
+      </div>
       <div class="ai-form">
-        <label>🎹 AI 钢琴老师 · 描述你弹的问题<input id="pianoInput" placeholder="如：手指跨不开、左右手不协调、节奏不稳…" /></label>
-        <button class="btn-primary" style="width:100%;margin-top:10px;" id="pianoAsk">让 AI 老师看看</button>
+        <label>🎹 AI 钢琴教练 · 语音或文字描述你的问题<input id="pianoInput" placeholder="如：手指跨不开、左右手不协调、节奏不稳…" /></label>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn-outline" id="pianoMic" style="flex:0 0 auto;">🎙️ 语音问</button>
+          <button class="btn-primary" id="pianoAsk" style="flex:1;">让 AI 教练看看（语音回复）</button>
+        </div>
         <div id="pianoResult" class="ai-result hidden" style="margin-top:12px;"></div>
       </div>
       <button class="btn-primary" style="width:100%;" id="pianoNext">打卡完成，更新下一课 →</button>
     `);
+    buildKeyboard();
   }
   function renderPianoModule(k) {
     const d = getPianoData();
@@ -1137,24 +1241,24 @@
   /* ---------- 唱歌 ---------- */
   const SING_VIDEOS = {
     0: [
-      { title: 'Jason老湿 108集零基础唱歌教程（全集）', bv: 'BV1VN1iYLExq', page: 1, t: 0 },
-      { title: 'Jason 99集零基础教唱歌（全集）', bv: 'BV1Ae411B7Dm', page: 1, t: 0 },
-      { title: '官方99集 Jason零基础唱歌系统课', bv: 'BV1okAVeaELv', page: 1, t: 0 }
+      { title: '南门声乐·每日练声（15分钟零基础开声）', bv: 'BV1QG4y1G7Fk', page: 1, t: 0, teacher: '南门声乐' },
+      { title: '郭潇雨·从零开始学唱歌（全集）', bv: 'BV1o3TuzHEEu', page: 1, t: 0, teacher: '郭潇雨' },
+      { title: '南门声乐·气息训练（腹式呼吸）', bv: 'BV1Z64y157fM', page: 1, t: 0, teacher: '南门声乐' }
     ],
     1: [
-      { title: 'Jason老湿 108集零基础唱歌教程（第20集起）', bv: 'BV1VN1iYLExq', page: 20, t: 0 },
-      { title: 'Jason 99集零基础教唱歌（第15集起）', bv: 'BV1Ae411B7Dm', page: 15, t: 0 },
-      { title: '官方99集 Jason零基础唱歌系统课（第20集起）', bv: 'BV1okAVeaELv', page: 20, t: 0 }
+      { title: '南门声乐·音准矫正（跟唱 do-re-mi）', bv: 'BV1iV1rB9Edj', page: 1, t: 0, teacher: '南门声乐' },
+      { title: '宋伶俐·零基础轻松学唱歌', bv: 'BV18ZhgzGE8t', page: 1, t: 0, teacher: '宋伶俐' },
+      { title: '南门声乐·气息训练（腹式呼吸）', bv: 'BV1Z64y157fM', page: 1, t: 0, teacher: '南门声乐' }
     ],
     2: [
-      { title: 'Jason老湿 108集零基础唱歌教程（第50集起·混声）', bv: 'BV1VN1iYLExq', page: 50, t: 0 },
-      { title: '官方99集 Jason零基础唱歌系统课（第50集起）', bv: 'BV1okAVeaELv', page: 50, t: 0 },
-      { title: 'Jason 99集零基础教唱歌（第50集起）', bv: 'BV1Ae411B7Dm', page: 50, t: 0 }
+      { title: '南门声乐·混声技巧（换声区过渡）', bv: 'BV1yP411r78z', page: 1, t: 0, teacher: '南门声乐' },
+      { title: '南门声乐·音域拓展测试', bv: 'BV1bW421R7AH', page: 1, t: 0, teacher: '南门声乐' },
+      { title: 'Jason·零基础唱歌系统课（进阶篇）', bv: 'BV1VN1iYLExq', page: 50, t: 0, teacher: 'Jason' }
     ],
     3: [
-      { title: 'Jason老湿 108集零基础唱歌教程（第80集起·高音）', bv: 'BV1VN1iYLExq', page: 80, t: 0 },
-      { title: '官方99集 Jason零基础唱歌系统课（第80集起）', bv: 'BV1okAVeaELv', page: 80, t: 0 },
-      { title: 'Jason 99集零基础教唱歌（第80集起）', bv: 'BV1Ae411B7Dm', page: 80, t: 0 }
+      { title: 'Jason·高音突破教程（第80集起）', bv: 'BV1Ae411B7Dm', page: 80, t: 0, teacher: 'Jason' },
+      { title: '南门声乐·混声技巧（巩固）', bv: 'BV1yP411r78z', page: 1, t: 0, teacher: '南门声乐' },
+      { title: '官方99集·Jason零基础唱歌系统课', bv: 'BV1okAVeaELv', page: 80, t: 0, teacher: 'Jason' }
     ]
   };
   function getSingData() { const p = load(LS.personal, {}); return p.singing || { streak: 0, xp: 0, hp: 5, level: 0, history: [], progress: { 练声: 0, 音准: 0, 气息: 0, 节奏: 0 } }; }
@@ -1185,10 +1289,10 @@
   function renderSingModule(k) {
     const d = getSingData();
     const guides = {
-      练声: { i: '🎤', t: '打嘟唇颤音 2 分钟', s: '双唇放松，发出「嘟——」的声音，像摩托车启动。从低音滑到高音再滑下来，每天 2 分钟。', video: { title: 'Jason老湿 108集零基础唱歌教程（第1集·练声）', bv: 'BV1VN1iYLExq', page: 1 } },
-      音准: { i: '🎵', t: '跟唱 do-re-mi', s: '用钢琴或手机 App 弹一个音，跟唱「do」，依次弹 do-re-mi-fa-sol-la-si-do，跟着唱。', video: { title: 'Jason 99集零基础教唱歌（音准篇）', bv: 'BV1Ae411B7Dm', page: 1 } },
-      气息: { i: '💨', t: '腹式呼吸 3 分钟', s: '手放肚子上，吸气时肚子鼓起，呼气时慢慢收紧。发「嘶——」声，尽量拖长。', video: { title: '官方99集 Jason零基础唱歌系统课（气息篇）', bv: 'BV1okAVeaELv', page: 1 } },
-      节奏: { i: '🥁', t: '拍手打拍子', s: '选一首慢歌，用手打拍子：1-2-3-4，嘴里念节奏型 ta-ta-ta-ta。', video: { title: 'Jason老湿 108集零基础唱歌教程（节奏篇）', bv: 'BV1VN1iYLExq', page: 5 } }
+      练声: { i: '🎤', t: '打嘟唇颤音 2 分钟', s: '双唇放松，发出「嘟——」的声音，像摩托车启动。从低音滑到高音再滑下来，每天 2 分钟。', video: { title: '南门声乐·每日练声（开声）', bv: 'BV1QG4y1G7Fk', page: 1 } },
+      音准: { i: '🎵', t: '跟唱 do-re-mi', s: '用钢琴或手机 App 弹一个音，跟唱「do」，依次弹 do-re-mi-fa-sol-la-si-do，跟着唱。', video: { title: '南门声乐·音准矫正', bv: 'BV1iV1rB9Edj', page: 1 } },
+      气息: { i: '💨', t: '腹式呼吸 3 分钟', s: '手放肚子上，吸气时肚子鼓起，呼气时慢慢收紧。发「嘶——」声，尽量拖长。', video: { title: '南门声乐·气息训练', bv: 'BV1Z64y157fM', page: 1 } },
+      节奏: { i: '🥁', t: '拍手打拍子', s: '选一首慢歌，用手打拍子：1-2-3-4，嘴里念节奏型 ta-ta-ta-ta。', video: { title: '南门声乐·混声与节奏', bv: 'BV1yP411r78z', page: 1 } }
     };
     const g = guides[k] || guides['练声'];
     const hasBv = g.video.bv && /^BV/i.test(g.video.bv);
@@ -1376,27 +1480,27 @@
   };
 
   const speakScenarios = {
-    reception: { title: '前台接待', icon: '🏢', difficulty: '入门', time: '约5分钟', steps: [
+    reception: { title: '前台接待', icon: '🏢', difficulty: '入门', time: '约5分钟', teach: '重点句型：Good morning, welcome to... / May I have your name? 注意 welcome 重读，name 用升调提问。不会的词用 I am here for... 补救。', grammar: '祈使句与礼貌用语：用 Could you / May I 比直接说更得体。', steps: [
       { ai: 'Good morning, welcome to our company.', keywords: ['good', 'morning', 'welcome', 'company'], highlight: '问候语使用正确', improve: '可补充自我介绍，如 I am XXX', bonus: 'Nice to meet you' },
       { ai: 'May I have your name, please?', keywords: ['name', 'i am', 'my name', 'call'], highlight: '回答清楚', improve: '可补充来访目的，如 I am here for the meeting', bonus: 'Nice to meet you too' },
       { ai: 'Nice to meet you, have a seat.', keywords: ['nice', 'meet', 'seat', 'thank'], highlight: '回应礼貌', improve: '可补充感谢，如 Thank you', bonus: 'Have a nice day' }
     ]},
-    email: { title: '邮件沟通', icon: '📧', difficulty: '初级', time: '约8分钟', steps: [
+    email: { title: '邮件沟通', icon: '📧', difficulty: '初级', time: '约8分钟', teach: '邮件三要素：开头 I hope this email finds you well. 中间说明目的，结尾 I look forward to your reply. 日期用 by + 星期/时间。', grammar: '将来时 will + 动词原形；礼貌请求用 Could you please...', steps: [
       { ai: 'I hope this email finds you well.', keywords: ['hope', 'email', 'well'], highlight: '邮件开头礼貌', improve: '可说明写信目的，如 I am writing to ask about...', bonus: 'I look forward to your reply' },
       { ai: 'Could you please send me the report by Friday?', keywords: ['report', 'friday', 'send'], highlight: '请求清楚', improve: '可确认截止时间，如 by 5 PM Friday', bonus: 'Thank you in advance' },
       { ai: 'Sure, I will send it this afternoon.', keywords: ['send', 'afternoon', 'will'], highlight: '回复明确', improve: '可补充附件说明，如 Please find the attachment', bonus: 'Best regards' }
     ]},
-    blogger: { title: '博主连线', icon: '📹', difficulty: '初级', time: '约8分钟', steps: [
+    blogger: { title: '博主连线', icon: '📹', difficulty: '初级', time: '约8分钟', teach: '连线开场：Hi, thanks for joining! 介绍自己用 I am a lifestyle blogger. 聊内容用 I mostly share... 邀请互动用 Feel free to ask me anything.', grammar: '一般现在时：I/you/we/they + 动词原形；第三人称加 -s。', steps: [
       { ai: 'Hi, thanks for joining this live stream!', keywords: ['hi', 'thanks', 'live'], highlight: '开场自然', improve: '可自我介绍，如 I am a lifestyle blogger', bonus: 'Nice to connect with you' },
       { ai: 'What kind of content do you usually create?', keywords: ['content', 'create', 'usually'], highlight: '问题表达清楚', improve: '可举例，如 makeup, vlog or review', bonus: 'That sounds interesting' },
       { ai: 'I mostly share daily skincare and makeup tips.', keywords: ['skincare', 'makeup', 'tips'], highlight: '回答具体', improve: '可邀请互动，如 Feel free to ask me anything', bonus: 'Let us stay in touch' }
     ]},
-    travel: { title: '出差旅行', icon: '✈️', difficulty: '入门', time: '约5分钟', steps: [
+    travel: { title: '出差旅行', icon: '✈️', difficulty: '入门', time: '约5分钟', teach: '入住酒店：I would like to check in, please. 递证件说 Here you are. 问早餐用 What time is breakfast? 多用 please / thank you 显礼貌。', grammar: 'Would like to + 动词原形表礼貌请求；Here you are 是递东西固定说法。', steps: [
       { ai: 'Hello, I would like to check in, please.', keywords: ['check', 'in', 'like'], highlight: '表达清楚', improve: '可给出姓名和预订号，如 My name is...', bonus: 'I have a reservation' },
       { ai: 'May I see your passport?', keywords: ['passport', 'here', 'is'], highlight: '回应得体', improve: '可主动递上，如 Here you are', bonus: 'Thank you so much' },
       { ai: 'Here is your room key. Have a nice stay.', keywords: ['room', 'key', 'stay'], highlight: '礼貌回应', improve: '可询问早餐时间，如 What time is breakfast?', bonus: 'Have a wonderful day' }
     ]},
-    chat: { title: '自由聊天', icon: '💬', difficulty: '进阶', time: '约10分钟', steps: [
+    chat: { title: '自由聊天', icon: '💬', difficulty: '进阶', time: '约10分钟', teach: '自由聊：先用 What do you usually do... 开启话题，回答用 I enjoy + 动名词，反问用 How about you? 让对话继续。', grammar: '动名词作宾语：enjoy / like + doing；频率用 usually / often。', steps: [
       { ai: 'What do you usually do in your free time?', keywords: ['free', 'time', 'usually', 'do'], highlight: '问题自然', improve: '可更具体，如 Do you prefer reading or sports?', bonus: 'That is a great hobby' },
       { ai: 'I enjoy taking photos and learning new things.', keywords: ['enjoy', 'photos', 'learning'], highlight: '表达流畅', improve: '可补充原因，如 because it helps me relax', bonus: 'We have a lot in common' },
       { ai: 'That is cool. What is your favorite city?', keywords: ['favorite', 'city', 'like'], highlight: '回应积极', improve: '可反问对方，如 How about you?', bonus: 'I would love to visit someday' }
@@ -1664,27 +1768,44 @@
     const sc = speakScenarios[sceneId];
     openSubpage(`${sc.title} 💬`, `
       <button class="back-row" data-engback>← 返回场景选择</button>
-      <div class="sub-header"><h2>${sc.icon} ${sc.title}</h2><p>${sc.difficulty} · 完成 ${sc.steps.length} 轮对话</p></div>
+      <div class="sub-header"><h2>${sc.icon} ${sc.title}</h2><p>${sc.difficulty} · 教学 → 对话 → 纠错</p></div>
       <div id="speakChat" class="chat-wrap">
-        <div class="chat-bubble chat-ai">${esc(sc.steps[0].ai)}</div>
+        <div class="chat-bubble chat-ai"><b>📚 课前小灶（AI 先带你学一遍）</b><br/>${esc(sc.teach)}</div>
       </div>
       <div class="chat-input-row">
-        <input id="speakInput" placeholder="输入你的回复，或点麦克风说话…" />
-        <button id="speakMic" class="mic-btn" data-micscene="${esc(sceneId)}">🎙️</button>
-        <button id="speakSend" data-sendscene="${esc(sceneId)}">➤</button>
+        <input id="speakInput" placeholder="先学完上面的小灶，再开始对话…" disabled />
+        <button id="speakMic" class="mic-btn" data-micscene="${esc(sceneId)}" disabled>🎙️</button>
+        <button id="speakSend" data-sendscene="${esc(sceneId)}" disabled>➤</button>
+      </div>
+      <div style="text-align:center;margin-top:10px;">
+        <button class="btn-primary" id="speakStart">✅ 我学会了，开始对话 →</button>
       </div>
       <div id="speakResult" class="chat-feedback" style="display:none;"></div>
     `);
     window.__speakScene = sceneId;
     window.__speakStep = 0;
     window.__speakStars = 0;
+    window.__speakPhase = 'teach';
+    window.__speakMiss = [];
+    window.__speakFreeN = 0;
   }
 
   function speakFeedback(sceneId, userText) {
+    if (window.__speakPhase === 'done') return;
     const sc = speakScenarios[sceneId];
-    const step = sc.steps[window.__speakStep];
     const chat = $('#speakChat');
     const userBubble = document.createElement('div'); userBubble.className = 'chat-bubble chat-user'; userBubble.textContent = userText || '…'; chat.appendChild(userBubble);
+    if (window.__speakPhase === 'free') {
+      const replies = ['Nice! Tell me more.', 'That sounds good. Why do you like it?', 'Great! How often do you do that?', 'Interesting! I see.', 'Well said!'];
+      const rep = replies[Math.floor(Math.random() * replies.length)];
+      window.__speakFreeN++;
+      setTimeout(() => {
+        const n = document.createElement('div'); n.className = 'chat-bubble chat-ai'; n.textContent = rep; chat.appendChild(n); chat.scrollTop = chat.scrollHeight;
+        if (window.__speakFreeN >= 2) endSpeakWithCritique(sc);
+      }, 800);
+      chat.scrollTop = chat.scrollHeight; return;
+    }
+    const step = sc.steps[window.__speakStep];
     const lower = (userText || '').toLowerCase();
     let stars = 0;
     step.keywords.forEach(kw => { if (lower.includes(kw.toLowerCase())) stars++; });
@@ -1693,25 +1814,33 @@
     window.__speakStars += stars;
     const hasKw = step.keywords.some(kw => lower.includes(kw.toLowerCase()));
     const hasBonus = lower.includes(step.bonus.toLowerCase());
+    if (!hasKw) window.__speakMiss.push({ step: window.__speakStep + 1, need: step.keywords.join(' / '), improve: step.improve });
     const fb = `<b>⭐ ${stars}/5</b><br/>${hasKw ? '✅ ' + esc(step.highlight) : '💡 ' + esc(step.improve)}${hasBonus ? '<br/>🎉 加分表达：' + esc(step.bonus) : ''}`;
     const fbDiv = document.createElement('div'); fbDiv.className = 'chat-feedback'; fbDiv.innerHTML = fb; chat.appendChild(fbDiv);
     window.__speakStep++;
     if (window.__speakStep < sc.steps.length) {
       setTimeout(() => { const next = document.createElement('div'); next.className = 'chat-bubble chat-ai'; next.textContent = sc.steps[window.__speakStep].ai; chat.appendChild(next); chat.scrollTop = chat.scrollHeight; }, 800);
-      } else {
-        const total = window.__speakStars;
-        const avg = Math.round(total / sc.steps.length);
-        const acc = avg >= 4 ? 90 : avg >= 3 ? 75 : 55;
-        setTimeout(() => {
-          const end = document.createElement('div'); end.className = 'chat-feedback';
-          end.innerHTML = `<b>🎉 对话结束</b><br/>总星数：${total} ⭐ · 平均 ${avg}/5<br/>${avg >= 4 ? '表现很棒，继续加油！' : avg >= 3 ? '还不错，注意关键词匹配。' : '建议多练基础句型。'}`;
-          chat.appendChild(end);
-          const s = getEngState(); s.xp += 10; s.map['口语'] = Math.min(100, s.map['口语'] + 10); if (avg >= 4) s.streak += 1; setEngState(s);
-          checkEngLevelAdjust(acc);
-          toast('口语对练完成 +10经验');
-          chat.scrollTop = chat.scrollHeight;
-        }, 800);
-      }
+    } else {
+      window.__speakPhase = 'free'; window.__speakFreeN = 0;
+      setTimeout(() => { const n = document.createElement('div'); n.className = 'chat-bubble chat-ai'; n.textContent = "Now let's free-talk! Say anything you like 💬"; chat.appendChild(n); chat.scrollTop = chat.scrollHeight; }, 800);
+    }
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function endSpeakWithCritique(sc) {
+    window.__speakPhase = 'done';
+    const total = window.__speakStars;
+    const avg = Math.round(total / sc.steps.length);
+    const acc = avg >= 4 ? 90 : avg >= 3 ? 75 : 55;
+    let critique = `<b>🎓 课后诊断</b><br/>对话总星数：${total} ⭐ · 平均 ${avg}/5<br/>`;
+    if (window.__speakMiss.length) {
+      critique += `<br/>📌 这次漏掉的表达：<br/>` + window.__speakMiss.map(m => `• 第${m.step}轮：应含 <b>${esc(m.need)}</b><br/>　改进：${esc(m.improve)}`).join('<br/>');
+    } else { critique += `<br/>✅ 关键词都覆盖到了，很棒！`; }
+    critique += `<br/><br/>🗣️ 发音建议：放慢语速，重读实词（名词/动词），用 Web Speech 反复跟读例句。<br/>📚 语法重点：${esc(sc.grammar || '注意主谓一致和时态。')}`;
+    const end = document.createElement('div'); end.className = 'chat-feedback'; end.innerHTML = critique; const chat = $('#speakChat'); chat.appendChild(end);
+    const s = getEngState(); s.xp += 10; s.map['口语'] = Math.min(100, s.map['口语'] + 10); if (avg >= 4) s.streak += 1; setEngState(s);
+    checkEngLevelAdjust(acc);
+    toast('口语对练完成 +10经验');
     chat.scrollTop = chat.scrollHeight;
   }
 
@@ -1873,18 +2002,132 @@
   })();
 
   /* ---------- 运动 ---------- */
+  const SPORT_DATA = {
+    tradition: [
+      { name: '八段锦·标准跟练', desc: '国家体育总局标准版，8个动作疏通筋骨', dur: 12, search: '八段锦 标准教学 完整版' },
+      { name: '八段锦·分段精讲', desc: '逐式拆解，新手也能学会', dur: 15, search: '八段锦 分段讲解 新手' },
+      { name: '金刚功·全套', desc: '张至顺道长金刚功，温养阳气', dur: 15, search: '金刚功 全套 张至顺' },
+      { name: '简化太极拳·24式', desc: '柔和缓慢，平衡身心', dur: 20, search: '简化太极拳 24式 教学' },
+      { name: '八段锦·办公室坐姿版', desc: '坐着也能练，缓解久坐僵硬', dur: 8, search: '八段锦 坐姿 办公室' }
+    ],
+    strength: {
+      leg: { name: '腿部力量', desc: '深蹲/箭步蹲，练出腿臀线条', dur: 10, search: '居家 腿臀训练 无器械', stretch: '大腿前侧&后侧拉伸' },
+      butt: { name: '臀桥训练', desc: '臀桥+蚌式，提臀不粗腿', dur: 10, search: '居家 翘臀训练 无器械', stretch: '臀肌拉伸' },
+      abs: { name: '腹部核心', desc: '卷腹+平板，收紧小腹', dur: 10, search: '居家 腹肌训练 无器械', stretch: '腹部拉伸' },
+      arm: { name: '手臂线条', desc: '手臂塑形，告别拜拜肉', dur: 10, search: '居家 手臂训练 无器械', stretch: '手臂拉伸' },
+      shoulder: { name: '肩颈放松', desc: '肩部绕环+颈部拉伸', dur: 8, search: '肩颈放松 拉伸 舒缓', stretch: '肩颈拉伸' },
+      chest: { name: '胸背舒展', desc: '俯卧撑+扩胸，改善含胸', dur: 10, search: '居家 胸肌训练 无器械', stretch: '胸部拉伸' },
+      back: { name: '背部训练', desc: '燕飞+划船，挺拔身姿', dur: 10, search: '居家 背肌训练 无器械', stretch: '背部拉伸' }
+    },
+    period: [
+      { name: '经期舒缓瑜伽', desc: '猫牛式/仰卧束角，不压迫腹部', dur: 15, search: '经期瑜伽 舒缓 不压迫腹部' },
+      { name: '经期呼吸放松', desc: '腹式呼吸+轻柔扭转，缓解不适', dur: 10, search: '经期 舒缓 呼吸 放松' }
+    ]
+  };
+  function getSportData() {
+    const p = load(LS.personal, {});
+    return p.sport || { periodMode: false, date: '', pickType: '', pickKey: '' };
+  }
+  function setSportData(d) { const p = load(LS.personal, {}); p.sport = d; save(LS.personal, p); }
+  function sportDailyPick(force) {
+    const d = getSportData();
+    const today = todayKey();
+    if (!force && d.date === today && d.pickKey) return d;
+    if (d.periodMode) {
+      const idx = Math.floor(Math.random() * SPORT_DATA.period.length);
+      d.pickType = 'period'; d.pickKey = 'p' + idx; d.date = today;
+    } else {
+      const r = Math.random();
+      if (r < 0.55) { const idx = Math.floor(Math.random() * SPORT_DATA.tradition.length); d.pickType = 'tradition'; d.pickKey = 't' + idx; }
+      else { const keys = Object.keys(SPORT_DATA.strength); const k = keys[Math.floor(Math.random() * keys.length)]; d.pickType = 'strength'; d.pickKey = k; }
+      d.date = today;
+    }
+    setSportData(d); return d;
+  }
   function renderSport() {
+    const d = sportDailyPick(false);
+    let ex, stretchHint = '';
+    if (d.pickType === 'period') ex = SPORT_DATA.period[Number(d.pickKey.slice(1))];
+    else if (d.pickType === 'tradition') ex = SPORT_DATA.tradition[Number(d.pickKey.slice(1))];
+    else { ex = SPORT_DATA.strength[d.pickKey]; stretchHint = ex.stretch; }
+    const searchUrl = 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(ex.search);
     openSubpage('运动计划 💪', `
       <button class="back-row" data-back>← 返回每日计划</button>
-      <div class="sub-header"><h2>运动计划 💪</h2><p>八段锦 · 力量拉伸 · 姨妈期友好</p></div>
-      <div class="card"><h4 style="margin:0 0 10px;">🌅 晨起 · 八段锦 12分钟</h4><p style="font-size:13px;color:var(--text-secondary);">温和唤醒身体，适合每天打卡。</p></div>
-      <div class="card"><h4 style="margin:0 0 10px;">🌙 晚间 · 拉伸 10分钟</h4><p style="font-size:13px;color:var(--text-secondary);">放松肩颈、腰背，久坐党必做。</p></div>
-      <div class="card"><h4 style="margin:0 0 10px;">🩸 姨妈期 · 舒缓版</h4><p style="font-size:13px;color:var(--text-secondary);">只练呼吸+轻柔拉伸，不压迫腹部。</p></div>
-      <button class="btn-primary" id="sportCheck" style="width:100%;">今日运动打卡</button>
+      <div class="sub-header"><h2>运动计划 💪</h2><p>每日随机一项 · 优先传统养生</p></div>
+      <div class="toggle-row">
+        <div><div class="tg-label">🌸 姨妈期模式</div><div class="tg-sub">开启后自动替换为经期舒缓练习</div></div>
+        <div class="switch ${d.periodMode ? 'on' : ''}" id="sportToggle"></div>
+      </div>
+      <div class="sport-hero"><h3>今日推荐 · ${esc(ex.name)}</h3><p>${esc(ex.desc)} · 约 ${ex.dur} 分钟</p></div>
+      <div class="card">
+        <h4 style="margin:0 0 10px;">📺 跟练视频</h4>
+        <div class="video-item" data-search="${esc(ex.search)}">
+          <div class="video-info"><div class="video-title">${esc(ex.name)} · 跟练</div><div class="video-meta">B站搜索 · 选播放量高的跟练</div></div>
+          <div class="video-actions">
+            <a href="${searchUrl}" target="_blank" rel="noopener" class="btn-primary" style="text-align:center;">▶ 去 B站跟练 ↗</a>
+          </div>
+        </div>
+      </div>
+      ${stretchHint ? `<div class="stretch-box">💡 力量训练后记得拉伸：<b>${esc(stretchHint)}</b>。可在 B站搜「${esc(stretchHint)}」跟练。</div>` : ''}
+      <button class="btn-outline" id="sportChange" style="width:100%;margin-bottom:12px;">🔄 换一项（${d.periodMode ? '经期舒缓' : '今日随机'}）</button>
+      <div class="ai-form">
+        <label>🏃 AI 运动教练 · 今天身体感觉如何？（可多选）</label>
+        <div class="chip-grid" id="sportFeel">
+          ${['腰酸', '腿软', '乏力', '膝盖不适', '肩颈酸', '状态很好'].map(f => `<button class="chip" data-feel="${esc(f)}">${esc(f)}</button>`).join('')}
+        </div>
+        <button class="btn-primary" id="sportCoach" style="width:100%;margin-top:10px;">让 AI 教练调整计划</button>
+        <div id="sportCoachResult" class="ai-result hidden" style="margin-top:12px;"></div>
+      </div>
     `);
   }
 
-  /* ---------- 滚动拉杆 + 回到顶部 ---------- */
+  /* ---------- AI爆品 / 新闻 ---------- */
+  let aipCat = '全部', newsCat = '全部';
+  const AIPRODUCT_FALLBACK = [
+    { cat: '抖音爆品', title: '桌面多巴胺收纳盒', meta: '近7天搜索 +320%', hot: true },
+    { cat: '抖音爆品', title: '磁吸充电小夜灯', meta: '直播间爆款', hot: true },
+    { cat: '小红书爆品', title: '早C晚A精华套装', meta: '护肤赛道 TOP', hot: false },
+    { cat: '小红书爆品', title: '氛围感星星串灯', meta: '租房党最爱', hot: false },
+    { cat: '淘宝热搜', title: '洞洞鞋鞋花DIY', meta: '夏季顶流', hot: true },
+    { cat: '淘宝热搜', title: '凉感冰丝枕', meta: '高温必备', hot: false }
+  ];
+  const NEWS_FALLBACK = [
+    { source: '新华网', cat: '时政', title: '今日要闻将在每次自动刷新后更新', summary: '新闻模块已接入每日自动抓取（新华网/人民网等），打开即可看到当天最新内容。', time: '每日更新' },
+    { source: '人民网', cat: '民生', title: '便民政策早知道', summary: '社保、医保、出行等民生资讯每日汇总。', time: '每日更新' }
+  ];
+  function renderAiproduct() {
+    const data = (daily.aiproduct && daily.aiproduct.length) ? daily.aiproduct : AIPRODUCT_FALLBACK;
+    const cats = ['全部', ...Array.from(new Set(data.map(p => p.cat)))];
+    const list = data.filter(p => aipCat === '全部' || p.cat === aipCat);
+    $('#aiproductBody').innerHTML = `
+      <div class="sub-header" style="margin-bottom:10px;"><h2>🛒 AI爆品</h2><p>每日更新 · 趋势好物灵感</p></div>
+      <div class="cat-bar">${cats.map(c => `<button class="cat-chip ${c === aipCat ? 'active' : ''}" data-aipcat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <div class="list-count">共 ${list.length} 件</div>
+      ${list.map((p, i) => `<div class="prod-card">
+        <div class="prod-rank">${i + 1}</div>
+        <div class="prod-info">
+          <div class="prod-title">${esc(p.title)}</div>
+          <div class="prod-meta"><span class="prod-tag ${p.hot ? 'hot' : ''}">${esc(p.cat)}</span>${esc(p.meta || '')}</div>
+        </div>
+      </div>`).join('') || '<div class="empty">暂无爆品</div>'}
+    `;
+  }
+  function renderNews() {
+    const data = (daily.news && daily.news.length) ? daily.news : NEWS_FALLBACK;
+    const cats = ['全部', ...Array.from(new Set(data.map(n => n.cat)))];
+    const list = data.filter(n => newsCat === '全部' || n.cat === newsCat);
+    $('#newsBody').innerHTML = `
+      <div class="sub-header" style="margin-bottom:10px;"><h2>📰 新闻</h2><p>每日更新 · ${esc(daily.date || todayKey())}</p></div>
+      <div class="cat-bar">${cats.map(c => `<button class="cat-chip ${c === newsCat ? 'active' : ''}" data-newscat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <div class="list-count">共 ${list.length} 条</div>
+      ${list.map(n => `<div class="news-card">
+        <div class="news-source">${esc(n.source || '综合')} · ${esc(n.cat || '')}</div>
+        <div class="news-title">${esc(n.title)}</div>
+        ${n.summary ? `<div class="news-sum">${esc(n.summary)}</div>` : ''}
+        <div class="news-foot"><span class="news-time">${esc(n.time || '')}</span><span class="news-cat">${esc(n.cat || '资讯')}</span></div>
+      </div>`).join('') || '<div class="empty">暂无新闻</div>'}
+    `;
+  }
   const content = $('#content');
   const track = $('#scrollTrack');
   const thumb = $('#scrollThumb');
@@ -1921,10 +2164,22 @@
     $('#todayDate').textContent = todayKey();
     renderPlan();
     fetch('./daily.json').then(r => r.ok ? r.json() : null).then(d => {
-      if (d && d.date && daily.date !== d.date) {
-        daily = d; save(LS.daily, daily); hidden = []; save(LS.hidden, hidden);
-        toast('已更新到 ' + d.date + ' 数据');
-        if (currentView === 'topic') renderTopics(); if (currentView === 'repost') renderReposts();
+      if (d && d.date) {
+        if (daily.date !== d.date) {
+          const oldTopics = (daily.topics || []).map(t => ({ ...t, id: t.id || uid(), seen_date: daily.date || todayKey() }));
+          const oldReposts = (daily.reposts || []).map(t => ({ ...t, id: t.id || uid(), seen_date: daily.date || todayKey() }));
+          if (oldTopics.length || oldReposts.length) {
+            const he = load(LS.historyExtra, { topics: [], reposts: [] });
+            const seenT = new Set(he.topics.map(t => (t.title || '') + '|' + (t.platform || '')));
+            oldTopics.forEach(t => { const k = (t.title || '') + '|' + (t.platform || ''); if (!seenT.has(k)) { he.topics.unshift(t); seenT.add(k); } });
+            const seenR = new Set(he.reposts.map(t => (t.title || '') + '|' + (t.source || '')));
+            oldReposts.forEach(t => { const k = (t.title || '') + '|' + (t.source || ''); if (!seenR.has(k)) { he.reposts.unshift(t); seenR.add(k); } });
+            save(LS.historyExtra, he);
+          }
+          daily = d; save(LS.daily, daily); hidden = []; save(LS.hidden, hidden);
+          toast('已更新到 ' + d.date + ' 数据');
+          if (currentView === 'topic') renderTopics(); if (currentView === 'repost') renderReposts();
+        }
       }
     }).catch(() => {});
     fetch('./archive.json').then(r => r.ok ? r.json() : null).then(a => {
