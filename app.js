@@ -2084,32 +2084,66 @@
   /* ---------- AI爆品 / 新闻 ---------- */
   let aipCat = '全部', newsCat = '全部';
   const AIPRODUCT_FALLBACK = [
-    { cat: '抖音爆品', title: '桌面多巴胺收纳盒', meta: '近7天搜索 +320%', hot: true },
-    { cat: '抖音爆品', title: '磁吸充电小夜灯', meta: '直播间爆款', hot: true },
-    { cat: '小红书爆品', title: '早C晚A精华套装', meta: '护肤赛道 TOP', hot: false },
-    { cat: '小红书爆品', title: '氛围感星星串灯', meta: '租房党最爱', hot: false },
-    { cat: '淘宝热搜', title: '洞洞鞋鞋花DIY', meta: '夏季顶流', hot: true },
-    { cat: '淘宝热搜', title: '凉感冰丝枕', meta: '高温必备', hot: false }
+    { title: '便携式制冷杯', tag: 'hot', tagText: '爆款', sales: '2.3w+', commission: '25%', rating: '4.8', script: '“夏天办公室没有冰箱？这个制冷杯3秒冰镇你的饮料！”→展示对比普通杯子 vs 制冷杯→上手演示→价格锚定“一杯奶茶钱”' },
+    { title: '防晒空顶帽', tag: 'trend', tagText: '趋势', sales: '5.6w+', commission: '20%', rating: '4.9', script: '“军训/通勤不晒黑的秘密”→紫外线测试卡对比→多场景佩戴展示→强调“不闷热不勒头”痛点解决' },
+    { title: '冷泡茶随身杯', tag: 'new', tagText: '新品', sales: '1.8w+', commission: '30%', rating: '4.7', script: '“打工人续命水，冷水也能泡好茶”→30秒冷泡演示→对比瓶装茶价格→“一个月省下200块奶茶钱”' },
+    { title: '次抛洗护旅行装', tag: 'potential', tagText: '潜力', sales: '9.8k+', commission: '22%', rating: '4.6', script: '“出差党的救星，一次一片不脏手”→拆箱展示→飞机/酒店场景演示→“比酒店小瓶靠谱10倍”' },
+    { title: '桌面多巴胺收纳盒', tag: 'hot', tagText: '爆款', sales: '3.1w+', commission: '18%', rating: '4.8', script: '“工位乱到被老板点名？”→ before/after 桌面改造→分格收纳演示→“颜值与实用并存”' },
+    { title: '磁吸充电小夜灯', tag: 'trend', tagText: '趋势', sales: '2.7w+', commission: '24%', rating: '4.7', script: '“租房党床头神器”→磁吸安装演示→三档色温对比→“不用布线也能有氛围感”' },
+    { title: '挂耳咖啡礼盒', tag: 'new', tagText: '新品', sales: '1.2w+', commission: '28%', rating: '4.9', script: '“早八人的续命仪式感”→手冲过程特写→风味卡片展示→“比瑞幸更香更便宜”' },
+    { title: '早C晚A精华套装', tag: 'hot', tagText: '爆款', sales: '4.5w+', commission: '15%', rating: '4.8', script: '“敏感肌也能抄作业的护肤公式”→28天打卡对比→成分表解读→“一套搞定暗沉细纹”' },
+    { title: '氛围感星星串灯', tag: 'potential', tagText: '潜力', sales: '8.5k+', commission: '32%', rating: '4.5', script: '“租房氛围感天花板”→安装过程→关灯前后对比→“几十块拍出电影感卧室”' },
+    { title: '洞洞鞋鞋花DIY', tag: 'hot', tagText: '爆款', sales: '6.2w+', commission: '21%', rating: '4.7', script: '“洞门永存！一双鞋换100种皮肤”→鞋花搭配合集→主题改造（库洛米/多巴胺）→“每天出门不重样”' },
+    { title: '披肩外搭空调衫', tag: 'trend', tagText: '趋势', sales: '1.9w+', commission: '19%', rating: '4.6', script: '“办公室冷气太猛？这件空调衫拯救老寒肩”→搭配吊带/连衣裙→面料透气测试→“通勤防晒两不误”' },
+    { title: '凉感冰丝枕', tag: 'new', tagText: '新品', sales: '3.4w+', commission: '17%', rating: '4.8', script: '“夏天睡觉一头汗？”→测温对比→仰卧/侧睡支撑展示→“不开空调也凉快”' }
   ];
   const NEWS_FALLBACK = [
     { source: '新华网', cat: '时政', title: '今日要闻将在每次自动刷新后更新', summary: '新闻模块已接入每日自动抓取（新华网/人民网等），打开即可看到当天最新内容。', time: '每日更新' },
     { source: '人民网', cat: '民生', title: '便民政策早知道', summary: '社保、医保、出行等民生资讯每日汇总。', time: '每日更新' }
   ];
   function renderAiproduct() {
-    const data = (daily.aiproduct && daily.aiproduct.length) ? daily.aiproduct : AIPRODUCT_FALLBACK;
-    const cats = ['全部', ...Array.from(new Set(data.map(p => p.cat)))];
-    const list = data.filter(p => aipCat === '全部' || p.cat === aipCat);
+    const all = (daily.aiproduct && daily.aiproduct.length) ? daily.aiproduct : AIPRODUCT_FALLBACK;
+    const todayList = all.slice(0, Math.min(6, all.length));
+    const histList = all.slice(6);
+    const list = aipCat === '历史记录' ? histList : todayList;
+    const tagClass = t => {
+      if (t === '爆款' || t === 'hot') return 'hot';
+      if (t === '趋势' || t === 'trend') return 'trend';
+      if (t === '新品' || t === 'new') return 'new';
+      return 'potential';
+    };
+    const tagText = p => p.tagText || ({ hot: '爆款', trend: '趋势', new: '新品', potential: '潜力' }[p.tag] || '潜力');
     $('#aiproductBody').innerHTML = `
-      <div class="sub-header" style="margin-bottom:10px;"><h2>🛒 AI爆品</h2><p>每日更新 · 趋势好物灵感</p></div>
-      <div class="cat-bar">${cats.map(c => `<button class="cat-chip ${c === aipCat ? 'active' : ''}" data-aipcat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-      <div class="list-count">共 ${list.length} 件</div>
-      ${list.map((p, i) => `<div class="prod-card">
-        <div class="prod-rank">${i + 1}</div>
-        <div class="prod-info">
-          <div class="prod-title">${esc(p.title)}</div>
-          <div class="prod-meta"><span class="prod-tag ${p.hot ? 'hot' : ''}">${esc(p.cat)}</span>${esc(p.meta || '')}</div>
+      <div class="aip-page">
+        <div class="aip-header">
+          <div class="aip-header-left">
+            <div class="aip-header-icon">🛍️</div>
+            <div class="aip-header-title">AI爆品</div>
+          </div>
+          <div class="aip-header-right">AI选品</div>
         </div>
-      </div>`).join('') || '<div class="empty">暂无爆品</div>'}
+        <div class="aip-tabs">
+          <button class="aip-tab ${aipCat === '历史记录' ? '' : 'active'}" data-aipcat="今日爆品">🔥 今日爆品</button>
+          <button class="aip-tab ${aipCat === '历史记录' ? 'active' : ''}" data-aipcat="历史记录">🗂️ 历史记录</button>
+        </div>
+        <div class="aip-list">
+          ${list.map((p, i) => `<div class="aip-card">
+            <div class="aip-card-head">
+              <div class="aip-card-title">${esc(p.title)}</div>
+              <span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>
+            </div>
+            <div class="aip-stats">
+              <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val">${esc(p.sales)}</span></div>
+              <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(p.commission)}</span></div>
+              <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val">${esc(p.rating)}</span></div>
+            </div>
+            <div class="aip-script-box">
+              <div class="aip-script-label">📝 脚本方向</div>
+              <div class="aip-script-text">${esc(p.script)}</div>
+            </div>
+          </div>`).join('') || '<div class="empty">暂无记录</div>'}
+        </div>
+      </div>
     `;
   }
   function renderNews() {
