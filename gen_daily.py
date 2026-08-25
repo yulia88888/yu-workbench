@@ -774,6 +774,119 @@ AIP_PLATS = ["抖音", "快手", "小红书"]
 AIP_TIMES = ["每日", "每周", "每月"]
 
 
+# ===== AI爆品 真实数据接入（可选，token 驱动）=====
+# 配置环境变量 AI_PRODUCT_TOKEN（推荐在仓库 Settings→Secrets 添加同名密钥，
+# 由 refresh.yml 注入 GitHub Actions）即可拉取真实平台商品榜；
+# 未配置时自动回退到下面的 AIPRODUCT_POOL 趋势参考值，页面照常可用。
+# ⚠️ 抖音/快手/小红书均无免费公开「商品销量」接口，必须经数据服务商
+#    （如 TikHub）的付费/试用 token。这是硬性限制，不是网络问题。
+AI_PRODUCT_TOKEN = os.environ.get("AI_PRODUCT_TOKEN", "").strip()
+
+# 默认服务商（可改）。字段映射需按服务商真实返回结构校准，拿到 token 后微调即可。
+AIP_PROVIDER = "tikhub"
+AIP_PROVIDER_CFG = {
+    "tikhub": {
+        "base": "https://api.tikhub.io",
+        # 各平台「商品热销榜」接口模板（rank: day/week/month）；以服务商文档为准
+        "endpoints": {
+            "抖音": "/api/v1/douyin/ecommerce/hot_goods?rank_type={rank}",
+            "快手": "/api/v1/kuaishou/ecommerce/hot_goods?rank_type={rank}",
+            "小红书": "/api/v1/xiaohongshu/ecommerce/hot_goods?rank_type={rank}",
+        },
+        "auth": "Bearer {token}",
+    },
+}
+_RANK_MAP = {"每日": "day", "每周": "week", "每月": "month"}
+
+
+def _aip_tag_from_rank(i):
+    return ["爆款", "爆款", "趋势", "趋势", "新品", "潜力"][i] if i < 6 else "潜力"
+
+
+def _aip_script(title, plat):
+    pain = "打工人" if plat == "抖音" else ("种草" if plat == "小红书" else "老铁")
+    return ("“%s”→ 真人出镜开箱/上手演示 → 戳中「%s」痛点 → 价格锚定+使用场景对比 "
+            "→ 结尾引导收藏/下单") % (title, pain)
+
+
+def _fetch_platform_real(plat, rank, token):
+    """调用服务商 API 拉取某平台某周期的爆品列表；任何异常返回 []。"""
+    cfg = AIP_PROVIDER_CFG.get(AIP_PROVIDER)
+    if not cfg:
+        return []
+    ep = cfg["endpoints"].get(plat)
+    if not ep:
+        return []
+    url = cfg["base"] + ep.format(rank=rank)
+    headers = {"User-Agent": UA, "Authorization": cfg["auth"].format(token=token),
+               "Accept": "application/json"}
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=15, context=CTX) as r:
+            txt = r.read().decode("utf-8", "ignore")
+        j = json.loads(txt)
+    except Exception:
+        return []
+    # 兼容多种返回结构，尽量挖出商品列表
+    items_raw = []
+    if isinstance(j, dict):
+        for k in ("data", "items", "result", "list", "goods_list", "products"):
+            v = j.get(k)
+            if isinstance(v, list):
+                items_raw = v
+                break
+            if isinstance(v, dict):
+                for kk in ("items", "list", "goods_list", "products"):
+                    if isinstance(v.get(kk), list):
+                        items_raw = v[kk]
+                        break
+            if items_raw:
+                break
+    out = []
+    for i, d in enumerate(items_raw[:8]):
+        if not isinstance(d, dict):
+            continue
+        title = (d.get("title") or d.get("product_title") or d.get("name")
+                 or d.get("goods_name") or "").strip()
+        if not title:
+            continue
+        sales = (d.get("sales_30d") or d.get("volume") or d.get("yesterday_volume")
+                 or d.get("sales") or "")
+        commission = d.get("commission_rate") or d.get("commission") or ""
+        rating = d.get("score") or d.get("rating") or d.get("rate") or ""
+        out.append({
+            "title": title,
+            "tag": "hot",
+            "tagText": _aip_tag_from_rank(i),
+            "sales": str(sales),
+            "commission": str(commission),
+            "rating": str(rating),
+            "script": _aip_script(title, plat),
+        })
+    return out
+
+
+def fetch_aiproduct_real():
+    """尝试拉取真实平台商品榜。token 缺失 → 返回 None（main 回退趋势池）。
+    单平台/单周期失败 → 该部分用趋势池兜底，保证页面不缺数据。"""
+    token = AI_PRODUCT_TOKEN
+    if not token:
+        return None
+    pool = gen_aiproduct()
+    result = {}
+    any_real = False
+    for plat in AIP_PLATS:
+        result[plat] = {}
+        for t in AIP_TIMES:
+            items = _fetch_platform_real(plat, _RANK_MAP[t], token)
+            if items:
+                result[plat][t] = items[:6]
+                any_real = True
+            else:
+                result[plat][t] = pool[plat][t]
+    return result if any_real else None
+
+
 def _aip_item(t):
     return {"title": t[0], "tag": t[1], "tagText": t[2], "sales": t[3], "commission": t[4], "rating": t[5], "script": t[6]}
 
@@ -819,7 +932,8 @@ def main():
 
     topics, reposts = [], []
     news = gen_news()
-    aiproduct = gen_aiproduct()
+    real_aip = fetch_aiproduct_real()
+    aiproduct = real_aip if real_aip else gen_aiproduct()
     seen = set()  # 全局去重：选题内部 + 二创内部 + 选题/二创之间 三处都不重复
     for i, p in enumerate(PLATFORMS_ORDER):
         ts = gen_topics(p, i, real_topic[p], seen)
@@ -833,6 +947,7 @@ def main():
         "reposts": reposts,
         "news": news,
         "aiproduct": aiproduct,
+        "aiproduct_real": real_aip is not None,
         "note": ("选题灵感=各平台赛道当日爆款广撒网扫描（含瑜不做的大众赛道），逐条给火爆核心原因+原创创作思路；"
                  "爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。"
                  "抖音=真实单条视频链接（via tophub 聚合）；快手=真实热搜页；B站=真实视频（云端IP可则）；微博=真实热搜话题页。"
