@@ -2163,8 +2163,10 @@
       }
     } else {
       const list = collect(aipPlat, aipTime);
-      bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>')
-        + `<div class="aip-foot">数据每日 AI 更新 · 为内容选品灵感参考（销量/佣金/评分为趋势参考值，非平台官方后台数据）</div>`;
+      const foot = daily.aiproduct_real
+        ? '<div class="aip-foot aip-foot-real">✅ 已接入真实平台商品榜（数据服务商 API · 每日自动更新）</div>'
+        : '<div class="aip-foot">数据每日 AI 更新 · 为内容选品灵感参考（销量/佣金/评分为趋势参考值，非平台官方后台数据）</div>';
+      bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>') + foot;
     }
     const times = [['每日', '🔥 每日爆品'], ['每周', '📅 每周爆品'], ['每月', '📆 每月爆品'], ['历史记录', '🗂️ 历史记录']];
     $('#aiproductBody').innerHTML = `
