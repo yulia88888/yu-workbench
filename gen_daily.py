@@ -891,6 +891,44 @@ def _aip_item(t):
     return {"title": t[0], "tag": t[1], "tagText": t[2], "sales": t[3], "commission": t[4], "rating": t[5], "script": t[6]}
 
 
+def load_aiproduct_real_snapshot():
+    """读取手动注入的真实平台热搜快照（由 AI 浏览器工具抓取后写入 aiproduct_real.json）。
+    仅当文件存在且更新时间在 7 天内返回；否则返回 None（交给上层回退趋势池）。
+    这样 8 小时自动任务会保留真实热搜，只在超过 7 天未刷新时才回退。"""
+    p = "aiproduct_real.json"
+    if not os.path.exists(p):
+        return None
+    try:
+        with open(p, encoding="utf-8") as f:
+            snap = json.load(f)
+        upd = snap.get("updated", "")
+        try:
+            d = datetime.datetime.strptime(upd, "%Y-%m-%d").date()
+        except Exception:
+            return None
+        if (datetime.date.today() - d).days > 7:
+            return None
+        return snap
+    except Exception:
+        return None
+
+
+def build_aiproduct_from_snapshot():
+    """用真实热搜快照填充「每日」（标记 real），每周/每月用趋势池兜底。"""
+    snap = load_aiproduct_real_snapshot()
+    if not snap:
+        return None
+    pool = gen_aiproduct()
+    result = {}
+    for plat in AIP_PLATS:
+        result[plat] = {}
+        daily = [dict(it, real=True) for it in snap.get("data", {}).get(plat, {}).get("每日", [])]
+        result[plat]["每日"] = daily
+        result[plat]["每周"] = pool[plat]["每周"]
+        result[plat]["每月"] = pool[plat]["每月"]
+    return result
+
+
 def gen_aiproduct():
     """按 平台 × 时间维度 生成爆品灵感；每日随日期刷新、每周随周次、每月随月份。"""
     pool = AIPRODUCT_POOL
@@ -933,7 +971,8 @@ def main():
     topics, reposts = [], []
     news = gen_news()
     real_aip = fetch_aiproduct_real()
-    aiproduct = real_aip if real_aip else gen_aiproduct()
+    aip_snap = build_aiproduct_from_snapshot() if real_aip is None else None
+    aiproduct = real_aip or aip_snap or gen_aiproduct()
     seen = set()  # 全局去重：选题内部 + 二创内部 + 选题/二创之间 三处都不重复
     for i, p in enumerate(PLATFORMS_ORDER):
         ts = gen_topics(p, i, real_topic[p], seen)
@@ -947,7 +986,7 @@ def main():
         "reposts": reposts,
         "news": news,
         "aiproduct": aiproduct,
-        "aiproduct_real": real_aip is not None,
+        "aiproduct_real": real_aip is not None or aip_snap is not None,
         "note": ("选题灵感=各平台赛道当日爆款广撒网扫描（含瑜不做的大众赛道），逐条给火爆核心原因+原创创作思路；"
                  "爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。"
                  "抖音=真实单条视频链接（via tophub 聚合）；快手=真实热搜页；B站=真实视频（云端IP可则）；微博=真实热搜话题页。"
