@@ -2124,24 +2124,28 @@
       const isReal = p.real;
       const saleVal = p.sales || '—';
       const commVal = p.commission || '—';
-      const rateVal = p.rating || '趋势参考';
       const saleReal = isReal && p.sales && p.sales !== '趋势参考';
       const commReal = isReal && p.commission && p.commission !== '趋势参考';
-      const rateReal = p.rating && p.rating !== '趋势参考';
+      const highBadge = (p.high && commReal) ? `<span class="aip-high">🔥高佣 ${esc(commVal)}</span>` : (commReal ? `<span class="aip-comm">💰佣金 ${esc(commVal)}</span>` : '');
       const srcLine = p.source ? `<span class="aip-src">来源：${esc(p.source)}</span>` : '';
       const catLine = (p.cat ? `🏷️ ${esc(p.cat)} ` : '') + srcLine;
       const amountLine = (isReal && p.amount && p.amount !== '—') ? ` · <span class="aip-amount">${esc(p.amount)}</span>` : '';
+      const suitLine = p.suit ? `<div class="aip-suit">✅ 适合你：${esc(p.suit)}</div>` : '';
+      const reviewLine = p.review ? `<div class="aip-review">💬 真实反馈：${esc(p.review)}</div>` : '';
+      const convLine = (p.conv && p.conv !== '—') ? `<div class="aip-stat"><span class="aip-stat-icon">📈</span>30天转化 <span class="aip-stat-val aip-good">${esc(p.conv)}</span></div>` : '';
       return `<div class="aip-card">
         <div class="aip-card-head">
           <div class="aip-card-title">${esc(p.title)}${showPlat ? `<span class="aip-plat-tag">${esc(p._plat || '')}</span>` : ''}</div>
-          <span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>
+          ${highBadge || `<span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>`}
         </div>
         ${catLine ? `<div class="aip-cat-line">${catLine}${amountLine}</div>` : (amountLine ? `<div class="aip-cat-line">${amountLine}</div>` : '')}
+        ${suitLine}
         <div class="aip-stats">
           <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val ${saleReal ? '' : 'aip-dim'}">${esc(saleVal)}</span></div>
-          <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val ${commReal ? '' : 'aip-dim'}">${esc(commVal)}</span></div>
-          <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val ${rateReal ? '' : 'aip-dim'}">${esc(rateVal)}</span></div>
+          ${(commReal && !p.high) ? `<div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(commVal)}</span></div>` : ''}
+          ${convLine}
         </div>
+        ${reviewLine}
         <div class="aip-script-box">
           <div class="aip-script-label">📝 脚本方向</div>
           <div class="aip-script-text">${esc(p.script)}</div>
@@ -2177,8 +2181,8 @@
     } else {
       const list = collect(aipPlat, aipTime);
       const foot = daily.aiproduct_real
-        ? '<div class="aip-foot aip-foot-real">✅ 抖音=蝉妈妈实时真实商品榜（商品名/佣金/日销量真实）· 快手/小红书=公开行业报告真实热品（销量/佣金为趋势参考）· 每7天由AI重抓刷新</div>'
-        : '<div class="aip-foot">商品选品灵感参考 · 销量/佣金/评分为趋势参考值（非平台官方后台数据）</div>';
+        ? '<div class="aip-foot aip-foot-real">✅ 已按「适合你(美妆·穿搭·女性好物)+佣金高」筛选排序 · 抖音=蝉妈妈真实商品(佣金/销量/30天转化率均真实) · 快手/小红书=公开报告真实热品(销量佣金趋势参考) · 「真实评价好」用蝉妈妈真实指标(转化率+持续销量)衡量，单品文字好评无免费接口不编造 · 每7天AI重抓刷新</div>'
+        : '<div class="aip-foot">商品选品灵感参考 · 销量/佣金为趋势参考值（非平台官方后台数据）</div>';
       bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>') + foot;
     }
     const times = [['每日', '🔥 每日爆品'], ['每周', '📅 每周爆品'], ['每月', '📆 每月爆品'], ['历史记录', '🗂️ 历史记录']];
