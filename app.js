@@ -135,12 +135,12 @@
     const hasReal = !!t.real_url;
     const mainLink = hasReal ? t.real_url : (t.dy_link || t.bz_link || '#');
     const batch = topicBatch ? `<input type="checkbox" class="batch-chk" data-btid="${esc(t.id)}" ${topicSel.has(t.id) ? 'checked' : ''}>` : '';
-    return `<div class="note-card" data-tid="${esc(t.id)}">
+    return `<div class="note-card topic-card" data-tid="${esc(t.id)}">
       <div class="note-header">
         <div class="note-num">${num}</div>
         <div class="note-title-wrap">
           <div class="note-title">${esc(t.title)} ${hist}</div>
-          <div class="note-tags">${pfTag}${tag}</div>
+          <div class="note-tags"><span class="mod-pill topic-pill">🌐 广撒网·全平台热点</span>${pfTag}${tag}</div>
           <div class="note-stats">${stats}</div>
         </div>
         ${batch}
@@ -185,12 +185,12 @@
     const hasReal = !!t.real_url;
     const mainLink = hasReal ? t.real_url : (t.link || '#');
     const batch = repostBatch ? `<input type="checkbox" class="batch-chk" data-brid="${esc(t.id)}" ${repostSel.has(t.id) ? 'checked' : ''}>` : '';
-    return `<div class="note-card" data-rid="${esc(t.id)}">
+    return `<div class="note-card repost-card" data-rid="${esc(t.id)}">
       <div class="note-header">
         <div class="note-num">${num}</div>
         <div class="note-title-wrap">
           <div class="note-title">${esc(t.title)} ${hist}</div>
-          <div class="note-tags">${pfTag}${tag}</div>
+          <div class="note-tags"><span class="mod-pill repost-pill">🎯 为你筛选·二创方案</span>${pfTag}${tag}</div>
           <div class="note-stats">🔥 ${esc(heat)} · 来源：${esc(t.source || '热点榜')}</div>
         </div>
         ${batch}
@@ -2120,25 +2120,34 @@
       return 'potential';
     };
     const tagText = p => p.tagText || ({ hot: '爆款', trend: '趋势', new: '新品', potential: '潜力' }[p.tag] || '潜力');
-    const aipCard = (p, showPlat) => `<div class="aip-card">
-      <div class="aip-card-head">
-        <div class="aip-card-title">${esc(p.title)}${showPlat ? `<span class="aip-plat-tag">${esc(p._plat || '')}</span>` : ''}</div>
-        <span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>
-      </div>
-      <div class="aip-stats">
-        ${p.real
-          ? `<div class="aip-stat"><span class="aip-stat-icon">🔥</span>热度 <span class="aip-stat-val">${esc(p.heat || '实时')}</span></div>
-             <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val aip-dim">趋势参考</span></div>
-             <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val aip-dim">趋势参考</span></div>`
-          : `<div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val">${esc(p.sales)}</span></div>
-             <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(p.commission)}</span></div>
-             <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val">${esc(p.rating)}</span></div>`}
-      </div>
-      <div class="aip-script-box">
-        <div class="aip-script-label">📝 脚本方向</div>
-        <div class="aip-script-text">${esc(p.script)}</div>
-      </div>
-    </div>`;
+    const aipCard = (p, showPlat) => {
+      const isReal = p.real;
+      const saleVal = p.sales || '—';
+      const commVal = p.commission || '—';
+      const rateVal = p.rating || '趋势参考';
+      const saleReal = isReal && p.sales && p.sales !== '趋势参考';
+      const commReal = isReal && p.commission && p.commission !== '趋势参考';
+      const rateReal = p.rating && p.rating !== '趋势参考';
+      const srcLine = p.source ? `<span class="aip-src">来源：${esc(p.source)}</span>` : '';
+      const catLine = (p.cat ? `🏷️ ${esc(p.cat)} ` : '') + srcLine;
+      const amountLine = (isReal && p.amount && p.amount !== '—') ? ` · <span class="aip-amount">${esc(p.amount)}</span>` : '';
+      return `<div class="aip-card">
+        <div class="aip-card-head">
+          <div class="aip-card-title">${esc(p.title)}${showPlat ? `<span class="aip-plat-tag">${esc(p._plat || '')}</span>` : ''}</div>
+          <span class="aip-tag ${tagClass(p.tagText || p.tag)}">${esc(tagText(p))}</span>
+        </div>
+        ${catLine ? `<div class="aip-cat-line">${catLine}${amountLine}</div>` : (amountLine ? `<div class="aip-cat-line">${amountLine}</div>` : '')}
+        <div class="aip-stats">
+          <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val ${saleReal ? '' : 'aip-dim'}">${esc(saleVal)}</span></div>
+          <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val ${commReal ? '' : 'aip-dim'}">${esc(commVal)}</span></div>
+          <div class="aip-stat"><span class="aip-stat-icon">⭐</span>评分 <span class="aip-stat-val ${rateReal ? '' : 'aip-dim'}">${esc(rateVal)}</span></div>
+        </div>
+        <div class="aip-script-box">
+          <div class="aip-script-label">📝 脚本方向</div>
+          <div class="aip-script-text">${esc(p.script)}</div>
+        </div>
+      </div>`;
+    };
     const collect = (plat, time) => {
       if (plat === '全部') {
         let arr = [];
@@ -2168,8 +2177,8 @@
     } else {
       const list = collect(aipPlat, aipTime);
       const foot = daily.aiproduct_real
-        ? '<div class="aip-foot aip-foot-real">✅ 真实平台热搜（抖音/快手/小红书）· 热度为真实数据，每日更新 · 商品销量/佣金为趋势参考（需商业后台数据）</div>'
-        : '<div class="aip-foot">数据每日 AI 更新 · 为内容选品灵感参考（销量/佣金/评分为趋势参考值，非平台官方后台数据）</div>';
+        ? '<div class="aip-foot aip-foot-real">✅ 抖音=蝉妈妈实时真实商品榜（商品名/佣金/日销量真实）· 快手/小红书=公开行业报告真实热品（销量/佣金为趋势参考）· 每7天由AI重抓刷新</div>'
+        : '<div class="aip-foot">商品选品灵感参考 · 销量/佣金/评分为趋势参考值（非平台官方后台数据）</div>';
       bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>') + foot;
     }
     const times = [['每日', '🔥 每日爆品'], ['每周', '📅 每周爆品'], ['每月', '📆 每月爆品'], ['历史记录', '🗂️ 历史记录']];
