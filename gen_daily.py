@@ -888,7 +888,8 @@ def fetch_aiproduct_real():
 
 
 def _aip_item(t):
-    return {"title": t[0], "tag": t[1], "tagText": t[2], "sales": t[3], "commission": t[4], "rating": t[5], "script": t[6]}
+    return {"title": t[0], "tag": t[1], "tagText": t[2], "sales": t[3], "commission": t[4],
+            "rating": t[5], "script": t[6], "cat": "", "real": False, "source": "AI趋势参考池"}
 
 
 def load_aiproduct_real_snapshot():
@@ -995,10 +996,11 @@ def main():
         "aiproduct": aiproduct,
         "aiproduct_real": real_aip is not None or aip_snap is not None,
         "note": ("选题灵感=各平台赛道当日爆款广撒网扫描（含瑜不做的大众赛道），逐条给火爆核心原因+原创创作思路；"
-                 "爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。"
-                 "抖音=真实单条视频链接（via tophub 聚合）；快手=真实热搜页；B站=真实视频（云端IP可则）；微博=真实热搜话题页。"
-                 "小红书官方未开放接口，给搜索入口，已如实标注。「链接升级」可粘贴分享短链解析为原视频卡片。"
-                 "AI爆品/新闻=每日自动更新（新闻抓新华网/人民网 RSS）。")
+                 "爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。两模块标题零重叠。"
+                 "抖音=真实单条视频链接（via tophub 聚合）；快手=真实热搜页；B站=真实视频；微博=真实热搜话题页。"
+                 "小红书官方未开放接口，给搜索入口，已如实标注。"
+                 "AI爆品=真实商品：抖音为蝉妈妈抖音销量榜实时真实商品（商品名/佣金/日销量真实）；"
+                 "快手/小红书为公开行业报告真实热品（销量/佣金为趋势参考）。每7天由AI重抓刷新以保持真实。")
     }
 
     with open("daily.json", "w", encoding="utf-8") as f:
