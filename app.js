@@ -2131,8 +2131,11 @@
       const catLine = (p.cat ? `🏷️ ${esc(p.cat)} ` : '') + srcLine;
       const amountLine = (isReal && p.amount && p.amount !== '—') ? ` · <span class="aip-amount">${esc(p.amount)}</span>` : '';
       const suitLine = p.suit ? `<div class="aip-suit">✅ 适合你：${esc(p.suit)}</div>` : '';
-      const reviewLine = p.review ? `<div class="aip-review">💬 真实反馈：${esc(p.review)}</div>` : '';
+      const reviewGood = p.review && (p.review.indexOf('好评') >= 0 || p.review.indexOf('%)') >= 0);
+      const reviewLine = p.review ? `<div class="aip-review ${reviewGood ? 'aip-review-good' : ''}">💬 真实口碑：${esc(p.review)}</div>` : '';
       const convLine = (p.conv && p.conv !== '—') ? `<div class="aip-stat"><span class="aip-stat-icon">📈</span>30天转化 <span class="aip-stat-val aip-good">${esc(p.conv)}</span></div>` : '';
+      const searchUrl = 'https://www.baidu.com/s?wd=' + encodeURIComponent(p.title + ' 真实评价 测评 小红书');
+      const searchBtn = `<a class="aip-search-btn" href="${searchUrl}" target="_blank" rel="noopener">🔍 搜这个产品的真实评价</a>`;
       return `<div class="aip-card">
         <div class="aip-card-head">
           <div class="aip-card-title">${esc(p.title)}${showPlat ? `<span class="aip-plat-tag">${esc(p._plat || '')}</span>` : ''}</div>
@@ -2150,6 +2153,7 @@
           <div class="aip-script-label">📝 脚本方向</div>
           <div class="aip-script-text">${esc(p.script)}</div>
         </div>
+        ${searchBtn}
       </div>`;
     };
     const collect = (plat, time) => {
@@ -2181,7 +2185,7 @@
     } else {
       const list = collect(aipPlat, aipTime);
       const foot = daily.aiproduct_real
-        ? '<div class="aip-foot aip-foot-real">✅ 已按「适合你(美妆·穿搭·女性好物)+佣金高」筛选排序 · 抖音=蝉妈妈真实商品(佣金/销量/30天转化率均真实) · 快手/小红书=公开报告真实热品(销量佣金趋势参考) · 「真实评价好」用蝉妈妈真实指标(转化率+持续销量)衡量，单品文字好评无免费接口不编造 · 每7天AI重抓刷新</div>'
+        ? '<div class="aip-foot aip-foot-real">✅ 已按「适合你(美妆·穿搭·女性好物)+佣金高」筛选排序 · 抖音=蝉妈妈真实商品(佣金/销量/30天转化率均真实) · 快手/小红书=公开报告真实热品(销量佣金趋势参考) · 「真实评价好」用蝉妈妈真实指标(转化率+持续销量)衡量，头部商品另附全网公开真实口碑(京东/天猫/抖音精选好评率) · 每张卡可一键「搜这个产品的真实评价」看小红书/抖音实时口碑 · 每7天AI重抓刷新</div>'
         : '<div class="aip-foot">商品选品灵感参考 · 销量/佣金为趋势参考值（非平台官方后台数据）</div>';
       bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>') + foot;
     }
