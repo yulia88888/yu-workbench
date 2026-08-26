@@ -697,6 +697,24 @@ def save_archive(topics, reposts, today_str, cap=700):
         json.dump({"topics": at_list, "reposts": ar_list}, f, ensure_ascii=False, indent=2)
 
 
+def save_content_history(date_str, snapshot, keep=180):
+    """按日期归档每天抓取的选题/二创/AI爆品，保留最近 keep 天（半年）。同日期覆盖，不重复增长。"""
+    hist = {}
+    if os.path.exists("history.json"):
+        try:
+            with open("history.json", encoding="utf-8") as f:
+                hist = json.load(f)
+        except Exception:
+            hist = {}
+    hist[date_str] = snapshot
+    dates = sorted(hist.keys())
+    if len(dates) > keep:
+        for d in dates[:-keep]:
+            hist.pop(d, None)
+    with open("history.json", "w", encoding="utf-8") as f:
+        json.dump(hist, f, ensure_ascii=False, indent=2)
+
+
 def fetch_rss(url, limit=6):
     try:
         req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -1014,6 +1032,12 @@ def main():
         print("[archive] 真实爆款已并入历史归档")
     except Exception as e:
         print("[warn] archive failed:", e)
+    # 半年历史归档：每天抓取的选题/二创/AI爆品按日期保留 180 天
+    try:
+        save_content_history(today_str, {"topics": topics, "reposts": reposts, "aiproduct": data["aiproduct"]})
+        print("[history] 已写入半年历史归档 history.json")
+    except Exception as e:
+        print("[warn] history failed:", e)
 
     print(f"date={today_str} topics={len(topics)} reposts={len(reposts)}")
     print("选题各平台:", {p: sum(1 for t in topics if t["platform"] == p) for p in PLATFORMS_ORDER})
