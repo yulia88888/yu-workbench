@@ -914,18 +914,25 @@ def load_aiproduct_real_snapshot():
 
 
 def build_aiproduct_from_snapshot():
-    """用真实热搜快照填充「每日」（标记 real），每周/每月用趋势池兜底。"""
+    """用真实热搜快照填充「每日/每周/每月」三档（均标记 real，按窗口滚动切片，
+    不再使用雷同的通用商品趋势池）。快照不足时退回趋势池。"""
     snap = load_aiproduct_real_snapshot()
     if not snap:
         return None
     pool = gen_aiproduct()
     result = {}
     for plat in AIP_PLATS:
+        raw = snap.get("data", {}).get(plat, {}).get("每日", [])
+        daily = [dict(it, real=True) for it in raw]
+        n = len(daily)
+        if n == 0:
+            result[plat] = pool[plat]
+            continue
+        # 每日=前半 / 每周=后半 / 每月=全量（近期热门总集），保证三档不全重复
         result[plat] = {}
-        daily = [dict(it, real=True) for it in snap.get("data", {}).get(plat, {}).get("每日", [])]
-        result[plat]["每日"] = daily
-        result[plat]["每周"] = pool[plat]["每周"]
-        result[plat]["每月"] = pool[plat]["每月"]
+        result[plat]["每日"] = daily[:10]
+        result[plat]["每周"] = daily[10:20] if n >= 20 else (daily[10:] + daily[:max(0, 20 - n)])
+        result[plat]["每月"] = daily  # 全量作为“近期热门总集”
     return result
 
 
