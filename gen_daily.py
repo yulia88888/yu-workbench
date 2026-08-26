@@ -929,10 +929,11 @@ def build_aiproduct_from_snapshot():
         if n == 0:
             result[plat] = pool[plat]
             continue
-        # 每日=前半 / 每周=后半 / 每月=全量（近期热门总集），保证三档不全重复
+        # 每日=前15 / 每周=第11~25 / 每月=全量（近期热门总集），保证可见商品更多且三档不全重复
         result[plat] = {}
-        result[plat]["每日"] = daily[:10]
-        result[plat]["每周"] = daily[10:20] if n >= 20 else (daily[10:] + daily[:max(0, 20 - n)])
+        result[plat]["每日"] = daily[:15]
+        weekly = daily[10:25] if n > 10 else daily[:]
+        result[plat]["每周"] = weekly if weekly else daily
         result[plat]["每月"] = daily  # 全量作为“近期热门总集”
     return result
 
