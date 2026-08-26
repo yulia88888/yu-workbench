@@ -81,6 +81,11 @@
 
     /* 爆款笔记分析卡片（图2） */
     .note-card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px;animation:pop .22s ease;}
+    .note-card.topic-card{border-left:4px solid #4A90E2;}
+    .note-card.repost-card{border-left:4px solid #FF6B95;}
+    .mod-pill{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-right:6px;vertical-align:middle;}
+    .topic-pill{color:#2A6FB0;background:#E8F1FC;}
+    .repost-pill{color:#E0397B;background:#FFEAF2;}
     .note-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
     .note-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
     .note-title-wrap{flex:1;min-width:0;}
@@ -388,6 +393,9 @@
     .aip-plat-tag{display:inline-block;font-size:10px;font-weight:800;color:#FF6B95;background:#FFF0F5;border-radius:6px;padding:2px 7px;margin-left:8px;vertical-align:middle;}
     .aip-foot{font-size:11px;color:var(--text-tertiary);text-align:center;padding:14px 18px 4px;line-height:1.7;}
     .aip-foot-real{color:#2e9e5b;font-weight:700;}
+    .aip-cat-line{font-size:11px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6;}
+    .aip-src{color:#999;font-weight:600;}
+    .aip-amount{color:#2e9e5b;font-weight:800;}
 
     /* ---------- 新闻 ---------- */
     .cat-bar{display:flex;gap:8px;overflow-x:auto;padding:4px 4px 10px;scrollbar-width:none;-ms-overflow-style:none;}
