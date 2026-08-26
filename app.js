@@ -12,13 +12,14 @@
   const LS = {
     tasks: 'yu_tasks', check: 'yu_check', daily: 'yu_daily', archive: 'yu_archive', hidden: 'yu_hidden',
     userTopics: 'yu_userTopics', userReposts: 'yu_userReposts', reviews: 'yu_reviews',
-    personal: 'yu_personal', historyExtra: 'yu_historyExtra', aipHistory: 'yu_aipHistory'
+    personal: 'yu_personal', historyExtra: 'yu_historyExtra', aipHistory: 'yu_aipHistory', contentHistory: 'yu_contentHistory'
   };
   const load = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } };
   const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
   let daily = __EMBEDDED_JSON__;
   let archive = load(LS.archive, { topics: [], reposts: [] });
+  let contentHistory = load(LS.contentHistory, {});
   let hidden = load(LS.hidden, []);
   let userTopics = load(LS.userTopics, []);
   let userReposts = load(LS.userReposts, []);
@@ -155,13 +156,28 @@
   }
   function renderTopics() {
     renderTopicFilters();
-    const list = allTopics().filter(t => topicFilter === '全部' || t.platform === topicFilter);
-    $('#topicCount').textContent = `共 ${list.length} 条`;
     $('#topicTools').classList.toggle('hidden', topicMode !== 'today');
     $('#topicFoot').classList.toggle('hidden', topicMode !== 'today');
     $('#topicBatchBtn').classList.toggle('hidden', topicMode !== 'history');
+    if (topicMode === 'history') { renderTopicHistory(); return; }
+    const list = allTopics().filter(t => topicFilter === '全部' || t.platform === topicFilter);
+    $('#topicCount').textContent = `共 ${list.length} 条`;
     if (!list.length) { $('#topicList').innerHTML = '<div class="empty">暂无内容</div>'; updateBatch('topic'); return; }
     $('#topicList').innerHTML = list.map((t, i) => topicCard(t, i + 1)).join('');
+    updateBatch('topic');
+  }
+  function renderTopicHistory() {
+    const dates = Object.keys(contentHistory).sort().reverse();
+    if (!dates.length) { $('#topicList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>'; $('#topicCount').textContent = '共 0 条'; updateBatch('topic'); return; }
+    let html = '';
+    dates.forEach(d => {
+      const items = (contentHistory[d].topics || []).filter(t => !hidden.includes(t.id));
+      if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 选题 ${items.length} 条</div>` + items.map((t, i) => topicCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
+    });
+    const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).topics) || [];
+    if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => topicCard({ ...t, _hist: true }, i + 1)).join('');
+    $('#topicCount').textContent = `共 ${dates.length} 天记录`;
+    $('#topicList').innerHTML = html || '<div class="empty">暂无历史</div>';
     updateBatch('topic');
   }
   $('#topicFilter').addEventListener('click', e => {
@@ -205,12 +221,27 @@
   }
   function renderReposts() {
     renderRepostFilters();
-    const list = allReposts().filter(t => repostFilter === '全部' || t.platform === repostFilter);
-    $('#repostCount').textContent = `共 ${list.length} 条`;
     $('#repostFoot').classList.toggle('hidden', repostMode !== 'today');
     $('#repostBatchBtn').classList.toggle('hidden', repostMode !== 'history');
+    if (repostMode === 'history') { renderRepostHistory(); return; }
+    const list = allReposts().filter(t => repostFilter === '全部' || t.platform === repostFilter);
+    $('#repostCount').textContent = `共 ${list.length} 条`;
     if (!list.length) { $('#repostList').innerHTML = '<div class="empty">暂无内容</div>'; updateBatch('repost'); return; }
     $('#repostList').innerHTML = list.map((t, i) => repostCard(t, i + 1)).join('');
+    updateBatch('repost');
+  }
+  function renderRepostHistory() {
+    const dates = Object.keys(contentHistory).sort().reverse();
+    if (!dates.length) { $('#repostList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>'; $('#repostCount').textContent = '共 0 条'; updateBatch('repost'); return; }
+    let html = '';
+    dates.forEach(d => {
+      const items = (contentHistory[d].reposts || []).filter(t => !hidden.includes(t.id));
+      if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 二创 ${items.length} 条</div>` + items.map((t, i) => repostCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
+    });
+    const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).reposts) || [];
+    if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => repostCard({ ...t, _hist: true }, i + 1)).join('');
+    $('#repostCount').textContent = `共 ${dates.length} 天记录`;
+    $('#repostList').innerHTML = html || '<div class="empty">暂无历史</div>';
     updateBatch('repost');
   }
   $('#repostFilter').addEventListener('click', e => {
@@ -2166,13 +2197,13 @@
     };
     let bodyHtml;
     if (aipTime === '历史记录') {
-      const ah = load(LS.aipHistory, {});
+      const ah = contentHistory;
       const dates = Object.keys(ah).sort().reverse();
       if (!dates.length) {
-        bodyHtml = '<div class="empty">暂无历史记录（次日自动归档前一天的爆品）</div>';
+        bodyHtml = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>';
       } else {
         bodyHtml = dates.map(d => {
-          const snap = ah[d] || {};
+          const snap = (ah[d] && ah[d].aiproduct) || {};
           let items = [];
           if (aipPlat === '全部') {
             AIP_PLATS.forEach(p => { (snap[p] && snap[p]['每日'] || []).forEach(it => items.push(Object.assign({}, it, { _plat: p }))); });
@@ -2283,6 +2314,9 @@
     }).catch(() => {});
     fetch('./archive.json').then(r => r.ok ? r.json() : null).then(a => {
       if (a) { archive = a; save(LS.archive, archive); }
+    }).catch(() => {});
+    fetch('./history.json').then(r => r.ok ? r.json() : null).then(h => {
+      if (h) { contentHistory = h; save(LS.contentHistory, h); }
     }).catch(() => {});
     setTimeout(updateScrollUI, 100);
   }
