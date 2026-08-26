@@ -2126,7 +2126,7 @@
       const commVal = p.commission || '—';
       const saleReal = isReal && p.sales && p.sales !== '趋势参考';
       const commReal = isReal && p.commission && p.commission !== '趋势参考';
-      const highBadge = (p.high && commReal) ? `<span class="aip-high">🔥高佣 ${esc(commVal)}</span>` : (commReal ? `<span class="aip-comm">💰佣金 ${esc(commVal)}</span>` : '');
+      const highBadge = (p.high && commReal) ? `<span class="aip-high">🔥高佣</span>` : '';
       const srcLine = p.source ? `<span class="aip-src">来源：${esc(p.source)}</span>` : '';
       const catLine = (p.cat ? `🏷️ ${esc(p.cat)} ` : '') + srcLine;
       const amountLine = (isReal && p.amount && p.amount !== '—') ? ` · <span class="aip-amount">${esc(p.amount)}</span>` : '';
@@ -2145,7 +2145,7 @@
         ${suitLine}
         <div class="aip-stats">
           <div class="aip-stat"><span class="aip-stat-icon">🛒</span>销量 <span class="aip-stat-val ${saleReal ? '' : 'aip-dim'}">${esc(saleVal)}</span></div>
-          ${(commReal && !p.high) ? `<div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val">${esc(commVal)}</span></div>` : ''}
+          <div class="aip-stat"><span class="aip-stat-icon">💰</span>佣金 <span class="aip-stat-val ${commReal ? '' : 'aip-dim'}">${esc(commVal)}</span></div>
           ${convLine}
         </div>
         ${reviewLine}
