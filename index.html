@@ -174,30 +174,28 @@
     .massage-desc{font-size:11px;color:var(--text-secondary);margin-top:2px;pointer-events:none;}
     .chip{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .mood-item{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-    .face-wrap{width:220px;height:240px;margin:14px auto;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-    .face-wrap span{font-size:48px;opacity:.5;}
-    .face-wrap::after{content:'点击放大';position:absolute;bottom:8px;right:10px;font-size:11px;color:#fff;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:999px;pointer-events:none;}
     .face-anim{width:100%;height:100%;display:block;}
     .massage-hand{filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));}
-    .step-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;}
-    .step-title{font-size:14px;font-weight:700;margin-bottom:6px;}
-    .step-tip{background:#FFF3F5;border-radius:10px;padding:10px;font-size:12px;color:var(--text-secondary);margin-bottom:10px;}
-    .timer-bar{height:6px;background:var(--primary-light);border-radius:999px;overflow:hidden;margin-bottom:8px;}
-    .timer-fill{height:100%;background:var(--pink);border-radius:999px;transition:width .2s linear;}
 
-    .face-zoom-overlay{position:fixed;inset:0;z-index:100;background:rgba(255,245,247,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
-    .face-zoom-overlay.show{display:flex;}
-    .face-zoom-close{position:absolute;top:14px;right:16px;width:40px;height:40px;border-radius:50%;background:#fff;border:none;font-size:22px;color:var(--text);box-shadow:var(--shadow);cursor:pointer;}
-    .face-zoom-box{width:min(86vw,360px);height:min(86vw,360px);background:#FFE0E0;border-radius:50% 50% 45% 45%;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(255,64,129,.18);}
-    .face-zoom-box .face-anim{width:100%;height:100%;}
-    .face-zoom-step{width:100%;max-width:420px;text-align:center;margin-top:16px;background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);}
-    .face-zoom-title{font-size:15px;font-weight:700;margin-bottom:6px;}
-    .face-zoom-desc{font-size:13px;color:var(--text-secondary);margin-bottom:8px;}
-    .face-zoom-tip{font-size:12px;color:var(--pink);background:#FFF3F5;border-radius:10px;padding:8px 12px;}
-    .face-zoom-controls{display:flex;gap:12px;margin-top:16px;width:100%;max-width:420px;}
-    .face-zoom-controls button{flex:1;padding:12px 8px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
-    .face-zoom-controls .btn-primary{background:var(--pink);color:#fff;}
-    .face-zoom-controls .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);}
+    .massage-play{height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#FFF8FA 0%,#FFF0F3 100%);padding:0 16px 16px;}
+    .massage-play-header{display:flex;align-items:center;gap:10px;padding:12px 0 8px;}
+    .massage-play-close{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--border);font-size:20px;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);}
+    .massage-play-title{font-size:18px;font-weight:800;margin:0;}
+    .massage-play-face{width:260px;height:300px;margin:6px auto 14px;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 10px 30px rgba(255,94,156,.12);}
+    .massage-step-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .massage-step-badge{background:var(--pink);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;}
+    .massage-step-label{background:#fff;color:var(--pink);font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid #FFD6E3;}
+    .massage-desc{font-size:15px;line-height:1.65;color:var(--text);margin-bottom:12px;font-weight:500;}
+    .massage-tip{background:#FFF3F5;border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text-secondary);margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;}
+    .massage-tip-icon{font-size:14px;flex-shrink:0;}
+    .massage-timer-bar{height:8px;background:#FFE0EB;border-radius:999px;overflow:hidden;margin-bottom:10px;}
+    .massage-timer-fill{height:100%;background:linear-gradient(90deg,var(--pink),#FF8FB3);border-radius:999px;transition:width .2s linear;}
+    .massage-time{text-align:center;font-size:20px;font-weight:800;color:var(--pink);margin-bottom:18px;}
+    .massage-controls{position:sticky;bottom:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:12px 0 8px;background:linear-gradient(180deg,rgba(255,248,250,0) 0%,#FFF0F3 30%);}
+    .massage-controls button{flex:1;padding:14px 6px;border-radius:999px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
+    .massage-controls .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow);}
+    .massage-controls .btn-primary{background:var(--pink);color:#fff;box-shadow:0 4px 14px rgba(255,94,156,.35);display:flex;align-items:center;justify-content:center;gap:6px;}
+    .massage-controls .btn-primary:active{transform:scale(.97);}
 
     /* 电子琴 / 唱歌 / 英语 通用 */
     .stat-row{display:flex;justify-content:space-around;background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;}
@@ -1872,49 +1870,42 @@
     const plan = plans[name] || plans['去水肿'];
     const steps = plan.steps;
     const hasBv = plan.video.bv && /^BV/i.test(plan.video.bv);
-    openSubpage(`${name} · 跟练`, `
-      <button class='back-row' data-mback>← 返回护肤日常</button>
-      <div class='sub-header'><h2>${esc(name)}</h2><p>跟着动画和语音提示完成每一步</p></div>
-      <div id='massageFace' class='face-wrap'>${faceAnimHTML(steps[0])}</div>
-      <div id='massageSteps'>${steps.map((st, i) => `<div class='step-card' data-step='${i}' style='${i === 0 ? '' : 'opacity:.5'}'>
-        <div class='step-title'>第 ${i + 1}/${steps.length} 步 · ${esc(st.t)}</div>
-        <p style='font-size:13px;color:var(--text);margin:0 0 8px;'>${esc(st.s)}</p>
-        <div class='step-tip'>💡 ${esc(st.tip)}</div>
-        <div class='timer-bar'><div class='timer-fill' id='timer${i}' style='width:0%'></div></div>
-        <div style='text-align:center;font-weight:700;color:var(--pink);' id='timeTxt${i}'>${st.sec}s</div>
-      </div>`).join('')}</div>
-      <div style='display:flex;gap:10px;margin-top:10px;'>
-        <button class='btn-outline' id='msPrev' style='flex:1;'>上一步</button>
-        <button class='btn-primary' id='msStart' style='flex:1;'>▶ 开始</button>
-        <button class='btn-outline' id='msNext' style='flex:1;'>下一步</button>
-      </div>
-      <div class='card' style='margin-top:14px;'>
-        <h4 style='margin:0 0 10px;'>📺 推荐跟练视频</h4>
-        <div class='video-item' data-bv='${esc(plan.video.bv)}' data-page='1' data-title='${esc(plan.video.title)}'>
-          <div class='video-info'><div class='video-title'>${esc(plan.video.title)}</div><div class='video-meta'>📚 真实跟练视频</div></div>
-          <div class='video-actions'>
-            ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
-            <a href='${hasBv ? bvidUrl(plan.video.bv) : '#'}' target='_blank' rel='noopener' class='btn-outline'>跳转原视频 ↗</a>
-          </div>
-          <div class='video-player'></div>
+    openSubpage(`${esc(name)} · 跟练`, `
+      <div class='massage-play'>
+        <div class='massage-play-header'>
+          <button class='massage-play-close' data-mback>×</button>
+          <div class='massage-play-title'>😼 ${esc(name)}</div>
+        </div>
+        <div class='massage-play-face' id='massageFace'>${faceAnimHTML(steps[0])}</div>
+        <div class='massage-step-row'>
+          <span class='massage-step-badge' id='massageStepBadge'>第 1/${steps.length} 步</span>
+          <span class='massage-step-label'>💧 ${esc(name)}</span>
+        </div>
+        <div class='massage-desc' id='massageDesc'>${esc(steps[0].s)}</div>
+        <div class='massage-tip'><span class='massage-tip-icon'>💡</span><span id='massageTip'>${esc(steps[0].tip)}</span></div>
+        <div class='massage-timer-bar'><div class='massage-timer-fill' id='massageTimerFill' style='width:0%'></div></div>
+        <div class='massage-time' id='massageTime'>${steps[0].sec}s</div>
+        <div class='massage-controls'>
+          <button class='btn-outline' id='msPrev'>上一步</button>
+          <button class='btn-primary' id='msStart'>▶ 开始</button>
+          <button class='btn-outline' id='msNext'>下一步</button>
         </div>
       </div>
     `);
     let cur = 0, timer = null, running = false, left = steps[0].sec;
-    function updateZoom() {
-      const face = $('#massageFace'); if (face) face.innerHTML = faceAnimHTML(steps[cur]);
-      const zFace = $('#massageFaceZoom'); if (zFace) zFace.innerHTML = faceAnimHTML(steps[cur]);
-      const zTitle = $('#massageZoomTitle'); if (zTitle) zTitle.textContent = `第 ${cur + 1}/${steps.length} 步 · ${steps[cur].t}`;
-      const zDesc = $('#massageZoomDesc'); if (zDesc) zDesc.textContent = steps[cur].s;
-      const zTip = $('#massageZoomTip'); if (zTip) zTip.textContent = '💡 ' + steps[cur].tip;
-    }
     function showStep() {
-      $$('#massageSteps .step-card').forEach((c, i) => c.style.opacity = i === cur ? '1' : '.5');
+      const face = $('#massageFace'); if (face) face.innerHTML = faceAnimHTML(steps[cur]);
+      const badge = $('#massageStepBadge'); if (badge) badge.textContent = `第 ${cur + 1}/${steps.length} 步`;
+      const desc = $('#massageDesc'); if (desc) desc.textContent = steps[cur].s;
+      const tip = $('#massageTip'); if (tip) tip.textContent = steps[cur].tip;
       left = steps[cur].sec;
-      updateZoom();
       updateTimer();
     }
-    function updateTimer() { const pct = (1 - left / steps[cur].sec) * 100; $(`#timer${cur}`).style.width = pct + '%'; $(`#timeTxt${cur}`).textContent = Math.ceil(left) + 's'; }
+    function updateTimer() {
+      const pct = (1 - left / steps[cur].sec) * 100;
+      const fill = $('#massageTimerFill'); if (fill) fill.style.width = pct + '%';
+      const time = $('#massageTime'); if (time) time.textContent = Math.ceil(left) + 's';
+    }
     function startTimer() {
       if (running) { clearInterval(timer); running = false; return false; }
       running = true;
@@ -1932,70 +1923,11 @@
     function refreshBtnText() {
       const txt = running ? '⏸ 暂停' : (left >= steps[cur].sec - 0.2 ? '▶ 开始' : '▶ 继续');
       const main = $('#msStart'); if (main) main.textContent = txt;
-      const zoom = $('#msZoomStart'); if (zoom) zoom.textContent = txt;
     }
     const msStart = $('#msStart'), msPrev = $('#msPrev'), msNext = $('#msNext');
-    if (msStart) msStart.addEventListener('click', () => {
-      if (startTimer()) { refreshBtnText(); }
-      else { stopTimer(); refreshBtnText(); }
-    });
+    if (msStart) msStart.addEventListener('click', () => { if (startTimer()) refreshBtnText(); else { stopTimer(); refreshBtnText(); } });
     if (msPrev) msPrev.addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
     if (msNext) msNext.addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
-
-    // 放大全屏视图
-    const faceWrap = $('#massageFace');
-    if (faceWrap) {
-      faceWrap.addEventListener('click', () => {
-        let overlay = $('#massageZoomOverlay');
-        if (!overlay) {
-          overlay = document.createElement('div');
-          overlay.id = 'massageZoomOverlay';
-          overlay.className = 'face-zoom-overlay';
-          overlay.innerHTML = `
-            <button class='face-zoom-close' id='massageZoomClose'>×</button>
-            <div class='face-zoom-box' id='massageFaceZoom'>${faceAnimHTML(steps[cur])}</div>
-            <div class='face-zoom-step'>
-              <div class='face-zoom-title' id='massageZoomTitle'>第 ${cur + 1}/${steps.length} 步 · ${esc(steps[cur].t)}</div>
-              <div class='face-zoom-desc' id='massageZoomDesc'>${esc(steps[cur].s)}</div>
-              <div class='face-zoom-tip' id='massageZoomTip'>💡 ${esc(steps[cur].tip)}</div>
-            </div>
-            <div class='face-zoom-controls'>
-              <button class='btn-outline' id='msZoomPrev'>上一步</button>
-              <button class='btn-primary' id='msZoomStart'>▶ 开始</button>
-              <button class='btn-outline' id='msZoomNext'>下一步</button>
-            </div>
-          `;
-          document.body.appendChild(overlay);
-          $('#massageZoomClose').addEventListener('click', (e) => { e.stopPropagation(); overlay.classList.remove('show'); });
-          overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
-          $('#msZoomStart').addEventListener('click', () => {
-            if (startTimer()) { refreshBtnText(); }
-            else { stopTimer(); refreshBtnText(); }
-          });
-          $('#msZoomPrev').addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
-          $('#msZoomNext').addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
-        } else {
-          updateZoom();
-        }
-        overlay.classList.add('show');
-      });
-    }
-    const escClose = (e) => { if (e.key === 'Escape') { const o = $('#massageZoomOverlay'); if (o) o.classList.remove('show'); } };
-    document.addEventListener('keydown', escClose);
-    // 返回护肤日常时移除全局监听，避免重复
-    const oldBack = $('#subpage').dataset.onclose;
-    $('#subpage').dataset.onclose = 'removeKeydown';
-    const observer = new MutationObserver((muts) => {
-      muts.forEach(m => {
-        if (m.attributeName === 'class' && !$('#subpage').classList.contains('show')) {
-          document.removeEventListener('keydown', escClose);
-          const o = $('#massageZoomOverlay'); if (o) o.remove();
-          observer.disconnect();
-        }
-      });
-    });
-    observer.observe($('#subpage'), { attributes: true, attributeFilter: ['class'] });
-
     showStep();
   }
 
