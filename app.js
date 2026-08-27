@@ -4,6 +4,11 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const todayKey = () => new Date().toISOString().slice(0, 10);
+  const todayKeyCN = () => {
+    const d = new Date();
+    const cn = new Date(d.getTime() + (d.getTimezoneOffset() + 480) * 60000);
+    return cn.toISOString().slice(0, 10);
+  };
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const copyLink = (url) => { if (!url || url === '#') return; navigator.clipboard.writeText(url).then(() => toast('链接已复制 📋')).catch(() => toast('复制失败，请手动复制')); };
@@ -487,6 +492,103 @@
     else if (tab === 'quiz') body.innerHTML = skinQuizHTML(s);
     else if (tab === 'diary') body.innerHTML = skinDiaryHTML(s);
     else if (tab === 'massage') body.innerHTML = skinMassageHTML();
+    attachSkinEvents(tab);
+  }
+  function attachSkinEvents(tab) {
+    if (tab === 'products') {
+      const add = $('#skinAddProd');
+      if (add) add.addEventListener('click', (e) => { e.stopPropagation(); openSkinAddSheet(); });
+      $$('#skinBody [data-delprod]').forEach(b => b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = b.dataset.delprod;
+        const s = getSkinData(); s.products = s.products.filter(p => p.id !== id); setSkinData(s); renderSkinTab('products'); toast('已删除');
+      }));
+      const gen2 = $('#skinGenRoutine2');
+      if (gen2) gen2.addEventListener('click', (e) => { e.stopPropagation(); generateSkinRoutine(); });
+      const gen1 = $('#skinGenRoutine');
+      if (gen1) gen1.addEventListener('click', (e) => { e.stopPropagation(); generateSkinRoutine(); });
+    }
+    if (tab === 'quiz') {
+      const start = $('#skinStartQuiz');
+      if (start) start.addEventListener('click', (e) => { e.stopPropagation(); openSkinQuizSheet(); });
+    }
+    if (tab === 'diary') {
+      $$('#skinBody .mood-item').forEach(el => el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        $$('#skinBody .mood-item').forEach(x => x.classList.toggle('active', x === el));
+        $('#skinBody').dataset.mood = el.dataset.mood;
+      }));
+      $$('#skinBody [data-dtag]').forEach(el => el.addEventListener('click', (e) => {
+        e.stopPropagation(); el.classList.toggle('active');
+      }));
+      const save = $('#skinSaveDiary');
+      if (save) save.addEventListener('click', (e) => { e.stopPropagation(); saveSkinDiary(); });
+    }
+    if (tab === 'massage') {
+      $$('#skinBody .massage-item').forEach(el => el.addEventListener('click', (e) => {
+        e.stopPropagation(); openMassagePlay(el.dataset.massage);
+      }));
+      const match = $('#massageMatch');
+      if (match) match.addEventListener('click', (e) => { e.stopPropagation(); toast('已为你匹配「去水肿+提亮」组合方案'); });
+    }
+  }
+  function generateSkinRoutine() {
+    const s = getSkinData(); const prods = s.products || [];
+    s.routine = prods.length ? prods.map(p => `${p.freq}：${p.name}`) : ['晨间：清水→精华→防晒', '晚间：卸妆→洁面→保湿→眼霜'];
+    setSkinData(s); renderSkinTab('routine'); toast('已生成一周模式 ✨');
+  }
+  function openSkinAddSheet() {
+    openSheet('添加护肤品', `
+      <form id="prodForm">
+        <div class="sheet-field"><label>产品名称<input name="name" required placeholder="如：珀莱雅双抗精华" /></label></div>
+        <div class="sheet-field"><label>类型<input name="type" placeholder="如：精华 / 面霜 / 防晒" /></label></div>
+        <div class="sheet-field"><label>使用频率<input name="freq" placeholder="如：每日早晚 / 每周2次" /></label></div>
+        <button type="button" id="sheetSave" class="sheet-save">保存</button>
+      </form>
+    `);
+    const btn = $('#sheetSave');
+    if (!btn) return;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const form = $('#prodForm');
+      if (form && !form.checkValidity()) { form.reportValidity(); return; }
+      const fd = new FormData(form);
+      const s = getSkinData(); s.products = s.products || [];
+      s.products.push({ id: uid(), name: fd.get('name'), type: fd.get('type'), freq: fd.get('freq') });
+      setSkinData(s); renderSkinTab('products'); toast('已添加'); closeSheet();
+    };
+  }
+  function openSkinQuizSheet() {
+    openSheet('肤质测试', `
+      <form id="quizForm">
+        <div class="sheet-field"><label>洗完脸后不涂护肤品，1小时后感觉？<select name="q1"><option>紧绷、起皮</option><option>T区油、两颊干</option><option>全脸都油</option><option>没什么感觉</option></select></label></div>
+        <div class="sheet-field"><label>换季或换产品时容易泛红刺痛？<select name="q2"><option>经常</option><option>偶尔</option><option>很少</option></select></label></div>
+        <div class="sheet-field"><label>最困扰你的皮肤问题？<select name="q3"><option>干燥细纹</option><option>出油痘痘</option><option>敏感泛红</option><option>暗沉暗黄</option></select></label></div>
+        <button type="button" id="sheetSave" class="sheet-save">查看结果</button>
+      </form>
+    `);
+    const btn = $('#sheetSave');
+    if (!btn) return;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const form = $('#quizForm');
+      if (form && !form.checkValidity()) { form.reportValidity(); return; }
+      const fd = new FormData(form);
+      const a1 = fd.get('q1'), a2 = fd.get('q2'), a3 = fd.get('q3');
+      let result = '混合偏干敏感肌', advice = '早晚分区护理：T区控油、两颊保湿，选无酒精、含神经酰胺的产品，慎用高浓度酸。';
+      if (a1.includes('全脸都油')) { result = '油性耐受肌'; advice = '注重清洁+控油+防晒，可适度用酸，避免过度封闭的面霜。'; }
+      else if (a1.includes('紧绷')) { result = '干性敏感肌'; advice = '以保湿修护为主，避免皂基洁面，叠加面霜/油类产品锁水。'; }
+      else if (a2 === '经常') { result = '敏感性肌肤'; advice = '精简护肤，停用功效型产品，优先修护屏障。'; }
+      const s = getSkinData(); s.quiz = { result, advice, date: todayKeyCN() }; setSkinData(s); renderSkinTab('quiz'); toast('测试完成'); closeSheet();
+    };
+  }
+  function saveSkinDiary() {
+    const mood = Number($('#skinBody').dataset.mood || 3);
+    const tags = $$('#skinBody .chip.active').map(c => c.dataset.dtag);
+    const note = $('#diaryNote').value.trim();
+    const s = getSkinData(); s.diary = s.diary || [];
+    s.diary.push({ date: todayKeyCN(), mood, tags, note });
+    setSkinData(s); renderSkinTab('diary'); toast('日记已保存');
   }
   function skinRoutineHTML(s) {
     const steps = s.routine && s.routine.length ? s.routine : ['晨间：清水→VC精华→防晒', '晚间：卸妆→洁面→保湿→眼霜'];
@@ -607,7 +709,7 @@
         if (a1.includes('全脸都油')) { result = '油性耐受肌'; advice = '注重清洁+控油+防晒，可适度用酸，避免过度封闭的面霜。'; }
         else if (a1.includes('紧绷')) { result = '干性敏感肌'; advice = '以保湿修护为主，避免皂基洁面，叠加面霜/油类产品锁水。'; }
         else if (a2 === '经常') { result = '敏感性肌肤'; advice = '精简护肤，停用功效型产品，优先修护屏障。'; }
-        const s = getSkinData(); s.quiz = { result, advice, date: todayKey() }; setSkinData(s); renderSkinTab('quiz'); toast('测试完成');
+        const s = getSkinData(); s.quiz = { result, advice, date: todayKeyCN() }; setSkinData(s); renderSkinTab('quiz'); toast('测试完成');
       }; return;
     }
     const mood = e.target.closest('[data-mood]');
@@ -619,7 +721,7 @@
       const mood = Number($('#skinBody').dataset.mood || 3);
       const tags = $$('#skinBody .chip.active').map(c => c.dataset.dtag);
       const note = $('#diaryNote').value.trim();
-      const s = getSkinData(); s.diary = s.diary || []; s.diary.push({ date: todayKey(), mood, tags, note });
+      const s = getSkinData(); s.diary = s.diary || []; s.diary.push({ date: todayKeyCN(), mood, tags, note });
       setSkinData(s); renderSkinTab('diary'); toast('日记已保存'); return;
     }
     if (handleVideoControls(e)) return;
@@ -1020,6 +1122,62 @@
       toast('已生成专属计划'); return;
     }
   });
+  function faceAnimHTML(step) {
+    const t = step.t || '', s = step.s || '';
+    let path = '', dur = 2, pulse = false;
+    if (/锁骨引流|淋巴/.test(t)) { path = 'M 172 95 Q 152 155 120 215'; dur = 2.2; }
+    else if (/眼下|眼周|睛明|太阳穴/.test(t)) { path = 'M 82 118 Q 110 108 148 112'; dur = 1.8; }
+    else if (/脸颊提升|颧骨|提亮|安抚/.test(t)) { path = 'M 75 165 Q 95 130 150 118'; dur = 2; }
+    else if (/下巴推提|下颌线|咬肌/.test(t)) { path = 'M 108 185 Q 140 155 162 132'; dur = 2; }
+    else if (/颈部拉伸|横向抚纹|竖向提拉|颈纹|纹路/.test(t)) {
+      if (/横向/.test(t) || /横向/.test(s)) { path = 'M 110 215 L 110 160'; dur = 2; }
+      else if (/竖向/.test(t) || /竖向/.test(s)) { path = 'M 80 215 L 90 165'; dur = 2; }
+      else if (/纹路透润|小圈|打圈/.test(t) || /纹路透润|小圈|打圈/.test(s)) { path = 'M 124 185 A 14 14 0 1 1 123.9 185'; dur = 1.8; }
+      else { path = 'M 110 215 L 110 160'; dur = 2; }
+    }
+    else if (/全脸按压|点穴|按压/.test(t) || /全脸按压|点穴/.test(s)) { path = 'M 110 95 L 70 150 L 110 185 L 150 150 Z'; dur = 3.5; }
+    else if (/全脸激活|呼吸收尾|搓热|捂脸/.test(t) || /全脸激活|呼吸收尾|捂脸/.test(s)) { pulse = true; }
+    else if (/额头唤醒|眉心|眉尾/.test(t)) { path = 'M 110 105 L 110 72 L 88 62'; dur = 2.2; }
+    else { path = 'M 70 150 Q 110 120 150 150'; dur = 2; }
+    const motion = pulse ? `
+      <circle cx='110' cy='130' r='55' fill='#ff4081' opacity='0.12'>
+        <animate attributeName='r' values='55;72;55' dur='2.2s' repeatCount='indefinite' />
+        <animate attributeName='opacity' values='0.12;0.04;0.12' dur='2.2s' repeatCount='indefinite' />
+      </circle>
+      <circle cx='110' cy='130' r='40' fill='none' stroke='#ff4081' stroke-width='2' opacity='0.25'>
+        <animate attributeName='r' values='40;65;40' dur='2.2s' repeatCount='indefinite' />
+      </circle>
+    ` : `
+      <g class='massage-hand'>
+        <circle r='8' fill='url(#massageGrad)' opacity='0.95'>
+          <animateMotion dur='${dur}s' repeatCount='indefinite' path='${path}' />
+        </circle>
+        <circle r='13' fill='none' stroke='#ff4081' stroke-width='1.5' opacity='0.35'>
+          <animateMotion dur='${dur}s' repeatCount='indefinite' path='${path}' />
+        </circle>
+      </g>
+    `;
+    return `<svg viewBox='0 0 220 260' class='face-anim' xmlns='http://www.w3.org/2000/svg'>
+      <defs>
+        <radialGradient id='massageGrad' cx='50%' cy='50%' r='50%'>
+          <stop offset='0%' stop-color='#ff8fb3' />
+          <stop offset='100%' stop-color='#ff4081' stop-opacity='0.6' />
+        </radialGradient>
+      </defs>
+      <path d='M 68 182 Q 68 232 78 252 L 142 252 Q 152 232 152 182' fill='#ffe4e6' />
+      <path d='M 38 120 Q 38 42 110 32 Q 182 42 182 120 Q 182 72 110 58 Q 38 72 38 120' fill='#6d5e78' />
+      <ellipse cx='110' cy='130' rx='74' ry='88' fill='#ffe4e6' />
+      <circle cx='70' cy='152' r='12' fill='#ffb7c5' opacity='0.4' />
+      <circle cx='150' cy='152' r='12' fill='#ffb7c5' opacity='0.4' />
+      <path d='M 74 120 Q 84 115 96 120' stroke='#6d5e78' stroke-width='2.5' fill='none' stroke-linecap='round' />
+      <path d='M 124 120 Q 134 115 146 120' stroke='#6d5e78' stroke-width='2.5' fill='none' stroke-linecap='round' />
+      <path d='M 68 108 Q 84 102 98 108' stroke='#6d5e78' stroke-width='2' fill='none' stroke-linecap='round' />
+      <path d='M 122 108 Q 136 102 152 108' stroke='#6d5e78' stroke-width='2' fill='none' stroke-linecap='round' />
+      <path d='M 110 130 L 106 155 L 114 155' stroke='#dcb0a6' stroke-width='2' fill='none' stroke-linecap='round' />
+      <path d='M 94 174 Q 110 182 126 174' stroke='#d68a8a' stroke-width='2.5' fill='none' stroke-linecap='round' />
+      ${motion}
+    </svg>`;
+  }
   function openMassagePlay(name) {
     const plans = {
       '去水肿': {
@@ -1072,43 +1230,57 @@
     const steps = plan.steps;
     const hasBv = plan.video.bv && /^BV/i.test(plan.video.bv);
     openSubpage(`${name} · 跟练`, `
-      <button class="back-row" data-mback>← 返回护肤日常</button>
-      <div class="sub-header"><h2>${esc(name)}</h2><p>跟着语音提示完成每一步</p></div>
-      <div class="face-wrap"><span>👩</span></div>
-      <div id="massageSteps">${steps.map((st, i) => `<div class="step-card" data-step="${i}" style="${i === 0 ? '' : 'opacity:.5'}">
-        <div class="step-title">第 ${i + 1}/${steps.length} 步 · ${esc(st.t)}</div>
-        <p style="font-size:13px;color:var(--text);margin:0 0 8px;">${esc(st.s)}</p>
-        <div class="step-tip">💡 ${esc(st.tip)}</div>
-        <div class="timer-bar"><div class="timer-fill" id="timer${i}" style="width:0%"></div></div>
-        <div style="text-align:center;font-weight:700;color:var(--pink);" id="timeTxt${i}">${st.sec}s</div>
+      <button class='back-row' data-mback>← 返回护肤日常</button>
+      <div class='sub-header'><h2>${esc(name)}</h2><p>跟着动画和语音提示完成每一步</p></div>
+      <div id='massageFace' class='face-wrap'>${faceAnimHTML(steps[0])}</div>
+      <div id='massageSteps'>${steps.map((st, i) => `<div class='step-card' data-step='${i}' style='${i === 0 ? '' : 'opacity:.5'}'>
+        <div class='step-title'>第 ${i + 1}/${steps.length} 步 · ${esc(st.t)}</div>
+        <p style='font-size:13px;color:var(--text);margin:0 0 8px;'>${esc(st.s)}</p>
+        <div class='step-tip'>💡 ${esc(st.tip)}</div>
+        <div class='timer-bar'><div class='timer-fill' id='timer${i}' style='width:0%'></div></div>
+        <div style='text-align:center;font-weight:700;color:var(--pink);' id='timeTxt${i}'>${st.sec}s</div>
       </div>`).join('')}</div>
-      <div style="display:flex;gap:10px;margin-top:10px;">
-        <button class="btn-outline" id="msPrev" style="flex:1;">上一步</button>
-        <button class="btn-primary" id="msStart" style="flex:1;">▶ 开始</button>
-        <button class="btn-outline" id="msNext" style="flex:1;">下一步</button>
+      <div style='display:flex;gap:10px;margin-top:10px;'>
+        <button class='btn-outline' id='msPrev' style='flex:1;'>上一步</button>
+        <button class='btn-primary' id='msStart' style='flex:1;'>▶ 开始</button>
+        <button class='btn-outline' id='msNext' style='flex:1;'>下一步</button>
       </div>
-      <div class="card" style="margin-top:14px;">
-        <h4 style="margin:0 0 10px;">📺 推荐跟练视频</h4>
-        <div class="video-item" data-bv="${esc(plan.video.bv)}" data-page="1" data-title="${esc(plan.video.title)}">
-          <div class="video-info"><div class="video-title">${esc(plan.video.title)}</div><div class="video-meta">📚 真实跟练视频</div></div>
-          <div class="video-actions">
+      <div class='card' style='margin-top:14px;'>
+        <h4 style='margin:0 0 10px;'>📺 推荐跟练视频</h4>
+        <div class='video-item' data-bv='${esc(plan.video.bv)}' data-page='1' data-title='${esc(plan.video.title)}'>
+          <div class='video-info'><div class='video-title'>${esc(plan.video.title)}</div><div class='video-meta'>📚 真实跟练视频</div></div>
+          <div class='video-actions'>
             ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
-            <a href="${hasBv ? bvidUrl(plan.video.bv) : '#' }" target="_blank" rel="noopener" class="btn-outline">跳转原视频 ↗</a>
+            <a href='${hasBv ? bvidUrl(plan.video.bv) : '#'}' target='_blank' rel='noopener' class='btn-outline'>跳转原视频 ↗</a>
           </div>
-          <div class="video-player"></div>
+          <div class='video-player'></div>
         </div>
       </div>
     `);
     let cur = 0, timer = null, running = false, left = steps[0].sec;
-    function showStep() { $$('#massageSteps .step-card').forEach((c, i) => c.style.opacity = i === cur ? '1' : '.5'); left = steps[cur].sec; updateTimer(); }
+    function showStep() {
+      $$('#massageSteps .step-card').forEach((c, i) => c.style.opacity = i === cur ? '1' : '.5');
+      $('#massageFace').innerHTML = faceAnimHTML(steps[cur]);
+      left = steps[cur].sec;
+      updateTimer();
+    }
     function updateTimer() { const pct = (1 - left / steps[cur].sec) * 100; $(`#timer${cur}`).style.width = pct + '%'; $(`#timeTxt${cur}`).textContent = Math.ceil(left) + 's'; }
-    $('#msStart').addEventListener('click', () => {
-      if (running) { clearInterval(timer); running = false; $('#msStart').textContent = '▶ 继续'; return; }
-      running = true; $('#msStart').textContent = '⏸ 暂停';
-      timer = setInterval(() => { left -= 0.1; if (left <= 0) { clearInterval(timer); running = false; $('#msStart').textContent = '✓ 完成'; } updateTimer(); }, 100);
+    const msStart = $('#msStart'), msPrev = $('#msPrev'), msNext = $('#msNext');
+    if (msStart) msStart.addEventListener('click', () => {
+      if (running) { clearInterval(timer); running = false; msStart.textContent = '▶ 继续'; return; }
+      running = true; msStart.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        left -= 0.1;
+        if (left <= 0) {
+          clearInterval(timer); running = false;
+          if (cur < steps.length - 1) { cur++; showStep(); msStart.textContent = '▶ 开始'; }
+          else { msStart.textContent = '✓ 完成'; }
+        }
+        updateTimer();
+      }, 100);
     });
-    $('#msPrev').addEventListener('click', () => { if (cur > 0) { cur--; showStep(); } });
-    $('#msNext').addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); } });
+    if (msPrev) msPrev.addEventListener('click', () => { if (cur > 0) { cur--; showStep(); if (msStart) msStart.textContent = '▶ 开始'; } });
+    if (msNext) msNext.addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); if (msStart) msStart.textContent = '▶ 开始'; } });
     showStep();
   }
 
