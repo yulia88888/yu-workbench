@@ -174,8 +174,9 @@
     .massage-desc{font-size:11px;color:var(--text-secondary);margin-top:2px;pointer-events:none;}
     .chip{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .mood-item{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-    .face-wrap{width:220px;height:240px;margin:14px auto;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .face-wrap{width:220px;height:240px;margin:14px auto;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .face-wrap span{font-size:48px;opacity:.5;}
+    .face-wrap::after{content:'点击放大';position:absolute;bottom:8px;right:10px;font-size:11px;color:#fff;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:999px;pointer-events:none;}
     .face-anim{width:100%;height:100%;display:block;}
     .massage-hand{filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));}
     .step-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;}
@@ -183,6 +184,20 @@
     .step-tip{background:#FFF3F5;border-radius:10px;padding:10px;font-size:12px;color:var(--text-secondary);margin-bottom:10px;}
     .timer-bar{height:6px;background:var(--primary-light);border-radius:999px;overflow:hidden;margin-bottom:8px;}
     .timer-fill{height:100%;background:var(--pink);border-radius:999px;transition:width .2s linear;}
+
+    .face-zoom-overlay{position:fixed;inset:0;z-index:100;background:rgba(255,245,247,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+    .face-zoom-overlay.show{display:flex;}
+    .face-zoom-close{position:absolute;top:14px;right:16px;width:40px;height:40px;border-radius:50%;background:#fff;border:none;font-size:22px;color:var(--text);box-shadow:var(--shadow);cursor:pointer;}
+    .face-zoom-box{width:min(86vw,360px);height:min(86vw,360px);background:#FFE0E0;border-radius:50% 50% 45% 45%;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(255,64,129,.18);}
+    .face-zoom-box .face-anim{width:100%;height:100%;}
+    .face-zoom-step{width:100%;max-width:420px;text-align:center;margin-top:16px;background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+    .face-zoom-title{font-size:15px;font-weight:700;margin-bottom:6px;}
+    .face-zoom-desc{font-size:13px;color:var(--text-secondary);margin-bottom:8px;}
+    .face-zoom-tip{font-size:12px;color:var(--pink);background:#FFF3F5;border-radius:10px;padding:8px 12px;}
+    .face-zoom-controls{display:flex;gap:12px;margin-top:16px;width:100%;max-width:420px;}
+    .face-zoom-controls button{flex:1;padding:12px 8px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
+    .face-zoom-controls .btn-primary{background:var(--pink);color:#fff;}
+    .face-zoom-controls .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);}
 
     /* 电子琴 / 唱歌 / 英语 通用 */
     .stat-row{display:flex;justify-content:space-around;background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;}
@@ -1886,29 +1901,101 @@
       </div>
     `);
     let cur = 0, timer = null, running = false, left = steps[0].sec;
+    function updateZoom() {
+      const face = $('#massageFace'); if (face) face.innerHTML = faceAnimHTML(steps[cur]);
+      const zFace = $('#massageFaceZoom'); if (zFace) zFace.innerHTML = faceAnimHTML(steps[cur]);
+      const zTitle = $('#massageZoomTitle'); if (zTitle) zTitle.textContent = `第 ${cur + 1}/${steps.length} 步 · ${steps[cur].t}`;
+      const zDesc = $('#massageZoomDesc'); if (zDesc) zDesc.textContent = steps[cur].s;
+      const zTip = $('#massageZoomTip'); if (zTip) zTip.textContent = '💡 ' + steps[cur].tip;
+    }
     function showStep() {
       $$('#massageSteps .step-card').forEach((c, i) => c.style.opacity = i === cur ? '1' : '.5');
-      $('#massageFace').innerHTML = faceAnimHTML(steps[cur]);
       left = steps[cur].sec;
+      updateZoom();
       updateTimer();
     }
     function updateTimer() { const pct = (1 - left / steps[cur].sec) * 100; $(`#timer${cur}`).style.width = pct + '%'; $(`#timeTxt${cur}`).textContent = Math.ceil(left) + 's'; }
-    const msStart = $('#msStart'), msPrev = $('#msPrev'), msNext = $('#msNext');
-    if (msStart) msStart.addEventListener('click', () => {
-      if (running) { clearInterval(timer); running = false; msStart.textContent = '▶ 继续'; return; }
-      running = true; msStart.textContent = '⏸ 暂停';
+    function startTimer() {
+      if (running) { clearInterval(timer); running = false; return false; }
+      running = true;
       timer = setInterval(() => {
         left -= 0.1;
         if (left <= 0) {
           clearInterval(timer); running = false;
-          if (cur < steps.length - 1) { cur++; showStep(); msStart.textContent = '▶ 开始'; }
-          else { msStart.textContent = '✓ 完成'; }
+          if (cur < steps.length - 1) { cur++; showStep(); }
         }
         updateTimer();
       }, 100);
+      return true;
+    }
+    function stopTimer() { if (running) { clearInterval(timer); running = false; return true; } return false; }
+    function refreshBtnText() {
+      const txt = running ? '⏸ 暂停' : (left >= steps[cur].sec - 0.2 ? '▶ 开始' : '▶ 继续');
+      const main = $('#msStart'); if (main) main.textContent = txt;
+      const zoom = $('#msZoomStart'); if (zoom) zoom.textContent = txt;
+    }
+    const msStart = $('#msStart'), msPrev = $('#msPrev'), msNext = $('#msNext');
+    if (msStart) msStart.addEventListener('click', () => {
+      if (startTimer()) { refreshBtnText(); }
+      else { stopTimer(); refreshBtnText(); }
     });
-    if (msPrev) msPrev.addEventListener('click', () => { if (cur > 0) { cur--; showStep(); if (msStart) msStart.textContent = '▶ 开始'; } });
-    if (msNext) msNext.addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); if (msStart) msStart.textContent = '▶ 开始'; } });
+    if (msPrev) msPrev.addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
+    if (msNext) msNext.addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
+
+    // 放大全屏视图
+    const faceWrap = $('#massageFace');
+    if (faceWrap) {
+      faceWrap.addEventListener('click', () => {
+        let overlay = $('#massageZoomOverlay');
+        if (!overlay) {
+          overlay = document.createElement('div');
+          overlay.id = 'massageZoomOverlay';
+          overlay.className = 'face-zoom-overlay';
+          overlay.innerHTML = `
+            <button class='face-zoom-close' id='massageZoomClose'>×</button>
+            <div class='face-zoom-box' id='massageFaceZoom'>${faceAnimHTML(steps[cur])}</div>
+            <div class='face-zoom-step'>
+              <div class='face-zoom-title' id='massageZoomTitle'>第 ${cur + 1}/${steps.length} 步 · ${esc(steps[cur].t)}</div>
+              <div class='face-zoom-desc' id='massageZoomDesc'>${esc(steps[cur].s)}</div>
+              <div class='face-zoom-tip' id='massageZoomTip'>💡 ${esc(steps[cur].tip)}</div>
+            </div>
+            <div class='face-zoom-controls'>
+              <button class='btn-outline' id='msZoomPrev'>上一步</button>
+              <button class='btn-primary' id='msZoomStart'>▶ 开始</button>
+              <button class='btn-outline' id='msZoomNext'>下一步</button>
+            </div>
+          `;
+          document.body.appendChild(overlay);
+          $('#massageZoomClose').addEventListener('click', (e) => { e.stopPropagation(); overlay.classList.remove('show'); });
+          overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+          $('#msZoomStart').addEventListener('click', () => {
+            if (startTimer()) { refreshBtnText(); }
+            else { stopTimer(); refreshBtnText(); }
+          });
+          $('#msZoomPrev').addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
+          $('#msZoomNext').addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
+        } else {
+          updateZoom();
+        }
+        overlay.classList.add('show');
+      });
+    }
+    const escClose = (e) => { if (e.key === 'Escape') { const o = $('#massageZoomOverlay'); if (o) o.classList.remove('show'); } };
+    document.addEventListener('keydown', escClose);
+    // 返回护肤日常时移除全局监听，避免重复
+    const oldBack = $('#subpage').dataset.onclose;
+    $('#subpage').dataset.onclose = 'removeKeydown';
+    const observer = new MutationObserver((muts) => {
+      muts.forEach(m => {
+        if (m.attributeName === 'class' && !$('#subpage').classList.contains('show')) {
+          document.removeEventListener('keydown', escClose);
+          const o = $('#massageZoomOverlay'); if (o) o.remove();
+          observer.disconnect();
+        }
+      });
+    });
+    observer.observe($('#subpage'), { attributes: true, attributeFilter: ['class'] });
+
     showStep();
   }
 
