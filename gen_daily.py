@@ -737,15 +737,18 @@ def fetch_rss(url, limit=6):
         root = ET.fromstring(raw)
         out = []
         for it in root.iter("item"):
-            title = (it.findtext("title") or "").strip()
+            title = re.sub("<[^>]+>", "", it.findtext("title") or "").strip()
             desc = re.sub("<[^>]+>", "", it.findtext("description") or "")
-            desc = re.sub(r"\s+", " ", desc).strip()[:80]
+            desc = re.sub(r"\s+", " ", desc).strip()[:120]
             pub = (it.findtext("pubDate") or "").strip()[:16]
+            link = (it.findtext("link") or "").strip()
             if not title:
                 continue
             item = {"title": title, "time": pub}
             if desc:
                 item["summary"] = desc
+            if link:
+                item["url"] = link
             out.append(item)
             if len(out) >= limit:
                 break
@@ -755,23 +758,76 @@ def fetch_rss(url, limit=6):
         return []
 
 
+def fetch_weibo_hot_raw(limit=8):
+    """为「今日热榜」抓取微博实时热搜（不过滤赛道）"""
+    out = []
+    try:
+        raw = http_get("https://weibo.com/ajax/side/hotSearch", referer="https://weibo.com/")
+        if not raw:
+            return out
+        data = json.loads(raw)
+        items = (data.get("data", {}) or {}).get("realtime", []) or []
+        for it in items[:limit]:
+            word = (it.get("word") or "").strip()
+            if not word:
+                continue
+            enc = urllib.parse.quote(word)
+            out.append({
+                "title": word,
+                "source": "微博热搜",
+                "cat": "今日热榜",
+                "heat": fmt_heat(it.get("num") or 0),
+                "url": f"https://s.weibo.com/weibo?q={enc}",
+            })
+    except Exception as e:
+        print("[warn] weibo hot raw failed:", e)
+    return out
+
+
 def gen_news():
+    """
+    每日要闻：按用户要求的 6 大分类采集官媒 RSS，每条带原文链接。
+    分类：时政要闻 / 财经动态 / 国际风云 / 科技前沿 / 民生社会 / 今日热榜
+    """
     sources = [
-        ("新华网", "时政", "http://www.xinhuanet.com/politics/news_politics.xml"),
-        ("人民网", "民生", "http://www.people.com.cn/rss/ywkx.xml"),
+        # 时政要闻
+        ("新华网", "时政要闻", "http://www.xinhuanet.com/politics/news_politics.xml"),
+        ("人民网", "时政要闻", "http://www.people.com.cn/rss/politics.xml"),
+        # 财经动态
+        ("新华网", "财经动态", "http://www.xinhuanet.com/fortune/news_fortune.xml"),
+        ("人民网", "财经动态", "http://www.people.com.cn/rss/finance.xml"),
+        # 国际风云
+        ("新华网", "国际风云", "http://www.xinhuanet.com/world/news_world.xml"),
+        ("人民网", "国际风云", "http://www.people.com.cn/rss/world.xml"),
+        # 科技前沿
+        ("新华网", "科技前沿", "http://www.xinhuanet.com/tech/news_tech.xml"),
+        # 民生社会
+        ("新华网", "民生社会", "http://www.xinhuanet.com/society/news_society.xml"),
+        ("人民网", "民生社会", "http://www.people.com.cn/rss/society.xml"),
+        ("人民网", "民生社会", "http://www.people.com.cn/rss/ywkx.xml"),
     ]
     news = []
+    seen_titles = set()
     for src, cat, url in sources:
-        for it in fetch_rss(url, 5):
+        for it in fetch_rss(url, 3):
+            t = it.get("title", "")
+            if t in seen_titles:
+                continue
+            seen_titles.add(t)
             it["source"] = src
             it["cat"] = cat
             news.append(it)
+    # 今日热榜：微博实时热搜
+    for it in fetch_weibo_hot_raw(6):
+        if it["title"] not in seen_titles:
+            seen_titles.add(it["title"])
+            news.append(it)
     if not news:
-        news = [{"source": "新华网", "cat": "时政",
+        news = [{"source": "新华网", "cat": "时政要闻",
                  "title": "今日要闻将在自动刷新后更新",
-                 "summary": "新闻模块已接入每日自动抓取（新华网/人民网等），打开即有当天最新内容。",
-                 "time": "每日更新"}]
-    return news[:12]
+                 "summary": "新闻模块已接入每日自动抓取（新华网/人民网/微博热搜），打开即有当天最新内容。",
+                 "time": "每日更新", "url": "https://www.xinhuanet.com/"}]
+    return news
 
 
 AIPRODUCT_POOL = [
