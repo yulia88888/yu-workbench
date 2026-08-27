@@ -174,8 +174,9 @@
     .massage-desc{font-size:11px;color:var(--text-secondary);margin-top:2px;pointer-events:none;}
     .chip{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .mood-item{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-    .face-wrap{width:220px;height:240px;margin:14px auto;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .face-wrap{width:220px;height:240px;margin:14px auto;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .face-wrap span{font-size:48px;opacity:.5;}
+    .face-wrap::after{content:'点击放大';position:absolute;bottom:8px;right:10px;font-size:11px;color:#fff;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:999px;pointer-events:none;}
     .face-anim{width:100%;height:100%;display:block;}
     .massage-hand{filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));}
     .step-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;}
@@ -183,6 +184,20 @@
     .step-tip{background:#FFF3F5;border-radius:10px;padding:10px;font-size:12px;color:var(--text-secondary);margin-bottom:10px;}
     .timer-bar{height:6px;background:var(--primary-light);border-radius:999px;overflow:hidden;margin-bottom:8px;}
     .timer-fill{height:100%;background:var(--pink);border-radius:999px;transition:width .2s linear;}
+
+    .face-zoom-overlay{position:fixed;inset:0;z-index:100;background:rgba(255,245,247,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+    .face-zoom-overlay.show{display:flex;}
+    .face-zoom-close{position:absolute;top:14px;right:16px;width:40px;height:40px;border-radius:50%;background:#fff;border:none;font-size:22px;color:var(--text);box-shadow:var(--shadow);cursor:pointer;}
+    .face-zoom-box{width:min(86vw,360px);height:min(86vw,360px);background:#FFE0E0;border-radius:50% 50% 45% 45%;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(255,64,129,.18);}
+    .face-zoom-box .face-anim{width:100%;height:100%;}
+    .face-zoom-step{width:100%;max-width:420px;text-align:center;margin-top:16px;background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);}
+    .face-zoom-title{font-size:15px;font-weight:700;margin-bottom:6px;}
+    .face-zoom-desc{font-size:13px;color:var(--text-secondary);margin-bottom:8px;}
+    .face-zoom-tip{font-size:12px;color:var(--pink);background:#FFF3F5;border-radius:10px;padding:8px 12px;}
+    .face-zoom-controls{display:flex;gap:12px;margin-top:16px;width:100%;max-width:420px;}
+    .face-zoom-controls button{flex:1;padding:12px 8px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
+    .face-zoom-controls .btn-primary{background:var(--pink);color:#fff;}
+    .face-zoom-controls .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);}
 
     /* 电子琴 / 唱歌 / 英语 通用 */
     .stat-row{display:flex;justify-content:space-around;background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;}
