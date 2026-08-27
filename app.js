@@ -1249,6 +1249,17 @@
           <button class='btn-primary' id='msStart'>▶ 开始</button>
           <button class='btn-outline' id='msNext'>下一步</button>
         </div>
+        <div class='massage-video'>
+          <h4>📺 推荐跟练视频</h4>
+          <div class='video-item' data-bv='${esc(plan.video.bv)}' data-page='1' data-title='${esc(plan.video.title)}'>
+            <div class='video-info'><div class='video-title'>${esc(plan.video.title)}</div><div class='video-meta'>📚 真实跟练视频</div></div>
+            <div class='video-actions'>
+              ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
+              <a href='${hasBv ? bvidUrl(plan.video.bv) : '#'}' target='_blank' rel='noopener' class='btn-outline'>跳转原视频 ↗</a>
+            </div>
+            <div class='video-player'></div>
+          </div>
+        </div>
       </div>
     `);
     let cur = 0, timer = null, running = false, left = steps[0].sec;
