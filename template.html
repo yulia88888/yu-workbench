@@ -174,30 +174,28 @@
     .massage-desc{font-size:11px;color:var(--text-secondary);margin-top:2px;pointer-events:none;}
     .chip{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
     .mood-item{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-    .face-wrap{width:220px;height:240px;margin:14px auto;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-in;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
-    .face-wrap span{font-size:48px;opacity:.5;}
-    .face-wrap::after{content:'点击放大';position:absolute;bottom:8px;right:10px;font-size:11px;color:#fff;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:999px;pointer-events:none;}
     .face-anim{width:100%;height:100%;display:block;}
     .massage-hand{filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));}
-    .step-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;}
-    .step-title{font-size:14px;font-weight:700;margin-bottom:6px;}
-    .step-tip{background:#FFF3F5;border-radius:10px;padding:10px;font-size:12px;color:var(--text-secondary);margin-bottom:10px;}
-    .timer-bar{height:6px;background:var(--primary-light);border-radius:999px;overflow:hidden;margin-bottom:8px;}
-    .timer-fill{height:100%;background:var(--pink);border-radius:999px;transition:width .2s linear;}
 
-    .face-zoom-overlay{position:fixed;inset:0;z-index:100;background:rgba(255,245,247,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
-    .face-zoom-overlay.show{display:flex;}
-    .face-zoom-close{position:absolute;top:14px;right:16px;width:40px;height:40px;border-radius:50%;background:#fff;border:none;font-size:22px;color:var(--text);box-shadow:var(--shadow);cursor:pointer;}
-    .face-zoom-box{width:min(86vw,360px);height:min(86vw,360px);background:#FFE0E0;border-radius:50% 50% 45% 45%;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(255,64,129,.18);}
-    .face-zoom-box .face-anim{width:100%;height:100%;}
-    .face-zoom-step{width:100%;max-width:420px;text-align:center;margin-top:16px;background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow);}
-    .face-zoom-title{font-size:15px;font-weight:700;margin-bottom:6px;}
-    .face-zoom-desc{font-size:13px;color:var(--text-secondary);margin-bottom:8px;}
-    .face-zoom-tip{font-size:12px;color:var(--pink);background:#FFF3F5;border-radius:10px;padding:8px 12px;}
-    .face-zoom-controls{display:flex;gap:12px;margin-top:16px;width:100%;max-width:420px;}
-    .face-zoom-controls button{flex:1;padding:12px 8px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
-    .face-zoom-controls .btn-primary{background:var(--pink);color:#fff;}
-    .face-zoom-controls .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);}
+    .massage-play{height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#FFF8FA 0%,#FFF0F3 100%);padding:0 16px 16px;}
+    .massage-play-header{display:flex;align-items:center;gap:10px;padding:12px 0 8px;}
+    .massage-play-close{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--border);font-size:20px;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);}
+    .massage-play-title{font-size:18px;font-weight:800;margin:0;}
+    .massage-play-face{width:260px;height:300px;margin:6px auto 14px;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 10px 30px rgba(255,94,156,.12);}
+    .massage-step-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .massage-step-badge{background:var(--pink);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;}
+    .massage-step-label{background:#fff;color:var(--pink);font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid #FFD6E3;}
+    .massage-desc{font-size:15px;line-height:1.65;color:var(--text);margin-bottom:12px;font-weight:500;}
+    .massage-tip{background:#FFF3F5;border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text-secondary);margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;}
+    .massage-tip-icon{font-size:14px;flex-shrink:0;}
+    .massage-timer-bar{height:8px;background:#FFE0EB;border-radius:999px;overflow:hidden;margin-bottom:10px;}
+    .massage-timer-fill{height:100%;background:linear-gradient(90deg,var(--pink),#FF8FB3);border-radius:999px;transition:width .2s linear;}
+    .massage-time{text-align:center;font-size:20px;font-weight:800;color:var(--pink);margin-bottom:18px;}
+    .massage-controls{position:sticky;bottom:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:12px 0 8px;background:linear-gradient(180deg,rgba(255,248,250,0) 0%,#FFF0F3 30%);}
+    .massage-controls button{flex:1;padding:14px 6px;border-radius:999px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
+    .massage-controls .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow);}
+    .massage-controls .btn-primary{background:var(--pink);color:#fff;box-shadow:0 4px 14px rgba(255,94,156,.35);display:flex;align-items:center;justify-content:center;gap:6px;}
+    .massage-controls .btn-primary:active{transform:scale(.97);}
 
     /* 电子琴 / 唱歌 / 英语 通用 */
     .stat-row{display:flex;justify-content:space-around;background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;}
