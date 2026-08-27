@@ -471,6 +471,17 @@
     if (p) { aipPlat = p.dataset.aipplat; renderAiproduct(); return; }
     const n = e.target.closest('[data-newscat]');
     if (n) { newsCat = n.dataset.newscat; renderNews(); return; }
+    const newsCheckin = e.target.closest('#newsCheckin');
+    if (newsCheckin) {
+      newsCheckin.textContent = '✅ 今日已打卡';
+      newsCheckin.disabled = true;
+      newsCheckin.classList.add('disabled');
+      toast('今日要闻打卡成功！坚持读报，眼界更开阔～');
+      const d = load(LS.plan, {});
+      d.newsCheckin = daily.date;
+      save(LS.plan, d);
+      return;
+    }
   });
 
   /* ---------- 护肤日常 ---------- */
@@ -2703,8 +2714,12 @@
   }
   const AIPRODUCT_FALLBACK = buildAipNested(AIP_FLAT);
   const NEWS_FALLBACK = [
-    { source: '新华网', cat: '时政', title: '今日要闻将在每次自动刷新后更新', summary: '新闻模块已接入每日自动抓取（新华网/人民网等），打开即可看到当天最新内容。', time: '每日更新' },
-    { source: '人民网', cat: '民生', title: '便民政策早知道', summary: '社保、医保、出行等民生资讯每日汇总。', time: '每日更新' }
+    { source: '新华网', cat: '时政要闻', title: '今日要闻将在每次自动刷新后更新', summary: '新闻模块已接入每日自动抓取（新华网/人民网/微博热搜），打开即可看到当天最新内容。', time: '每日更新', url: 'https://www.xinhuanet.com/' },
+    { source: '人民网', cat: '民生社会', title: '便民政策早知道', summary: '社保、医保、出行等民生资讯每日汇总。', time: '每日更新', url: 'http://www.people.com.cn/' },
+    { source: '新华网', cat: '财经动态', title: '财经市场每日动态', summary: '股市、消费、产业等财经资讯汇总。', time: '每日更新', url: 'http://www.xinhuanet.com/fortune/' },
+    { source: '新华网', cat: '国际风云', title: '国际局势一日概览', summary: '全球热点与外交动态汇总。', time: '每日更新', url: 'http://www.xinhuanet.com/world/' },
+    { source: '新华网', cat: '科技前沿', title: '科技新鲜事', summary: '前沿技术、产业创新资讯汇总。', time: '每日更新', url: 'http://www.xinhuanet.com/tech/' },
+    { source: '微博热搜', cat: '今日热榜', title: '微博实时热搜', summary: '今日网友最关心的话题。', time: '每日更新', url: 'https://s.weibo.com/top/summary' }
   ];
   function renderAiproduct() {
     const aipData = (daily.aiproduct && daily.aiproduct['抖音']) ? daily.aiproduct : AIPRODUCT_FALLBACK;
@@ -2806,18 +2821,81 @@
   }
   function renderNews() {
     const data = (daily.news && daily.news.length) ? daily.news : NEWS_FALLBACK;
-    const cats = ['全部', ...Array.from(new Set(data.map(n => n.cat)))];
+    const cats = ['全部', '时政要闻', '财经动态', '国际风云', '科技前沿', '民生社会', '今日热榜'];
+    const catSet = new Set(data.map(n => n.cat));
+    const orderedCats = cats.filter(c => c === '全部' || catSet.has(c));
     const list = data.filter(n => newsCat === '全部' || n.cat === newsCat);
+    const groups = {};
+    list.forEach(n => { groups[n.cat] = groups[n.cat] || []; groups[n.cat].push(n); });
+    const groupOrder = orderedCats.filter(c => c !== '全部');
+    const dateStr = daily.date || todayKey();
+    const week = ['日', '一', '二', '三', '四', '五', '六'][new Date(dateStr.replace(/\//g, '-')).getDay()] || '—';
+    const mediaMap = [
+      { icon: '📺', name: '央视新闻', desc: '国家大事第一线·权威快讯', links: [
+        { t: '央视新闻网', u: 'https://www.cctv.com/' },
+        { t: '新闻联播回看', u: 'https://tv.cctv.com/lm/xwlb/' },
+        { t: '央视频', u: 'https://www.yangshipin.cn/' }
+      ]},
+      { icon: '📰', name: '新华社', desc: '国家通讯社·深度时政报道', links: [
+        { t: '新华网', u: 'https://www.xinhuanet.com/' },
+        { t: '今日要闻', u: 'https://www.xinhuanet.com/politics/' }
+      ]},
+      { icon: '📄', name: '人民日报', desc: '党报头版·评论员文章', links: [
+        { t: '人民网', u: 'http://www.people.com.cn/' },
+        { t: '人民日报电子版', u: 'http://paper.people.com.cn/rmrb/' }
+      ]},
+      { icon: '🌍', name: '参考消息', desc: '外媒视角看中国和世界', links: [
+        { t: '参考消息网', u: 'http://www.cankaoxiaoxi.com/' }
+      ]}
+    ];
+    const catCards = groupOrder.map(cat => {
+      const items = groups[cat] || [];
+      if (!items.length) return '';
+      return `<div class="news-sum-card">
+        <div class="news-sum-cat">${esc(cat)}</div>
+        <ol class="news-sum-list">
+          ${items.map(n => `<li>
+            <a class="news-sum-link" href="${esc(n.url || '#')}" target="_blank" rel="noopener">${esc(n.title)}</a>
+            ${n.summary ? `<span class="news-sum-text">${esc(n.summary)}</span>` : ''}
+            ${n.heat ? `<span class="news-sum-heat">🔥 ${esc(n.heat)}</span>` : ''}
+          </li>`).join('')}
+        </ol>
+      </div>`;
+    }).join('');
     $('#newsBody').innerHTML = `
-      <div class="sub-header" style="margin-bottom:10px;"><h2>📰 新闻</h2><p>每日更新 · ${esc(daily.date || todayKey())}</p></div>
-      <div class="cat-bar">${cats.map(c => `<button class="cat-chip ${c === newsCat ? 'active' : ''}" data-newscat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
-      <div class="list-count">共 ${list.length} 条</div>
-      ${list.map(n => `<div class="news-card">
-        <div class="news-source">${esc(n.source || '综合')} · ${esc(n.cat || '')}</div>
-        <div class="news-title">${esc(n.title)}</div>
-        ${n.summary ? `<div class="news-sum">${esc(n.summary)}</div>` : ''}
-        <div class="news-foot"><span class="news-time">${esc(n.time || '')}</span><span class="news-cat">${esc(n.cat || '资讯')}</span></div>
-      </div>`).join('') || '<div class="empty">暂无新闻</div>'}
+      <button class="back-row" data-back>← 返回每日计划</button>
+      <div class="news-header-card">
+        <h1 class="news-h1">每日要闻</h1>
+        <div class="news-subtitle">央视·官媒权威新闻·每日读报打卡</div>
+        <div class="news-tab-pill">
+          <span class="news-tab-dot active">今日看点</span>
+          <span class="news-tab-dot">要闻摘记</span>
+        </div>
+        <div class="news-date-line">${esc(dateStr)} · 星期${week}</div>
+        <div class="news-slogan">花10分钟了解今天的世界吧</div>
+        <button class="news-checkin-btn" id="newsCheckin">【今日新闻看完了，打卡！】</button>
+      </div>
+      <div class="news-section">
+        <h3 class="news-section-title">权威官媒直通车</h3>
+        <div class="news-media-list">
+          ${mediaMap.map(m => `<div class="news-media-item">
+            <div class="news-media-name">${m.icon} ${esc(m.name)}：<span class="news-media-desc">${esc(m.desc)}</span></div>
+            <div class="news-media-links">
+              ${m.links.map(l => `<a href="${esc(l.u)}" target="_blank" rel="noopener" class="news-link-pill">${esc(l.t)}</a>`).join('')}
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="news-section">
+        <h3 class="news-section-title">分类看点 <small>点开查看频道入口</small></h3>
+        <div class="news-cat-chips">
+          ${orderedCats.map(c => `<button class="news-cat-chip ${c === newsCat ? 'active' : ''}" data-newscat="${esc(c)}">${esc(c)}</button>`).join('')}
+        </div>
+      </div>
+      <div class="news-section">
+        <h3 class="news-section-title">📋 今日新闻摘要汇总</h3>
+        ${catCards || '<div class="empty">暂无新闻</div>'}
+      </div>
     `;
   }
   const content = $('#content');
