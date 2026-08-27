@@ -1229,49 +1229,42 @@
     const plan = plans[name] || plans['去水肿'];
     const steps = plan.steps;
     const hasBv = plan.video.bv && /^BV/i.test(plan.video.bv);
-    openSubpage(`${name} · 跟练`, `
-      <button class='back-row' data-mback>← 返回护肤日常</button>
-      <div class='sub-header'><h2>${esc(name)}</h2><p>跟着动画和语音提示完成每一步</p></div>
-      <div id='massageFace' class='face-wrap'>${faceAnimHTML(steps[0])}</div>
-      <div id='massageSteps'>${steps.map((st, i) => `<div class='step-card' data-step='${i}' style='${i === 0 ? '' : 'opacity:.5'}'>
-        <div class='step-title'>第 ${i + 1}/${steps.length} 步 · ${esc(st.t)}</div>
-        <p style='font-size:13px;color:var(--text);margin:0 0 8px;'>${esc(st.s)}</p>
-        <div class='step-tip'>💡 ${esc(st.tip)}</div>
-        <div class='timer-bar'><div class='timer-fill' id='timer${i}' style='width:0%'></div></div>
-        <div style='text-align:center;font-weight:700;color:var(--pink);' id='timeTxt${i}'>${st.sec}s</div>
-      </div>`).join('')}</div>
-      <div style='display:flex;gap:10px;margin-top:10px;'>
-        <button class='btn-outline' id='msPrev' style='flex:1;'>上一步</button>
-        <button class='btn-primary' id='msStart' style='flex:1;'>▶ 开始</button>
-        <button class='btn-outline' id='msNext' style='flex:1;'>下一步</button>
-      </div>
-      <div class='card' style='margin-top:14px;'>
-        <h4 style='margin:0 0 10px;'>📺 推荐跟练视频</h4>
-        <div class='video-item' data-bv='${esc(plan.video.bv)}' data-page='1' data-title='${esc(plan.video.title)}'>
-          <div class='video-info'><div class='video-title'>${esc(plan.video.title)}</div><div class='video-meta'>📚 真实跟练视频</div></div>
-          <div class='video-actions'>
-            ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
-            <a href='${hasBv ? bvidUrl(plan.video.bv) : '#'}' target='_blank' rel='noopener' class='btn-outline'>跳转原视频 ↗</a>
-          </div>
-          <div class='video-player'></div>
+    openSubpage(`${esc(name)} · 跟练`, `
+      <div class='massage-play'>
+        <div class='massage-play-header'>
+          <button class='massage-play-close' data-mback>×</button>
+          <div class='massage-play-title'>😼 ${esc(name)}</div>
+        </div>
+        <div class='massage-play-face' id='massageFace'>${faceAnimHTML(steps[0])}</div>
+        <div class='massage-step-row'>
+          <span class='massage-step-badge' id='massageStepBadge'>第 1/${steps.length} 步</span>
+          <span class='massage-step-label'>💧 ${esc(name)}</span>
+        </div>
+        <div class='massage-desc' id='massageDesc'>${esc(steps[0].s)}</div>
+        <div class='massage-tip'><span class='massage-tip-icon'>💡</span><span id='massageTip'>${esc(steps[0].tip)}</span></div>
+        <div class='massage-timer-bar'><div class='massage-timer-fill' id='massageTimerFill' style='width:0%'></div></div>
+        <div class='massage-time' id='massageTime'>${steps[0].sec}s</div>
+        <div class='massage-controls'>
+          <button class='btn-outline' id='msPrev'>上一步</button>
+          <button class='btn-primary' id='msStart'>▶ 开始</button>
+          <button class='btn-outline' id='msNext'>下一步</button>
         </div>
       </div>
     `);
     let cur = 0, timer = null, running = false, left = steps[0].sec;
-    function updateZoom() {
-      const face = $('#massageFace'); if (face) face.innerHTML = faceAnimHTML(steps[cur]);
-      const zFace = $('#massageFaceZoom'); if (zFace) zFace.innerHTML = faceAnimHTML(steps[cur]);
-      const zTitle = $('#massageZoomTitle'); if (zTitle) zTitle.textContent = `第 ${cur + 1}/${steps.length} 步 · ${steps[cur].t}`;
-      const zDesc = $('#massageZoomDesc'); if (zDesc) zDesc.textContent = steps[cur].s;
-      const zTip = $('#massageZoomTip'); if (zTip) zTip.textContent = '💡 ' + steps[cur].tip;
-    }
     function showStep() {
-      $$('#massageSteps .step-card').forEach((c, i) => c.style.opacity = i === cur ? '1' : '.5');
+      const face = $('#massageFace'); if (face) face.innerHTML = faceAnimHTML(steps[cur]);
+      const badge = $('#massageStepBadge'); if (badge) badge.textContent = `第 ${cur + 1}/${steps.length} 步`;
+      const desc = $('#massageDesc'); if (desc) desc.textContent = steps[cur].s;
+      const tip = $('#massageTip'); if (tip) tip.textContent = steps[cur].tip;
       left = steps[cur].sec;
-      updateZoom();
       updateTimer();
     }
-    function updateTimer() { const pct = (1 - left / steps[cur].sec) * 100; $(`#timer${cur}`).style.width = pct + '%'; $(`#timeTxt${cur}`).textContent = Math.ceil(left) + 's'; }
+    function updateTimer() {
+      const pct = (1 - left / steps[cur].sec) * 100;
+      const fill = $('#massageTimerFill'); if (fill) fill.style.width = pct + '%';
+      const time = $('#massageTime'); if (time) time.textContent = Math.ceil(left) + 's';
+    }
     function startTimer() {
       if (running) { clearInterval(timer); running = false; return false; }
       running = true;
@@ -1289,70 +1282,11 @@
     function refreshBtnText() {
       const txt = running ? '⏸ 暂停' : (left >= steps[cur].sec - 0.2 ? '▶ 开始' : '▶ 继续');
       const main = $('#msStart'); if (main) main.textContent = txt;
-      const zoom = $('#msZoomStart'); if (zoom) zoom.textContent = txt;
     }
     const msStart = $('#msStart'), msPrev = $('#msPrev'), msNext = $('#msNext');
-    if (msStart) msStart.addEventListener('click', () => {
-      if (startTimer()) { refreshBtnText(); }
-      else { stopTimer(); refreshBtnText(); }
-    });
+    if (msStart) msStart.addEventListener('click', () => { if (startTimer()) refreshBtnText(); else { stopTimer(); refreshBtnText(); } });
     if (msPrev) msPrev.addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
     if (msNext) msNext.addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
-
-    // 放大全屏视图
-    const faceWrap = $('#massageFace');
-    if (faceWrap) {
-      faceWrap.addEventListener('click', () => {
-        let overlay = $('#massageZoomOverlay');
-        if (!overlay) {
-          overlay = document.createElement('div');
-          overlay.id = 'massageZoomOverlay';
-          overlay.className = 'face-zoom-overlay';
-          overlay.innerHTML = `
-            <button class='face-zoom-close' id='massageZoomClose'>×</button>
-            <div class='face-zoom-box' id='massageFaceZoom'>${faceAnimHTML(steps[cur])}</div>
-            <div class='face-zoom-step'>
-              <div class='face-zoom-title' id='massageZoomTitle'>第 ${cur + 1}/${steps.length} 步 · ${esc(steps[cur].t)}</div>
-              <div class='face-zoom-desc' id='massageZoomDesc'>${esc(steps[cur].s)}</div>
-              <div class='face-zoom-tip' id='massageZoomTip'>💡 ${esc(steps[cur].tip)}</div>
-            </div>
-            <div class='face-zoom-controls'>
-              <button class='btn-outline' id='msZoomPrev'>上一步</button>
-              <button class='btn-primary' id='msZoomStart'>▶ 开始</button>
-              <button class='btn-outline' id='msZoomNext'>下一步</button>
-            </div>
-          `;
-          document.body.appendChild(overlay);
-          $('#massageZoomClose').addEventListener('click', (e) => { e.stopPropagation(); overlay.classList.remove('show'); });
-          overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
-          $('#msZoomStart').addEventListener('click', () => {
-            if (startTimer()) { refreshBtnText(); }
-            else { stopTimer(); refreshBtnText(); }
-          });
-          $('#msZoomPrev').addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
-          $('#msZoomNext').addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
-        } else {
-          updateZoom();
-        }
-        overlay.classList.add('show');
-      });
-    }
-    const escClose = (e) => { if (e.key === 'Escape') { const o = $('#massageZoomOverlay'); if (o) o.classList.remove('show'); } };
-    document.addEventListener('keydown', escClose);
-    // 返回护肤日常时移除全局监听，避免重复
-    const oldBack = $('#subpage').dataset.onclose;
-    $('#subpage').dataset.onclose = 'removeKeydown';
-    const observer = new MutationObserver((muts) => {
-      muts.forEach(m => {
-        if (m.attributeName === 'class' && !$('#subpage').classList.contains('show')) {
-          document.removeEventListener('keydown', escClose);
-          const o = $('#massageZoomOverlay'); if (o) o.remove();
-          observer.disconnect();
-        }
-      });
-    });
-    observer.observe($('#subpage'), { attributes: true, attributeFilter: ['class'] });
-
     showStep();
   }
 
