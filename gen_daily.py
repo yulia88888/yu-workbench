@@ -591,6 +591,7 @@ def build_repost(platform, track, title, idx, source_date, real=None):
 
 def gen_topics(platform, p_idx, real_items, seen):
     out = []
+    local_seen = set()  # 平台内去重；跨平台允许重复，保证每天各平台独立打乱、内容真正不同
     # 真实接口优先（广撒网，不过滤）
     for it in real_items[:20]:
         track = it.get("cat") or "情绪共鸣"
@@ -598,22 +599,28 @@ def gen_topics(platform, p_idx, real_items, seen):
         if not title or title in seen:
             continue
         seen.add(title)
+        local_seen.add(title)
         entry = build_topic(platform, track, title, len(out), real=it)
         out.append(entry)
-    # 用全赛道词池补足到 20（广撒网，含大众赛道）
+    # 用全赛道词池补足到 20（按日期打乱，保证每天条目不同）
+    shuf = {tk: list(TRACKS[tk]["titles"]) for tk in ALL_TRACKS}
+    for _tk in shuf:
+        random.shuffle(shuf[_tk])
     start = p_idx * 4
     n = 0
     guard = 0
     while len(out) < 20:
         track = ALL_TRACKS[(start + n) % len(ALL_TRACKS)]
-        title = pick(TRACKS[track]["titles"], p_idx * 3 + n)
+        pool = shuf[track]
+        title = pool[(p_idx * 3 + n) % len(pool)]
         guard += 1
         if guard > 600:  # 兜底：标题池耗尽时允许重复，避免死循环
             entry = build_topic(platform, track, title, len(out))
             out.append(entry); n += 1; continue
-        if title in seen:
+        if title in local_seen or title in seen:
             n += 1
             continue
+        local_seen.add(title)
         seen.add(title)
         entry = build_topic(platform, track, title,	len(out))
         out.append(entry)
@@ -624,6 +631,7 @@ def gen_topics(platform, p_idx, real_items, seen):
 def gen_reposts(platform, p_idx, real_items, source_date, seen):
     """seen: 全局已用标题（含选题），保证二创不再放重复内容"""
     out = []
+    local_seen = set()  # 平台内去重；跨平台允许重复，保证每天各平台独立打乱
     # 真实接口优先，但只保留瑜适合的赛道
     for it in real_items[:20]:
         track = it.get("cat") or "情绪共鸣"
@@ -633,23 +641,29 @@ def gen_reposts(platform, p_idx, real_items, source_date, seen):
         if not title or title in seen:
             continue
         seen.add(title)
+        local_seen.add(title)
         entry = build_repost(platform, track, title, len(out), source_date, real=it)
         out.append(entry)
-    # 用瑜专属「原爆款视频」词池补足到 20（与选题灵感的热点池完全分开）
+    # 用瑜专属「原爆款视频」词池补足到 20（按日期打乱，每天不同，与选题池分开）
+    shuf = {}
+    for _tk in YU_TRACKS:
+        lst = RPOST_TITLES.get(_tk, TRACKS[_tk]["titles"])
+        cp = list(lst); random.shuffle(cp); shuf[_tk] = cp
     start = p_idx * 3
     n = 0
     guard = 0
     while len(out) < 20:
         track = YU_TRACKS[(start + n) % len(YU_TRACKS)]
-        rpool = RPOST_TITLES.get(track, TRACKS[track]["titles"])
-        title = pick(rpool, p_idx * 3 + n)
+        pool = shuf[track]
+        title = pool[(p_idx * 3 + n) % len(pool)]
         guard += 1
         if guard > 600:  # 兜底：标题池耗尽时允许重复，避免死循环
             entry = build_repost(platform, track, title, len(out), source_date)
             out.append(entry); n += 1; continue
-        if title in seen:
+        if title in local_seen or title in seen:
             n += 1
             continue
+        local_seen.add(title)
         seen.add(title)
         entry = build_repost(platform, track, title, len(out), source_date)
         out.append(entry)
@@ -980,7 +994,11 @@ def gen_aiproduct():
 
 
 def main():
-    today = datetime.date.today()
+    # 用北京时间(UTC+8)算日期，避免 GitHub 服务器(UTC)在「北京时间00:00」那次运行
+    # 把日期错算成前一天、覆盖掉当天历史归档。
+    bj = datetime.datetime.now(datetime.timezone.utc).astimezone(
+        datetime.timezone(datetime.timedelta(hours=8)))
+    today = bj.date()
     today_str = today.strftime("%Y-%m-%d")
     yesterday_str = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
     random.seed(int(today_str.replace("-", "")))
@@ -995,17 +1013,23 @@ def main():
     # 爆款二创：只取适合瑜的赛道（真实接口过滤到 YU_TRACKS）
     real_repost = {"抖音": douyin, "小红书": [], "快手": kuaishou, "微博": weibo, "B站": bili}
 
-    topics, reposts = [], []
+    topics = []
+    topic_titles_by_plat = {}
     news = gen_news()
     real_aip = fetch_aiproduct_real()
     aip_snap = build_aiproduct_from_snapshot() if real_aip is None else None
     aiproduct = real_aip or aip_snap or gen_aiproduct()
-    seen = set()  # 全局去重：选题内部 + 二创内部 + 选题/二创之间 三处都不重复
+    # 每平台独立去重：选题各平台内不重复；二创仅避免与本平台选题重复（模块去重）。
+    # 跨平台允许精选池重复，这样每天各平台独立按日期打乱，内容真正每天不同。
     for i, p in enumerate(PLATFORMS_ORDER):
-        ts = gen_topics(p, i, real_topic[p], seen)
+        ts = gen_topics(p, i, real_topic[p], set())
+        topic_titles_by_plat[p] = {t["title"] for t in ts}
         topics.extend(ts)
+    reposts = []
     for i, p in enumerate(PLATFORMS_ORDER):
-        reposts.extend(gen_reposts(p, i, real_repost[p], yesterday_str, seen))
+        rep_seen = set(topic_titles_by_plat[p])  # 模块去重：同平台 选题≠二创
+        rs = gen_reposts(p, i, real_repost[p], yesterday_str, rep_seen)
+        reposts.extend(rs)
 
     data = {
         "date": today_str,
