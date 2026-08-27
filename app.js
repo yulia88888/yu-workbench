@@ -1258,29 +1258,101 @@
       </div>
     `);
     let cur = 0, timer = null, running = false, left = steps[0].sec;
+    function updateZoom() {
+      const face = $('#massageFace'); if (face) face.innerHTML = faceAnimHTML(steps[cur]);
+      const zFace = $('#massageFaceZoom'); if (zFace) zFace.innerHTML = faceAnimHTML(steps[cur]);
+      const zTitle = $('#massageZoomTitle'); if (zTitle) zTitle.textContent = `第 ${cur + 1}/${steps.length} 步 · ${steps[cur].t}`;
+      const zDesc = $('#massageZoomDesc'); if (zDesc) zDesc.textContent = steps[cur].s;
+      const zTip = $('#massageZoomTip'); if (zTip) zTip.textContent = '💡 ' + steps[cur].tip;
+    }
     function showStep() {
       $$('#massageSteps .step-card').forEach((c, i) => c.style.opacity = i === cur ? '1' : '.5');
-      $('#massageFace').innerHTML = faceAnimHTML(steps[cur]);
       left = steps[cur].sec;
+      updateZoom();
       updateTimer();
     }
     function updateTimer() { const pct = (1 - left / steps[cur].sec) * 100; $(`#timer${cur}`).style.width = pct + '%'; $(`#timeTxt${cur}`).textContent = Math.ceil(left) + 's'; }
-    const msStart = $('#msStart'), msPrev = $('#msPrev'), msNext = $('#msNext');
-    if (msStart) msStart.addEventListener('click', () => {
-      if (running) { clearInterval(timer); running = false; msStart.textContent = '▶ 继续'; return; }
-      running = true; msStart.textContent = '⏸ 暂停';
+    function startTimer() {
+      if (running) { clearInterval(timer); running = false; return false; }
+      running = true;
       timer = setInterval(() => {
         left -= 0.1;
         if (left <= 0) {
           clearInterval(timer); running = false;
-          if (cur < steps.length - 1) { cur++; showStep(); msStart.textContent = '▶ 开始'; }
-          else { msStart.textContent = '✓ 完成'; }
+          if (cur < steps.length - 1) { cur++; showStep(); }
         }
         updateTimer();
       }, 100);
+      return true;
+    }
+    function stopTimer() { if (running) { clearInterval(timer); running = false; return true; } return false; }
+    function refreshBtnText() {
+      const txt = running ? '⏸ 暂停' : (left >= steps[cur].sec - 0.2 ? '▶ 开始' : '▶ 继续');
+      const main = $('#msStart'); if (main) main.textContent = txt;
+      const zoom = $('#msZoomStart'); if (zoom) zoom.textContent = txt;
+    }
+    const msStart = $('#msStart'), msPrev = $('#msPrev'), msNext = $('#msNext');
+    if (msStart) msStart.addEventListener('click', () => {
+      if (startTimer()) { refreshBtnText(); }
+      else { stopTimer(); refreshBtnText(); }
     });
-    if (msPrev) msPrev.addEventListener('click', () => { if (cur > 0) { cur--; showStep(); if (msStart) msStart.textContent = '▶ 开始'; } });
-    if (msNext) msNext.addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); if (msStart) msStart.textContent = '▶ 开始'; } });
+    if (msPrev) msPrev.addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
+    if (msNext) msNext.addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
+
+    // 放大全屏视图
+    const faceWrap = $('#massageFace');
+    if (faceWrap) {
+      faceWrap.addEventListener('click', () => {
+        let overlay = $('#massageZoomOverlay');
+        if (!overlay) {
+          overlay = document.createElement('div');
+          overlay.id = 'massageZoomOverlay';
+          overlay.className = 'face-zoom-overlay';
+          overlay.innerHTML = `
+            <button class='face-zoom-close' id='massageZoomClose'>×</button>
+            <div class='face-zoom-box' id='massageFaceZoom'>${faceAnimHTML(steps[cur])}</div>
+            <div class='face-zoom-step'>
+              <div class='face-zoom-title' id='massageZoomTitle'>第 ${cur + 1}/${steps.length} 步 · ${esc(steps[cur].t)}</div>
+              <div class='face-zoom-desc' id='massageZoomDesc'>${esc(steps[cur].s)}</div>
+              <div class='face-zoom-tip' id='massageZoomTip'>💡 ${esc(steps[cur].tip)}</div>
+            </div>
+            <div class='face-zoom-controls'>
+              <button class='btn-outline' id='msZoomPrev'>上一步</button>
+              <button class='btn-primary' id='msZoomStart'>▶ 开始</button>
+              <button class='btn-outline' id='msZoomNext'>下一步</button>
+            </div>
+          `;
+          document.body.appendChild(overlay);
+          $('#massageZoomClose').addEventListener('click', (e) => { e.stopPropagation(); overlay.classList.remove('show'); });
+          overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+          $('#msZoomStart').addEventListener('click', () => {
+            if (startTimer()) { refreshBtnText(); }
+            else { stopTimer(); refreshBtnText(); }
+          });
+          $('#msZoomPrev').addEventListener('click', () => { if (cur > 0) { cur--; showStep(); refreshBtnText(); } });
+          $('#msZoomNext').addEventListener('click', () => { if (cur < steps.length - 1) { cur++; showStep(); refreshBtnText(); } });
+        } else {
+          updateZoom();
+        }
+        overlay.classList.add('show');
+      });
+    }
+    const escClose = (e) => { if (e.key === 'Escape') { const o = $('#massageZoomOverlay'); if (o) o.classList.remove('show'); } };
+    document.addEventListener('keydown', escClose);
+    // 返回护肤日常时移除全局监听，避免重复
+    const oldBack = $('#subpage').dataset.onclose;
+    $('#subpage').dataset.onclose = 'removeKeydown';
+    const observer = new MutationObserver((muts) => {
+      muts.forEach(m => {
+        if (m.attributeName === 'class' && !$('#subpage').classList.contains('show')) {
+          document.removeEventListener('keydown', escClose);
+          const o = $('#massageZoomOverlay'); if (o) o.remove();
+          observer.disconnect();
+        }
+      });
+    });
+    observer.observe($('#subpage'), { attributes: true, attributeFilter: ['class'] });
+
     showStep();
   }
 
