@@ -54,6 +54,20 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // 历史归档 history.json / 真实爆款 archive.json：网络优先（保证每天新增的历史与爆款立即生效），失败才回退缓存
+  if (url.includes('history.json') || url.includes('archive.json')) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
   // 静态资源（icon / manifest）：缓存优先，缺失则网络并写入缓存
   e.respondWith(
     caches.match(req).then((hit) => {
