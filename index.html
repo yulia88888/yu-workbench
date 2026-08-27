@@ -250,6 +250,38 @@
     .ai-form textarea,.ai-form input{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:14px;outline:none;margin-top:4px;}
     .ai-result{background:#F3F8FF;border-left:4px solid #4A90E2;padding:12px;border-radius:10px;font-size:13px;color:var(--text-secondary);line-height:1.6;}
 
+    /* AI 老师实时陪练面板 */
+    .ai-teacher{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);animation:pop .22s ease;}
+    .ai-tch-head{margin-bottom:10px;}
+    .ai-tch-title{font-size:14px;font-weight:700;color:var(--text);}
+    .ai-tch-tip{font-size:11px;color:var(--text-tertiary);margin-top:3px;line-height:1.4;}
+    .ai-tabs{display:flex;gap:8px;margin-bottom:12px;}
+    .ai-tab{flex:1;padding:8px;border-radius:12px;font-size:13px;font-weight:600;background:var(--primary-soft);color:var(--text-secondary);border:1px solid var(--border);transition:all .15s;}
+    .ai-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .ai-panel{margin-bottom:6px;}
+    .ai-tline{font-size:12px;color:var(--text-secondary);margin-bottom:8px;}
+    .ai-notes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+    .ai-note{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;border-radius:12px;background:#fff;border:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text);min-width:50px;transition:all .15s;}
+    .ai-note small{font-size:10px;font-weight:500;color:var(--text-tertiary);margin-top:2px;}
+    .ai-note.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 3px 8px rgba(107,142,66,.3);}
+    .ai-note.active small{color:rgba(255,255,255,.85);}
+    .ai-pitch{margin:10px 0;}
+    .ai-pitch-bar{position:relative;height:30px;background:linear-gradient(90deg,#FFE3E3,#FFF6E0 50%,#E3F0FF);border-radius:999px;border:1px solid var(--border);overflow:hidden;}
+    .ai-pitch-target{position:absolute;top:0;bottom:0;width:2px;background:var(--primary);left:50%;transform:translateX(-50%);}
+    .ai-pitch-needle{position:absolute;top:2px;bottom:2px;width:6px;border-radius:999px;background:#FF4081;left:50%;transform:translateX(-50%);transition:left .06s linear;box-shadow:0 0 6px rgba(255,64,129,.6);}
+    .ai-pitch-read{display:flex;justify-content:space-between;font-size:12px;margin-top:6px;}
+    .ai-note-name{font-weight:700;color:var(--text);}
+    .ai-dev{color:var(--text-secondary);}
+    .ai-stat{font-size:12px;color:var(--text-secondary);margin:8px 0;}
+    .ai-stat b{color:var(--primary);}
+    .ai-actions{display:flex;gap:8px;margin-top:6px;}
+    .ai-actions .btn-primary,.ai-actions .btn-outline{flex:1;}
+    .ai-live{margin-top:10px;font-size:12px;color:var(--primary-dark);background:var(--primary-soft);border-radius:10px;padding:8px 10px;line-height:1.5;}
+    .ai-hint{font-size:11px;color:var(--text-tertiary);margin:8px 0;line-height:1.5;}
+    .ai-ask{display:flex;gap:8px;margin-top:10px;}
+    .ai-ask .btn-outline{flex:1;}
+    .ai-cam{width:100%;border-radius:12px;background:#000;aspect-ratio:4/3;object-fit:cover;margin-bottom:8px;}
+
     /* 英语单词卡片 */
     .word-card{background:var(--card);border-radius:18px;padding:18px;text-align:center;margin-bottom:14px;box-shadow:var(--shadow);}
     .word-en{font-size:28px;font-weight:800;margin-bottom:4px;}
@@ -1057,6 +1089,7 @@
 
   /* ---------- 子页面系统 ---------- */
   function openSubpage(title, html) {
+    stopAllAISessions();
     subStack.push({ title, html });
     $('#viewTitle').textContent = title;
     $('#backBtn').classList.add('show');
@@ -1082,6 +1115,7 @@
     setTimeout(updateScrollUI, 60);
   }
   function closeSubpage() {
+    stopAllAISessions();
     subStack = [];
     $('#subpage').classList.remove('show');
     $('#subpage').classList.add('hidden');
@@ -1388,10 +1422,20 @@
       if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const rec = new SR(); rec.lang = 'zh-CN'; rec.interimResults = false; rec.maxAlternatives = 1;
-      rec.onresult = ev => { const t = ev.results[0][0].transcript; const inp = $('#pianoInput'); if (inp) inp.value = t; toast('已识别，点「让AI教练看看」'); };
-      rec.onerror = () => toast('语音识别失败，请手动输入');
-      rec.start(); return;
+      rec.onresult = ev => { const t = ev.results[0][0].transcript; aiCoachReply(t, $('#pianoResult'), 'piano'); };
+      rec.onerror = () => toast('语音识别失败，请重试');
+      toast('请说出你的问题…'); rec.start(); return;
     }
+    const pianoGuide = e.target.closest('#pianoGuide');
+    if (pianoGuide) { voiceGuideOn = !voiceGuideOn; pianoGuide.textContent = voiceGuideOn ? '🔊 语音指导：开' : '🔇 语音指导：关'; if (voiceGuideOn) speakGuide('语音指导已开启'); return; }
+    const pianoListen = e.target.closest('#pianoListen');
+    if (pianoListen) { startPianoListen(); return; }
+    const pianoStop = e.target.closest('#pianoStop');
+    if (pianoStop) { stopPianoListen(); return; }
+    const pianoCamStart = e.target.closest('#pianoCamStart');
+    if (pianoCamStart) { startPianoCam(); return; }
+    const pianoCamStop = e.target.closest('#pianoCamStop');
+    if (pianoCamStop) { stopPianoCam(); return; }
     const vkKey = e.target.closest('.vk-white, .vk-black');
     if (vkKey) {
       playNote(Number(vkKey.dataset.freq));
@@ -1412,16 +1456,7 @@
     if (pMap) { const k = pMap.dataset.map.split(':')[1]; renderPianoModule(k); return; }
     const pModCheck = e.target.closest('[data-modcheck^="piano:"]');
     if (pModCheck) { const k = pModCheck.dataset.modcheck.split(':')[1]; const d = getPianoData(); d.progress[k] = Math.min(100, (d.progress[k] || 0) + 15); d.xp += 5; setPianoData(d); toast(`${k} +15%`); renderPianoModule(k); return; }
-    const pAsk = e.target.closest('#pianoAsk');
-    if (pAsk) {
-      const q = $('#pianoInput') && $('#pianoInput').value.trim();
-      if (!q) { toast('请先描述你的问题'); return; }
-      const res = $('#pianoResult'); res.classList.remove('hidden');
-      const reply = `针对「${q}」，建议：第一，先分手慢练，节拍器设 60；第二，把困难小节循环练五遍再串起来；第三，录下来自己听，比老师说的更直观。`;
-      res.innerHTML = `<b>🎹 AI 钢琴教练：</b><br/>${esc(reply)}<br/><br/>💡 小技巧：手型保持「握鸡蛋」弧度，指尖立起来触键，节奏不稳就先只练右手。`;
-      speakText(reply, 'zh-CN', 0.95);
-      return;
-    }
+    // 钢琴「看/听」与语音问逻辑见上方 #pianoMic / #pianoListen / #pianoCamStart；文字回复统一由 aiCoachReply 处理
     const pNext = e.target.closest('#pianoNext');
     if (pNext) {
       const acc = Number(prompt('今天掌握得怎么样？\n1=很吃力 2=一般 3=顺利 4=很轻松', '3') || '3');
@@ -1441,14 +1476,29 @@
     if (sMap) { const k = sMap.dataset.map.split(':')[1]; renderSingModule(k); return; }
     const sModCheck = e.target.closest('[data-modcheck^="sing:"]');
     if (sModCheck) { const k = sModCheck.dataset.modcheck.split(':')[1]; const d = getSingData(); d.progress[k] = Math.min(100, (d.progress[k] || 0) + 15); d.xp += 5; setSingData(d); toast(`${k} +15%`); renderSingModule(k); return; }
-    const sAsk = e.target.closest('#singAsk');
-    if (sAsk) {
-      const q = $('#singInput') && $('#singInput').value.trim();
-      if (!q) { toast('请先描述问题'); return; }
-      const res = $('#singResult'); res.classList.remove('hidden');
-      res.innerHTML = `<b>AI 唱歌老师反馈：</b><br/>针对「${esc(q)}」：<br/>① 每天做「打嘟」唇颤音 2 分钟放松声带；<br/>② 用钢琴或 App 找基准音，跟唱 do-re-mi；<br/>③ 录下来对比原唱，找出偏差的音。`;
-      return;
+    const singTabBtn = e.target.closest('[data-singtab]');
+    if (singTabBtn) { switchSingTab(singTabBtn.dataset.singtab); return; }
+    const sTarget = e.target.closest('[data-singtarget]');
+    if (sTarget) { setSingTarget(Number(sTarget.dataset.singtarget), sTarget); return; }
+    const singListen = e.target.closest('#singListen');
+    if (singListen) { startSingListen(); return; }
+    const singStop = e.target.closest('#singStop');
+    if (singStop) { stopSingListen(); return; }
+    const singCamStart = e.target.closest('#singCamStart');
+    if (singCamStart) { startSingCam(); return; }
+    const singCamStop = e.target.closest('#singCamStop');
+    if (singCamStop) { stopSingCam(); return; }
+    const singAsk = e.target.closest('#singAsk');
+    if (singAsk) {
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const rec = new SR(); rec.lang = 'zh-CN'; rec.interimResults = false; rec.maxAlternatives = 1;
+      rec.onresult = ev => { const t = ev.results[0][0].transcript; aiCoachReply(t, $('#singResult'), 'sing'); };
+      rec.onerror = () => toast('语音识别失败，请重试');
+      toast('请说出你的问题…'); rec.start(); return;
     }
+    const singGuide = e.target.closest('#singGuide');
+    if (singGuide) { voiceGuideOn = !voiceGuideOn; singGuide.textContent = voiceGuideOn ? '🔊 语音指导：开' : '🔇 语音指导：关'; if (voiceGuideOn) speakGuide('语音指导已开启'); return; }
     const sNext = e.target.closest('#singNext');
     if (sNext) {
       const acc = Number(prompt('今天练声感觉如何？\n1=很吃力 2=一般 3=顺利 4=很轻松', '3') || '3');
@@ -2047,6 +2097,8 @@
     vk.innerHTML = html;
   }
   function renderPiano() {
+    window.__aiState = window.__aiState || {};
+    window.__aiState.piano = { hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0 };
     const d = getPianoData();
     const levels = ['零基础', '入门', '进阶', '熟练'];
     const units = [{ k: '音阶', i: '🎹' }, { k: '音调', i: '🎵' }, { k: '简单曲目', i: '🎼' }, { k: '和弦', i: '🎸' }];
@@ -2066,13 +2118,44 @@
         <div class="vk-hint" id="vkHint">点击琴键听音；点「跟弹练习」考你 C-D-E-F-G 音阶</div>
         <button class="btn-outline" id="vkTest" style="width:100%;margin-top:8px;">🎯 跟弹练习：弹 C→D→E→F→G</button>
       </div>
-      <div class="ai-form">
-        <label>🎹 AI 钢琴教练 · 语音或文字描述你的问题<input id="pianoInput" placeholder="如：手指跨不开、左右手不协调、节奏不稳…" /></label>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button class="btn-outline" id="pianoMic" style="flex:0 0 auto;">🎙️ 语音问</button>
-          <button class="btn-primary" id="pianoAsk" style="flex:1;">让 AI 教练看看（语音回复）</button>
+      <div class="ai-teacher">
+        <div class="ai-tch-head">
+          <div class="ai-tch-title">🎹 AI 钢琴教练 · 现场陪练</div>
+          <div class="ai-tch-tip">不用打字，老师直接听你弹的音准、看你的手型，实时语音指导</div>
         </div>
-        <div id="pianoResult" class="ai-result hidden" style="margin-top:12px;"></div>
+        <div class="ai-tabs">
+          <button class="ai-tab active" data-piantab="pitch">🎯 听音准</button>
+          <button class="ai-tab" data-piantab="hand">👀 看手型</button>
+        </div>
+        <div id="pianoPitch" class="ai-panel">
+          <div class="ai-pitch">
+            <div class="ai-pitch-bar">
+              <div class="ai-pitch-needle" id="pianoNeedle" style="left:50%"></div>
+            </div>
+            <div class="ai-pitch-read"><span id="pianoNoteName" class="ai-note-name">—</span><span id="pianoDev" class="ai-dev">偏差 —</span></div>
+          </div>
+          <div class="ai-stat">命中 <b id="pianoHit">0</b>/<b id="pianoTry">0</b>（<b id="pianoRate">0%</b>）</div>
+          <div class="ai-actions">
+            <button class="btn-primary" id="pianoListen">🎙️ 开始听我弹</button>
+            <button class="btn-outline hidden" id="pianoStop">⏹ 停止并总结</button>
+          </div>
+          <div id="pianoLive" class="ai-live hidden"></div>
+          <div class="ai-hint">在虚拟键盘或真实电子琴上弹一个音，老师听音准。也可先用上方「跟弹练习」弹 C→D→E→F→G。</div>
+        </div>
+        <div id="pianoHand" class="ai-panel hidden">
+          <video id="pianoCam" class="ai-cam" playsinline muted></video>
+          <div id="pianoCamTip" class="ai-live hidden"></div>
+          <div class="ai-hint">把手放在键盘上，老师看手指是否立起、手腕是否放平。基础动作感知，无需联网。</div>
+          <div class="ai-actions">
+            <button class="btn-primary" id="pianoCamStart">📷 开启摄像头看手型</button>
+            <button class="btn-outline hidden" id="pianoCamStop">⏹ 关闭</button>
+          </div>
+        </div>
+        <div class="ai-ask">
+          <button class="btn-outline" id="pianoMic">🎙️ 语音问教练</button>
+          <button class="btn-outline" id="pianoGuide">🔊 语音指导：开</button>
+        </div>
+        <div id="pianoResult" class="ai-result hidden" style="margin-top:10px;"></div>
       </div>
       <button class="btn-primary" style="width:100%;" id="pianoNext">打卡完成，更新下一课 →</button>
     `);
@@ -2132,6 +2215,8 @@
   function getSingData() { const p = load(LS.personal, {}); return p.singing || { streak: 0, xp: 0, hp: 5, level: 0, history: [], progress: { 练声: 0, 音准: 0, 气息: 0, 节奏: 0 } }; }
   function setSingData(d) { const p = load(LS.personal, {}); p.singing = d; save(LS.personal, p); }
   function renderSinging() {
+    window.__aiState = window.__aiState || {};
+    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0 };
     const d = getSingData();
     const levels = ['五音不全', '入门', '进阶', '熟练'];
     const units = [{ k: '练声', i: '🎤' }, { k: '音准', i: '🎵' }, { k: '气息', i: '💨' }, { k: '节奏', i: '🥁' }];
@@ -2146,10 +2231,46 @@
       <div class="diff-tabs">${levels.map((l, i) => `<button class="diff-tab ${i === d.level ? 'active' : ''}" data-sl="${i}">${l}</button>`).join('')}</div>
       <div class="card"><h4 style="margin:0 0 10px;">📚 学习地图（点击打卡）</h4><div class="map-row">${units.map(u => `<div class="map-circle ${d.progress[u.k] >= 100 ? 'done' : ''}" data-map="sing:${u.k}"><div class="map-icon">${u.i}</div><div class="map-label">${u.k}</div><div class="map-pct">${d.progress[u.k]}%</div></div>`).join('')}</div></div>
       ${videoListHTML(SING_VIDEOS[d.level], levels[d.level])}
-      <div class="ai-form">
-        <label>🎤 AI 唱歌老师 · 描述你练声/发声的问题<input id="singInput" placeholder="如：高音上不去、气息短、跑调…" /></label>
-        <button class="btn-primary" style="width:100%;margin-top:10px;" id="singAsk">让 AI 老师听听</button>
-        <div id="singResult" class="ai-result hidden" style="margin-top:12px;"></div>
+      <div class="ai-teacher">
+        <div class="ai-tch-head">
+          <div class="ai-tch-title">🎤 AI 唱歌老师 · 现场陪练</div>
+          <div class="ai-tch-tip">不用打字，老师直接听你唱、看你口型，实时语音指导</div>
+        </div>
+        <div class="ai-tabs">
+          <button class="ai-tab active" data-singtab="pitch">🎯 听音准</button>
+          <button class="ai-tab" data-singtab="mouth">👄 看口型</button>
+        </div>
+        <div id="singPitch" class="ai-panel">
+          <div class="ai-tline">先选目标音，老师先弹给你听，你跟着唱：</div>
+          <div class="ai-notes">${[['C4',261.63,'哆'],['D4',293.66,'来'],['E4',329.63,'咪'],['F4',349.23,'发'],['G4',392.00,'嗦'],['A4',440.00,'拉']].map(n=>`<button class="ai-note" data-singtarget="${n[1]}">${n[0]}<small>${n[2]}</small></button>`).join('')}</div>
+          <div class="ai-pitch">
+            <div class="ai-pitch-bar">
+              <div class="ai-pitch-target" id="singTarget" style="left:50%"></div>
+              <div class="ai-pitch-needle" id="singNeedle" style="left:50%"></div>
+            </div>
+            <div class="ai-pitch-read"><span id="singNoteName" class="ai-note-name">—</span><span id="singDev" class="ai-dev">偏差 —</span></div>
+          </div>
+          <div class="ai-stat">命中 <b id="singHit">0</b>/<b id="singTry">0</b>（<b id="singRate">0%</b>）</div>
+          <div class="ai-actions">
+            <button class="btn-primary" id="singListen">🎙️ 开始听我唱</button>
+            <button class="btn-outline hidden" id="singStop">⏹ 停止并总结</button>
+          </div>
+          <div id="singLive" class="ai-live hidden"></div>
+        </div>
+        <div id="singMouth" class="ai-panel hidden">
+          <video id="singCam" class="ai-cam" playsinline muted></video>
+          <div id="singCamTip" class="ai-live hidden"></div>
+          <div class="ai-hint">对着镜头发声，老师看你在唱、口型是否打开。基础动作感知，无需联网。</div>
+          <div class="ai-actions">
+            <button class="btn-primary" id="singCamStart">📷 开启摄像头看口型</button>
+            <button class="btn-outline hidden" id="singCamStop">⏹ 关闭</button>
+          </div>
+        </div>
+        <div class="ai-ask">
+          <button class="btn-outline" id="singAsk">🎙️ 语音问老师</button>
+          <button class="btn-outline" id="singGuide">🔊 语音指导：开</button>
+        </div>
+        <div id="singResult" class="ai-result hidden" style="margin-top:10px;"></div>
       </div>
       <button class="btn-primary" style="width:100%;" id="singNext">练完打卡，更新进度 →</button>
     `);
@@ -2192,6 +2313,292 @@
     speechSynthesis.cancel(); speechSynthesis.speak(u);
   }
   function autoSpeakWord(en) { setTimeout(() => speakText(en), 300); }
+
+  /* ============ AI 老师：麦克风音高检测 + 摄像头动作感知（纯前端·零依赖） ============ */
+  window.__aiSessions = window.__aiSessions || [];
+  function registerAISession(obj) { window.__aiSessions.push(obj); }
+  function stopAllAISessions() {
+    (window.__aiSessions || []).forEach(s => { try { s.stop && s.stop(); } catch (e) {} });
+    window.__aiSessions = [];
+  }
+  let voiceGuideOn = true;
+  function speakGuide(text) { if (voiceGuideOn && text) speakText(text, 'zh-CN', 0.98); }
+
+  // autocorrelation 自相关音高检测：时域 Float32 → 基频 Hz（无音/噪声返回 -1）
+  function autoCorrelate(buf, sampleRate) {
+    let SIZE = buf.length;
+    let rms = 0;
+    for (let i = 0; i < SIZE; i++) { const v = buf[i]; rms += v * v; }
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.008) return -1;
+    let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+    for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
+    for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } }
+    buf = buf.slice(r1, r2); SIZE = buf.length;
+    if (SIZE < Math.floor(sampleRate / 1000)) return -1;
+    const c = new Float32Array(SIZE);
+    for (let i = 0; i < SIZE; i++) { let sum = 0; for (let j = 0; j < SIZE - i; j++) sum += buf[j] * buf[j + i]; c[i] = sum; }
+    let d = 0; while (d < SIZE - 1 && c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < SIZE; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+    let T0 = maxpos;
+    if (T0 > 0 && T0 < SIZE - 1) {
+      const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+      const a = (x1 + x3 - 2 * x2) / 2, b = (x3 - x1) / 2;
+      if (a) T0 = T0 - b / (2 * a);
+    }
+    if (T0 <= 0 || !isFinite(T0)) return -1;
+    return sampleRate / T0;
+  }
+  const _NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  function noteFromFreq(freq) {
+    if (!(freq > 0)) return { name: '—', cents: 0, midi: 0 };
+    const midi = Math.round(12 * Math.log2(freq / 440)) + 69;
+    const name = _NOTE_NAMES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
+    const fExact = 440 * Math.pow(2, (midi - 69) / 12);
+    const cents = Math.round(1200 * Math.log2(freq / fExact));
+    return { name, cents, midi };
+  }
+  // 麦克风实时音高训练器
+  function createPitchTrainer(onPitch) {
+    let audioCtx, analyser, stream, raf, data, running = false;
+    return {
+      async start() {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+        window.__micCtx = window.__micCtx || new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx = window.__micCtx;
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+        const src = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.1;
+        src.connect(analyser);
+        data = new Float32Array(analyser.fftSize);
+        running = true; loop();
+      },
+      stop() {
+        running = false;
+        if (raf) cancelAnimationFrame(raf);
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        try { analyser && analyser.disconnect(); } catch (e) {}
+      },
+      isRunning() { return running; }
+    };
+    function loop() {
+      if (!running) return;
+      analyser.getFloatTimeDomainData(data);
+      const f = autoCorrelate(data, audioCtx.sampleRate);
+      if (f > 60 && f < 1500) onPitch(f, noteFromFreq(f));
+      else onPitch(0, { name: '—', cents: 0 });
+      raf = requestAnimationFrame(loop);
+    }
+  }
+  // 摄像头动作感知（纯 Canvas 帧差，零依赖）
+  function createCamWatcher(videoEl, opts) {
+    opts = opts || {};
+    let stream, raf, running = false, prevGray = null, motionHistory = [];
+    return {
+      async start() {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
+        videoEl.srcObject = stream;
+        try { await videoEl.play(); } catch (e) {}
+        running = true; loop();
+      },
+      stop() {
+        running = false;
+        if (raf) cancelAnimationFrame(raf);
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        videoEl.srcObject = null; prevGray = null; motionHistory = [];
+      },
+      isRunning() { return running; }
+    };
+    function loop() {
+      if (!running) return;
+      const w = videoEl.videoWidth || 320, h = videoEl.videoHeight || 240;
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
+      try { ctx.drawImage(videoEl, 0, 0, w, h); } catch (e) { return; }
+      const img = ctx.getImageData(0, 0, w, h).data;
+      const gray = new Float32Array(w * h);
+      for (let i = 0, p = 0; i < img.length; i += 4, p++) gray[p] = img[i] * 0.299 + img[i + 1] * 0.587 + img[i + 2] * 0.114;
+      let motion = 0;
+      if (prevGray) { for (let i = 0; i < gray.length; i++) { const dd = gray[i] - prevGray[i]; motion += dd * dd; } motion = Math.sqrt(motion / gray.length); }
+      prevGray = gray;
+      motionHistory.push(motion); if (motionHistory.length > 20) motionHistory.shift();
+      const avg = motionHistory.reduce((a, b) => a + b, 0) / motionHistory.length;
+      if (opts.onFrame) opts.onFrame({ motion, avg, active: avg > 6, ctx, w, h });
+      raf = requestAnimationFrame(loop);
+    }
+  }
+  // AI 老师文字/语音回复（关键词匹配针对性建议）
+  function aiCoachReply(q, el, subject) {
+    if (!q) { toast('没听清，请再说一次'); return; }
+    el.classList.remove('hidden');
+    let reply;
+    if (subject === 'sing') {
+      if (/高音|上不去|破音|喊/.test(q)) reply = '高音上不去别硬顶，用混声：气声起头、找「呜」的位置往上滑，多做哼鸣过渡。每天打嘟唇颤音 2 分钟放松声带。';
+      else if (/低音|下不来|压/.test(q)) reply = '低音要放松喉咙，像叹气一样把声音往下沉，别压喉。';
+      else if (/气息|气短|喘|憋/.test(q)) reply = '练腹式呼吸：吸气肚子鼓、呼气发「嘶」尽量拖长，每天 3 分钟。唱歌用气的流动推声音，不要憋。';
+      else if (/跑调|音准|不在调|走音/.test(q)) reply = '先跟钢琴慢练 do-re-mi，用手机录下来对比原唱；音准能练出来，关键是先听准再唱准。';
+      else if (/节奏|抢拍|拖拍|跟不上/.test(q)) reply = '用节拍器从 60 速度开始，手打拍子嘴念节奏，先稳再快。';
+      else reply = '坚持每天练声 15 分钟，先打嘟开嗓再练音阶。把今天练的录下来和昨天对比，进步会很明显。';
+    } else {
+      if (/手型|手指|僵硬|跨不开|立/.test(q)) reply = '手型保持「握鸡蛋」弧度，指尖立起来触键，手腕与键盘基本平齐、别太高也别塌。跨不开就放慢、分手练。';
+      else if (/左右手|协调|配合|合手/.test(q)) reply = '先分手慢练到熟练，再合手；合手时把速度降到能跟上的最慢，节拍器从 60 起。';
+      else if (/节奏|不稳|抢|慢/.test(q)) reply = '节拍器设 60，先只练右手旋律稳住节奏，再加左手。';
+      else if (/音准|不准|跑音|错音/.test(q)) reply = '弹前先听标准音，弹错音就慢下来单练那一小节，用耳朵核对每个音。';
+      else if (/和弦|同时|按/.test(q)) reply = '和弦先分别按准每个音再一起落下，手腕放松，保持 2 秒找站稳的感觉。';
+      else reply = '每天先慢练音阶 10 遍打基础，再练曲目。卡住的小节循环练 5 遍再串起来。';
+    }
+    el.innerHTML = `<b>${subject === 'sing' ? '🎤 AI 唱歌老师' : '🎹 AI 钢琴教练'}：</b><br/>针对「${esc(q)}」：${esc(reply)}`;
+    speakGuide(reply);
+  }
+
+  /* ============ AI 老师：唱歌/钢琴 实时陪练控制 ============ */
+  function setSingTarget(freq, btn) {
+    const st = window.__aiState.sing; st.target = freq;
+    $$('[data-singtarget]').forEach(b => b.classList.toggle('active', b === btn));
+    playNote(freq);
+    $('#singTarget').style.left = '50%';
+    toast('目标音已设定，跟着唱～');
+  }
+  function startSingListen() {
+    const st = window.__aiState.sing;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
+    const btn = $('#singListen'), stop = $('#singStop'), live = $('#singLive');
+    const trainer = createPitchTrainer((freq, nt) => {
+      $('#singNoteName').textContent = nt.name;
+      const live2 = $('#singLive');
+      if (freq > 0) {
+        const target = st.target || 261.63;
+        const devCents = Math.round(1200 * Math.log2(freq / target));
+        const pos = Math.max(2, Math.min(98, 50 + devCents / 2.4));
+        $('#singNeedle').style.left = pos + '%';
+        let devTxt, hit = false;
+        if (Math.abs(devCents) <= 30) { devTxt = '✅ 很准'; hit = true; }
+        else if (devCents < 0) devTxt = '⬇ 偏低 ' + (-devCents) + ' 音分';
+        else devTxt = '⬆ 偏高 ' + devCents + ' 音分';
+        $('#singDev').textContent = devTxt;
+        if (st.active) {
+          st.tries++; if (hit) st.hits++;
+          $('#singHit').textContent = st.hits; $('#singTry').textContent = st.tries;
+          $('#singRate').textContent = Math.round(st.hits / st.tries * 100) + '%';
+          live2.classList.remove('hidden'); live2.innerHTML = '你唱出：<b>' + nt.name + '</b> · ' + devTxt;
+          const now = Date.now();
+          if (now - st.lastSpeak > 2600) {
+            st.lastSpeak = now;
+            if (hit) speakGuide('很准，保持这个音');
+            else if (devCents < 0) speakGuide('刚才偏低了，声音再高一点点');
+            else speakGuide('刚才偏高了，声音放低一点点');
+          }
+        }
+      } else { $('#singDev').textContent = '偏差 —'; }
+    });
+    st.trainer = trainer; st.active = true; st.lastSpeak = 0;
+    registerAISession(trainer);
+    trainer.start().then(() => {
+      btn.classList.add('hidden'); stop.classList.remove('hidden');
+      live.classList.remove('hidden'); live.innerHTML = '老师在听…唱一个音试试' + (st.target ? '' : '（未选目标音，可先选一个）');
+      if (st.target) playNote(st.target);
+    }).catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+  }
+  function stopSingListen() {
+    const st = window.__aiState.sing; st.active = false;
+    if (st.trainer) { st.trainer.stop(); st.trainer = null; }
+    $('#singListen').classList.remove('hidden'); $('#singStop').classList.add('hidden');
+    const rate = st.tries ? Math.round(st.hits / st.tries * 100) : 0;
+    speakGuide('练习结束，命中率 ' + rate + '%，' + (rate >= 70 ? '很棒，继续保持' : rate >= 40 ? '有进步，多练几遍' : '多跟着钢琴慢练，先听准再唱准'));
+    $('#singLive').innerHTML = '本轮命中率 <b>' + rate + '%</b>（命中 ' + st.hits + '/' + st.tries + '）';
+  }
+  function startSingCam() {
+    const st = window.__aiState.sing;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持摄像头'); return; }
+    const video = $('#singCam'), tip = $('#singCamTip');
+    const cam = createCamWatcher(video, {
+      onFrame: ({ avg, active }) => {
+        tip.classList.remove('hidden');
+        if (active) { tip.innerHTML = '👄 检测到你在发声/动嘴，口型保持打开，咬字清楚～'; if (Date.now() - st.camLast > 5000) { st.camLast = Date.now(); speakGuide('口型打开了，继续保持'); } }
+        else { tip.innerHTML = '👄 没检测到明显口型动作，对着镜头大声唱、把嘴张大'; }
+      }
+    });
+    st.cam = cam; st.camLast = 0; registerAISession(cam);
+    cam.start().then(() => { $('#singCamStart').classList.add('hidden'); $('#singCamStop').classList.remove('hidden'); }).catch(err => { toast('摄像头开启失败：' + ((err && err.message) || err)); });
+  }
+  function stopSingCam() {
+    const st = window.__aiState.sing;
+    if (st.cam) { st.cam.stop(); st.cam = null; }
+    $('#singCamStart').classList.remove('hidden'); $('#singCamStop').classList.add('hidden');
+    $('#singCamTip').classList.add('hidden');
+  }
+  function switchSingTab(tab) {
+    $$('[data-singtab]').forEach(b => b.classList.toggle('active', b.dataset.singtab === tab));
+    $('#singPitch').classList.toggle('hidden', tab !== 'pitch');
+    $('#singMouth').classList.toggle('hidden', tab !== 'mouth');
+    const st = window.__aiState.sing;
+    if (tab !== 'pitch' && st.trainer) { st.active = false; st.trainer.stop(); st.trainer = null; $('#singListen').classList.remove('hidden'); $('#singStop').classList.add('hidden'); }
+    if (tab !== 'mouth' && st.cam) { st.cam.stop(); st.cam = null; $('#singCamStart').classList.remove('hidden'); $('#singCamStop').classList.add('hidden'); $('#singCamTip').classList.add('hidden'); }
+  }
+  function startPianoListen() {
+    const st = window.__aiState.piano;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
+    const btn = $('#pianoListen'), stop = $('#pianoStop'), live = $('#pianoLive');
+    const trainer = createPitchTrainer((freq, nt) => {
+      $('#pianoNoteName').textContent = nt.name;
+      if (freq > 0) {
+        const cents = nt.cents;
+        const pos = Math.max(2, Math.min(98, 50 + cents / 2.4));
+        $('#pianoNeedle').style.left = pos + '%';
+        let devTxt, hit = false;
+        if (Math.abs(cents) <= 35) { devTxt = '✅ 音准不错'; hit = true; }
+        else if (cents < 0) devTxt = '⬇ 偏低 ' + (-cents);
+        else devTxt = '⬆ 偏高 ' + cents;
+        $('#pianoDev').textContent = devTxt;
+        if (st.active) {
+          st.tries++; if (hit) st.hits++;
+          $('#pianoHit').textContent = st.hits; $('#pianoTry').textContent = st.tries;
+          $('#pianoRate').textContent = Math.round(st.hits / st.tries * 100) + '%';
+          live.classList.remove('hidden'); live.innerHTML = '你弹到：<b>' + nt.name + '</b> · ' + devTxt;
+          const now = Date.now();
+          if (now - st.lastSpeak > 2600) {
+            st.lastSpeak = now;
+            if (hit) speakGuide('这个音很准');
+            else if (cents < 0) speakGuide('偏低了一点，手指再往右一点');
+            else speakGuide('偏高了，往左一点');
+          }
+        }
+      } else { $('#pianoDev').textContent = '偏差 —'; }
+    });
+    st.trainer = trainer; st.active = true; st.lastSpeak = 0;
+    registerAISession(trainer);
+    trainer.start().then(() => { btn.classList.add('hidden'); stop.classList.remove('hidden'); live.classList.remove('hidden'); live.innerHTML = '老师在听…弹一个音试试'; }).catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+  }
+  function stopPianoListen() {
+    const st = window.__aiState.piano; st.active = false;
+    if (st.trainer) { st.trainer.stop(); st.trainer = null; }
+    $('#pianoListen').classList.remove('hidden'); $('#pianoStop').classList.add('hidden');
+    const rate = st.tries ? Math.round(st.hits / st.tries * 100) : 0;
+    speakGuide('练习结束，音准命中率 ' + rate + '%，' + (rate >= 70 ? '很稳，继续保持' : rate >= 40 ? '有进步，慢练找准每个音' : '多听标准音，慢下来单练'));
+    $('#pianoLive').innerHTML = '本轮音准命中率 <b>' + rate + '%</b>（命中 ' + st.hits + '/' + st.tries + '）';
+  }
+  function startPianoCam() {
+    const st = window.__aiState.piano;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持摄像头'); return; }
+    const video = $('#pianoCam'), tip = $('#pianoCamTip');
+    const cam = createCamWatcher(video, {
+      onFrame: ({ avg, active }) => {
+        tip.classList.remove('hidden');
+        if (active) { tip.innerHTML = '🤚 看到你的手在动，保持手指立起、手腕放平、像握鸡蛋～'; if (Date.now() - st.camLast > 5000) { st.camLast = Date.now(); speakGuide('手放得不错，手指立起来继续'); } }
+        else { tip.innerHTML = '🤚 没检测到键盘上的手部动作，把手放在键盘上开始弹吧'; }
+      }
+    });
+    st.cam = cam; st.camLast = 0; registerAISession(cam);
+    cam.start().then(() => { $('#pianoCamStart').classList.add('hidden'); $('#pianoCamStop').classList.remove('hidden'); }).catch(err => { toast('摄像头开启失败：' + ((err && err.message) || err)); });
+  }
+  function stopPianoCam() {
+    const st = window.__aiState.piano;
+    if (st.cam) { st.cam.stop(); st.cam = null; }
+    $('#pianoCamStart').classList.remove('hidden'); $('#pianoCamStop').classList.add('hidden');
+    $('#pianoCamTip').classList.add('hidden');
+  }
+
   const WB_ENGLISH_STATE = 'wb_english_state';
   const WB_ENGLISH_WORDS = 'wb_english_words';
   const WB_ENGLISH_TASKS = 'wb_english_tasks';
