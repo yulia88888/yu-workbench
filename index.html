@@ -177,11 +177,11 @@
     .face-anim{width:100%;height:100%;display:block;}
     .massage-hand{filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));}
 
-    .massage-play{height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#FFF8FA 0%,#FFF0F3 100%);padding:0 16px 16px;}
+    .massage-play{height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#FFF8FA 0%,#FFF0F3 100%);padding:0 16px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
     .massage-play-header{display:flex;align-items:center;gap:10px;padding:12px 0 8px;}
     .massage-play-close{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--border);font-size:20px;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);}
     .massage-play-title{font-size:18px;font-weight:800;margin:0;}
-    .massage-play-face{width:260px;height:300px;margin:6px auto 14px;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 10px 30px rgba(255,94,156,.12);}
+    .massage-play-face{width:260px;height:300px;margin:6px auto 14px;background:#FFE0E0;border-radius:50% 50% 45% 45%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 10px 30px rgba(255,94,156,.12);flex-shrink:0;}
     .massage-step-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
     .massage-step-badge{background:var(--pink);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;}
     .massage-step-label{background:#fff;color:var(--pink);font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid #FFD6E3;}
@@ -191,11 +191,16 @@
     .massage-timer-bar{height:8px;background:#FFE0EB;border-radius:999px;overflow:hidden;margin-bottom:10px;}
     .massage-timer-fill{height:100%;background:linear-gradient(90deg,var(--pink),#FF8FB3);border-radius:999px;transition:width .2s linear;}
     .massage-time{text-align:center;font-size:20px;font-weight:800;color:var(--pink);margin-bottom:18px;}
-    .massage-controls{position:sticky;bottom:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:12px 0 8px;background:linear-gradient(180deg,rgba(255,248,250,0) 0%,#FFF0F3 30%);}
+    .massage-controls{display:flex;align-items:center;gap:12px;padding:12px 0 8px;margin-top:auto;}
     .massage-controls button{flex:1;padding:14px 6px;border-radius:999px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
     .massage-controls .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow);}
     .massage-controls .btn-primary{background:var(--pink);color:#fff;box-shadow:0 4px 14px rgba(255,94,156,.35);display:flex;align-items:center;justify-content:center;gap:6px;}
     .massage-controls .btn-primary:active{transform:scale(.97);}
+    .massage-video{background:#fff;border-radius:16px;padding:14px;margin-top:4px;margin-bottom:8px;box-shadow:var(--shadow);}
+    .massage-video h4{margin:0 0 10px;font-size:15px;}
+    .massage-video .video-item{margin:0;}
+    .massage-video .video-title{font-size:14px;font-weight:600;}
+    .massage-video .video-meta{font-size:12px;color:var(--text-secondary);}
 
     /* 电子琴 / 唱歌 / 英语 通用 */
     .stat-row{display:flex;justify-content:space-around;background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;}
@@ -1889,6 +1894,17 @@
           <button class='btn-outline' id='msPrev'>上一步</button>
           <button class='btn-primary' id='msStart'>▶ 开始</button>
           <button class='btn-outline' id='msNext'>下一步</button>
+        </div>
+        <div class='massage-video'>
+          <h4>📺 推荐跟练视频</h4>
+          <div class='video-item' data-bv='${esc(plan.video.bv)}' data-page='1' data-title='${esc(plan.video.title)}'>
+            <div class='video-info'><div class='video-title'>${esc(plan.video.title)}</div><div class='video-meta'>📚 真实跟练视频</div></div>
+            <div class='video-actions'>
+              ${hasBv ? '<button class="btn-outline video-play" data-action="play">本页播放</button>' : ''}
+              <a href='${hasBv ? bvidUrl(plan.video.bv) : '#'}' target='_blank' rel='noopener' class='btn-outline'>跳转原视频 ↗</a>
+            </div>
+            <div class='video-player'></div>
+          </div>
         </div>
       </div>
     `);
