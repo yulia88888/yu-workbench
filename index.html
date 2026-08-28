@@ -297,6 +297,18 @@
     .ai-textarea{width:100%;min-height:110px;box-sizing:border-box;border:1.5px solid var(--border);border-radius:12px;padding:10px;font-size:13px;line-height:1.6;color:var(--text);background:#FAFBFF;resize:vertical;}
     .ai-textarea:focus{outline:none;border-color:var(--primary);}
 
+    /* AI 逐句点评 */
+    .ai-settings{margin:10px 0;border:1px solid var(--border);border-radius:12px;background:#FAFBFF;padding:8px 10px;}
+    .ai-settings summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--text);}
+    .ai-set-box{margin-top:10px;}
+    .ai-set-row{margin-bottom:8px;}
+    .ai-set-row label{display:block;font-size:11px;color:var(--text-secondary);margin-bottom:3px;}
+    .ai-set-row input{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:13px;outline:none;background:#fff;}
+    .ai-set-row input:focus{border-color:var(--primary);}
+    .ai-review-result{margin-top:10px;background:#F3F8FF;border-left:4px solid #4A90E2;padding:12px;border-radius:10px;font-size:13px;color:var(--text-secondary);line-height:1.6;}
+    .ai-review-result b{color:var(--text);}
+    .ai-review-body{margin-top:6px;}
+
     /* 英语单词卡片 */
     .word-card{background:var(--card);border-radius:18px;padding:18px;text-align:center;margin-bottom:14px;box-shadow:var(--shadow);}
     .word-en{font-size:28px;font-weight:800;margin-bottom:4px;}
@@ -1591,6 +1603,37 @@
     }
     const singGuide = e.target.closest('#singGuide');
     if (singGuide) { voiceGuideOn = !voiceGuideOn; singGuide.textContent = voiceGuideOn ? '🔊 语音指导：开' : '🔇 语音指导：关'; if (voiceGuideOn) speakGuide('语音指导已开启'); return; }
+    const aiSave = e.target.closest('#aiSave');
+    if (aiSave) { saveAiConfig(); return; }
+    const reviewMode = e.target.closest('[data-reviewmode]');
+    if (reviewMode) {
+      const st = window.__aiState.sing;
+      st.mode = reviewMode.dataset.reviewmode;
+      $$('[data-reviewmode]').forEach(b => b.classList.toggle('active', b === reviewMode));
+      $('#reviewCustomBox').classList.toggle('hidden', st.mode !== 'custom');
+      const rn = $('#reviewName'); rn.classList.remove('hidden');
+      if (st.mode === 'scale') rn.innerHTML = '🎼 曲目：音阶 do-re-mi（中音区）';
+      else if (st.mode === 'song') rn.innerHTML = '🎵 曲目：小星星';
+      else rn.innerHTML = '✏️ 请在上方粘贴「歌名 + 简谱」后点载入';
+      st.reviewName = st.mode === 'custom' ? '自定义歌曲' : (st.mode === 'song' ? '小星星' : '音阶练习');
+      return;
+    }
+    const reviewCustomLoad = e.target.closest('#reviewCustomLoad');
+    if (reviewCustomLoad) {
+      const st = window.__aiState.sing;
+      const text = $('#reviewCustomInput') && $('#reviewCustomInput').value.trim();
+      if (!text) { toast('请先粘贴「歌名 + 简谱」'); return; }
+      const r = parseCustomSong(text);
+      if (!r.seq.length) { toast('没解析到音符，检查格式（每行：歌词 空格 数字）'); return; }
+      st.customList = r.seq; st.mode = 'custom'; st.reviewName = r.name;
+      $('#reviewName').classList.remove('hidden');
+      $('#reviewName').innerHTML = '🎵 正在评：<b>' + esc(r.name) + '</b>（共 ' + r.seq.length + ' 个字）';
+      return;
+    }
+    const reviewStart = e.target.closest('#reviewStart');
+    if (reviewStart) { startReview(); return; }
+    const reviewStop = e.target.closest('#reviewStop');
+    if (reviewStop) { stopReview(); return; }
     const sNext = e.target.closest('#singNext');
     if (sNext) {
       const acc = Number(prompt('今天练声感觉如何？\n1=很吃力 2=一般 3=顺利 4=很轻松', '3') || '3');
@@ -2308,7 +2351,9 @@
   function setSingData(d) { const p = load(LS.personal, {}); p.singing = d; save(LS.personal, p); }
   function renderSinging() {
     window.__aiState = window.__aiState || {};
-    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0, scaleOn: false, scaleIdx: 0, scalePassed: 0, scaleLocked: false, mode: 'scale', range: 'mid', customList: [] };
+    const _ac = loadAiConfig();
+    const _qv = s => (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0, scaleOn: false, scaleIdx: 0, scalePassed: 0, scaleLocked: false, mode: 'scale', range: 'mid', customList: [], reviewOn: false, reviewSamples: [], reviewTranscript: '', reviewRec: null, reviewStartT: 0, reviewName: '' };
     const d = getSingData();
     const levels = ['五音不全', '入门', '进阶', '熟练'];
     const units = [{ k: '练声', i: '🎤' }, { k: '音准', i: '🎵' }, { k: '气息', i: '💨' }, { k: '节奏', i: '🥁' }];
@@ -2332,6 +2377,7 @@
           <button class="ai-tab active" data-singtab="pitch">🎯 听音准</button>
           <button class="ai-tab" data-singtab="scale">🎼 逐音带练</button>
           <button class="ai-tab" data-singtab="mouth">👄 看口型</button>
+          <button class="ai-tab" data-singtab="review">🤖 AI 点评</button>
         </div>
         <div id="singPitch" class="ai-panel">
           <div class="ai-tline">先选目标音，老师先弹给你听，你跟着唱：</div>
@@ -2393,6 +2439,36 @@
 ="btn-primary" id="scaleStart">🎼 开始逐音带练</button>
             <button class="btn-outline hidden" id="scaleStop">⏹ 结束</button>
           </div>
+        </div>
+        <div id="singReview" class="ai-panel hidden">
+          <div class="ai-tline">连上你自己的免费大模型（DeepSeek / 通义 / 智谱等，注册送额度不花钱），唱一段后老师<b>逐句点评</b>音准、气息、咬字。</div>
+          <details class="ai-settings">
+            <summary>⚙️ AI 设置（填你自己的免费 Key，仅存本机）</summary>
+            <div class="ai-set-box">
+              <div class="ai-set-row"><label>API 地址（含 /v1）</label><input id="aiBase" placeholder="https://api.deepseek.com/v1" value="${_qv(_ac.base)}"></div>
+              <div class="ai-set-row"><label>API Key</label><input id="aiKey" type="password" placeholder="sk-..." value="${_qv(_ac.key)}"></div>
+              <div class="ai-set-row"><label>模型名</label><input id="aiModel" placeholder="deepseek-chat" value="${_qv(_ac.model)}"></div>
+              <button class="btn-primary" id="aiSave" style="margin-top:6px;">💾 保存设置</button>
+              <div id="aiSaveTip" class="ai-hint"></div>
+            </div>
+          </details>
+          <div class="ai-subtabs">
+            <span class="ai-subtab-label">曲目</span>
+            <button class="ai-subtab active" data-reviewmode="scale">🎼 音阶</button>
+            <button class="ai-subtab" data-reviewmode="song">🎵 小星星</button>
+            <button class="ai-subtab" data-reviewmode="custom">✏️ 自定义</button>
+          </div>
+          <div id="reviewCustomBox" class="ai-subpanel hidden">
+            <textarea id="reviewCustomInput" class="ai-textarea" placeholder="歌名：小星星&#10;一闪一闪亮晶晶 1155665&#10;满天都是小星星 4433221&#10;&#10;数字 1-7 = do re mi...，0 = 停顿"></textarea>
+            <div class="ai-actions"><button class="btn-primary" id="reviewCustomLoad">📥 载入并开始</button></div>
+          </div>
+          <div id="reviewName" class="ai-live hidden"></div>
+          <div class="ai-actions">
+            <button class="btn-primary" id="reviewStart">🎙️ 录音并点评</button>
+            <button class="btn-outline hidden" id="reviewStop">⏹ 停止</button>
+          </div>
+          <div id="reviewLive" class="ai-live hidden"></div>
+          <div id="singReviewResult" class="ai-review-result hidden"></div>
         </div>
         <div class="ai-ask">
           <button class="btn-outline" id="singAsk">🎙️ 语音问老师</button>
@@ -2656,6 +2732,103 @@
     $('#singCamStart').classList.remove('hidden'); $('#singCamStop').classList.add('hidden');
     $('#singCamTip').classList.add('hidden');
   }
+
+  /* ============ AI 逐句点评：用户自带免费大模型（OpenAI 兼容接口） ============ */
+  function loadAiConfig() { try { return JSON.parse(localStorage.getItem('yu_ai_cfg') || '{}'); } catch (e) { return {}; } }
+  function saveAiConfig() {
+    const base = $('#aiBase').value.trim();
+    const key = $('#aiKey').value.trim();
+    const model = $('#aiModel').value.trim();
+    localStorage.setItem('yu_ai_cfg', JSON.stringify({ base, key, model }));
+    const tip = $('#aiSaveTip');
+    if (tip) tip.textContent = '已保存到本机浏览器（不会上传到本项目服务器，只有你填的 API 平台会收到请求）';
+    toast('AI 设置已保存');
+  }
+  async function callLLM(messages) {
+    const cfg = loadAiConfig();
+    if (!cfg || !cfg.key) { toast('请先在「⚙️ AI 设置」里填写你的免费 Key'); return null; }
+    const base = (cfg.base || 'https://api.deepseek.com/v1').replace(/\/+$/, '');
+    const url = base + '/chat/completions';
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
+        body: JSON.stringify({ model: cfg.model || 'deepseek-chat', messages: messages, temperature: 0.7, max_tokens: 800 })
+      });
+      if (!res.ok) { const t = await res.text().catch(() => ''); toast('大模型调用失败：' + res.status); console.warn('LLM err', res.status, t); return null; }
+      const j = await res.json();
+      return (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+    } catch (e) {
+      toast('网络/CORS 错误：该平台可能不允许浏览器直连，换 DeepSeek/通义/智谱试试');
+      console.warn('LLM fetch err', e);
+      return null;
+    }
+  }
+  function buildReviewReport(seq, samples) {
+    if (!seq.length) return '（无曲目）';
+    const dur = samples.length ? samples[samples.length - 1].t : 0;
+    const per = dur > 0.5 ? dur / seq.length : 1.2;
+    let out = '';
+    seq.forEach((n, i) => {
+      const t0 = i * per, t1 = (i + 1) * per;
+      const seg = samples.filter(s => s.t >= t0 && s.t < t1 && s.freq > 0);
+      if (!seg.length) { out += `${i + 1}. ${n[2]}（目标 ${n[0]} ${Math.round(n[1])}Hz）：未检测到声音/没唱出\n`; return; }
+      const avg = seg.reduce((a, b) => a + b.freq, 0) / seg.length;
+      const dev = Math.round(1200 * Math.log2(avg / n[1]));
+      const ok = Math.abs(dev) <= 35;
+      out += `${i + 1}. ${n[2]}（目标 ${n[0]} ${Math.round(n[1])}Hz）→ 实际约 ${Math.round(avg)}Hz，偏差 ${dev > 0 ? '+' : ''}${dev} 音分 ${ok ? '（准✅）' : '（偏' + (dev < 0 ? '低' : '高') + '）'}\n`;
+    });
+    return out;
+  }
+  function startReview() {
+    const st = window.__aiState.sing;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
+    const cfg = loadAiConfig();
+    if (!cfg || !cfg.key) { toast('请先在「⚙️ AI 设置」里填写你的免费 Key'); return; }
+    if (st.mode === 'custom' && !st.customList.length) { toast('请先载入自定义歌曲'); return; }
+    const seq = getScaleSequence();
+    if (!seq.length) { toast('没有曲目'); return; }
+    st.reviewOn = true; st.reviewSamples = []; st.reviewTranscript = ''; st.reviewStartT = performance.now();
+    $('#reviewStart').classList.add('hidden'); $('#reviewStop').classList.remove('hidden');
+    const rl = $('#reviewLive'); rl.classList.remove('hidden'); rl.innerHTML = '🎙️ 录音中…请跟着唱《' + esc(st.reviewName || '曲目') + '》，唱完点「停止」';
+    $('#singReviewResult').classList.add('hidden');
+    const trainer = createPitchTrainer((freq) => { st.reviewSamples.push({ t: (performance.now() - st.reviewStartT) / 1000, freq: freq > 0 ? freq : 0 }); });
+    st.trainer = trainer; registerAISession(trainer);
+    trainer.start().catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      try {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const rec = new SR(); rec.lang = 'zh-CN'; rec.interimResults = true; rec.continuous = true;
+        rec.onresult = (ev) => { let t = ''; for (let i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript; st.reviewTranscript = t; };
+        rec.onerror = () => {};
+        st.reviewRec = rec; rec.start();
+      } catch (e) {}
+    }
+  }
+  async function stopReview() {
+    const st = window.__aiState.sing;
+    if (!st.reviewOn) return;
+    st.reviewOn = false;
+    if (st.trainer) { st.trainer.stop(); st.trainer = null; }
+    if (st.reviewRec) { try { st.reviewRec.stop(); } catch (e) {} st.reviewRec = null; }
+    $('#reviewStart').classList.remove('hidden'); $('#reviewStop').classList.add('hidden');
+    const rl = $('#reviewLive'); rl.innerHTML = '🤔 正在请 AI 老师点评…';
+    const seq = getScaleSequence();
+    const report = buildReviewReport(seq, st.reviewSamples);
+    const songName = st.reviewName || '曲目';
+    const sys = `你是一位专业、温和的声乐老师。下面是一名学生刚唱的一段《${songName}》的逐字音准分析（由前端音高检测得到，目标音为简谱对应频率，偏差单位为音分，±35 音分内算准）。请：1）逐字简评音准（哪几个字准、哪几个偏高低）；2）指出整体可能的问题（气息/咬字/节奏）并给 1-2 条针对性练习建议；3）用鼓励语气结尾。分点说明，控制在 200 字内。`;
+    const user = `【逐字分析】\n${report}\n【识别到的歌词】${st.reviewTranscript || '（未启用语音识别）'}\n请点评。`;
+    const content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: user }]);
+    const box = $('#singReviewResult');
+    if (content) {
+      box.classList.remove('hidden');
+      box.innerHTML = `<b>🤖 AI 老师逐句点评</b><div class="ai-review-body">${esc(content).replace(/\n/g, '<br/>')}</div>`;
+      speakGuide(content.slice(0, 110));
+      rl.innerHTML = '✅ 点评完成';
+    } else {
+      rl.innerHTML = '⚠️ 点评失败，检查 Key 是否有效，或换支持浏览器直连的平台（DeepSeek/通义/智谱）';
+    }
+  }
   const SCALE_LIST = [['C4',261.63,'哆'],['D4',293.66,'来'],['E4',329.63,'咪'],['F4',349.23,'发'],['G4',392.00,'嗦'],['A4',440.00,'拉'],['B4',493.88,'西'],['C5',523.25,'哆']];
   const SCALE_LOW = [['C3',130.81,'哆'],['D3',146.83,'来'],['E3',164.81,'咪'],['F3',174.61,'发'],['G3',196.00,'嗦'],['A3',220.00,'拉'],['B3',246.94,'西'],['C4',261.63,'哆']];
   const SCALE_HIGH = [['C5',523.25,'哆'],['D5',587.33,'来'],['E5',659.25,'咪'],['F5',698.46,'发'],['G5',783.99,'嗦'],['A5',880.00,'拉'],['B5',987.77,'西'],['C6',1046.50,'哆']];
@@ -2773,7 +2946,9 @@
     $('#singPitch').classList.toggle('hidden', tab !== 'pitch');
     $('#singScale').classList.toggle('hidden', tab !== 'scale');
     $('#singMouth').classList.toggle('hidden', tab !== 'mouth');
+    $('#singReview').classList.toggle('hidden', tab !== 'review');
     const st = window.__aiState.sing;
+    if (tab !== 'review' && st.reviewOn) { st.reviewOn = false; if (st.trainer) { st.trainer.stop(); st.trainer = null; } if (st.reviewRec) { try { st.reviewRec.stop(); } catch (e) {} st.reviewRec = null; } $('#reviewStart').classList.remove('hidden'); $('#reviewStop').classList.add('hidden'); }
     if (tab !== 'pitch' && st.trainer && !st.scaleOn) { st.active = false; st.trainer.stop(); st.trainer = null; $('#singListen').classList.remove('hidden'); $('#singStop').classList.add('hidden'); }
     if (tab !== 'scale' && st.scaleOn) { stopScaleTrain(); }
     if (tab !== 'mouth' && st.cam) { st.cam.stop(); st.cam = null; $('#singCamStart').classList.remove('hidden'); $('#singCamStop').classList.add('hidden'); $('#singCamTip').classList.add('hidden'); }
