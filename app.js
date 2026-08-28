@@ -2031,20 +2031,44 @@
       return null;
     }
   }
+  // 按实际发声边界切分：把"有声段"作为每个字的边界（拖拍/停顿不会错位），而非按时间硬切
+  function splitVoices(samples) {
+    const GAP = 0.18, MINLEN = 0.08; // 间隔>0.18s 视为换字；短于 0.08s 的声音忽略
+    const raw = [];
+    let cur = null;
+    const pushSeg = (c) => { const len = c.t1 - c.t0; if (len >= MINLEN) raw.push({ t0: c.t0, t1: c.t1, sum: c.sum, n: c.n, avg: c.sum / c.n }); };
+    for (const s of samples) {
+      if (s.freq > 0) {
+        if (!cur) cur = { t0: s.t, t1: s.t, sum: 0, n: 0 };
+        cur.t1 = s.t; cur.sum += s.freq; cur.n++;
+      } else if (cur) { pushSeg(cur); cur = null; }
+    }
+    if (cur) pushSeg(cur);
+    // 合并间隔过近的相邻段（中间静音<GAP 视为同一字，避免长音被误拆）
+    const merged = [];
+    for (const sg of raw) {
+      const last = merged[merged.length - 1];
+      if (last && sg.t0 - last.t1 < GAP) {
+        const sum = last.sum + sg.sum, n = last.n + sg.n;
+        last.t1 = sg.t1; last.sum = sum; last.n = n; last.avg = sum / n;
+      } else merged.push(sg);
+    }
+    return merged;
+  }
   function buildReviewReport(seq, samples) {
     if (!seq.length) return '（无曲目）';
-    const dur = samples.length ? samples[samples.length - 1].t : 0;
-    const per = dur > 0.5 ? dur / seq.length : 1.2;
+    const segs = splitVoices(samples);
+    const label = (n) => (n[2] || n[0]);
     let out = '';
     seq.forEach((n, i) => {
-      const t0 = i * per, t1 = (i + 1) * per;
-      const seg = samples.filter(s => s.t >= t0 && s.t < t1 && s.freq > 0);
-      if (!seg.length) { out += `${i + 1}. ${n[2]}（目标 ${n[0]} ${Math.round(n[1])}Hz）：未检测到声音/没唱出\n`; return; }
-      const avg = seg.reduce((a, b) => a + b.freq, 0) / seg.length;
+      const seg = segs[i];
+      if (!seg) { out += `${i + 1}. ${label(n)}（目标 ${n[0]} ${Math.round(n[1])}Hz）：未检测到声音/没唱出\n`; return; }
+      const avg = seg.avg;
       const dev = Math.round(1200 * Math.log2(avg / n[1]));
       const ok = Math.abs(dev) <= 35;
-      out += `${i + 1}. ${n[2]}（目标 ${n[0]} ${Math.round(n[1])}Hz）→ 实际约 ${Math.round(avg)}Hz，偏差 ${dev > 0 ? '+' : ''}${dev} 音分 ${ok ? '（准✅）' : '（偏' + (dev < 0 ? '低' : '高') + '）'}\n`;
+      out += `${i + 1}. ${label(n)}（目标 ${n[0]} ${Math.round(n[1])}Hz）→ 实际约 ${Math.round(avg)}Hz，偏差 ${dev > 0 ? '+' : ''}${dev} 音分 ${ok ? '（准✅）' : '（偏' + (dev < 0 ? '低' : '高') + '）'}\n`;
     });
+    out += `\n（已按你实际发声顺序对齐，共识别 ${segs.length} 个发声段）`;
     return out;
   }
   function startReview() {
