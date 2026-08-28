@@ -289,6 +289,10 @@
     .scale-note .scale-note-freq{font-size:10px;opacity:.6;margin-top:2px;}
     .scale-note.current{border-color:var(--primary);background:#EAF1FF;color:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
     .scale-note.done{border-color:#34C759;background:#E9FBEF;color:#1f9e46;}
+    .ai-subtabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+    .ai-subtab{font-size:12px;padding:6px 10px;border-radius:999px;border:1.5px solid var(--border);background:#FAFBFF;color:var(--text-secondary);cursor:pointer;transition:.2s;}
+    .ai-subtab.active{border-color:var(--primary);background:#EAF1FF;color:var(--primary);font-weight:700;}
+    .ai-subtab-label{font-size:12px;align-self:center;color:var(--text-secondary);}
 
     /* 英语单词卡片 */
     .word-card{background:var(--card);border-radius:18px;padding:18px;text-align:center;margin-bottom:14px;box-shadow:var(--shadow);}
@@ -1535,10 +1539,29 @@
     if (singCamStart) { startSingCam(); return; }
     const singCamStop = e.target.closest('#singCamStop');
     if (singCamStop) { stopSingCam(); return; }
+    const scaleMode = e.target.closest('[data-scalemode]');
+    if (scaleMode) {
+      const st = window.__aiState.sing;
+      if (st.scaleOn) stopScaleTrain(false);
+      st.mode = scaleMode.dataset.scalemode;
+      $$('[data-scalemode]').forEach(b => b.classList.toggle('active', b === scaleMode));
+      $('#scaleRangeBox').style.display = (st.mode === 'song') ? 'none' : '';
+      rebuildScaleTrack();
+      return;
+    }
+    const scaleRange = e.target.closest('[data-scaling]');
+    if (scaleRange) {
+      const st = window.__aiState.sing;
+      if (st.scaleOn) stopScaleTrain(false);
+      st.range = scaleRange.dataset.scaling;
+      $$('[data-scaling]').forEach(b => b.classList.toggle('active', b === scaleRange));
+      rebuildScaleTrack();
+      return;
+    }
     const scaleStart = e.target.closest('#scaleStart');
     if (scaleStart) { startScaleTrain(); return; }
     const scaleStop = e.target.closest('#scaleStop');
-    if (scaleStop) { stopScaleTrain(false); return; }
+    if (scaleStop) { stopScaleTrain(false);  return; }
     const singAsk = e.target.closest('#singAsk');
     if (singAsk) {
       if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
@@ -2267,7 +2290,7 @@
   function setSingData(d) { const p = load(LS.personal, {}); p.singing = d; save(LS.personal, p); }
   function renderSinging() {
     window.__aiState = window.__aiState || {};
-    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0, scaleOn: false, scaleIdx: 0, scalePassed: 0, scaleLocked: false };
+    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0, scaleOn: false, scaleIdx: 0, scalePassed: 0, scaleLocked: false, mode: 'scale', range: 'mid' };
     const d = getSingData();
     const levels = ['五音不全', '入门', '进阶', '熟练'];
     const units = [{ k: '练声', i: '🎤' }, { k: '音准', i: '🎵' }, { k: '气息', i: '💨' }, { k: '节奏', i: '🥁' }];
@@ -2320,6 +2343,16 @@
         </div>
         <div id="singScale" class="ai-panel hidden">
           <div class="ai-tline">老师一个音一个音带你唱 👇 先听标准音，再跟着唱，唱准了自动进下一个。</div>
+          <div class="ai-subtabs">
+            <button class="ai-subtab active" data-scalemode="scale">🎼 音阶 do-re-mi</button>
+            <button class="ai-subtab" data-scalemode="song">🎵 逐字带唱·小星星</button>
+          </div>
+          <div class="ai-subtabs" id="scaleRangeBox">
+            <span class="ai-subtab-label">音区</span>
+            <button class="ai-subtab active" data-scaling="mid">中 C4-C5</button>
+            <button class="ai-subtab" data-scaling="low">低 C3-C4</button>
+            <button class="ai-subtab" data-scaling="high">高 C5-C6</button>
+          </div>
           <div class="scale-track" id="scaleTrack"></div>
           <div class="ai-pitch">
             <div class="ai-pitch-bar">
@@ -2599,6 +2632,19 @@
     $('#singCamTip').classList.add('hidden');
   }
   const SCALE_LIST = [['C4',261.63,'哆'],['D4',293.66,'来'],['E4',329.63,'咪'],['F4',349.23,'发'],['G4',392.00,'嗦'],['A4',440.00,'拉'],['B4',493.88,'西'],['C5',523.25,'哆']];
+  const SCALE_LOW = [['C3',130.81,'哆'],['D3',146.83,'来'],['E3',164.81,'咪'],['F3',174.61,'发'],['G3',196.00,'嗦'],['A3',220.00,'拉'],['B3',246.94,'西'],['C4',261.63,'哆']];
+  const SCALE_HIGH = [['C5',523.25,'哆'],['D5',587.33,'来'],['E5',659.25,'咪'],['F5',698.46,'发'],['G5',783.99,'嗦'],['A5',880.00,'拉'],['B5',987.77,'西'],['C6',1046.50,'哆']];
+  const SONG_NOTES = [['C4',261.63,'一闪'],['C4',261.63,'一闪'],['G4',392.00,'亮晶'],['G4',392.00,'晶'],['A4',440.00,'满天'],['A4',440.00,'都'],['G4',392.00,'是星'],['F4',349.23,'挂在'],['F4',349.23,'天上'],['E4',329.63,'放光'],['E4',329.63,'明'],['D4',293.66,'好像'],['D4',293.66,'许'],['C4',261.63,'多星']];
+  function getScaleSequence() {
+    const st = window.__aiState.sing;
+    if (st.mode === 'song') return SONG_NOTES;
+    return (st.range === 'low' ? SCALE_LOW : st.range === 'high' ? SCALE_HIGH : SCALE_LIST);
+  }
+  function rebuildScaleTrack() {
+    const st = window.__aiState.sing;
+    const seq = getScaleSequence();
+    $('#scaleTrack').innerHTML = seq.map((n, i) => `<div class="scale-note" data-i="${i}"><div class="scale-note-name">${n[2]}</div><div class="scale-note-freq">${n[0]}</div></div>`).join('');
+  }
   function markScaleNote(idx, state) {
     $$('#scaleTrack .scale-note').forEach(el => {
       const i = Number(el.dataset.i);
@@ -2609,8 +2655,8 @@
   function startScaleTrain() {
     const st = window.__aiState.sing;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
-    st.scaleList = SCALE_LIST; st.scaleIdx = 0; st.scalePassed = 0; st.scaleLocked = false; st.scaleLastSpeak = 0; st.scaleOn = true;
-    $('#scaleTrack').innerHTML = SCALE_LIST.map((n, i) => `<div class="scale-note" data-i="${i}"><div class="scale-note-name">${n[2]}</div><div class="scale-note-freq">${n[0]}</div></div>`).join('');
+    st.scaleList = getScaleSequence(); st.scaleIdx = 0; st.scalePassed = 0; st.scaleLocked = false; st.scaleLastSpeak = 0; st.scaleOn = true;
+    rebuildScaleTrack();
     const trainer = createPitchTrainer((freq, nt) => {
       $('#scaleNoteName').textContent = freq > 0 ? nt.name : '—';
       if (freq > 0) {
@@ -2647,8 +2693,8 @@
     trainer.start().then(() => {
       $('#scaleStart').classList.add('hidden'); $('#scaleStop').classList.remove('hidden');
       $('#scalePrompt').classList.remove('hidden');
-      markScaleNote(0, 'current'); playNote(SCALE_LIST[ 0][1]);
-      $('#scalePrompt').innerHTML = '🎧 听老师唱：' + SCALE_LIST[0][2] + '（然后跟着唱）';
+      markScaleNote(0, 'current'); playNote(st.scaleList[0][1]);
+      $('#scalePrompt').innerHTML = '🎧 听老师唱：' + st.scaleList[0][2] + '（然后跟着唱）';
       speakGuide('我们先从哆开始，听我唱，然后你跟着唱');
     }).catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
   }
