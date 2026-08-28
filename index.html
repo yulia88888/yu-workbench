@@ -2804,11 +2804,37 @@
     out += `\n（已按你实际发声顺序对齐，共识别 ${segs.length} 个发声段）`;
     return out;
   }
+  // 纯本地逐字点评（无需大模型/Key/额度）：基于音高偏差数据用规则生成文字 + 本地 TTS
+  function buildLocalReview(seq, samples) {
+    const segs = splitVoices(samples);
+    let good = 0, high = 0, low = 0, miss = 0;
+    const bad = [];
+    seq.forEach((n, i) => {
+      const seg = segs[i];
+      const name = n[2] || n[0];
+      if (!seg) { miss++; bad.push(name + '（没唱出）'); return; }
+      const dev = Math.round(1200 * Math.log2(seg.avg / n[1]));
+      if (Math.abs(dev) <= 35) good++;
+      else if (dev < 0) { low++; bad.push(name + '（偏低）'); }
+      else { high++; bad.push(name + '（偏高）'); }
+    });
+    let s = `本次共 ${seq.length} 个字：准 ${good} 个、偏高 ${high} 个、偏低 ${low} 个、没唱出 ${miss} 个。\n`;
+    if (good === seq.length && miss === 0) s += '太棒了，每个字都音准到位！保持住～\n';
+    else {
+      if (bad.length) s += '重点练这几个：' + bad.slice(0, 6).join('、') + '。\n';
+      if (high > low) s += '整体偏高，唱时气息下沉、别往上挤脖子；';
+      else if (low > high) s += '整体偏低，把声音位置提起来、多给点气；';
+      else if (good === 0 && miss < seq.length) s += '多数音准偏差，先放慢、一个字一个字对准；';
+      s += '偏的字单独连唱 3 遍找感觉。\n';
+    }
+    s += '（本地点评·完全免费，未调用大模型；想更智能请到⚙️设置填免费 Key）';
+    return s;
+  }
   function startReview() {
     const st = window.__aiState.sing;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
     const cfg = loadAiConfig();
-    if (!cfg || !cfg.key) { toast('请先在「⚙️ AI 设置」里填写你的免费 Key'); return; }
+    if (!cfg || !cfg.key) { toast('未填 Key：将用「本地逐字点评」（完全免费，无需额度）'); }
     if (st.mode === 'custom' && !st.customList.length) { toast('请先载入自定义歌曲'); return; }
     const seq = getScaleSequence();
     if (!seq.length) { toast('没有曲目'); return; }
@@ -2836,21 +2862,28 @@
     if (st.trainer) { st.trainer.stop(); st.trainer = null; }
     if (st.reviewRec) { try { st.reviewRec.stop(); } catch (e) {} st.reviewRec = null; }
     $('#reviewStart').classList.remove('hidden'); $('#reviewStop').classList.add('hidden');
-    const rl = $('#reviewLive'); rl.innerHTML = '🤔 正在请 AI 老师点评…';
+    const rl = $('#reviewLive'); rl.innerHTML = '🤔 正在生成逐字点评…';
     const seq = getScaleSequence();
     const report = buildReviewReport(seq, st.reviewSamples);
     const songName = st.reviewName || '曲目';
-    const sys = `你是一位专业、温和的声乐老师。下面是一名学生刚唱的一段《${songName}》的逐字音准分析（由前端音高检测得到，目标音为简谱对应频率，偏差单位为音分，±35 音分内算准）。请：1）逐字简评音准（哪几个字准、哪几个偏高低）；2）指出整体可能的问题（气息/咬字/节奏）并给 1-2 条针对性练习建议；3）用鼓励语气结尾。分点说明，控制在 200 字内。`;
-    const user = `【逐字分析】\n${report}\n【识别到的歌词】${st.reviewTranscript || '（未启用语音识别）'}\n请点评。`;
-    const content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: user }]);
+    const cfg = loadAiConfig();
+    let content = null, source = '';
+    if (cfg && cfg.key) {
+      const sys = `你是一位专业、温和的声乐老师。下面是一名学生刚唱的一段《${songName}》的逐字音准分析（由前端音高检测得到，目标音为简谱对应频率，偏差单位为音分，±35 音分内算准）。请：1）逐字简评音准（哪几个字准、哪几个偏高低）；2）指出整体可能的问题（气息/咬字/节奏）并给 1-2 条针对性练习建议；3）用鼓励语气结尾。分点说明，控制在 200 字内。`;
+      const user = `【逐字分析】\n${report}\n【识别到的歌词】${st.reviewTranscript || '（未启用语音识别）'}\n请点评。`;
+      content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: user }]);
+      source = 'ai';
+    }
+    if (!content) { content = buildLocalReview(seq, st.reviewSamples); source = 'local'; }
     const box = $('#singReviewResult');
     if (content) {
       box.classList.remove('hidden');
-      box.innerHTML = `<b>🤖 AI 老师逐句点评</b><div class="ai-review-body">${esc(content).replace(/\n/g, '<br/>')}</div>`;
+      const title = source === 'ai' ? '🤖 AI 老师逐字点评' : '🎤 本地逐字点评（完全免费·无需 Key）';
+      box.innerHTML = `<b>${title}</b><div class="ai-review-body">${esc(content).replace(/\n/g, '<br/>')}</div>`;
       speakGuide(content.slice(0, 110));
       rl.innerHTML = '✅ 点评完成';
     } else {
-      rl.innerHTML = '⚠️ 点评失败，检查 Key 是否有效，或换支持浏览器直连的平台（DeepSeek/通义/智谱）';
+      rl.innerHTML = '⚠️ 点评失败，请重试';
     }
   }
   const SCALE_LIST = [['C4',261.63,'哆'],['D4',293.66,'来'],['E4',329.63,'咪'],['F4',349.23,'发'],['G4',392.00,'嗦'],['A4',440.00,'拉'],['B4',493.88,'西'],['C5',523.25,'哆']];
