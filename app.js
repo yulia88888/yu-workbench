@@ -827,7 +827,8 @@
       if (st.scaleOn) stopScaleTrain(false);
       st.mode = scaleMode.dataset.scalemode;
       $$('[data-scalemode]').forEach(b => b.classList.toggle('active', b === scaleMode));
-      $('#scaleRangeBox').style.display = (st.mode === 'song') ? 'none' : '';
+      $('#scaleRangeBox').style.display = (st.mode === 'song' || st.mode === 'custom') ? 'none' : '';
+      $('#customBox').classList.toggle('hidden', st.mode !== 'custom');
       rebuildScaleTrack();
       return;
     }
@@ -838,6 +839,20 @@
       st.range = scaleRange.dataset.scaling;
       $$('[data-scaling]').forEach(b => b.classList.toggle('active', b === scaleRange));
       rebuildScaleTrack();
+      return;
+    }
+    const customLoad = e.target.closest('#customLoad');
+    if (customLoad) {
+      const st = window.__aiState.sing;
+      const text = $('#customSongInput') && $('#customSongInput').value.trim();
+      if (!text) { toast('请先粘贴「歌名 + 简谱」'); return; }
+      const r = parseCustomSong(text);
+      if (!r.seq.length) { toast('没解析到音符，检查格式（每行：歌词 空格 数字）'); return; }
+      st.customList = r.seq; st.mode = 'custom';
+      $('#customBox').classList.add('hidden');
+      $('#customName').classList.remove('hidden');
+      $('#customName').innerHTML = '🎵 正在练：<b>' + esc(r.name) + '</b>（共 ' + r.seq.length + ' 个字，自动按较少的一方对齐）';
+      startScaleTrain();
       return;
     }
     const scaleStart = e.target.closest('#scaleStart');
@@ -1572,7 +1587,7 @@
   function setSingData(d) { const p = load(LS.personal, {}); p.singing = d; save(LS.personal, p); }
   function renderSinging() {
     window.__aiState = window.__aiState || {};
-    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0, scaleOn: false, scaleIdx: 0, scalePassed: 0, scaleLocked: false, mode: 'scale', range: 'mid' };
+    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0, scaleOn: false, scaleIdx: 0, scalePassed: 0, scaleLocked: false, mode: 'scale', range: 'mid', customList: [] };
     const d = getSingData();
     const levels = ['五音不全', '入门', '进阶', '熟练'];
     const units = [{ k: '练声', i: '🎤' }, { k: '音准', i: '🎵' }, { k: '气息', i: '💨' }, { k: '节奏', i: '🥁' }];
@@ -1628,6 +1643,7 @@
           <div class="ai-subtabs">
             <button class="ai-subtab active" data-scalemode="scale">🎼 音阶 do-re-mi</button>
             <button class="ai-subtab" data-scalemode="song">🎵 逐字带唱·小星星</button>
+            <button class="ai-subtab" data-scalemode="custom">✏️ 自定义歌曲</button>
           </div>
           <div class="ai-subtabs" id="scaleRangeBox">
             <span class="ai-subtab-label">音区</span>
@@ -1636,6 +1652,12 @@
             <button class="ai-subtab" data-scaling="high">高 C5-C6</button>
           </div>
           <div class="scale-track" id="scaleTrack"></div>
+          <div id="customBox" class="ai-subpanel hidden">
+            <div class="ai-tline">把「歌名 + 简谱」粘贴进来，老师逐字带你唱 👇</div>
+            <textarea id="customSongInput" class="ai-textarea" placeholder="歌名：小星星&#10;一闪一闪亮晶晶 1155665&#10;满天都是小星星 4433221&#10;&#10;数字 1-7 = do re mi fa sol la si，0 = 停顿，数字后加 ' 是高八度、加 . 是低八度"></textarea>
+            <div class="ai-actions"><button class="btn-primary" id="customLoad">📥 载入并开始</button></div>
+            <div id="customName" class="ai-live hidden"></div>
+          </div>
           <div class="ai-pitch">
             <div class="ai-pitch-bar">
               <div class="ai-pitch-target" id="scaleTarget" style="left:50%"></div>
@@ -1919,8 +1941,39 @@
   const SONG_NOTES = [['C4',261.63,'一闪'],['C4',261.63,'一闪'],['G4',392.00,'亮晶'],['G4',392.00,'晶'],['A4',440.00,'满天'],['A4',440.00,'都'],['G4',392.00,'是星'],['F4',349.23,'挂在'],['F4',349.23,'天上'],['E4',329.63,'放光'],['E4',329.63,'明'],['D4',293.66,'好像'],['D4',293.66,'许'],['C4',261.63,'多星']];
   function getScaleSequence() {
     const st = window.__aiState.sing;
+    if (st.mode === 'custom') return st.customList || [];
     if (st.mode === 'song') return SONG_NOTES;
     return (st.range === 'low' ? SCALE_LOW : st.range === 'high' ? SCALE_HIGH : SCALE_LIST);
+  }
+  function parseCustomSong(text) {
+    let name = '我的歌';
+    const seq = [];
+    const BASE = { '1': 261.63, '2': 293.66, '3': 329.63, '4': 349.23, '5': 392.00, '6': 440.00, '7': 493.88 };
+    const toFreq = (tok) => {
+      if (!tok || tok[0] === '0') return 0;
+      let f = BASE[tok[0]]; if (!f) return 0;
+      if (tok.includes("'") || tok.includes('^')) f *= 2;
+      else if (tok.includes('.') || tok.includes(',')) f /= 2;
+      return f;
+    };
+    const toName = (f) => f > 0 ? noteFromFreq(f).name : '—';
+    const lines = text.replace(/\r/g, '').split('\n');
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line) continue;
+      if (/^(歌名|歌曲|曲名|歌)/.test(line) && line.includes(':')) {
+        const m = line.match(/[:：]\s*(.+)$/); if (m) name = m[1].trim();
+        continue;
+      }
+      const parts = line.split(/\s+/);
+      if (parts.length < 2) continue;
+      const lyrics = Array.from(parts[0]);
+      const nums = parts.slice(1).join('');
+      const tokens = nums.match(/[0-7]['.^,]*|0/g) || [];
+      const n = Math.min(lyrics.length, tokens.length);
+      for (let i = 0; i < n; i++) { const f = toFreq(tokens[i]); seq.push([toName(f), f, lyrics[i]]); }
+    }
+    return { name, seq };
   }
   function rebuildScaleTrack() {
     const st = window.__aiState.sing;
