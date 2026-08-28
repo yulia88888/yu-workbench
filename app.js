@@ -821,6 +821,10 @@
     if (singCamStart) { startSingCam(); return; }
     const singCamStop = e.target.closest('#singCamStop');
     if (singCamStop) { stopSingCam(); return; }
+    const scaleStart = e.target.closest('#scaleStart');
+    if (scaleStart) { startScaleTrain(); return; }
+    const scaleStop = e.target.closest('#scaleStop');
+    if (scaleStop) { stopScaleTrain(false); return; }
     const singAsk = e.target.closest('#singAsk');
     if (singAsk) {
       if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
@@ -1549,7 +1553,7 @@
   function setSingData(d) { const p = load(LS.personal, {}); p.singing = d; save(LS.personal, p); }
   function renderSinging() {
     window.__aiState = window.__aiState || {};
-    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0 };
+    window.__aiState.sing = { target: null, hits: 0, tries: 0, active: false, lastSpeak: 0, cam: null, trainer: null, camLast: 0, scaleOn: false, scaleIdx: 0, scalePassed: 0, scaleLocked: false };
     const d = getSingData();
     const levels = ['五音不全', '入门', '进阶', '熟练'];
     const units = [{ k: '练声', i: '🎤' }, { k: '音准', i: '🎵' }, { k: '气息', i: '💨' }, { k: '节奏', i: '🥁' }];
@@ -1571,6 +1575,7 @@
         </div>
         <div class="ai-tabs">
           <button class="ai-tab active" data-singtab="pitch">🎯 听音准</button>
+          <button class="ai-tab" data-singtab="scale">🎼 逐音带练</button>
           <button class="ai-tab" data-singtab="mouth">👄 看口型</button>
         </div>
         <div id="singPitch" class="ai-panel">
@@ -1597,6 +1602,24 @@
           <div class="ai-actions">
             <button class="btn-primary" id="singCamStart">📷 开启摄像头看口型</button>
             <button class="btn-outline hidden" id="singCamStop">⏹ 关闭</button>
+          </div>
+        </div>
+        <div id="singScale" class="ai-panel hidden">
+          <div class="ai-tline">老师一个音一个音带你唱 👇 先听标准音，再跟着唱，唱准了自动进下一个。</div>
+          <div class="scale-track" id="scaleTrack"></div>
+          <div class="ai-pitch">
+            <div class="ai-pitch-bar">
+              <div class="ai-pitch-target" id="scaleTarget" style="left:50%"></div>
+              <div class="ai-pitch-needle" id="scaleNeedle" style="left:50%"></div>
+            </div>
+            <div class="ai-pitch-read"><span id="scaleNoteName" class="ai-note-name">—</span><span id="scaleDev" class="ai-dev">偏差 —</span></div>
+          </div>
+          <div id="scalePrompt" class="ai-live hidden"></div>
+          <div class="ai-actions">
+            <button class
+
+="btn-primary" id="scaleStart">🎼 开始逐音带练</button>
+            <button class="btn-outline hidden" id="scaleStop">⏹ 结束</button>
           </div>
         </div>
         <div class="ai-ask">
@@ -1861,12 +1884,82 @@
     $('#singCamStart').classList.remove('hidden'); $('#singCamStop').classList.add('hidden');
     $('#singCamTip').classList.add('hidden');
   }
+  const SCALE_LIST = [['C4',261.63,'哆'],['D4',293.66,'来'],['E4',329.63,'咪'],['F4',349.23,'发'],['G4',392.00,'嗦'],['A4',440.00,'拉'],['B4',493.88,'西'],['C5',523.25,'哆']];
+  function markScaleNote(idx, state) {
+    $$('#scaleTrack .scale-note').forEach(el => {
+      const i = Number(el.dataset.i);
+      el.classList.toggle('done', i < window.__aiState.sing.scaleIdx || (state === 'done' && i === idx));
+      el.classList.toggle('current', state === 'current' && i === idx);
+    });
+  }
+  function startScaleTrain() {
+    const st = window.__aiState.sing;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
+    st.scaleList = SCALE_LIST; st.scaleIdx = 0; st.scalePassed = 0; st.scaleLocked = false; st.scaleLastSpeak = 0; st.scaleOn = true;
+    $('#scaleTrack').innerHTML = SCALE_LIST.map((n, i) => `<div class="scale-note" data-i="${i}"><div class="scale-note-name">${n[2]}</div><div class="scale-note-freq">${n[0]}</div></div>`).join('');
+    const trainer = createPitchTrainer((freq, nt) => {
+      $('#scaleNoteName').textContent = freq > 0 ? nt.name : '—';
+      if (freq > 0) {
+        const target = st.scaleList[st.scaleIdx][1];
+        const dev = Math.round(1200 * Math.log2(freq / target));
+        $('#scaleNeedle').style.left = Math.max(2, Math.min(98, 50 + dev / 2.4)) + '%';
+        $('#scaleDev').textContent = Math.abs(dev) <= 35 ? '✅ 很准' : (dev < 0 ? '⬇ 偏低 ' + (-dev) : '⬆ 偏高 ' + dev);
+        if (!st.scaleLocked) {
+          if (Math.abs(dev) <= 35) {
+            st.scaleLocked = true; st.scalePassed++;
+            markScaleNote(st.scaleIdx, 'done');
+            $('#scalePrompt').classList.remove('hidden'); $('#scalePrompt').innerHTML = '✅ 「' + st.scaleList[st.scaleIdx][2] + '」很准！';
+            speakGuide('很准，下一个：' + (st.scaleList[st.scaleIdx + 1] ? st.scaleList[st.scaleIdx + 1][2] : '完成'));
+            setTimeout(() => {
+              if (!st.scaleOn) return;
+              st.scaleIdx++;
+              if (st.scaleIdx >= st.scaleList.length) { stopScaleTrain(true); return; }
+              st.scaleLocked = false;
+              playNote(st.scaleList[st.scaleIdx][1]);
+              $('#scalePrompt').innerHTML = '🎧 听老师唱：' + st.scaleList[st.scaleIdx][2] + '（然后跟着唱）';
+              markScaleNote(st.scaleIdx, 'current');
+            }, 1100);
+          } else {
+            const now = Date.now();
+            if (now - st.scaleLastSpeak > 2500) {
+              st.scaleLastSpeak = now;
+              speakGuide(dev < 0 ? '再高一点点' : '再低一点点');
+            }
+          }
+        }
+      } else { $('#scaleDev').textContent = '偏差 —'; }
+    });
+    st.trainer = trainer; registerAISession(trainer);
+    trainer.start().then(() => {
+      $('#scaleStart').classList.add('hidden'); $('#scaleStop').classList.remove('hidden');
+      $('#scalePrompt').classList.remove('hidden');
+      markScaleNote(0, 'current'); playNote(SCALE_LIST[ 0][1]);
+      $('#scalePrompt').innerHTML = '🎧 听老师唱：' + SCALE_LIST[0][2] + '（然后跟着唱）';
+      speakGuide('我们先从哆开始，听我唱，然后你跟着唱');
+    }).catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+  }
+  function stopScaleTrain(finished) {
+    const st = window.__aiState.sing;
+    st.scaleOn = false;
+    if (st.trainer) { st.trainer.stop(); st.trainer = null; }
+    $('#scaleStart').classList.remove('hidden'); $('#scaleStop').classList.add('hidden');
+    if (finished) {
+      $('#scalePrompt').innerHTML = '🎉 全部唱完！共唱准 <b>' + st.scalePassed + '</b> 个音，进步明显～';
+      speakGuide('全部唱完啦，唱准了 ' + st.scalePassed + ' 个音，很棒');
+      $$('#scaleTrack .scale-note').forEach(el => el.classList.add('done'));
+    } else {
+      $('#scalePrompt').innerHTML = '已暂停。已唱准 <b>' + st.scalePassed + '</b> 个音。';
+      speakGuide('暂停，已唱准 ' + st.scalePassed + ' 个音');
+    }
+  }
   function switchSingTab(tab) {
     $$('[data-singtab]').forEach(b => b.classList.toggle('active', b.dataset.singtab === tab));
     $('#singPitch').classList.toggle('hidden', tab !== 'pitch');
+    $('#singScale').classList.toggle('hidden', tab !== 'scale');
     $('#singMouth').classList.toggle('hidden', tab !== 'mouth');
     const st = window.__aiState.sing;
-    if (tab !== 'pitch' && st.trainer) { st.active = false; st.trainer.stop(); st.trainer = null; $('#singListen').classList.remove('hidden'); $('#singStop').classList.add('hidden'); }
+    if (tab !== 'pitch' && st.trainer && !st.scaleOn) { st.active = false; st.trainer.stop(); st.trainer = null; $('#singListen').classList.remove('hidden'); $('#singStop').classList.add('hidden'); }
+    if (tab !== 'scale' && st.scaleOn) { stopScaleTrain(); }
     if (tab !== 'mouth' && st.cam) { st.cam.stop(); st.cam = null; $('#singCamStart').classList.remove('hidden'); $('#singCamStop').classList.add('hidden'); $('#singCamTip').classList.add('hidden'); }
   }
   function startPianoListen() {
