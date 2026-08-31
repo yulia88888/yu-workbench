@@ -1,0 +1,15 @@
+name: 诊断-源可达性
+on:
+  workflow_dispatch:
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 运行 gen_daily
+        run: python gen_daily.py
+      - name: 统计可达性
+        run: python diag_report.py
