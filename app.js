@@ -3286,7 +3286,7 @@
       <button class="back-row" data-back>← 返回每日计划</button>
       <div class="news-header-card">
         <h1 class="news-h1">每日要闻</h1>
-        <div class="news-subtitle">中国新闻网 · 微博热搜 · 科技财经媒体 实时活源 · 每日读报打卡</div>
+        <div class="news-subtitle">新华网(news.cn) · 中国新闻网 · 央视网 · 微博热搜 · 科技财经媒体 实时活源 · 每日读报打卡</div>
         <div class="news-tab-pill">
           <span class="news-tab-dot active">今日看点</span>
           <span class="news-tab-dot">要闻摘记</span>
