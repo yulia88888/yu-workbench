@@ -4216,18 +4216,27 @@
   async function fetchHistory(force) {
     if (_histFetching) return;
     if (!force && historyDone) return;
-    if (!force && Object.keys(contentHistory).length) return;
-    _histFetching = true; historyLoading = true; historyError = false;
+    const have = Object.keys(contentHistory || {});
+    // 先取线上索引，判断内联是否已覆盖全部日期；已覆盖则跳过（省流量）
+    let idxDates = [];
     try {
       const ri = await fetch('./history/index.json?_=' + Date.now(), { cache: 'no-store' });
-      let dates = [];
-      if (ri.ok) { const idx = await ri.json(); dates = Array.isArray(idx) ? idx : (idx.dates || []); }
-      if (!dates.length) { historyDone = true; refreshHistoryNow(); return; }
-      dates = dates.slice(-90); // 最多展示最近 90 天，手机最稳
-      let i = 0; const workers = Math.min(6, dates.length);
+      if (ri.ok) { const idx = await ri.json(); idxDates = Array.isArray(idx) ? idx : (idx.dates || []); }
+    } catch (e) {}
+    if (!force && have.length && idxDates.length && idxDates.every(d => have.includes(d))) {
+      historyDone = true; refreshHistoryNow(); return;
+    }
+    _histFetching = true; historyLoading = true; historyError = false;
+    try {
+      const base = idxDates.length ? idxDates : have;
+      const dates = base.slice(-90); // 最多展示最近 90 天
+      // 只拉取内联/缓存里还没有的「缺口天」，避免重复拉整批（手机省流量）
+      const missing = dates.filter(d => !have.includes(d));
+      const toFetch = missing.length ? missing : dates;
+      let i = 0; const workers = Math.min(6, toFetch.length);
       async function worker() {
-        while (i < dates.length) {
-          const d = dates[i++];
+        while (i < toFetch.length) {
+          const d = toFetch[i++];
           try {
             const rd = await fetch('./history/' + d + '.json?_=' + Date.now(), { cache: 'no-store' });
             if (rd.ok) { const obj = await rd.json(); if (obj && typeof obj === 'object') contentHistory[d] = obj; }
