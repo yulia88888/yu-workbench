@@ -1183,9 +1183,11 @@ def main():
     topics = []
     topic_titles_by_plat = {}
     news = gen_news()
+    snap = load_aiproduct_real_snapshot()
     real_aip = fetch_aiproduct_real()
-    aip_snap = build_aiproduct_from_snapshot() if real_aip is None else None
+    aip_snap = build_aiproduct_from_snapshot() if (real_aip is None and snap) else None
     aiproduct = real_aip or aip_snap or gen_aiproduct()
+    aip_hot = (snap or {}).get("hot_today") if (real_aip is None and snap) else None
     # 每平台独立去重：选题各平台内不重复；二创仅避免与本平台选题重复（模块去重）。
     # 跨平台允许精选池重复，这样每天各平台独立按日期打乱，内容真正每天不同。
     for i, p in enumerate(PLATFORMS_ORDER):
@@ -1205,6 +1207,7 @@ def main():
         "reposts": reposts,
         "news": news,
         "aiproduct": aiproduct,
+        "aiproduct_hot": aip_hot,
         "aiproduct_real": real_aip is not None or aip_snap is not None,
         "note": ("选题灵感=各平台赛道当日爆款广撒网扫描（含瑜不做的大众赛道），逐条给火爆核心原因+原创创作思路；"
                  "爆款二创=从中筛选适合瑜的13个赛道，逐条给为什么适合你二创+详细改编方案。两模块标题零重叠。"
