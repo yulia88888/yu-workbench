@@ -880,7 +880,8 @@ def fetch_rss_news(url, limit=12, source=""):
 def gen_news():
     """
     每日要闻：用「实时活源」采集（不再依赖已冻结的新华网/人民网旧 RSS，那些源返回 2022/2025 缓存）。
-    来源：微博实时热搜（今日热榜 / 时政 / 国际）+ 虎嗅 / 36氪（科技 / 财经 / 民生）+ 知乎日报（民生 / 科技）。
+    来源（均为实测当天活源）：中国新闻网 + 央视网（权威官媒）+ 微博实时热搜（今日热榜 / 时政 / 国际）
+          + 虎嗅 / 36氪（科技 / 财经 / 民生）+ 知乎日报（民生 / 科技）。
     所有条目做日期过滤（>20 天丢弃）并按日期倒序，确保不会出现 2022 旧闻。
     分类：时政要闻 / 财经动态 / 国际风云 / 科技前沿 / 民生社会 / 今日热榜
     """
@@ -899,15 +900,19 @@ def gen_news():
         it["time"] = now_bj.strftime("%Y-%m-%d")
         news.append(it)
 
-    # 2) 虎嗅 / 36氪 / 知乎日报：科技 / 财经 / 民生 / 时政 / 国际
+    # 2) 权威官媒（实测当天活源）+ 专业媒体：时政 / 国际 / 民生 / 财经 / 科技
+    #    备注：新华网/人民网官方 RSS 已冻结(2022/2025)，光明网 RSS 失效；
+    #          经实测，中国新闻网、央视网 RSS 当天更新可用，作为权威来源接入。
     rss_sources = [
-        ("https://rss.huxiu.com/", "虎嗅"),
-        ("https://www.36kr.com/feed", "36氪"),
-        ("https://rsshub.rssforever.com/zhihu/daily", "知乎日报"),
+        ("https://www.chinanews.com.cn/rss/scroll-news.xml", "中国新闻网", 18),
+        ("https://rsshub.rssforever.com/cctv/news", "央视网", 18),
+        ("https://rss.huxiu.com/", "虎嗅", 12),
+        ("https://www.36kr.com/feed", "36氪", 12),
+        ("https://rsshub.rssforever.com/zhihu/daily", "知乎日报", 10),
     ]
-    for url, src in rss_sources:
+    for url, src, lim in rss_sources:
         try:
-            for it in fetch_rss_news(url, 12, source=src):
+            for it in fetch_rss_news(url, lim, source=src):
                 t = it.get("title", "")
                 if not t or t in seen_titles:
                     continue
