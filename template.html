@@ -52,6 +52,11 @@
     .back-btn.show{display:block;}
     .topbar-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.2px;}
     .topbar-date{font-size:12px;color:var(--text-tertiary);white-space:nowrap;}
+    .live-refresh-btn{margin-left:6px;border:none;background:var(--surface-2);border-radius:8px;width:28px;height:26px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none;}
+    .live-refresh-btn:active{transform:scale(.94);}
+    .live-status{font-size:11px;color:var(--text-tertiary);margin-left:6px;white-space:nowrap;}
+    .live-status.ok{color:#16a34a;}
+    .live-status.off{color:#d97706;}
 
     .content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 12px 20px;scrollbar-width:none;-ms-overflow-style:none;}
     .content::-webkit-scrollbar{display:none;}
@@ -574,6 +579,8 @@
           <h1 class="topbar-title" id="viewTitle">每日计划</h1>
         </div>
         <span class="topbar-date" id="todayDate"></span>
+        <button id="liveRefreshBtn" class="live-refresh-btn" title="立即检查更新">🔄</button>
+        <span id="liveStatus" class="live-status"></span>
       </header>
 
       <section class="content" id="content">
