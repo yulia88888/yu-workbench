@@ -714,35 +714,53 @@ def save_archive(topics, reposts, today_str, cap=700):
 
 def save_content_history(date_str, snapshot, keep=180, topic_cap=60, repost_cap=60, aip_keep=30):
     """按日期归档每天抓取的选题/二创/AI爆品，保留最近 keep 天（半年）。
-    体积控制：① 紧凑格式(separators)省约 45% 空白；② 每日 topics/reposts 截断到上限，
-    避免半年后文件破几十 MB；③ aiproduct 历史每天重复存同一份趋势池，只保留最近 aip_keep 天，
-    更早置空（前端 `|| {}` 容错显示「该日无记录」）。"""
-    hist = {}
-    if os.path.exists("history.json"):
+    改为按天拆文件（history/<date>.json）+ 索引（history/index.json）：
+    单文件仅几十~百 KB，手机端可逐日并行加载，彻底告别一次性拉 1MB 大文件。"""
+    os.makedirs("history", exist_ok=True)
+    # 1) 当天文件：同日多次运行按 id 去重合并，截断到上限
+    day_path = os.path.join("history", date_str + ".json")
+    day = {"topics": [], "reposts": [], "aiproduct": {}}
+    if os.path.exists(day_path):
         try:
-            with open("history.json", encoding="utf-8") as f:
-                hist = json.load(f)
+            with open(day_path, encoding="utf-8") as f:
+                day = json.load(f)
         except Exception:
-            hist = {}
-    hist[date_str] = snapshot
-    dates = sorted(hist.keys())
-    # aiproduct 窗口：只保留最近 aip_keep 天，更早置空省空间
-    for d in dates[:-aip_keep]:
-        if hist[d].get("aiproduct"):
-            hist[d]["aiproduct"] = {}
-    # 每日条数上限
-    for d in dates:
-        t = hist[d].get("topics", [])
-        if len(t) > topic_cap:
-            hist[d]["topics"] = t[:topic_cap]
-        r = hist[d].get("reposts", [])
-        if len(r) > repost_cap:
-            hist[d]["reposts"] = r[:repost_cap]
+            day = {"topics": [], "reposts": [], "aiproduct": {}}
+    for key, cap in (("topics", topic_cap), ("reposts", repost_cap)):
+        exist = {}
+        for x in (day.get(key) or []):
+            if x.get("id"): exist[x["id"]] = x
+        for x in (snapshot.get(key) or []):
+            if x.get("id") and x["id"] not in exist:
+                exist[x["id"]] = x
+        merged = list(exist.values())
+        if len(merged) > cap:
+            merged = merged[:cap]
+        day[key] = merged
+    if snapshot.get("aiproduct"):
+        day["aiproduct"] = snapshot["aiproduct"]
+    with open(day_path, "w", encoding="utf-8") as f:
+        json.dump(day, f, ensure_ascii=False, separators=(",", ":"))
+    # 2) 索引维护：日期升序列表；裁剪到 keep 天并清理过期天文件
+    idx_path = os.path.join("history", "index.json")
+    dates = []
+    if os.path.exists(idx_path):
+        try:
+            dates = json.load(open(idx_path, encoding="utf-8"))
+            if isinstance(dates, dict):
+                dates = dates.get("dates", [])
+        except Exception:
+            dates = []
+    if date_str not in dates:
+        dates.append(date_str)
+    dates = sorted(set(dates))
     if len(dates) > keep:
-        for d in dates[:-keep]:
-            hist.pop(d, None)
-    with open("history.json", "w", encoding="utf-8") as f:
-        json.dump(hist, f, ensure_ascii=False, separators=(",", ":"))
+        for old in dates[:-keep]:
+            try: os.remove(os.path.join("history", old + ".json"))
+            except Exception: pass
+        dates = dates[-keep:]
+    with open(idx_path, "w", encoding="utf-8") as f:
+        json.dump(dates, f, ensure_ascii=False, separators=(",", ":"))
 
 
 def fetch_rss(url, limit=6):
@@ -1309,7 +1327,7 @@ def main():
     # 半年历史归档：每天抓取的选题/二创/AI爆品按日期保留 180 天
     try:
         save_content_history(today_str, {"topics": topics, "reposts": reposts, "aiproduct": data["aiproduct"]})
-        print("[history] 已写入半年历史归档 history.json")
+        print("[history] 已写入半年历史归档 history/ 目录（按天拆分，手机可逐日加载）")
     except Exception as e:
         print("[warn] history failed:", e)
 
