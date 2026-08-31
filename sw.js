@@ -1,5 +1,5 @@
 // 瑜的工作台 Service Worker —— 离线缓存 App Shell（已去除 Tailwind CDN 依赖）
-const CACHE = 'yu-workbench-v14';
+const CACHE = 'yu-workbench-v15';
 const ASSETS = [
   './',
   './index.html',
@@ -40,8 +40,8 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 每日数据 daily.json：网络优先（保证每天自动刷新生效），失败才用缓存兜底
-  if (url.includes('daily.json')) {
+  // 每日数据 daily.json / 历史归档 history/ 分日文件 / 真实爆款 archive.json：网络优先（保证每天新增立即生效），失败才回退缓存
+  if (url.includes('daily.json') || url.includes('/history/') || url.includes('archive.json')) {
     e.respondWith(
       fetch(req)
         .then((res) => {
@@ -54,13 +54,15 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 历史归档 history/ 分日文件 / 真实爆款 archive.json：网络优先（保证每天新增的历史与爆款立即生效），失败才回退缓存
-  if (url.includes('/history/') || url.includes('archive.json')) {
+  // 同源静态资源（app.js 内联在 index.html 中，这里兜底处理任何同源 GET）：网络优先，断网时回退缓存
+  if (url.startsWith(self.location.origin)) {
     e.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          if (res && (res.ok || res.type === 'opaqueredirect')) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          }
           return res;
         })
         .catch(() => caches.match(req))
@@ -68,7 +70,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 静态资源（icon / manifest）：缓存优先，缺失则网络并写入缓存
+  // 跨域资源（如第三方字体/图标）：缓存优先，缺失则网络并写入缓存
   e.respondWith(
     caches.match(req).then((hit) => {
       if (hit) return hit;
@@ -79,7 +81,6 @@ self.addEventListener('fetch', (e) => {
           return res;
         })
         .catch(() => {
-          // 图标离线兜底
           if (req.url.includes('icon.svg')) {
             return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#ec4899"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#fff" font-family="sans-serif">瑜</text></svg>', { headers: { 'Content-Type': 'image/svg+xml' } });
           }
