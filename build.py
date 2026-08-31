@@ -11,11 +11,28 @@ data = json.loads((base / 'daily.json').read_text(encoding='utf-8'))
 payload = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
 payload = payload.replace('</script', '<\\/script')
 
+# 内联最近历史归档（按天分日文件），保证首屏/离线也能看到历史，避免手机网络波动导致空白
+hist_dir = base / 'history'
+history_embed = {}
+if hist_dir.is_dir():
+    hist_files = sorted([f for f in hist_dir.iterdir() if f.suffix == '.json' and f.name != 'index.json'])
+    # 最多内联最近 30 天，控制 index.html 体积
+    for f in hist_files[-30:]:
+        try:
+            history_embed[f.stem] = json.loads(f.read_text(encoding='utf-8'))
+        except Exception as e:
+            print('历史归档读取跳过', f, e)
+history_payload = json.dumps(history_embed, ensure_ascii=False, separators=(',', ':'))
+history_payload = history_payload.replace('</script', '<\\/script')
+
 if '__SCRIPT__' not in tpl:
     raise SystemExit('模板里找不到 __SCRIPT__ 占位符')
 if '__EMBEDDED_JSON__' not in script:
     raise SystemExit('app.js 里找不到 __EMBEDDED_JSON__ 占位符')
+if '__HISTORY_EMBED__' not in script:
+    raise SystemExit('app.js 里找不到 __HISTORY_EMBED__ 占位符')
 
+script = script.replace('__HISTORY_EMBED__', history_payload)
 out = tpl.replace('__SCRIPT__', script)
 out = out.replace('__EMBEDDED_JSON__', payload)
 
