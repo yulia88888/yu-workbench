@@ -1,5 +1,5 @@
 // 瑜的工作台 Service Worker —— 离线缓存 App Shell（已去除 Tailwind CDN 依赖）
-const CACHE = 'yu-workbench-v13';
+const CACHE = 'yu-workbench-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -54,8 +54,8 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 历史归档 history.json / 真实爆款 archive.json：网络优先（保证每天新增的历史与爆款立即生效），失败才回退缓存
-  if (url.includes('history.json') || url.includes('archive.json')) {
+  // 历史归档 history/ 分日文件 / 真实爆款 archive.json：网络优先（保证每天新增的历史与爆款立即生效），失败才回退缓存
+  if (url.includes('/history/') || url.includes('archive.json')) {
     e.respondWith(
       fetch(req)
         .then((res) => {
