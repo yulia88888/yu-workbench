@@ -3277,7 +3277,7 @@
       <button class="back-row" data-back>← 返回每日计划</button>
       <div class="news-header-card">
         <h1 class="news-h1">每日要闻</h1>
-        <div class="news-subtitle">央视·官媒权威新闻·每日读报打卡</div>
+        <div class="news-subtitle">微博热搜 · 科技财经媒体实时活源 · 每日读报打卡</div>
         <div class="news-tab-pill">
           <span class="news-tab-dot active">今日看点</span>
           <span class="news-tab-dot">要闻摘记</span>
@@ -3353,7 +3353,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const d = await res.json();
       if (!d || !d.date) throw new Error('empty');
-      const sig = [d.date, (d.topics || []).length, (d.reposts || []).length, (d.news || []).length, (d.aiproduct || []).length].join('|');
+      const sig = [d.date, d.gen || '', (d.topics || []).length, (d.reposts || []).length, (d.news || []).length, (d.aiproduct || []).length].join('|');
       if (sig !== _liveSig) {
         if (daily.date && daily.date !== d.date) {
           const oldTopics = (daily.topics || []).map(t => ({ ...t, id: t.id || uid(), seen_date: daily.date || todayKey() }));
