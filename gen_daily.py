@@ -1115,10 +1115,16 @@ def load_aiproduct_real_snapshot():
 
 def build_aiproduct_from_snapshot():
     """用真实热搜快照填充「每日/每周/每月」三档（均标记 real，按窗口滚动切片，
-    不再使用雷同的通用商品趋势池）。快照不足时退回趋势池。"""
+    不再使用雷同的通用商品趋势池）。快照不足时退回趋势池。
+    关键加固：用 gen_daily 运行当天(北京时间)日期种子，对第6条起的商品再 shuffle 一次，
+    保证无论 refresh 自动化何时跑/是否联网，GitHub Actions 每8小时跑出的爆品都按当天轮换，
+    真正每天不一样（抖音前5高佣固定不动，满足「佣金高」）。"""
     snap = load_aiproduct_real_snapshot()
     if not snap:
         return None
+    bj = datetime.datetime.now(datetime.timezone.utc).astimezone(
+        datetime.timezone(datetime.timedelta(hours=8)))
+    day_seed = int(bj.strftime("%Y%m%d"))
     pool = gen_aiproduct()
     result = {}
     for plat in AIP_PLATS:
@@ -1128,6 +1134,12 @@ def build_aiproduct_from_snapshot():
         if n == 0:
             result[plat] = pool[plat]
             continue
+        # 当天日期种子对第6条起 re-shuffle（前5高佣固定），确保每日主打每天不同
+        if n > 5:
+            tail = daily[5:]
+            rnd = random.Random(day_seed + hash(plat) % 97)
+            rnd.shuffle(tail)
+            daily = daily[:5] + tail
         # 每日=前15 / 每周=第11~25 / 每月=全量（近期热门总集），保证可见商品更多且三档不全重复
         result[plat] = {}
         result[plat]["每日"] = daily[:15]
