@@ -748,5 +748,18 @@
   <script>
 __SCRIPT__
   </script>
+
+  <!-- 注册 Service Worker：导航/数据网络优先，保证每次打开都拿到最新版本 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      let _swReloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!_swReloading) { _swReloading = true; location.reload(); }
+      });
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
