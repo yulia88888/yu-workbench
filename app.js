@@ -170,11 +170,16 @@
     if (!list.length) { $('#topicList').innerHTML = '<div class="empty">暂无内容</div>'; updateBatch('topic'); return; }
     $('#topicList').innerHTML = list.map((t, i) => topicCard(t, i + 1)).join('');
     updateBatch('topic');
+    fetchHistory(false); // 后台预热历史归档，切到「历史」时即时可见
   }
   function renderTopicHistory() {
-    refreshHistoryNow();
-    const dates = Object.keys(contentHistory).sort().reverse();
-    if (!dates.length) { $('#topicList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>'; $('#topicCount').textContent = '共 0 条'; updateBatch('topic'); return; }
+    const dates = Object.keys(contentHistory || {}).sort().reverse();
+    if (!dates.length) {
+      $('#topicList').innerHTML = '<div class="empty">⏳ 正在加载历史归档…（首次约 1MB，请稍候）</div>';
+      $('#topicCount').textContent = '加载中…';
+      fetchHistory(true);
+      return;
+    }
     let html = '';
     dates.forEach(d => {
       const items = (contentHistory[d].topics || []).filter(t => !hidden.includes(t.id));
@@ -235,11 +240,16 @@
     if (!list.length) { $('#repostList').innerHTML = '<div class="empty">暂无内容</div>'; updateBatch('repost'); return; }
     $('#repostList').innerHTML = list.map((t, i) => repostCard(t, i + 1)).join('');
     updateBatch('repost');
+    fetchHistory(false); // 后台预热历史归档，切到「历史」时即时可见
   }
   function renderRepostHistory() {
-    refreshHistoryNow();
-    const dates = Object.keys(contentHistory).sort().reverse();
-    if (!dates.length) { $('#repostList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>'; $('#repostCount').textContent = '共 0 条'; updateBatch('repost'); return; }
+    const dates = Object.keys(contentHistory || {}).sort().reverse();
+    if (!dates.length) {
+      $('#repostList').innerHTML = '<div class="empty">⏳ 正在加载历史归档…（首次约 1MB，请稍候）</div>';
+      $('#repostCount').textContent = '加载中…';
+      fetchHistory(true);
+      return;
+    }
     let html = '';
     dates.forEach(d => {
       const items = (contentHistory[d].reposts || []).filter(t => !hidden.includes(t.id));
@@ -3187,10 +3197,11 @@
     };
     let bodyHtml;
     if (aipTime === '历史记录') {
-      const ah = contentHistory;
+      const ah = contentHistory || {};
       const dates = Object.keys(ah).sort().reverse();
       if (!dates.length) {
-        bodyHtml = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>';
+        bodyHtml = '<div class="empty">⏳ 正在加载历史归档…（首次约 1MB，请稍候）</div>';
+        fetchHistory(true);
       } else {
         bodyHtml = dates.map(d => {
           const snap = (ah[d] && ah[d].aiproduct) || {};
@@ -3399,25 +3410,26 @@
     } catch (e) {}
   }
   let _histFetching = false;
-  async function refreshHistoryNow() {
-    const needHist = (currentView === 'topic' && topicMode === 'history') ||
-      (currentView === 'repost' && repostMode === 'history') ||
-      (currentView === 'aiproduct' && aipTime === '历史记录');
-    if (_histFetching || !needHist) return;
+  // 后台/按需拉取历史归档（约 1MB），成功后存入 contentHistory 并重渲染当前历史视图
+  async function fetchHistory(force) {
+    if (_histFetching) return;
+    if (!force && contentHistory && Object.keys(contentHistory).length) return; // 已有则跳过，避免重复拉取
     _histFetching = true;
     try {
       const rh = await fetch('./history.json?_=' + Date.now(), { cache: 'no-store' });
       if (rh.ok) {
         const h = await rh.json();
-        if (h) {
-          contentHistory = h; save(LS.contentHistory, h);
-          if (currentView === 'topic' && topicMode === 'history') renderTopicHistory();
-          else if (currentView === 'repost' && repostMode === 'history') renderRepostHistory();
-          else if (currentView === 'aiproduct' && aipTime === '历史记录') renderAiproduct();
-        }
+        if (h && typeof h === 'object') { contentHistory = h; save(LS.contentHistory, h); }
       }
     } catch (e) {}
     finally { _histFetching = false; }
+    refreshHistoryNow(); // 拉取完成（或失败）后按当前视图重渲染
+  }
+  // 仅负责「按当前视图重渲染历史」，不负责拉取
+  function refreshHistoryNow() {
+    if (currentView === 'topic' && topicMode === 'history') renderTopicHistory();
+    else if (currentView === 'repost' && repostMode === 'history') renderRepostHistory();
+    else if (currentView === 'aiproduct' && aipTime === '历史记录') renderAiproduct();
   }
 
   function init() {
