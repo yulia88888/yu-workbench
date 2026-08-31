@@ -24,7 +24,9 @@
 
   let daily = __EMBEDDED_JSON__;
   let archive = load(LS.archive, { topics: [], reposts: [] });
-  let contentHistory = load(LS.contentHistory, {});
+  let contentHistory = {};   // 不再从 localStorage 读整份历史（1MB 易超手机配额），改为进入「历史」时按需按天加载
+  let historyIndex = [];
+  let historyLoading = false, historyError = false, historyDone = false, _idxFetched = false;
   let hidden = load(LS.hidden, []);
   let userTopics = load(LS.userTopics, []);
   let userReposts = load(LS.userReposts, []);
@@ -170,25 +172,45 @@
     if (!list.length) { $('#topicList').innerHTML = '<div class="empty">暂无内容</div>'; updateBatch('topic'); return; }
     $('#topicList').innerHTML = list.map((t, i) => topicCard(t, i + 1)).join('');
     updateBatch('topic');
-    fetchHistory(false); // 后台预热历史归档，切到「历史」时即时可见
+    prefetchHistoryIndex(); // 仅预热日期索引（极小），切到「历史」时再按天加载正文
   }
   function renderTopicHistory() {
     const dates = Object.keys(contentHistory || {}).sort().reverse();
-    if (!dates.length) {
-      $('#topicList').innerHTML = '<div class="empty">⏳ 正在加载历史归档…（首次约 1MB，请稍候）</div>';
-      $('#topicCount').textContent = '加载中…';
-      fetchHistory(true);
+    if (dates.length) {
+      let html = '';
+      dates.forEach(d => {
+        const items = (contentHistory[d].topics || []).filter(t => !hidden.includes(t.id));
+        if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 选题 ${items.length} 条</div>` + items.map((t, i) => topicCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
+      });
+      const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).topics) || [];
+      if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => topicCard({ ...t, _hist: true }, i + 1)).join('');
+      $('#topicCount').textContent = `共 ${dates.length} 天记录`;
+      $('#topicList').innerHTML = html || '<div class="empty">暂无历史</div>';
+      updateBatch('topic');
       return;
     }
-    let html = '';
-    dates.forEach(d => {
-      const items = (contentHistory[d].topics || []).filter(t => !hidden.includes(t.id));
-      if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 选题 ${items.length} 条</div>` + items.map((t, i) => topicCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
-    });
-    const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).topics) || [];
-    if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => topicCard({ ...t, _hist: true }, i + 1)).join('');
-    $('#topicCount').textContent = `共 ${dates.length} 天记录`;
-    $('#topicList').innerHTML = html || '<div class="empty">暂无历史</div>';
+    if (historyLoading) {
+      $('#topicList').innerHTML = '<div class="empty">⏳ 正在按天加载历史归档…（每个文件很小，手机秒开）</div>';
+      $('#topicCount').textContent = '加载中…';
+      updateBatch('topic');
+      return;
+    }
+    if (historyError) {
+      $('#topicList').innerHTML = '<div class="empty">⚠️ 历史加载失败（网络波动）。<br><button id="histRetry" class="btn-primary" style="margin-top:10px;">↻ 点此重试</button></div>';
+      $('#topicCount').textContent = '加载失败';
+      const rb = $('#histRetry'); if (rb) rb.onclick = () => { historyError = false; fetchHistory(true); };
+      updateBatch('topic');
+      return;
+    }
+    if (historyDone) {
+      $('#topicList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>';
+      $('#topicCount').textContent = '共 0 天';
+      updateBatch('topic');
+      return;
+    }
+    fetchHistory(true);
+    $('#topicList').innerHTML = '<div class="empty">⏳ 正在按天加载历史归档…（每个文件很小，手机秒开）</div>';
+    $('#topicCount').textContent = '加载中…';
     updateBatch('topic');
   }
   $('#topicFilter').addEventListener('click', e => {
@@ -240,25 +262,45 @@
     if (!list.length) { $('#repostList').innerHTML = '<div class="empty">暂无内容</div>'; updateBatch('repost'); return; }
     $('#repostList').innerHTML = list.map((t, i) => repostCard(t, i + 1)).join('');
     updateBatch('repost');
-    fetchHistory(false); // 后台预热历史归档，切到「历史」时即时可见
+    prefetchHistoryIndex(); // 仅预热日期索引（极小），切到「历史」时再按天加载正文
   }
   function renderRepostHistory() {
     const dates = Object.keys(contentHistory || {}).sort().reverse();
-    if (!dates.length) {
-      $('#repostList').innerHTML = '<div class="empty">⏳ 正在加载历史归档…（首次约 1MB，请稍候）</div>';
-      $('#repostCount').textContent = '加载中…';
-      fetchHistory(true);
+    if (dates.length) {
+      let html = '';
+      dates.forEach(d => {
+        const items = (contentHistory[d].reposts || []).filter(t => !hidden.includes(t.id));
+        if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 二创 ${items.length} 条</div>` + items.map((t, i) => repostCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
+      });
+      const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).reposts) || [];
+      if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => repostCard({ ...t, _hist: true }, i + 1)).join('');
+      $('#repostCount').textContent = `共 ${dates.length} 天记录`;
+      $('#repostList').innerHTML = html || '<div class="empty">暂无历史</div>';
+      updateBatch('repost');
       return;
     }
-    let html = '';
-    dates.forEach(d => {
-      const items = (contentHistory[d].reposts || []).filter(t => !hidden.includes(t.id));
-      if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 二创 ${items.length} 条</div>` + items.map((t, i) => repostCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
-    });
-    const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).reposts) || [];
-    if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => repostCard({ ...t, _hist: true }, i + 1)).join('');
-    $('#repostCount').textContent = `共 ${dates.length} 天记录`;
-    $('#repostList').innerHTML = html || '<div class="empty">暂无历史</div>';
+    if (historyLoading) {
+      $('#repostList').innerHTML = '<div class="empty">⏳ 正在按天加载历史归档…（每个文件很小，手机秒开）</div>';
+      $('#repostCount').textContent = '加载中…';
+      updateBatch('repost');
+      return;
+    }
+    if (historyError) {
+      $('#repostList').innerHTML = '<div class="empty">⚠️ 历史加载失败（网络波动）。<br><button id="histRetryR" class="btn-primary" style="margin-top:10px;">↻ 点此重试</button></div>';
+      $('#repostCount').textContent = '加载失败';
+      const rb = $('#histRetryR'); if (rb) rb.onclick = () => { historyError = false; fetchHistory(true); };
+      updateBatch('repost');
+      return;
+    }
+    if (historyDone) {
+      $('#repostList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>';
+      $('#repostCount').textContent = '共 0 天';
+      updateBatch('repost');
+      return;
+    }
+    fetchHistory(true);
+    $('#repostList').innerHTML = '<div class="empty">⏳ 正在按天加载历史归档…（每个文件很小，手机秒开）</div>';
+    $('#repostCount').textContent = '加载中…';
     updateBatch('repost');
   }
   $('#repostFilter').addEventListener('click', e => {
@@ -1503,10 +1545,14 @@
     const vk = $('#vk'); if (!vk) return;
     const whites = [['C4', 261.63], ['D4', 293.66], ['E4', 329.63], ['F4', 349.23], ['G4', 392.00], ['A4', 440.00], ['B4', 493.88], ['C5', 523.25]];
     const blacks = { 0: ['C#4', 277.18], 1: ['D#4', 311.13], 3: ['F#4', 369.99], 4: ['G#4', 415.30], 5: ['A#4', 466.16] };
+    // 自适应宽度：按容器宽度算白键宽（手机也能铺满、不溢出）
+    const wrapW = Math.max(220, (vk.clientWidth || 320));
+    const whiteW = Math.max(26, Math.min(46, Math.floor((wrapW - 6) / 8)));
+    const blackW = Math.round(whiteW * 0.62);
     let html = '';
     whites.forEach((w, i) => {
-      html += `<div class="vk-white" data-note="${w[0]}" data-freq="${w[1]}">${w[0]}</div>`;
-      if (blacks[i]) html += `<div class="vk-black" style="left:${i * 40 + 27}px;" data-note="${blacks[i][0]}" data-freq="${blacks[i][1]}">${blacks[i][0][0]}</div>`;
+      html += `<div class="vk-white" data-note="${w[0]}" data-freq="${w[1]}" style="width:${whiteW}px">${w[0]}</div>`;
+      if (blacks[i]) html += `<div class="vk-black" data-note="${blacks[i][0]}" data-freq="${blacks[i][1]}" style="left:${i * whiteW + whiteW - Math.round(blackW / 2)}px;width:${blackW}px">${blacks[i][0][0]}</div>`;
     });
     vk.innerHTML = html;
   }
@@ -3200,7 +3246,7 @@
       const ah = contentHistory || {};
       const dates = Object.keys(ah).sort().reverse();
       if (!dates.length) {
-        bodyHtml = '<div class="empty">⏳ 正在加载历史归档…（首次约 1MB，请稍候）</div>';
+        bodyHtml = '<div class="empty">⏳ 正在按天加载历史归档…（每个文件很小，手机秒开）</div>';
         fetchHistory(true);
       } else {
         bodyHtml = dates.map(d => {
@@ -3410,20 +3456,44 @@
     } catch (e) {}
   }
   let _histFetching = false;
-  // 后台/按需拉取历史归档（约 1MB），成功后存入 contentHistory 并重渲染当前历史视图
+  // 仅预热日期索引（history/index.json，仅几百字节），不加载正文，省流量
+  async function prefetchHistoryIndex() {
+    if (_idxFetched || historyDone) return;
+    _idxFetched = true;
+    try {
+      const ri = await fetch('./history/index.json?_=' + Date.now(), { cache: 'no-store' });
+      if (ri.ok) { const idx = await ri.json(); historyIndex = Array.isArray(idx) ? idx : (idx.dates || []); }
+    } catch (e) { _idxFetched = false; }
+  }
+  // 进入「历史」视图时调用：按天并行加载 history/<date>.json（每文件几十~百 KB，手机友好），流式渲染
   async function fetchHistory(force) {
     if (_histFetching) return;
-    if (!force && contentHistory && Object.keys(contentHistory).length) return; // 已有则跳过，避免重复拉取
-    _histFetching = true;
+    if (!force && historyDone) return;
+    if (!force && Object.keys(contentHistory).length) return;
+    _histFetching = true; historyLoading = true; historyError = false;
     try {
-      const rh = await fetch('./history.json?_=' + Date.now(), { cache: 'no-store' });
-      if (rh.ok) {
-        const h = await rh.json();
-        if (h && typeof h === 'object') { contentHistory = h; save(LS.contentHistory, h); }
+      const ri = await fetch('./history/index.json?_=' + Date.now(), { cache: 'no-store' });
+      let dates = [];
+      if (ri.ok) { const idx = await ri.json(); dates = Array.isArray(idx) ? idx : (idx.dates || []); }
+      if (!dates.length) { historyDone = true; refreshHistoryNow(); return; }
+      dates = dates.slice(-90); // 最多展示最近 90 天，手机最稳
+      let i = 0; const workers = Math.min(6, dates.length);
+      async function worker() {
+        while (i < dates.length) {
+          const d = dates[i++];
+          try {
+            const rd = await fetch('./history/' + d + '.json?_=' + Date.now(), { cache: 'no-store' });
+            if (rd.ok) { const obj = await rd.json(); if (obj && typeof obj === 'object') contentHistory[d] = obj; }
+          } catch (e) {}
+          if (currentView === 'topic' && topicMode === 'history') renderTopicHistory();
+          else if (currentView === 'repost' && repostMode === 'history') renderRepostHistory();
+        }
       }
-    } catch (e) {}
-    finally { _histFetching = false; }
-    refreshHistoryNow(); // 拉取完成（或失败）后按当前视图重渲染
+      const ws = []; for (let k = 0; k < workers; k++) ws.push(worker());
+      await Promise.all(ws);
+      historyDone = true;
+    } catch (e) { historyError = true; }
+    finally { historyLoading = false; _histFetching = false; refreshHistoryNow(); }
   }
   // 仅负责「按当前视图重渲染历史」，不负责拉取
   function refreshHistoryNow() {
