@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: 生成 daily.json / archive.json / history.json（新闻/选题/二创/半年历史）
+      - name: 生成 daily.json / archive.json / history/ 分日归档（新闻/选题/二创/半年历史）
         env:
           AI_PRODUCT_TOKEN: ${{ secrets.AI_PRODUCT_TOKEN }}
         run: python gen_daily.py
@@ -36,7 +36,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html sw.js app.js template.html daily.json archive.json history.json aiproduct_real.json manifest.webmanifest icon.svg
+          git rm -f history.json 2>/dev/null || true; git add index.html sw.js app.js template.html daily.json archive.json aiproduct_real.json manifest.webmanifest icon.svg history
           if git diff --cached --quiet; then
             echo "✅ 无内容变更，跳过提交"
           else
