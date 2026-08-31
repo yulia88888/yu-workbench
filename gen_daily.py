@@ -27,6 +27,7 @@ import urllib.request
 import urllib.parse
 import random
 import datetime
+import email.utils
 import xml.etree.ElementTree as ET
 
 CTX = ssl.create_default_context()
@@ -755,7 +756,7 @@ def fetch_rss(url, limit=6):
             title = re.sub("<[^>]+>", "", it.findtext("title") or "").strip()
             desc = re.sub("<[^>]+>", "", it.findtext("description") or "")
             desc = re.sub(r"\s+", " ", desc).strip()[:120]
-            pub = (it.findtext("pubDate") or "").strip()[:16]
+            pub = (it.findtext("pubDate") or "").strip()[:25]
             link = (it.findtext("link") or "").strip()
             if not title:
                 continue
@@ -799,49 +800,144 @@ def fetch_weibo_hot_raw(limit=8):
     return out
 
 
+# ---------- 新闻分类关键词路由（基于活源内容归类到 6 大频道） ----------
+NEWS_MAX_AGE_DAYS = 20
+WORLD_KW = ["美国", "俄", "乌克兰", "欧盟", "日本", "韩国", "朝鲜", "印度", "中东",
+            "以色列", "巴勒斯坦", "法国", "德国", "英国", "联合国", "总统", "大选",
+            "战争", "冲突", "外交", "北约", "缅甸", "菲律宾", "越南", "泰国",
+            "加拿大", "澳大利亚", "伊朗", "土耳其", "海外"]
+POLITICS_KW = ["主席", "总理", "中央", "国务院", "政策", "部委", "两会", "人大", "官宣",
+               "通报", "中纪委", "巡视", "改革", "部署", "条例", "纪委", "习近平",
+               "李强", "外交部", "发布会", "意见", "规划", "国务院", "中方", "国产",
+               "国家", "政府", "部长", "会议", "新规", "法", "税", "医保", "社保",
+               "查处", "问责", "泥石流", "地震", "洪水", "台风", "救援", "受灾",
+               "灾区", "暴雨", "事故", "坍塌", "口岸", "吉隆", "疫情", "防控"]
+FINANCE_KW = ["财经", "股", "基金", "经济", "融资", "上市", "消费", "零售", "房产",
+              "金融", "银行", "GDP", "央行", "财政", "楼市", "证券", "IPO", "估值",
+              "营收", "利润", "财报", "黄金", "金价", "降价", "涨价", "裁员"]
+TECH_KW = ["科技", "AI", "芯片", "软件", "互联网", "智能", "新能源", "汽车", "手机",
+           "大模型", "算法", "机器人", "量子", "航天", "半导体", "5G", "云计算", "元宇宙",
+           "苹果", "华为", "小米", "特斯拉", "科学", "研究", "突破"]
+SOCIETY_KW = ["开学", "教育", "高考", "中考", "放假", "天气", "高温", "寒潮", "医保",
+              "社保", "养老", "育儿", "结婚", "离婚", "就业", "工资", "房价", "租房",
+              "维权", "诈骗", "谣言", "流言", "健康", "养生", "减肥", "睡眠", "熬夜"]
+
+
+def parse_pubdate(s):
+    """解析 RSS 常见时间格式（RFC822 / 2026-08-31 10:50），转 UTC datetime；失败返回 None。"""
+    if not s:
+        return None
+    s = s.strip()
+    try:
+        dt = email.utils.parsedate_to_datetime(s)
+        if dt:
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=datetime.timezone.utc)
+            return dt.astimezone(datetime.timezone.utc)
+    except Exception:
+        pass
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.datetime.strptime(s, fmt).replace(tzinfo=datetime.timezone.utc)
+        except Exception:
+            pass
+    return None
+
+
+def news_cat_for(item, is_hot):
+    """根据标题关键词归到 6 大频道之一（优先级：国际 > 时政/国内重大 > 财经 > 科技 > 民生 > 今日热榜）。"""
+    title = item.get("title") or ""
+    if any(k in title for k in WORLD_KW):
+        return "国际风云"
+    if any(k in title for k in POLITICS_KW):
+        return "时政要闻"
+    if any(k in title for k in FINANCE_KW):
+        return "财经动态"
+    if any(k in title for k in TECH_KW):
+        return "科技前沿"
+    if any(k in title for k in SOCIETY_KW):
+        return "民生社会"
+    # 微博热搜未命中上述任一频道时，归入今日热榜（保持热榜广度）
+    if is_hot:
+        return "今日热榜"
+    return "民生社会"
+
+
+def fetch_rss_news(url, limit=12, source=""):
+    """抓取一个 RSS 源，做日期过滤（>20 天丢弃），返回标准化条目。"""
+    out = []
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    for it in fetch_rss(url, limit):
+        dt = parse_pubdate(it.get("time", ""))
+        if dt and (now_utc - dt) > datetime.timedelta(days=NEWS_MAX_AGE_DAYS):
+            continue
+        if source:
+            it["source"] = source
+        out.append(it)
+    return out
+
+
 def gen_news():
     """
-    每日要闻：按用户要求的 6 大分类采集官媒 RSS，每条带原文链接。
+    每日要闻：用「实时活源」采集（不再依赖已冻结的新华网/人民网旧 RSS，那些源返回 2022/2025 缓存）。
+    来源：微博实时热搜（今日热榜 / 时政 / 国际）+ 虎嗅 / 36氪（科技 / 财经 / 民生）+ 知乎日报（民生 / 科技）。
+    所有条目做日期过滤（>20 天丢弃）并按日期倒序，确保不会出现 2022 旧闻。
     分类：时政要闻 / 财经动态 / 国际风云 / 科技前沿 / 民生社会 / 今日热榜
     """
-    sources = [
-        # 时政要闻
-        ("新华网", "时政要闻", "http://www.xinhuanet.com/politics/news_politics.xml"),
-        ("人民网", "时政要闻", "http://www.people.com.cn/rss/politics.xml"),
-        # 财经动态
-        ("新华网", "财经动态", "http://www.xinhuanet.com/fortune/news_fortune.xml"),
-        ("人民网", "财经动态", "http://www.people.com.cn/rss/finance.xml"),
-        # 国际风云
-        ("新华网", "国际风云", "http://www.xinhuanet.com/world/news_world.xml"),
-        ("人民网", "国际风云", "http://www.people.com.cn/rss/world.xml"),
-        # 科技前沿
-        ("新华网", "科技前沿", "http://www.xinhuanet.com/tech/news_tech.xml"),
-        # 民生社会
-        ("新华网", "民生社会", "http://www.xinhuanet.com/society/news_society.xml"),
-        ("人民网", "民生社会", "http://www.people.com.cn/rss/society.xml"),
-        ("人民网", "民生社会", "http://www.people.com.cn/rss/ywkx.xml"),
-    ]
+    now_bj = datetime.datetime.now(datetime.timezone.utc).astimezone(
+        datetime.timezone(datetime.timedelta(hours=8)))
     news = []
     seen_titles = set()
-    for src, cat, url in sources:
-        for it in fetch_rss(url, 3):
-            t = it.get("title", "")
-            if t in seen_titles:
-                continue
-            seen_titles.add(t)
-            it["source"] = src
-            it["cat"] = cat
-            news.append(it)
-    # 今日热榜：微博实时热搜
-    for it in fetch_weibo_hot_raw(6):
-        if it["title"] not in seen_titles:
-            seen_titles.add(it["title"])
-            news.append(it)
+
+    # 1) 微博实时热搜：今日热榜主力，并用关键词路由出时政/国际
+    for it in fetch_weibo_hot_raw(20):
+        t = it.get("title", "")
+        if not t or t in seen_titles:
+            continue
+        seen_titles.add(t)
+        it["cat"] = news_cat_for(it, is_hot=True)
+        it["time"] = now_bj.strftime("%Y-%m-%d")
+        news.append(it)
+
+    # 2) 虎嗅 / 36氪 / 知乎日报：科技 / 财经 / 民生 / 时政 / 国际
+    rss_sources = [
+        ("https://rss.huxiu.com/", "虎嗅"),
+        ("https://www.36kr.com/feed", "36氪"),
+        ("https://rsshub.rssforever.com/zhihu/daily", "知乎日报"),
+    ]
+    for url, src in rss_sources:
+        try:
+            for it in fetch_rss_news(url, 12, source=src):
+                t = it.get("title", "")
+                if not t or t in seen_titles:
+                    continue
+                seen_titles.add(t)
+                it["cat"] = news_cat_for(it, is_hot=False)
+                news.append(it)
+        except Exception as e:
+            print("[news rss fail]", src, e)
+
+    # 2.5) 兜底：任一分类为空时，从「今日热榜」借前几条补上，保证 6 频道天天有内容
+    for cat in ["时政要闻", "财经动态", "国际风云", "科技前沿", "民生社会"]:
+        if not any(x.get("cat") == cat for x in news):
+            for x in [x for x in news if x.get("cat") == "今日热榜"][:2]:
+                x["cat"] = cat
+
+    # 3) 按日期倒序（微博热搜无真实日期排末尾，但整体仍新鲜）
+    def sortkey(x):
+        dt = parse_pubdate(x.get("time", ""))
+        return dt.timestamp() if dt else 0
+    news.sort(key=sortkey, reverse=True)
+
+    # 4) 兜底：若全部活源都失败（极少见），给出诚实提示，绝不回退到 2022 旧闻
     if not news:
-        news = [{"source": "新华网", "cat": "时政要闻",
-                 "title": "今日要闻将在自动刷新后更新",
-                 "summary": "新闻模块已接入每日自动抓取（新华网/人民网/微博热搜），打开即有当天最新内容。",
-                 "time": "每日更新", "url": "https://www.xinhuanet.com/"}]
+        news = [{
+            "source": "微博热搜", "cat": "今日热榜",
+            "title": "实时新闻源暂未取到，请稍后刷新",
+            "summary": "新闻模块已接入微博热搜 / 虎嗅 / 36氪 / 知乎日报等实时活源，打开即可看到当天最新内容。",
+            "time": now_bj.strftime("%Y-%m-%d"),
+            "url": "https://s.weibo.com/top/summary"
+        }]
     return news
 
 
@@ -1104,6 +1200,7 @@ def main():
 
     data = {
         "date": today_str,
+        "gen": bj.strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         "topics": topics,
         "reposts": reposts,
         "news": news,
