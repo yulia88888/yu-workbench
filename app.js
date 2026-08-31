@@ -3338,12 +3338,21 @@
 
   /* ---------- 导航 + 启动 ---------- */
   $$('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
-  function init() {
-    $('#todayDate').textContent = todayKey();
-    renderPlan();
-    fetch('./daily.json').then(r => r.ok ? r.json() : null).then(d => {
-      if (d && d.date) {
-        if (daily.date !== d.date) {
+  function liveStatus(msg, cls) {
+    const el = $('#liveStatus');
+    if (el) { el.textContent = msg; el.className = 'live-status' + (cls ? ' ' + cls : ''); }
+  }
+  let _liveSig = '';
+  async function liveRefresh() {
+    liveStatus('检查更新…');
+    try {
+      const res = await fetch('./daily.json?_=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+      if (!d || !d.date) throw new Error('empty');
+      const sig = [d.date, (d.topics || []).length, (d.reposts || []).length, (d.news || []).length, (d.aiproduct || []).length].join('|');
+      if (sig !== _liveSig) {
+        if (daily.date && daily.date !== d.date) {
           const oldTopics = (daily.topics || []).map(t => ({ ...t, id: t.id || uid(), seen_date: daily.date || todayKey() }));
           const oldReposts = (daily.reposts || []).map(t => ({ ...t, id: t.id || uid(), seen_date: daily.date || todayKey() }));
           if (oldTopics.length || oldReposts.length) {
@@ -3356,18 +3365,49 @@
           }
           const oldAip = daily.aiproduct;
           if (oldAip && daily.date) { const ah = load(LS.aipHistory, {}); ah[daily.date] = oldAip; save(LS.aipHistory, ah); }
-          daily = d; save(LS.daily, daily); hidden = []; save(LS.hidden, hidden);
-          toast('已更新到 ' + d.date + ' 数据');
-          if (currentView === 'topic') renderTopics(); if (currentView === 'repost') renderReposts();
+          hidden = []; save(LS.hidden, hidden);
+        }
+        const changed = daily.date !== d.date;
+        daily = d; save(LS.daily, daily); _liveSig = sig;
+        if (currentView === 'topic') renderTopics();
+        else if (currentView === 'repost') renderReposts();
+        else if (currentView === 'news') renderNews();
+        else if (currentView === 'aiproduct') renderAiproduct();
+        if (changed) toast('已更新到 ' + d.date + ' 数据');
+      }
+      liveStatus('已更新 ' + d.date, 'ok');
+    } catch (e) {
+      liveStatus('离线·本地 ' + (daily.date || ''), 'off');
+    }
+  }
+  async function liveRefreshAssets() {
+    try {
+      const ra = await fetch('./archive.json?_=' + Date.now(), { cache: 'no-store' });
+      if (ra.ok) { const a = await ra.json(); if (a) { archive = a; save(LS.archive, archive); } }
+    } catch (e) {}
+    try {
+      const rh = await fetch('./history.json?_=' + Date.now(), { cache: 'no-store' });
+      if (rh.ok) {
+        const h = await rh.json();
+        if (h) {
+          contentHistory = h; save(LS.contentHistory, h);
+          if (currentView === 'topic' && topicMode === 'history') renderTopicHistory();
+          else if (currentView === 'repost' && repostMode === 'history') renderRepostHistory();
+          else if (currentView === 'aiproduct') renderAiproduct();
         }
       }
-    }).catch(() => {});
-    fetch('./archive.json').then(r => r.ok ? r.json() : null).then(a => {
-      if (a) { archive = a; save(LS.archive, archive); }
-    }).catch(() => {});
-    fetch('./history.json').then(r => r.ok ? r.json() : null).then(h => {
-      if (h) { contentHistory = h; save(LS.contentHistory, h); }
-    }).catch(() => {});
+    } catch (e) {}
+  }
+
+  function init() {
+    $('#todayDate').textContent = todayKey();
+    renderPlan();
+    liveRefresh();
+    liveRefreshAssets();
+    const lrb = $('#liveRefreshBtn');
+    if (lrb) lrb.addEventListener('click', () => { liveRefresh(); liveRefreshAssets(); toast('正在检查更新…'); });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { liveRefresh(); liveRefreshAssets(); } });
+    setInterval(() => { if (document.visibilityState === 'visible') liveRefresh(); }, 10 * 60 * 1000);
     setTimeout(updateScrollUI, 100);
   }
   init();
