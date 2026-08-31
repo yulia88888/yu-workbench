@@ -711,8 +711,11 @@ def save_archive(topics, reposts, today_str, cap=700):
         json.dump({"topics": at_list, "reposts": ar_list}, f, ensure_ascii=False, indent=2)
 
 
-def save_content_history(date_str, snapshot, keep=180):
-    """按日期归档每天抓取的选题/二创/AI爆品，保留最近 keep 天（半年）。同日期覆盖，不重复增长。"""
+def save_content_history(date_str, snapshot, keep=180, topic_cap=60, repost_cap=60, aip_keep=30):
+    """按日期归档每天抓取的选题/二创/AI爆品，保留最近 keep 天（半年）。
+    体积控制：① 紧凑格式(separators)省约 45% 空白；② 每日 topics/reposts 截断到上限，
+    避免半年后文件破几十 MB；③ aiproduct 历史每天重复存同一份趋势池，只保留最近 aip_keep 天，
+    更早置空（前端 `|| {}` 容错显示「该日无记录」）。"""
     hist = {}
     if os.path.exists("history.json"):
         try:
@@ -722,11 +725,23 @@ def save_content_history(date_str, snapshot, keep=180):
             hist = {}
     hist[date_str] = snapshot
     dates = sorted(hist.keys())
+    # aiproduct 窗口：只保留最近 aip_keep 天，更早置空省空间
+    for d in dates[:-aip_keep]:
+        if hist[d].get("aiproduct"):
+            hist[d]["aiproduct"] = {}
+    # 每日条数上限
+    for d in dates:
+        t = hist[d].get("topics", [])
+        if len(t) > topic_cap:
+            hist[d]["topics"] = t[:topic_cap]
+        r = hist[d].get("reposts", [])
+        if len(r) > repost_cap:
+            hist[d]["reposts"] = r[:repost_cap]
     if len(dates) > keep:
         for d in dates[:-keep]:
             hist.pop(d, None)
     with open("history.json", "w", encoding="utf-8") as f:
-        json.dump(hist, f, ensure_ascii=False, indent=2)
+        json.dump(hist, f, ensure_ascii=False, separators=(",", ":"))
 
 
 def fetch_rss(url, limit=6):
