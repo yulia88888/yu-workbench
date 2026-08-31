@@ -24,7 +24,7 @@
 
   let daily = __EMBEDDED_JSON__;
   let archive = load(LS.archive, { topics: [], reposts: [] });
-  let contentHistory = {};   // 不再从 localStorage 读整份历史（1MB 易超手机配额），改为进入「历史」时按需按天加载
+  let contentHistory = __HISTORY_EMBED__ || {};   // build.py 会把最近历史内联进页面，保证首屏/离线也能看到；网络正常时 fetchHistory 会在后台补齐/更新
   let historyIndex = [];
   let historyLoading = false, historyError = false, historyDone = false, _idxFetched = false;
   let hidden = load(LS.hidden, []);
@@ -3188,7 +3188,6 @@
     { source: '微博热搜', cat: '今日热榜', title: '微博实时热搜', summary: '今日网友最关心的话题。', time: '每日更新', url: 'https://s.weibo.com/top/summary' }
   ];
   function renderAiproduct() {
-    if (aipTime === '历史记录') refreshHistoryNow();
     const aipData = (daily.aiproduct && daily.aiproduct['抖音']) ? daily.aiproduct : AIPRODUCT_FALLBACK;
     const tagClass = t => {
       if (t === '爆款' || t === 'hot') return 'hot';
