@@ -3205,10 +3205,19 @@
       }
     } else {
       const list = collect(aipPlat, aipTime);
+      const hotHtml = (daily.aiproduct_hot && daily.aiproduct_hot.length) ? (
+        '<div class="aip-hot-today"><div class="aip-hot-title">🔥 今日实时热点爆品灵感 <span class="aip-hot-sub">微博热搜·美妆/穿搭/女性好物·每天自动更新</span></div><div class="aip-hot-list">' +
+        daily.aiproduct_hot.map(h => {
+          const hf = (h.heat >= 10000) ? (h.heat / 10000).toFixed(1) + '万' : ('' + h.heat);
+          const url = 'https://www.baidu.com/s?wd=' + encodeURIComponent(h.word + ' 带货 选品 小红书');
+          return '<a class="aip-hot-card" href="' + url + '" target="_blank" rel="noopener"><div class="aip-hot-word">' + esc(h.word) + '</div><div class="aip-hot-heat">🔥 ' + hf + ' 热度</div></a>';
+        }).join('') +
+        '</div></div>'
+      ) : '';
       const foot = daily.aiproduct_real
-        ? '<div class="aip-foot aip-foot-real">✅ 已按「适合你(美妆·穿搭·女性好物)+佣金高」筛选排序 · 抖音=蝉妈妈真实商品(佣金/销量/30天转化率均真实) · 快手/小红书=公开报告真实热品(销量佣金趋势参考) · 「真实评价好」用蝉妈妈真实指标(转化率+持续销量)衡量，头部商品另附全网公开真实口碑(京东/天猫/抖音精选好评率) · 每张卡可一键「搜这个产品的真实评价」看小红书/抖音实时口碑 · 每7天AI重抓刷新</div>'
+        ? '<div class="aip-foot aip-foot-real">✅ 已按「适合你(美妆·穿搭·女性好物)+佣金高」筛选排序 · 抖音=蝉妈妈真实商品(佣金/销量/30天转化率均真实) · 快手/小红书=公开报告真实热品(销量佣金趋势参考) · 「真实评价好」用蝉妈妈真实指标(转化率+持续销量)衡量，头部商品另附全网公开真实口碑(京东/天猫/抖音精选好评率) · 每张卡可一键「搜这个产品的真实评价」看小红书/抖音实时口碑 · 精选好物每日轮换主打 · 今日热点来自微博热搜每天更新</div>'
         : '<div class="aip-foot">商品选品灵感参考 · 销量/佣金为趋势参考值（非平台官方后台数据）</div>';
-      bodyHtml = (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>') + foot;
+      bodyHtml = hotHtml + (list.length ? list.map(it => aipCard(it, aipPlat === '全部')).join('') : '<div class="empty">暂无爆品</div>') + foot;
     }
     const times = [['每日', '🔥 每日爆品'], ['每周', '📅 每周爆品'], ['每月', '📆 每月爆品'], ['历史记录', '🗂️ 历史记录']];
     $('#aiproductBody').innerHTML = `
@@ -3353,7 +3362,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const d = await res.json();
       if (!d || !d.date) throw new Error('empty');
-      const sig = [d.date, d.gen || '', (d.topics || []).length, (d.reposts || []).length, (d.news || []).length, (d.aiproduct || []).length].join('|');
+      const sig = [d.date, d.gen || '', (d.topics || []).length, (d.reposts || []).length, (d.news || []).length, (d.aiproduct || []).length, (d.aiproduct_hot || []).length].join('|');
       if (sig !== _liveSig) {
         if (daily.date && daily.date !== d.date) {
           const oldTopics = (daily.topics || []).map(t => ({ ...t, id: t.id || uid(), seen_date: daily.date || todayKey() }));
