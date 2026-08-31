@@ -877,11 +877,65 @@ def fetch_rss_news(url, limit=12, source=""):
     return out
 
 
+def fetch_news_cn():
+    """
+    新华网(news.cn) 实时权威源：官方 RSS 已冻结(2022/2025 缓存)，但 www.news.cn 栏目页是活的。
+    抓取首页 + 时政/国际/科技/财经/民生 栏目页 HTML，正则抽取 <a href='...news.cn/{栏目}/20YYYYMMDD/{hash}/c.html'>标题</a>，
+    只保留「近 3 天」条目（栏目页混有常青专题旧文，必须按 URL 日期严格过滤），按栏目映射到 6 大频道。
+    失败/超时自动返回 []，不影响其他源。
+    """
+    section_chan = {
+        "politics": "时政要闻",
+        "world": "国际风云",
+        "tech": "科技前沿",
+        "fortune": "财经动态", "money": "财经动态", "caijing": "财经动态",
+    }
+    pages = [
+        "https://www.news.cn/",
+        "https://www.news.cn/politics/",
+        "https://www.news.cn/world/",
+        "https://www.news.cn/tech/",
+        "https://www.news.cn/fortune/",
+        "https://www.news.cn/society/",
+    ]
+    pat = re.compile(
+        r'href=[\"\x27](https?://www\.news\.cn/([a-z]+)/20(\d{6})/[^\"\x27]+?/c\.html?)[\"\x27][^>]*>([^<]{4,42})</a>')
+    now_bj = datetime.datetime.now(datetime.timezone.utc).astimezone(
+        datetime.timezone(datetime.timedelta(hours=8)))
+    cutoff = now_bj - datetime.timedelta(days=3)
+    out, seen = [], set()
+    for url in pages:
+        raw = http_get(url, referer="https://www.news.cn/", timeout=15, retries=2)
+        if not raw:
+            continue
+        for m in pat.finditer(raw):
+            href, sec, ymd, title = m.group(1), m.group(2), m.group(3), m.group(4).strip()
+            try:
+                d = datetime.datetime.strptime("20" + ymd, "%Y%m%d").replace(
+                    tzinfo=datetime.timezone(datetime.timedelta(hours=8)))
+            except Exception:
+                continue
+            if d < cutoff:
+                continue
+            if title in seen:
+                continue
+            seen.add(title)
+            out.append({
+                "source": "新华网(news.cn)",
+                "cat": section_chan.get(sec, "民生社会"),
+                "title": title,
+                "url": href,
+                "time": d.strftime("%Y-%m-%d"),
+                "summary": "",
+            })
+    return out
+
+
 def gen_news():
     """
     每日要闻：用「实时活源」采集（不再依赖已冻结的新华网/人民网旧 RSS，那些源返回 2022/2025 缓存）。
-    来源（均为实测当天活源）：中国新闻网 + 央视网（权威官媒）+ 微博实时热搜（今日热榜 / 时政 / 国际）
-          + 虎嗅 / 36氪（科技 / 财经 / 民生）+ 知乎日报（民生 / 科技）。
+    来源（均为实测当天活源）：新华网(news.cn) 栏目页 + 中国新闻网 + 央视网（权威官媒）
+          + 微博实时热搜（今日热榜 / 时政 / 国际）+ 虎嗅 / 36氪（科技 / 财经 / 民生）+ 知乎日报（民生 / 科技）。
     所有条目做日期过滤（>20 天丢弃）并按日期倒序，确保不会出现 2022 旧闻。
     分类：时政要闻 / 财经动态 / 国际风云 / 科技前沿 / 民生社会 / 今日热榜
     """
@@ -898,6 +952,14 @@ def gen_news():
         seen_titles.add(t)
         it["cat"] = news_cat_for(it, is_hot=True)
         it["time"] = now_bj.strftime("%Y-%m-%d")
+        news.append(it)
+
+    # 1.5) 新华网(news.cn) 实时权威源（栏目页 HTML 抓取，已按日期过滤只留近 3 天）
+    for it in fetch_news_cn():
+        t = it.get("title", "")
+        if not t or t in seen_titles:
+            continue
+        seen_titles.add(t)
         news.append(it)
 
     # 2) 权威官媒（实测当天活源）+ 专业媒体：时政 / 国际 / 民生 / 财经 / 科技
