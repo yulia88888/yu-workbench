@@ -3124,7 +3124,7 @@
   }
   const AIPRODUCT_FALLBACK = buildAipNested(AIP_FLAT);
   const NEWS_FALLBACK = [
-    { source: '新华网', cat: '时政要闻', title: '今日要闻将在每次自动刷新后更新', summary: '新闻模块已接入每日自动抓取（新华网/人民网/微博热搜），打开即可看到当天最新内容。', time: '每日更新', url: 'https://www.xinhuanet.com/' },
+    { source: '中国新闻网', cat: '时政要闻', title: '今日要闻将在每次自动刷新后更新', summary: '新闻模块已接入每日自动抓取（中国新闻网/央视/微博热搜/虎嗅/36氪/知乎日报），打开即可看到当天最新内容。', time: '每日更新', url: 'https://www.chinanews.com.cn/' },
     { source: '人民网', cat: '民生社会', title: '便民政策早知道', summary: '社保、医保、出行等民生资讯每日汇总。', time: '每日更新', url: 'http://www.people.com.cn/' },
     { source: '新华网', cat: '财经动态', title: '财经市场每日动态', summary: '股市、消费、产业等财经资讯汇总。', time: '每日更新', url: 'http://www.xinhuanet.com/fortune/' },
     { source: '新华网', cat: '国际风云', title: '国际局势一日概览', summary: '全球热点与外交动态汇总。', time: '每日更新', url: 'http://www.xinhuanet.com/world/' },
@@ -3286,7 +3286,7 @@
       <button class="back-row" data-back>← 返回每日计划</button>
       <div class="news-header-card">
         <h1 class="news-h1">每日要闻</h1>
-        <div class="news-subtitle">微博热搜 · 科技财经媒体实时活源 · 每日读报打卡</div>
+        <div class="news-subtitle">中国新闻网 · 微博热搜 · 科技财经媒体 实时活源 · 每日读报打卡</div>
         <div class="news-tab-pill">
           <span class="news-tab-dot active">今日看点</span>
           <span class="news-tab-dot">要闻摘记</span>
