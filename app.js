@@ -172,6 +172,7 @@
     updateBatch('topic');
   }
   function renderTopicHistory() {
+    refreshHistoryNow();
     const dates = Object.keys(contentHistory).sort().reverse();
     if (!dates.length) { $('#topicList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>'; $('#topicCount').textContent = '共 0 条'; updateBatch('topic'); return; }
     let html = '';
@@ -236,6 +237,7 @@
     updateBatch('repost');
   }
   function renderRepostHistory() {
+    refreshHistoryNow();
     const dates = Object.keys(contentHistory).sort().reverse();
     if (!dates.length) { $('#repostList').innerHTML = '<div class="empty">暂无历史记录（从今天起每天自动归档，半年可查）</div>'; $('#repostCount').textContent = '共 0 条'; updateBatch('repost'); return; }
     let html = '';
@@ -3130,6 +3132,7 @@
     { source: '微博热搜', cat: '今日热榜', title: '微博实时热搜', summary: '今日网友最关心的话题。', time: '每日更新', url: 'https://s.weibo.com/top/summary' }
   ];
   function renderAiproduct() {
+    if (aipTime === '历史记录') refreshHistoryNow();
     const aipData = (daily.aiproduct && daily.aiproduct['抖音']) ? daily.aiproduct : AIPRODUCT_FALLBACK;
     const tagClass = t => {
       if (t === '爆款' || t === 'hot') return 'hot';
@@ -3385,6 +3388,14 @@
       const ra = await fetch('./archive.json?_=' + Date.now(), { cache: 'no-store' });
       if (ra.ok) { const a = await ra.json(); if (a) { archive = a; save(LS.archive, archive); } }
     } catch (e) {}
+  }
+  let _histFetching = false;
+  async function refreshHistoryNow() {
+    const needHist = (currentView === 'topic' && topicMode === 'history') ||
+      (currentView === 'repost' && repostMode === 'history') ||
+      (currentView === 'aiproduct' && aipTime === '历史记录');
+    if (_histFetching || !needHist) return;
+    _histFetching = true;
     try {
       const rh = await fetch('./history.json?_=' + Date.now(), { cache: 'no-store' });
       if (rh.ok) {
@@ -3393,10 +3404,11 @@
           contentHistory = h; save(LS.contentHistory, h);
           if (currentView === 'topic' && topicMode === 'history') renderTopicHistory();
           else if (currentView === 'repost' && repostMode === 'history') renderRepostHistory();
-          else if (currentView === 'aiproduct') renderAiproduct();
+          else if (currentView === 'aiproduct' && aipTime === '历史记录') renderAiproduct();
         }
       }
     } catch (e) {}
+    finally { _histFetching = false; }
   }
 
   function init() {
