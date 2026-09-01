@@ -1024,6 +1024,8 @@
       $('#reviewName').innerHTML = '🎵 正在评：<b>' + esc(r.name) + '</b>（共 ' + r.seq.length + ' 个字）';
       return;
     }
+    const reviewCustomAi = e.target.closest('#reviewCustomAi');
+    if (reviewCustomAi) { aiGenerateCustomSong(reviewCustomAi); return; }
     const reviewStart = e.target.closest('#reviewStart');
     if (reviewStart) { startReview(); return; }
     const reviewStop = e.target.closest('#reviewStop');
@@ -1863,8 +1865,9 @@
             <button class="ai-subtab" data-reviewmode="custom">✏️ 自定义</button>
           </div>
           <div id="reviewCustomBox" class="ai-subpanel hidden">
-            <textarea id="reviewCustomInput" class="ai-textarea" placeholder="歌名：小星星&#10;一闪一闪亮晶晶 1155665&#10;满天都是小星星 4433221&#10;&#10;数字 1-7 = do re mi...，0 = 停顿"></textarea>
-            <div class="ai-actions"><button class="btn-primary" id="reviewCustomLoad">📥 载入并开始</button></div>
+            <textarea id="reviewCustomInput" class="ai-textarea" placeholder="两种用法：&#10;① 只输入歌名（如：晚风心里吹），点下面「✨ 只给歌名，AI 生成」&#10;② 或粘贴「歌名 + 简谱」（每行：歌词 空格 数字 1-7，0=停顿）"></textarea>
+            <div class="ai-actions"><button class="btn-primary" id="reviewCustomLoad">📥 载入并开始</button> <button class="btn-outline" id="reviewCustomAi">✨ 只给歌名，AI 生成</button></div>
+            <div id="reviewCustomAiHint" class="ai-hint"></div>
           </div>
           <div id="reviewName" class="ai-live hidden"></div>
           <div class="ai-actions">
@@ -2365,6 +2368,45 @@
       for (let i = 0; i < n; i++) { const f = toFreq(tokens[i]); seq.push([toName(f), f, lyrics[i]]); }
     }
     return { name, seq };
+  }
+  // 只给歌名，让 AI 生成歌词+简谱填到输入框（用户可编辑后再点「载入并开始」）
+  async function aiGenerateCustomSong(btn) {
+    const ta = $('#reviewCustomInput');
+    const hint = $('#reviewCustomAiHint');
+    const name = (ta?.value || '').trim();
+    if (!name) { toast('请先在上面输入框写上歌名'); return; }
+    if (btn) btn.disabled = true;
+    if (hint) hint.innerHTML = '⏳ AI 正在为「' + esc(name) + '」生成歌词+简谱…';
+    const sys = '你是华语流行歌曲助理。严格按指定格式输出，不要任何其他文字、不要 markdown 代码块、不要解释。';
+    const usr = `歌名：${name}
+
+输出要求（**严格**遵守）：
+
+1. 第一行：歌名：<原歌名>
+2. 之后每行 = 一个汉字 + 一个空格 + 一个数字
+   数字 1=do, 2=re, 3=mi, 4=fa, 5=sol, 6=la, 7=si（均为中音）
+   0 = 停顿/休止
+3. 写你**记得的真实歌词**（一首热门歌的话你应该记得前 1-2 段主歌）
+4. 旋律数字用你**记忆中最稳的近似**就行，不需要 100% 准确；若完全不确定，最后一行加 #approx
+5. **完全不知道这首歌** → 只输出"歌名：<原歌名>"加单独一行 #unknown
+6. 不要输出标点符号、不要输出引号、不要输出 markdown`;
+    try {
+      const out = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: usr }]);
+      if (out && out.trim()) {
+        // 去掉可能的 markdown 围栏、开头空白
+        const clean = out.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+        ta.value = clean;
+        if (hint) hint.innerHTML = '✅ 已填入歌词+简谱，<b>旋律为 AI 推测可能不准</b>，建议对照原歌微调数字 → 然后点「📥 载入并开始」';
+        toast('已生成，点「📥 载入并开始」即可练习');
+      } else {
+        if (hint) hint.innerHTML = '⚠️ ' + esc(window.__llmErr || 'AI 没返回内容，请检查 AI 设置');
+        toast('AI 没生成出来，检查 AI 设置');
+      }
+    } catch (e) {
+      if (hint) hint.innerHTML = '⚠️ 出错了：' + esc(String(e && e.message || e));
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
   function rebuildScaleTrack() {
     const st = window.__aiState.sing;
