@@ -1,5 +1,5 @@
 // 瑜的工作台 Service Worker —— 离线缓存 App Shell（已去除 Tailwind CDN 依赖）
-const CACHE = 'yu-workbench-v18';
+const CACHE = 'yu-workbench-v19';
 const ASSETS = [
   './',
   './index.html',
@@ -40,17 +40,10 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 每日数据 daily.json / 历史归档 history/ 分日文件 / 真实爆款 archive.json：网络优先（保证每天新增立即生效），失败才回退缓存
+  // 每日数据 daily.json / 历史归档 history/ 分日文件 / 真实爆款 archive.json：纯透传（不缓存，避免返回旧版导致每天内容看起来没更新）
+  // 离线时这些文件拿不到，但页面有内联 daily.json + localStorage yu_daily 兜底
   if (url.includes('daily.json') || url.includes('/history/') || url.includes('archive.json')) {
-    e.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-          return res;
-        })
-        .catch(() => caches.match(req, { ignoreSearch: true }))
-    );
+    e.respondWith(fetch(req));
     return;
   }
 
