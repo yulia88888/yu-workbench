@@ -2957,7 +2957,7 @@
       if (!res.ok) {
         const t = await res.text().catch(() => '');
         if (/image|vision|multimodal|not support|unsupported/i.test(t)) {
-          toast('当前模型不支持看图，请在⚙️设置换成视觉模型（gpt-4o / 通义千问VL / 智谱 GLM-4V / 豆包视觉）');
+          toast('当前模型不支持看图，请换成免费视觉模型 glm-4.6v-flash（智谱）');
         } else {
           toast('大模型调用失败：' + res.status);
         }
@@ -4440,6 +4440,7 @@
       <div class="outfit-ai-box">
         <div style="font-size:16px;font-weight:700;margin-bottom:6px;">✨ AI搭配师 · 顶级私服顾问</div>
         <div class="outfit-ai-hint">融合抖音 / 小红书当季流行趋势，只从你<b>已有的衣物</b>里挑，结合想要的风格与天气，生成一套专属搭配。缺的单品会告诉你"差哪一件"。</div>
+        <div class="outfit-tips" style="margin:0 0 10px;">💡 想让 AI <b>看懂照片</b>：到「唱歌 → ⚙️ AI 设置」把地址填 <b>https://open.bigmodel.cn/api/paas/v4</b>、模型填 <b>glm-4.6v-flash</b>（智谱，永久免费，需实名认证）。纯文字搭配用现在填的 Key 就行。</div>
         ${wardrobe.length ? `
           <div class="outfit-ai-row">
             <select id="outfitAiStyle" style="flex:1;">${styleOpts}</select>
@@ -4598,7 +4599,7 @@
 天气/温度：${weather || '未指定'}
 我的需求：${prompt}${outfitAiImg ? '\n（附上了我的穿搭照片，请帮我看哪件配饰更搭这套）' : ''}`;
     const content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: userText }], outfitAiImg ? [outfitAiImg] : null);
-    resBox.innerHTML = `<div class="outfit-ai-result">${content ? esc(content).replace(/\n/g,'<br/>') : 'AI 未返回结果，请检查「唱歌」模块里的 ⚙️ AI 设置是否已填写免费 Key；若上传了照片，请确认所用模型支持看图（如 gpt-4o / 通义千问VL / 智谱 GLM-4V / 豆包视觉）。'}</div>`;
+    resBox.innerHTML = `<div class="outfit-ai-result">${content ? esc(content).replace(/\n/g,'<br/>') : 'AI 未返回结果。<br/>① 检查「唱歌 → ⚙️ AI 设置」是否填了 Key；<br/>② 上传照片需要<b>视觉模型</b>，DeepSeek 看不了图。<br/>推荐<b>永久免费</b>的：智谱 glm-4.6v-flash（地址 https://open.bigmodel.cn/api/paas/v4）。'}</div>`;
   }
 
   /* ---------- 导航 + 启动 ---------- */
