@@ -343,6 +343,16 @@
     if (oimgc) { outfitPendingImg = null; const w = $('#outfitImgPreview'); if (w) { w.style.display = 'none'; w.innerHTML = ''; } const fi = $('#outfitImg'); if (fi) fi.value = ''; return; }
     const oaiimgc = e.target.closest('[data-oaiimgclear]');
     if (oaiimgc) { outfitAiImg = null; const w = $('#outfitAiImgPreview'); if (w) { w.style.display = 'none'; w.innerHTML = ''; } const fi = $('#outfitAiImg'); if (fi) fi.value = ''; return; }
+    // 穿搭页「一键打开 AI 设置」：自动进唱歌子页 → 切到「AI 点评」标签 → 展开折叠面板 → 滚过去
+    if (e.target.closest('[data-oaisettings]')) {
+      try { renderSinging(); } catch (err) { console.warn('open sing failed', err); }
+      setTimeout(() => {
+        try { switchSingTab('review'); } catch (err) {}
+        const det = document.querySelector('.ai-settings');
+        if (det) { det.open = true; try { det.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (err) {} }
+      }, 150);
+      return;
+    }
   });
 
   document.addEventListener('keydown', e => {
@@ -3636,7 +3646,9 @@
       <div class="outfit-ai-box">
         <div style="font-size:16px;font-weight:700;margin-bottom:6px;">✨ AI搭配师 · 顶级私服顾问</div>
         <div class="outfit-ai-hint">融合抖音 / 小红书当季流行趋势，只从你<b>已有的衣物</b>里挑，结合想要的风格与天气，生成一套专属搭配。缺的单品会告诉你"差哪一件"。</div>
-        <div class="outfit-tips" style="margin:0 0 10px;">💡 想让 AI <b>看懂照片</b>：到「唱歌 → ⚙️ AI 设置」把地址填 <b>https://open.bigmodel.cn/api/paas/v4</b>、模型填 <b>glm-4.6v-flash</b>（智谱，永久免费，需实名认证）。纯文字搭配用现在填的 Key 就行。</div>
+        <div class="outfit-tips" style="margin:0 0 10px;">💡 想让 AI <b>看懂照片</b>：需用智谱免费视觉模型 <b>glm-4.6v-flash</b>（Key 去 bigmodel.cn 免费领）。<br/>
+          <button class="outfit-btn-outline" data-oaisettings style="margin-top:7px;padding:7px 12px;font-size:12px;">🔑 一键打开 AI 设置（自动跳转并展开）</button>
+        </div>
         ${wardrobe.length ? `
           <div class="outfit-ai-row">
             <select id="outfitAiStyle" style="flex:1;">${styleOpts}</select>
