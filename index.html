@@ -2959,8 +2959,13 @@
     toast('AI 设置已保存');
   }
   async function callLLM(messages, images) {
+    window.__llmErr = '';   // 让 outfitAIAsk 等下游能读到具体原因
     const cfg = loadAiConfig();
-    if (!cfg || !cfg.key) { toast('请先在「⚙️ AI 设置」里填写你的免费 Key'); return null; }
+    if (!cfg || !cfg.key) {
+      window.__llmErr = '还没填写 Key。请先在上方「AI 设置」粘贴 Key → 点保存（地址和模型我已帮你填好）。';
+      toast('请先在「⚙️ AI 设置」里填写你的免费 Key');
+      return null;
+    }
     const base = (cfg.base || 'https://api.deepseek.com/v1').replace(/\/+$/, '');
     const url = base + '/chat/completions';
     // 若带图片，把最后一条 user 消息转为多模态（图文混排）内容
@@ -2986,17 +2991,25 @@
       });
       if (!res.ok) {
         const t = await res.text().catch(() => '');
-        if (/image|vision|multimodal|not support|unsupported/i.test(t)) {
-          toast('当前模型不支持看图，请换成免费视觉模型 glm-4.6v-flash（智谱）');
+        let msg;
+        if (res.status === 401) {
+          msg = 'Key 无效或已过期（HTTP 401）。请去智谱后台核对 Key，或删掉重建一个新的。';
+        } else if (res.status === 429) {
+          msg = '请求太快被限流（HTTP 429）。等 10 秒再试，或换一个账号的 Key。';
+        } else if (/image|vision|multimodal|not support|unsupported/i.test(t)) {
+          msg = '当前模型不支持看图，请确认模型是 glm-4.6v-flash（智谱免费视觉模型）。';
         } else {
-          toast('大模型调用失败：' + res.status);
+          msg = '大模型调用失败 HTTP ' + res.status + '。模型=' + (cfg.model || 'deepseek-chat') + '，地址=' + base;
         }
-        console.warn('LLM err', res.status, t); return null;
+        window.__llmErr = msg;
+        toast(msg);
+        console.warn('LLM err', res.status, t, msg); return null;
       }
       const j = await res.json();
       return (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
     } catch (e) {
-      toast('网络/CORS 错误：该平台可能不允许浏览器直连，换 DeepSeek/通义/智谱试试');
+      window.__llmErr = '网络/CORS 错误：浏览器可能不允许直连该平台。智谱 BigModel 允许浏览器直连，应该是网络/防火墙问题，重试或换网络。';
+      toast('网络/CORS 错误：换 DeepSeek/智谱等允许浏览器直连的平台');
       console.warn('LLM fetch err', e);
       return null;
     }
@@ -4651,7 +4664,20 @@
 天气/温度：${weather || '未指定'}
 我的需求：${prompt}${outfitAiImg ? '\n（附上了我的穿搭照片，请帮我看哪件配饰更搭这套）' : ''}`;
     const content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: userText }], outfitAiImg ? [outfitAiImg] : null);
-    resBox.innerHTML = `<div class="outfit-ai-result">${content ? esc(content).replace(/\n/g,'<br/>') : 'AI 未返回结果。<br/>① 检查「唱歌 → ⚙️ AI 设置」是否填了 Key；<br/>② 上传照片需要<b>视觉模型</b>，DeepSeek 看不了图。<br/>推荐<b>永久免费</b>的：智谱 glm-4.6v-flash（地址 https://open.bigmodel.cn/api/paas/v4）。'}</div>`;
+    if (content) {
+      resBox.innerHTML = `<div class="outfit-ai-result">${esc(content).replace(/\n/g,'<br/>')}</div>`;
+    } else {
+      const reason = (window.__llmErr || '未知错误').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      resBox.innerHTML = `<div class="outfit-ai-result" style="border-left:3px solid #ff6b6b;">
+        ⚠️ <b>${reason}</b><br/><br/>
+        <span style="opacity:.75;font-size:12px;">📌 快速排查：</span><br/>
+        <span style="opacity:.75;font-size:12px;">
+        ① 上面「🔑 AI 设置」里 Key 那行有没有填？（填了会显示圆点）<br/>
+        ② 有没有点「💾 保存设置」？<br/>
+        ③ 地址和模型用我帮你预填的（智谱 glm-4.6v-flash）就行，别改成别的。<br/>
+        ④ 还不行的话，把这个红框<b>截图发我</b>（Key 那行是圆点，安全）。</span>
+      </div>`;
+    }
   }
 
   /* ---------- 导航 + 启动 ---------- */
