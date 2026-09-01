@@ -2955,7 +2955,7 @@
     const model = $('#aiModel').value.trim();
     localStorage.setItem('yu_ai_cfg', JSON.stringify({ base, key, model }));
     const tip = $('#aiSaveTip');
-    if (tip) tip.textContent = '已保存到本机浏览器（不会上传到本项目服务器，只有你填的 API 平台会收到请求）';
+    if (tip) tip.innerHTML = '已保存到本机浏览器（不会上传到本项目服务器，只有你填的 API 平台会收到请求）<br/>✅ 与「👗 穿搭 → AI搭配师」里的设置是<b>同一份</b>，改哪边都一样，不用填两次。';
     toast('AI 设置已保存');
   }
   async function callLLM(messages, images) {
