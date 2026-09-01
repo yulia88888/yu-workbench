@@ -17,7 +17,8 @@
   const LS = {
     tasks: 'yu_tasks', check: 'yu_check', daily: 'yu_daily', archive: 'yu_archive', hidden: 'yu_hidden',
     userTopics: 'yu_userTopics', userReposts: 'yu_userReposts', reviews: 'yu_reviews',
-    personal: 'yu_personal', historyExtra: 'yu_historyExtra', aipHistory: 'yu_aipHistory', contentHistory: 'yu_contentHistory'
+    personal: 'yu_personal', historyExtra: 'yu_historyExtra', aipHistory: 'yu_aipHistory', contentHistory: 'yu_contentHistory',
+    wardrobe: 'yu_wardrobe'
   };
   const load = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } };
   const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
@@ -26,6 +27,7 @@
   let archive = load(LS.archive, { topics: [], reposts: [] });
   let contentHistory = __HISTORY_EMBED__ || {};   // build.py 会把最近历史内联进页面，保证首屏/离线也能看到；网络正常时 fetchHistory 会在后台补齐/更新
   let historyIndex = [];
+  let wardrobe = load(LS.wardrobe, []);
   let historyLoading = false, historyError = false, historyDone = false, _idxFetched = false;
   let hidden = load(LS.hidden, []);
   let userTopics = load(LS.userTopics, []);
@@ -37,8 +39,10 @@
   let topicSel = new Set(), repostSel = new Set();
   let currentView = 'plan';
   let subStack = [];
+  let outfitTab = 'today';
+  let outfitPref = 'normal'; // cold/normal/hot
 
-  const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰' };
+  const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰', outfit: '穿搭衣橱' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
 
   function mergeHist(list, type) {
@@ -76,6 +80,7 @@
     if (v === 'review') renderReviews();
     if (v === 'aiproduct') renderAiproduct();
     if (v === 'news') renderNews();
+    if (v === 'outfit') renderOutfit();
     setTimeout(updateScrollUI, 60);
   }
 
@@ -321,6 +326,24 @@
       save(LS.tasks, tasks);
       toast('已加入每日计划 ✅'); return;
     }
+    const otab = e.target.closest('[data-otab]');
+    if (otab) { renderOutfitTab(otab.dataset.otab); return; }
+    const opref = e.target.closest('[data-opref]');
+    if (opref) { outfitPref = opref.dataset.opref; renderOutfitTab('today'); return; }
+    if (e.target.closest('[data-ogen]')) { generateOutfitByTemp(); return; }
+    if (e.target.closest('[data-oadd]')) { addOutfitItem(); return; }
+    if (e.target.closest('[data-obasic]')) { generateBasicWardrobe(); return; }
+    const odel = e.target.closest('[data-odel]');
+    if (odel) { deleteOutfitItem(odel.dataset.odel); return; }
+    if (e.target.closest('[data-orefresh]')) { renderOutfitTab('fitting'); return; }
+    if (e.target.closest('[data-oaiask]')) { outfitAIAsk(); return; }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (e.target.id === 'outfitName') { addOutfitItem(); return; }
+    if (e.target.id === 'outfitTemp') { generateOutfitByTemp(); return; }
+    if (e.target.id === 'outfitAiInput') { outfitAIAsk(); return; }
   });
 
   /* ---------- 批量管理 ---------- */
@@ -3403,6 +3426,253 @@
   document.addEventListener('mousemove', e => { if (!drag) return; const active = $('#subpage').classList.contains('hidden') ? content : $('#subpage'); const dy = e.clientY - sy; const ratio = active.scrollHeight / active.clientHeight; active.scrollTop = st0 + dy * ratio; updateScrollUI(); });
   document.addEventListener('touchend', () => drag = false);
   document.addEventListener('mouseup', () => drag = false);
+
+  /* ---------- 穿搭衣橱 ---------- */
+  const OUTFIT_CATS = ['上装','下装','外套','连衣裙','鞋履','配饰','包包'];
+  const OUTFIT_SEASONS = ['春','夏','秋','冬'];
+  const OUTFIT_THICK = ['薄','适中','厚'];
+  function outfitIcon(cat) {
+    return { '上装':'👚','下装':'👖','外套':'🧥','连衣裙':'👗','鞋履':'👟','配饰':'🧣','包包':'👜' }[cat] || '👔';
+  }
+  function renderOutfit() {
+    $('#outfitBody').innerHTML = `
+      <div class="outfit-page">
+        <div class="outfit-header">
+          <div class="outfit-title">💠 穿搭衣橱 👗</div>
+          <div class="outfit-subtitle">不再靠猜温度，也不再对着衣柜发呆</div>
+        </div>
+        <div class="outfit-tabs">
+          <button class="outfit-tab ${outfitTab==='today'?'active':''}" data-otab="today">🧣今日穿什么</button>
+          <button class="outfit-tab ${outfitTab==='wardrobe'?'active':''}" data-otab="wardrobe">👚我的衣橱</button>
+          <button class="outfit-tab ${outfitTab==='fitting'?'active':''}" data-otab="fitting">🪞试衣间</button>
+          <button class="outfit-tab ${outfitTab==='ai'?'active':''}" data-otab="ai">✨AI搭配师</button>
+        </div>
+        <div id="outfitTabBody"></div>
+      </div>`;
+    renderOutfitTab(outfitTab);
+  }
+  function renderOutfitTab(tab) {
+    outfitTab = tab;
+    $$('#outfitBody .outfit-tab').forEach(t => t.classList.toggle('active', t.dataset.otab === tab));
+    const b = $('#outfitTabBody');
+    if (tab === 'today') b.innerHTML = renderOutfitTodayHTML();
+    else if (tab === 'wardrobe') b.innerHTML = renderOutfitWardrobeHTML();
+    else if (tab === 'fitting') b.innerHTML = renderOutfitFittingHTML();
+    else if (tab === 'ai') b.innerHTML = renderOutfitAIHTML();
+  }
+  function renderOutfitTodayHTML() {
+    return `
+      <div class="outfit-suggest-card">
+        <h3>今日穿搭建议</h3>
+        <div class="outfit-input-row">
+          <input id="outfitTemp" type="number" placeholder="输入温度℃" inputmode="numeric" />
+          <button class="outfit-generate-btn" data-ogen>生成</button>
+        </div>
+        <div class="outfit-pref-row">
+          <button class="outfit-pref ${outfitPref==='cold'?'active':''}" data-opref="cold">❄️ 怕冷</button>
+          <button class="outfit-pref ${outfitPref==='normal'?'active':''}" data-opref="normal">🙂 正常</button>
+          <button class="outfit-pref ${outfitPref==='hot'?'active':''}" data-opref="hot">🔥 怕热</button>
+        </div>
+      </div>
+      <div id="outfitSuggestResult"></div>
+      <div class="outfit-section-title">🌡️ 温度速查表</div>
+      <div class="outfit-quick-table">
+        <b>≥30℃</b>：短袖/吊带/短裤/凉鞋/透气棉麻<br/>
+        <b>25~29℃</b>：T恤/薄衬衫/九分裤/单鞋<br/>
+        <b>20~24℃</b>：长袖衬衫/薄针织衫/牛仔裤/休闲鞋<br/>
+        <b>15~19℃</b>：卫衣/薄外套/长裤/乐福鞋<br/>
+        <b>10~14℃</b>：毛衣/风衣/厚裤/短靴<br/>
+        <b>5~9℃</b>：厚毛衣/羽绒服/加绒裤/保暖鞋<br/>
+        <b>＜5℃</b>：羽绒服/保暖内衣/围巾手套/雪地靴
+      </div>`;
+  }
+  function renderOutfitWardrobeHTML() {
+    const cats = OUTFIT_CATS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    const seasons = OUTFIT_SEASONS.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    const thick = OUTFIT_THICK.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+    let listHtml = wardrobe.length ? '' : `<div class="outfit-empty"><div class="outfit-empty-icon">👚</div><div class="outfit-empty-text">衣橱空空，点击「一键建基础衣橱」或「添加衣服」开始吧～</div></div>`;
+    if (wardrobe.length) {
+      listHtml = `<div style="margin-bottom:12px;font-size:12px;color:var(--text-secondary);">共 ${wardrobe.length} 件衣物</div>` +
+        wardrobe.map(it => `
+          <div class="outfit-item">
+            <div class="outfit-item-icon">${outfitIcon(it.category)}</div>
+            <div class="outfit-item-info">
+              <div class="outfit-item-name">${esc(it.name)}</div>
+              <div class="outfit-item-meta">
+                <span class="outfit-category-tag">${esc(it.category)}</span>
+                ${esc(it.season)} · ${esc(it.thickness)}
+              </div>
+            </div>
+            <button class="outfit-item-del" data-odel="${esc(it.id)}">✕</button>
+          </div>`).join('');
+    }
+    return `
+      <div class="outfit-card">
+        <div class="outfit-add-row">
+          <input id="outfitName" type="text" placeholder="衣服名称" />
+          <select id="outfitCat">${cats}</select>
+          <select id="outfitSeason">${seasons}</select>
+          <select id="outfitThick">${thick}</select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="outfit-btn-outline" data-oadd style="flex:1;">＋ 添加</button>
+          <button class="outfit-btn-pink" data-obasic style="flex:1;">👚 一键建基础衣橱</button>
+        </div>
+      </div>
+      <div id="outfitList">${listHtml}</div>`;
+  }
+  function renderOutfitFittingHTML() {
+    if (!wardrobe.length) {
+      return `<div class="outfit-card"><div class="outfit-empty"><div class="outfit-empty-icon">🪞</div><div class="outfit-empty-text">试衣间需要先到「我的衣橱」添加衣物<br/>才能预览搭配哦～</div></div></div>`;
+    }
+    const combos = generateFittingCombos();
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:0 4px 10px;">
+        <span style="font-size:13px;font-weight:700;color:var(--text);">推荐搭配</span>
+        <button class="outfit-btn-outline" data-orefresh>🔄 换一批</button>
+      </div>
+      <div id="outfitCombos">${combos}</div>`;
+  }
+  function renderOutfitAIHTML() {
+    return `
+      <div class="outfit-ai-box">
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px;">✨ AI搭配师</div>
+        <div class="outfit-ai-hint">读取你的衣橱（${wardrobe.length} 件）+ 当日天气，生成专属搭配。可对话替换配饰。</div>
+        ${wardrobe.length ? `
+          <input id="outfitAiInput" type="text" placeholder="如：换一双小白鞋 / 今天要见客户正式一点" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 12px;font-size:14px;margin-bottom:10px;outline:none;" />
+          <button class="outfit-btn-pink" data-oaiask>生成搭配</button>
+        ` : `
+          <button class="outfit-btn-pink" style="width:100%;" disabled>先添加衣物，AI才能为你搭配 👗</button>
+          <div class="outfit-tips">请到「我的衣橱」添加至少一件衣服。</div>
+        `}
+        <div id="outfitAiResult"></div>
+      </div>`;
+  }
+  function addOutfitItem() {
+    const name = ($('#outfitName')?.value || '').trim();
+    if (!name) { toast('请输入衣服名称'); return; }
+    wardrobe.push({
+      id: uid(), name,
+      category: $('#outfitCat').value,
+      season: $('#outfitSeason').value,
+      thickness: $('#outfitThick').value,
+      addAt: Date.now()
+    });
+    save(LS.wardrobe, wardrobe);
+    $('#outfitName').value = '';
+    renderOutfitTab('wardrobe');
+    toast('已添加 ✅');
+  }
+  function deleteOutfitItem(id) {
+    wardrobe = wardrobe.filter(it => it.id !== id);
+    save(LS.wardrobe, wardrobe);
+    renderOutfitTab('wardrobe');
+  }
+  function generateBasicWardrobe() {
+    const basics = [
+      ['白色T恤','上装','夏','薄'],['条纹衬衫','上装','春','薄'],
+      ['黑色针织衫','上装','秋','适中'],['灰色卫衣','上装','秋','适中'],
+      ['直筒牛仔裤','下装','秋','适中'],['黑色西装裤','下装','春','适中'],
+      ['A字半身裙','下装','夏','薄'],['高腰阔腿裤','下装','夏','薄'],
+      ['卡其色风衣','外套','秋','适中'],['黑色羽绒服','外套','冬','厚'],
+      ['牛仔外套','外套','春','适中'],['米色大衣','外套','冬','厚'],
+      ['黑色连衣裙','连衣裙','夏','薄'],['小白鞋','鞋履','夏','薄'],
+      ['黑色乐福鞋','鞋履','春','适中'],['棕色短靴','鞋履','冬','厚'],
+      ['帆布包','包包','夏','薄'],['斜挎小包','包包','春','适中'],
+      ['围巾','配饰','冬','厚'],['棒球帽','配饰','夏','薄']
+    ];
+    const now = Date.now();
+    wardrobe = basics.map(([name,category,season,thickness]) => ({ id: uid(), name, category, season, thickness, addAt: now }));
+    save(LS.wardrobe, wardrobe);
+    renderOutfitTab('wardrobe');
+    toast('已生成 20 件基础衣物 👚');
+  }
+  function pickByTemp(temp, pref) {
+    let offset = 0;
+    if (pref === 'cold') offset = -3;
+    if (pref === 'hot') offset = 3;
+    const t = parseFloat(temp) + offset;
+    if (isNaN(t)) return null;
+    const rules = [
+      { t: 30, name:'盛夏清凉', items:['上装:短袖/吊带','下装:短裤/半裙','鞋履:凉鞋','配饰:遮阳帽'] },
+      { t: 25, name:'夏末清爽', items:['上装:T恤/薄衬衫','下装:九分裤/半裙','鞋履:单鞋/小白鞋','配饰:棒球帽'] },
+      { t: 20, name:'初秋舒适', items:['上装:长袖衬衫/薄针织','下装:牛仔裤/长裤','鞋履:乐福鞋/休闲鞋','配饰:丝巾'] },
+      { t: 15, name:'深秋保暖', items:['上装:卫衣/薄毛衣','外套:薄外套/风衣','下装:长裤','鞋履:短靴','配饰:围巾'] },
+      { t: 10, name:'初冬防风', items:['上装:毛衣/厚针织','外套:大衣/棉服','下装:加绒裤','鞋履:短靴','配饰:围巾'] },
+      { t: 5, name:'寒冬御寒', items:['上装:厚毛衣/保暖内衣','外套:羽绒服','下装:加绒裤','鞋履:保暖鞋/雪地靴','配饰:围巾/手套'] },
+      { t: -50, name:'极寒防护', items:['上装:保暖内衣+厚毛衣','外套:长款羽绒服','下装:羽绒裤/加绒裤','鞋履:雪地靴','配饰:围巾/手套/帽子'] }
+    ];
+    return rules.find(r => t >= r.t) || rules[rules.length-1];
+  }
+  function matchWardrobePieces(ruleItems) {
+    if (!wardrobe.length) return ruleItems.map(desc => ({ desc, found: null }));
+    return ruleItems.map(desc => {
+      const cat = desc.split(':')[0];
+      const candidates = wardrobe.filter(it => it.category === cat);
+      if (!candidates.length) return { desc, found: null };
+      const idx = Math.floor(Math.random() * candidates.length);
+      return { desc, found: candidates[idx] };
+    });
+  }
+  function generateOutfitByTemp() {
+    const temp = $('#outfitTemp').value;
+    const rule = pickByTemp(temp, outfitPref);
+    const box = $('#outfitSuggestResult');
+    if (!rule) { box.innerHTML = ''; return; }
+    const pieces = matchWardrobePieces(rule.items);
+    box.innerHTML = `
+      <div class="outfit-card">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">🌡️ ${esc(temp)}℃ · ${rule.name}</div>
+        ${pieces.map(p => `
+          <div class="outfit-combo-piece">
+            <span class="outfit-combo-piece-icon">${p.found ? outfitIcon(p.found.category) : '💡'}</span>
+            <span>${p.found ? `<b>${esc(p.found.name)}</b>（${esc(p.found.category)}）` : esc(p.desc.split(':')[1])}</span>
+          </div>
+        `).join('')}
+        <div class="outfit-tips">${wardrobe.length ? '已从你的衣橱中随机挑选；去「我的衣橱」添加更多衣服，匹配会更精准。' : '衣橱为空，显示通用建议。先添加衣物可获得专属搭配。'}</div>
+      </div>`;
+  }
+  function generateFittingCombos() {
+    const byCat = {};
+    wardrobe.forEach(it => { byCat[it.category] = byCat[it.category] || []; byCat[it.category].push(it); });
+    const tops = byCat['上装'] || []; const bottoms = byCat['下装'] || []; const outers = byCat['外套'] || [];
+    const dresses = byCat['连衣裙'] || []; const shoes = byCat['鞋履'] || []; const accs = byCat['配饰'] || []; const bags = byCat['包包'] || [];
+    const combos = [];
+    for (let i = 0; i < 3; i++) {
+      let pieces = [];
+      if (dresses.length && Math.random() > 0.5) {
+        pieces.push({ name: rand(dresses).name, icon: '👗' });
+      } else if (tops.length && bottoms.length) {
+        pieces.push({ name: rand(tops).name, icon: '👚' });
+        pieces.push({ name: rand(bottoms).name, icon: '👖' });
+      } else if (tops.length) {
+        pieces.push({ name: rand(tops).name, icon: '👚' });
+      }
+      if (outers.length && Math.random() > 0.4) pieces.push({ name: rand(outers).name, icon: '🧥' });
+      if (shoes.length) pieces.push({ name: rand(shoes).name, icon: '👟' });
+      if (accs.length && Math.random() > 0.5) pieces.push({ name: rand(accs).name, icon: '🧣' });
+      if (bags.length && Math.random() > 0.5) pieces.push({ name: rand(bags).name, icon: '👜' });
+      if (pieces.length < 2) continue;
+      combos.push(`
+        <div class="outfit-combo-card">
+          <div class="outfit-combo-title">搭配 ${i+1}</div>
+          ${pieces.map(p => `<div class="outfit-combo-piece"><span class="outfit-combo-piece-icon">${p.icon}</span><span>${esc(p.name)}</span></div>`).join('')}
+        </div>`);
+    }
+    return combos.length ? combos.join('') : `<div class="outfit-empty">衣物类别不够丰富，多添加几件再回来～</div>`;
+  }
+  function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  async function outfitAIAsk() {
+    const input = $('#outfitAiInput');
+    const prompt = (input?.value || '').trim();
+    if (!prompt) { toast('请输入你的搭配需求'); return; }
+    const resBox = $('#outfitAiResult');
+    resBox.innerHTML = `<div class="outfit-ai-result">⏳ AI 正在搭配中…</div>`;
+    const wardrobeText = wardrobe.map(it => `${it.category}:${it.name}(${it.season}/${it.thickness})`).join('；');
+    const sys = `你是一位时尚穿搭顾问。用户的衣橱里有这些衣物：${wardrobeText}。请根据用户的需求给出具体搭配方案，直接说穿什么，控制在 200 字内，语气亲切。`;
+    const content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: prompt }]);
+    resBox.innerHTML = `<div class="outfit-ai-result">${content ? esc(content).replace(/\n/g,'<br/>') : 'AI 未返回结果，请检查「唱歌」模块里的 ⚙️ AI 设置是否已填写免费 Key。'}</div>`;
+  }
 
   /* ---------- 导航 + 启动 ---------- */
   $$('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
