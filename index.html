@@ -1153,6 +1153,20 @@
     if (oimgc) { outfitPendingImg = null; const w = $('#outfitImgPreview'); if (w) { w.style.display = 'none'; w.innerHTML = ''; } const fi = $('#outfitImg'); if (fi) fi.value = ''; return; }
     const oaiimgc = e.target.closest('[data-oaiimgclear]');
     if (oaiimgc) { outfitAiImg = null; const w = $('#outfitAiImgPreview'); if (w) { w.style.display = 'none'; w.innerHTML = ''; } const fi = $('#outfitAiImg'); if (fi) fi.value = ''; return; }
+    // 穿搭页内嵌 AI 设置：直接保存到 yu_ai_cfg（与唱歌模块共用同一份配置）
+    if (e.target.closest('[data-oaisave]')) {
+      const base = ($('#oaiBase')?.value || '').trim();
+      const key = ($('#oaiKey')?.value || '').trim();
+      const model = ($('#oaiModel')?.value || '').trim();
+      if (!key) { toast('请先把 Key 粘进中间那行'); return; }
+      if (!base) { toast('请填写 API 地址'); return; }
+      if (!model) { toast('请填写模型名'); return; }
+      localStorage.setItem('yu_ai_cfg', JSON.stringify({ base, key, model }));
+      const tip = $('#oaiSaveTip');
+      if (tip) tip.innerHTML = '✅ 已保存到本机浏览器（唱歌模块共用同一份，不用再填一次）';
+      toast('AI 设置已保存 ✅');
+      return;
+    }
     // 穿搭页「一键打开 AI 设置」：自动进唱歌子页 → 切到「AI 点评」标签 → 展开折叠面板 → 滚过去
     if (e.target.closest('[data-oaisettings]')) {
       try { renderSinging(); } catch (err) { console.warn('open sing failed', err); }
@@ -4452,13 +4466,33 @@
   function renderOutfitAIHTML() {
     const styles = ['不限','韩系','法式','老钱风','通勤','运动','甜美','酷飒','多巴胺','Clean Fit','新中式'];
     const styleOpts = styles.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    const _ac = loadAiConfig();
+    const _qv = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // 默认预填智谱免费视觉模型，用户只需粘 Key
+    const curBase = _ac.base || 'https://open.bigmodel.cn/api/paas/v4';
+    const curModel = _ac.model || 'glm-4.6v-flash';
+    const hasKey = !!(_ac.key && String(_ac.key).trim());
+    const inp = 'width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;background:#fff;outline:none;margin-bottom:6px;';
     return `
       <div class="outfit-ai-box">
         <div style="font-size:16px;font-weight:700;margin-bottom:6px;">✨ AI搭配师 · 顶级私服顾问</div>
         <div class="outfit-ai-hint">融合抖音 / 小红书当季流行趋势，只从你<b>已有的衣物</b>里挑，结合想要的风格与天气，生成一套专属搭配。缺的单品会告诉你"差哪一件"。</div>
-        <div class="outfit-tips" style="margin:0 0 10px;">💡 想让 AI <b>看懂照片</b>：需用智谱免费视觉模型 <b>glm-4.6v-flash</b>（Key 去 bigmodel.cn 免费领）。<br/>
-          <button class="outfit-btn-outline" data-oaisettings style="margin-top:7px;padding:7px 12px;font-size:12px;">🔑 一键打开 AI 设置（自动跳转并展开）</button>
+
+        <div class="outfit-card" style="background:#FFF6F9;margin:12px 0 14px;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px;">🔑 AI 设置 ${hasKey ? '<span style="color:#22a06b;font-size:12px;">· 已填好 ✅</span>' : ''}</div>
+          <div class="outfit-tips" style="margin:0 0 9px;">
+            ${hasKey
+              ? 'Key 已保存（显示为圆点保护隐私）。想换模型可改下面两行，改完点保存。'
+              : '下面两行已<b>帮你填好</b>（智谱免费视觉模型），你<b>只需把 Key 粘进中间那行</b>，然后点保存。'}
+          </div>
+          <input id="oaiBase" value="${_qv(curBase)}" placeholder="API 地址" style="${inp}" />
+          <input id="oaiKey" type="password" value="${_qv(_ac.key || '')}" placeholder="👈 在这里粘贴你的 Key" style="${inp}" />
+          <input id="oaiModel" value="${_qv(curModel)}" placeholder="模型名" style="${inp}" />
+          <button class="outfit-btn-pink" data-oaisave style="width:100%;">💾 保存设置</button>
+          <div id="oaiSaveTip" class="outfit-tips"></div>
+          ${hasKey ? '' : '<div class="outfit-tips" style="margin-top:6px;">没 Key？去 <b>bigmodel.cn</b> 手机号注册 → 实名认证 → 右上角「API Key」新建 → 复制那串（只显示一次）。免费。</div>'}
         </div>
+
         ${wardrobe.length ? `
           <div class="outfit-ai-row">
             <select id="outfitAiStyle" style="flex:1;">${styleOpts}</select>
