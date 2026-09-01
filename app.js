@@ -1819,9 +1819,15 @@
           <details class="ai-settings">
             <summary>⚙️ AI 设置（填你自己的免费 Key，仅存本机）</summary>
             <div class="ai-set-box">
-              <div class="ai-set-row"><label>API 地址（含 /v1）</label><input id="aiBase" placeholder="https://api.deepseek.com/v1" value="${_qv(_ac.base)}"></div>
-              <div class="ai-set-row"><label>API Key</label><input id="aiKey" type="password" placeholder="sk-..." value="${_qv(_ac.key)}"></div>
+              <div class="ai-set-row"><label>API 地址</label><input id="aiBase" placeholder="https://api.deepseek.com/v1" value="${_qv(_ac.base)}"></div>
+              <div class="ai-set-row"><label>API Key</label><input id="aiKey" type="password" placeholder="粘贴你的 Key（不会显示明文）" value="${_qv(_ac.key)}"></div>
               <div class="ai-set-row"><label>模型名</label><input id="aiModel" placeholder="deepseek-chat" value="${_qv(_ac.model)}"></div>
+              <div class="ai-hint" style="margin:8px 0 2px;line-height:1.7;">
+                💡 <b>想让 AI 看懂照片</b>（穿搭页上传图问配饰），请用智谱免费视觉模型，三项照抄：<br/>
+                地址 <code>https://open.bigmodel.cn/api/paas/v4</code><br/>
+                模型 <code>glm-4.6v-flash</code>　（Key 去 bigmodel.cn 注册领取）<br/>
+                <span style="opacity:.75;">只做文字点评/搭配的话，DeepSeek 等普通模型即可，不用换。</span>
+              </div>
               <button class="btn-primary" id="aiSave" style="margin-top:6px;">💾 保存设置</button>
               <div id="aiSaveTip" class="ai-hint"></div>
             </div>
