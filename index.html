@@ -613,6 +613,15 @@
     .outfit-tips{font-size:11px;color:var(--text-tertiary);margin-top:10px;line-height:1.5;}
     .outfit-quick-table{background:#fff;border-radius:14px;padding:12px;font-size:12px;color:var(--text-secondary);line-height:1.7;}
     .outfit-quick-table b{color:var(--text);}
+    .outfit-item-img{width:46px;height:46px;border-radius:12px;object-fit:cover;background:var(--pink-light);flex-shrink:0;}
+    .outfit-upload-btn{display:block;width:100%;text-align:center;background:var(--pink-light);color:var(--pink);border:1px dashed var(--pink);border-radius:12px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;}
+    .outfit-upload-btn:active{transform:scale(.98);}
+    .outfit-thumb-wrap{position:relative;display:inline-block;margin-top:8px;}
+    .outfit-thumb{width:84px;height:84px;object-fit:cover;border-radius:12px;box-shadow:var(--shadow);}
+    .outfit-thumb-del{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid var(--border);color:var(--text-tertiary);font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);}
+    .outfit-ai-row{display:flex;gap:8px;margin:0 0 4px;}
+    .outfit-ai-row select,.outfit-ai-row input{border:1px solid var(--border);border-radius:12px;padding:10px 8px;font-size:13px;background:#fff;outline:none;color:var(--text);}
+    .outfit-combo-img{width:28px;height:28px;border-radius:8px;object-fit:cover;flex-shrink:0;}
   </style>
 </head>
 <body>
@@ -842,6 +851,8 @@
   let subStack = [];
   let outfitTab = 'today';
   let outfitPref = 'normal'; // cold/normal/hot
+  let outfitPendingImg = null;   // 添加衣物时暂存的照片缩略图（dataURL）
+  let outfitAiImg = null;        // AI搭配师里随问上传的参考图（dataURL）
 
   const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰', outfit: '穿搭衣橱' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
@@ -1138,6 +1149,10 @@
     if (odel) { deleteOutfitItem(odel.dataset.odel); return; }
     if (e.target.closest('[data-orefresh]')) { renderOutfitTab('fitting'); return; }
     if (e.target.closest('[data-oaiask]')) { outfitAIAsk(); return; }
+    const oimgc = e.target.closest('[data-oimgclear]');
+    if (oimgc) { outfitPendingImg = null; const w = $('#outfitImgPreview'); if (w) { w.style.display = 'none'; w.innerHTML = ''; } const fi = $('#outfitImg'); if (fi) fi.value = ''; return; }
+    const oaiimgc = e.target.closest('[data-oaiimgclear]');
+    if (oaiimgc) { outfitAiImg = null; const w = $('#outfitAiImgPreview'); if (w) { w.style.display = 'none'; w.innerHTML = ''; } const fi = $('#outfitAiImg'); if (fi) fi.value = ''; return; }
   });
 
   document.addEventListener('keydown', e => {
@@ -1145,6 +1160,26 @@
     if (e.target.id === 'outfitName') { addOutfitItem(); return; }
     if (e.target.id === 'outfitTemp') { generateOutfitByTemp(); return; }
     if (e.target.id === 'outfitAiInput') { outfitAIAsk(); return; }
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.id === 'outfitImg') {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      fileToThumb(f, url => {
+        outfitPendingImg = url;
+        const wrap = $('#outfitImgPreview');
+        if (wrap) { wrap.style.display = ''; wrap.innerHTML = url ? `<img class="outfit-thumb" src="${url}" alt="" /><button class="outfit-thumb-del" data-oimgclear>✕</button>` : ''; }
+      });
+    } else if (e.target.id === 'outfitAiImg') {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      fileToThumb(f, url => {
+        outfitAiImg = url;
+        const wrap = $('#outfitAiImgPreview');
+        if (wrap) { wrap.style.display = ''; wrap.innerHTML = url ? `<img class="outfit-thumb" src="${url}" alt="" /><button class="outfit-thumb-del" data-oaiimgclear>✕</button>` : ''; }
+      });
+    }
   });
 
   /* ---------- 批量管理 ---------- */
@@ -2893,18 +2928,41 @@
     if (tip) tip.textContent = '已保存到本机浏览器（不会上传到本项目服务器，只有你填的 API 平台会收到请求）';
     toast('AI 设置已保存');
   }
-  async function callLLM(messages) {
+  async function callLLM(messages, images) {
     const cfg = loadAiConfig();
     if (!cfg || !cfg.key) { toast('请先在「⚙️ AI 设置」里填写你的免费 Key'); return null; }
     const base = (cfg.base || 'https://api.deepseek.com/v1').replace(/\/+$/, '');
     const url = base + '/chat/completions';
+    // 若带图片，把最后一条 user 消息转为多模态（图文混排）内容
+    let msgs = messages;
+    if (images && images.length) {
+      msgs = messages.map(m => ({ ...m }));
+      for (let i = msgs.length - 1; i >= 0; i--) {
+        if (msgs[i].role === 'user') {
+          const text = typeof msgs[i].content === 'string' ? msgs[i].content : '';
+          msgs[i].content = [
+            { type: 'text', text },
+            ...images.map(u => ({ type: 'image_url', image_url: { url: u } }))
+          ];
+          break;
+        }
+      }
+    }
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
-        body: JSON.stringify({ model: cfg.model || 'deepseek-chat', messages: messages, temperature: 0.7, max_tokens: 800 })
+        body: JSON.stringify({ model: cfg.model || 'deepseek-chat', messages: msgs, temperature: 0.7, max_tokens: 1000 })
       });
-      if (!res.ok) { const t = await res.text().catch(() => ''); toast('大模型调用失败：' + res.status); console.warn('LLM err', res.status, t); return null; }
+      if (!res.ok) {
+        const t = await res.text().catch(() => '');
+        if (/image|vision|multimodal|not support|unsupported/i.test(t)) {
+          toast('当前模型不支持看图，请在⚙️设置换成视觉模型（gpt-4o / 通义千问VL / 智谱 GLM-4V / 豆包视觉）');
+        } else {
+          toast('大模型调用失败：' + res.status);
+        }
+        console.warn('LLM err', res.status, t); return null;
+      }
       const j = await res.json();
       return (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
     } catch (e) {
@@ -4235,6 +4293,40 @@
   function outfitIcon(cat) {
     return { '上装':'👚','下装':'👖','外套':'🧥','连衣裙':'👗','鞋履':'👟','配饰':'🧣','包包':'👜' }[cat] || '👔';
   }
+  // 把用户选中的图片文件压缩成适合 localStorage 的小缩略图（dataURL）
+  function fileToThumb(file, cb) {
+    if (!file || !file.type || !file.type.startsWith('image/')) { cb(null); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 300;
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale)), h = Math.max(1, Math.round(img.height * scale));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        let url = null;
+        try { url = cv.toDataURL('image/jpeg', 0.6); } catch (e) { url = null; }
+        cb(url);
+      };
+      img.onerror = () => cb(null);
+      img.src = reader.result;
+    };
+    reader.onerror = () => cb(null);
+    reader.readAsDataURL(file);
+  }
+  // 写衣橱时做配额保护：超容量则去掉所有图片再存，保证不丢文字数据
+  function saveWardrobeSafe() {
+    try { save(LS.wardrobe, wardrobe); return true; }
+    catch (e) {
+      try {
+        wardrobe.forEach(it => { delete it.img; });
+        save(LS.wardrobe, wardrobe);
+        toast('本地容量不足，已保留衣物信息但去掉了部分照片');
+        return true;
+      } catch (e2) { toast('本地存储已满，请删减一些衣物'); return false; }
+    }
+  }
   function renderOutfit() {
     $('#outfitBody').innerHTML = `
       <div class="outfit-page">
@@ -4296,7 +4388,7 @@
       listHtml = `<div style="margin-bottom:12px;font-size:12px;color:var(--text-secondary);">共 ${wardrobe.length} 件衣物</div>` +
         wardrobe.map(it => `
           <div class="outfit-item">
-            <div class="outfit-item-icon">${outfitIcon(it.category)}</div>
+            ${it.img ? `<img class="outfit-item-img" src="${it.img}" alt="" />` : `<div class="outfit-item-icon">${outfitIcon(it.category)}</div>`}
             <div class="outfit-item-info">
               <div class="outfit-item-name">${esc(it.name)}</div>
               <div class="outfit-item-meta">
@@ -4309,13 +4401,20 @@
     }
     return `
       <div class="outfit-card">
+        <input id="outfitName" type="text" placeholder="衣服名称（如：米色针织开衫）" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 12px;font-size:14px;background:#fff;outline:none;margin-bottom:8px;" />
         <div class="outfit-add-row">
-          <input id="outfitName" type="text" placeholder="衣服名称" />
           <select id="outfitCat">${cats}</select>
           <select id="outfitSeason">${seasons}</select>
           <select id="outfitThick">${thick}</select>
         </div>
-        <div style="display:flex;gap:8px;">
+        <label class="outfit-upload-btn">
+          📷 拍照 / 上传衣服照片
+          <input id="outfitImg" type="file" accept="image/*" capture="environment" hidden />
+        </label>
+        <div id="outfitImgPreview" class="outfit-thumb-wrap" style="${outfitPendingImg ? '' : 'display:none;'}">
+          ${outfitPendingImg ? `<img class="outfit-thumb" src="${outfitPendingImg}" alt="" /><button class="outfit-thumb-del" data-oimgclear>✕</button>` : ''}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
           <button class="outfit-btn-outline" data-oadd style="flex:1;">＋ 添加</button>
           <button class="outfit-btn-pink" data-obasic style="flex:1;">👚 一键建基础衣橱</button>
         </div>
@@ -4335,13 +4434,26 @@
       <div id="outfitCombos">${combos}</div>`;
   }
   function renderOutfitAIHTML() {
+    const styles = ['不限','韩系','法式','老钱风','通勤','运动','甜美','酷飒','多巴胺','Clean Fit','新中式'];
+    const styleOpts = styles.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
     return `
       <div class="outfit-ai-box">
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px;">✨ AI搭配师</div>
-        <div class="outfit-ai-hint">读取你的衣橱（${wardrobe.length} 件）+ 当日天气，生成专属搭配。可对话替换配饰。</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px;">✨ AI搭配师 · 顶级私服顾问</div>
+        <div class="outfit-ai-hint">融合抖音 / 小红书当季流行趋势，只从你<b>已有的衣物</b>里挑，结合想要的风格与天气，生成一套专属搭配。缺的单品会告诉你"差哪一件"。</div>
         ${wardrobe.length ? `
-          <input id="outfitAiInput" type="text" placeholder="如：换一双小白鞋 / 今天要见客户正式一点" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 12px;font-size:14px;margin-bottom:10px;outline:none;" />
-          <button class="outfit-btn-pink" data-oaiask>生成搭配</button>
+          <div class="outfit-ai-row">
+            <select id="outfitAiStyle" style="flex:1;">${styleOpts}</select>
+            <input id="outfitAiWeather" type="text" placeholder="天气/温度 如：18℃ 多云" style="flex:1.2;" />
+          </div>
+          <input id="outfitAiInput" type="text" placeholder="具体需求，如：今天约会想要温柔一点 / 哪件配饰更搭这套？（可上传照片）" style="width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 12px;font-size:14px;margin:8px 0 10px;outline:none;" />
+          <label class="outfit-upload-btn" style="margin-bottom:10px;">
+            📷 上传穿搭照 / 参考图（问"哪个配饰更搭"）
+            <input id="outfitAiImg" type="file" accept="image/*" hidden />
+          </label>
+          <div id="outfitAiImgPreview" class="outfit-thumb-wrap" style="${outfitAiImg ? '' : 'display:none;'}">
+            ${outfitAiImg ? `<img class="outfit-thumb" src="${outfitAiImg}" alt="" /><button class="outfit-thumb-del" data-oaiimgclear>✕</button>` : ''}
+          </div>
+          <button class="outfit-btn-pink" data-oaiask style="width:100%;">✨ 生成专属搭配</button>
         ` : `
           <button class="outfit-btn-pink" style="width:100%;" disabled>先添加衣物，AI才能为你搭配 👗</button>
           <div class="outfit-tips">请到「我的衣橱」添加至少一件衣服。</div>
@@ -4357,12 +4469,15 @@
       category: $('#outfitCat').value,
       season: $('#outfitSeason').value,
       thickness: $('#outfitThick').value,
+      img: outfitPendingImg || null,
       addAt: Date.now()
     });
-    save(LS.wardrobe, wardrobe);
-    $('#outfitName').value = '';
-    renderOutfitTab('wardrobe');
-    toast('已添加 ✅');
+    if (saveWardrobeSafe()) {
+      outfitPendingImg = null;
+      if ($('#outfitName')) $('#outfitName').value = '';
+      renderOutfitTab('wardrobe');
+      toast('已添加 ✅');
+    }
   }
   function deleteOutfitItem(id) {
     wardrobe = wardrobe.filter(it => it.id !== id);
@@ -4426,7 +4541,7 @@
         <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">🌡️ ${esc(temp)}℃ · ${rule.name}</div>
         ${pieces.map(p => `
           <div class="outfit-combo-piece">
-            <span class="outfit-combo-piece-icon">${p.found ? outfitIcon(p.found.category) : '💡'}</span>
+            ${(p.found && p.found.img) ? `<img class="outfit-combo-img" src="${p.found.img}" alt="" />` : `<span class="outfit-combo-piece-icon">${p.found ? outfitIcon(p.found.category) : '💡'}</span>`}
             <span>${p.found ? `<b>${esc(p.found.name)}</b>（${esc(p.found.category)}）` : esc(p.desc.split(':')[1])}</span>
           </div>
         `).join('')}
@@ -4439,25 +4554,26 @@
     const tops = byCat['上装'] || []; const bottoms = byCat['下装'] || []; const outers = byCat['外套'] || [];
     const dresses = byCat['连衣裙'] || []; const shoes = byCat['鞋履'] || []; const accs = byCat['配饰'] || []; const bags = byCat['包包'] || [];
     const combos = [];
+    const add = (pieces, arr, icon) => { const it = rand(arr); pieces.push({ name: it.name, icon, img: it.img }); };
     for (let i = 0; i < 3; i++) {
       let pieces = [];
       if (dresses.length && Math.random() > 0.5) {
-        pieces.push({ name: rand(dresses).name, icon: '👗' });
+        add(pieces, dresses, '👗');
       } else if (tops.length && bottoms.length) {
-        pieces.push({ name: rand(tops).name, icon: '👚' });
-        pieces.push({ name: rand(bottoms).name, icon: '👖' });
+        add(pieces, tops, '👚');
+        add(pieces, bottoms, '👖');
       } else if (tops.length) {
-        pieces.push({ name: rand(tops).name, icon: '👚' });
+        add(pieces, tops, '👚');
       }
-      if (outers.length && Math.random() > 0.4) pieces.push({ name: rand(outers).name, icon: '🧥' });
-      if (shoes.length) pieces.push({ name: rand(shoes).name, icon: '👟' });
-      if (accs.length && Math.random() > 0.5) pieces.push({ name: rand(accs).name, icon: '🧣' });
-      if (bags.length && Math.random() > 0.5) pieces.push({ name: rand(bags).name, icon: '👜' });
+      if (outers.length && Math.random() > 0.4) add(pieces, outers, '🧥');
+      if (shoes.length) add(pieces, shoes, '👟');
+      if (accs.length && Math.random() > 0.5) add(pieces, accs, '🧣');
+      if (bags.length && Math.random() > 0.5) add(pieces, bags, '👜');
       if (pieces.length < 2) continue;
       combos.push(`
         <div class="outfit-combo-card">
           <div class="outfit-combo-title">搭配 ${i+1}</div>
-          ${pieces.map(p => `<div class="outfit-combo-piece"><span class="outfit-combo-piece-icon">${p.icon}</span><span>${esc(p.name)}</span></div>`).join('')}
+          ${pieces.map(p => `<div class="outfit-combo-piece">${p.img ? `<img class="outfit-combo-img" src="${p.img}" alt="" />` : `<span class="outfit-combo-piece-icon">${p.icon}</span>`}<span>${esc(p.name)}</span></div>`).join('')}
         </div>`);
     }
     return combos.length ? combos.join('') : `<div class="outfit-empty">衣物类别不够丰富，多添加几件再回来～</div>`;
@@ -4466,13 +4582,23 @@
   async function outfitAIAsk() {
     const input = $('#outfitAiInput');
     const prompt = (input?.value || '').trim();
-    if (!prompt) { toast('请输入你的搭配需求'); return; }
+    if (!prompt) { toast('请描述你的需求（如：今天约会温柔一点 / 哪件配饰更搭）'); return; }
     const resBox = $('#outfitAiResult');
-    resBox.innerHTML = `<div class="outfit-ai-result">⏳ AI 正在搭配中…</div>`;
-    const wardrobeText = wardrobe.map(it => `${it.category}:${it.name}(${it.season}/${it.thickness})`).join('；');
-    const sys = `你是一位时尚穿搭顾问。用户的衣橱里有这些衣物：${wardrobeText}。请根据用户的需求给出具体搭配方案，直接说穿什么，控制在 200 字内，语气亲切。`;
-    const content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: prompt }]);
-    resBox.innerHTML = `<div class="outfit-ai-result">${content ? esc(content).replace(/\n/g,'<br/>') : 'AI 未返回结果，请检查「唱歌」模块里的 ⚙️ AI 设置是否已填写免费 Key。'}</div>`;
+    resBox.innerHTML = `<div class="outfit-ai-result">⏳ 顶级搭配师正在为你构思专属穿搭…</div>`;
+    const style = ($('#outfitAiStyle')?.value || '不限');
+    const weather = ($('#outfitAiWeather')?.value || '').trim();
+    const wardrobeText = wardrobe.map(it => `${it.category}:${it.name}(${it.season}季/${it.thickness}${it.img ? '·有照片' : ''})`).join('；');
+    const sys = `你是一位顶级时尚搭配师，长期研究抖音、小红书等平台的当季流行趋势，对爆款配色与风格（如美拉德、老钱风、多巴胺、Clean Fit、新中式等）了如指掌。
+用户会给你：①她衣橱里实际拥有的衣物清单（类别/季节/厚薄，部分有照片）；②她想要的风格与当天天气/温度；有时还会附上她的穿搭参考照片。
+请严格只从她「已有的衣物」中挑出一套完整搭配（尽量涵盖 上装/下装/外套/鞋履/配饰/包包），并说明：为什么这套契合该风格与天气、参考了当下哪种流行趋势。
+若她缺少某件关键单品，明确说「差这一件：xxx」，并建议补什么（可结合抖音/小红书当下热门款），但绝不把没有的衣服说成已有。
+语气像懂行又贴心的闺蜜，控制在 240 字内，用短句换行。`;
+    const userText = `我的衣橱：${wardrobeText || '（空）'}
+想要风格：${style}
+天气/温度：${weather || '未指定'}
+我的需求：${prompt}${outfitAiImg ? '\n（附上了我的穿搭照片，请帮我看哪件配饰更搭这套）' : ''}`;
+    const content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: userText }], outfitAiImg ? [outfitAiImg] : null);
+    resBox.innerHTML = `<div class="outfit-ai-result">${content ? esc(content).replace(/\n/g,'<br/>') : 'AI 未返回结果，请检查「唱歌」模块里的 ⚙️ AI 设置是否已填写免费 Key；若上传了照片，请确认所用模型支持看图（如 gpt-4o / 通义千问VL / 智谱 GLM-4V / 豆包视觉）。'}</div>`;
   }
 
   /* ---------- 导航 + 启动 ---------- */
