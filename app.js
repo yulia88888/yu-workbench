@@ -43,6 +43,11 @@
   let outfitPref = 'normal'; // cold/normal/hot
   let outfitPendingImg = null;   // 添加衣物时暂存的照片缩略图（dataURL）
   let outfitAiImg = null;        // AI搭配师里随问上传的参考图（dataURL）
+  // 画布式试衣间状态：base=底图(mannequin 或 上传照片 dataURL)，layers=衣物图层
+  let fitting = load('yu_fitting', { base: null, layers: [] });
+  let fittingSelected = null;    // 当前选中图层 id
+  let fittingLooks = load('yu_fitting_looks', []);   // 已保存的搭配图库
+  function saveFitting() { try { save('yu_fitting', { base: fitting.base, layers: fitting.layers }); } catch (e) { toast('搭配保存失败：本地空间不足'); } }
 
   const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰', outfit: '穿搭衣橱' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
@@ -338,6 +343,20 @@
     const odel = e.target.closest('[data-odel]');
     if (odel) { deleteOutfitItem(odel.dataset.odel); return; }
     if (e.target.closest('[data-orefresh]')) { renderOutfitTab('fitting'); return; }
+    // 画布式试衣间
+    const fitAdd = e.target.closest('[data-fitadd]');
+    if (fitAdd) { addFitLayer(fitAdd.dataset.fitadd); return; }
+    if (e.target.closest('[data-fitbase]')) { openFitBasePicker(); return; }
+    if (e.target.closest('[data-fitclear]')) { clearFitLayers(); return; }
+    if (e.target.closest('[data-fitsave]')) { saveFitLook(); return; }
+    if (e.target.closest('[data-fitexport]')) { exportFit(); return; }
+    const fitOpBtn = e.target.closest('[data-fitop]');
+    if (fitOpBtn) { fitOp(fitOpBtn.dataset.fitop); return; }
+    const lookDel = e.target.closest('[data-fitlookdel]');
+    if (lookDel) { deleteFitLook(lookDel.dataset.fitlookdel); return; }
+    // 抠图弹层
+    const cutBtn = e.target.closest('[data-cut]');
+    if (cutBtn) { cutAction(cutBtn.dataset.cut); return; }
     if (e.target.closest('[data-oaiask]')) { outfitAIAsk(); return; }
     const oimgc = e.target.closest('[data-oimgclear]');
     if (oimgc) { outfitPendingImg = null; const w = $('#outfitImgPreview'); if (w) { w.style.display = 'none'; w.innerHTML = ''; } const fi = $('#outfitImg'); if (fi) fi.value = ''; return; }
@@ -3964,7 +3983,7 @@
     const b = $('#outfitTabBody');
     if (tab === 'today') b.innerHTML = renderOutfitTodayHTML();
     else if (tab === 'wardrobe') b.innerHTML = renderOutfitWardrobeHTML();
-    else if (tab === 'fitting') b.innerHTML = renderOutfitFittingHTML();
+    else if (tab === 'fitting') { b.innerHTML = renderOutfitFittingHTML(); initFitting(); }
     else if (tab === 'ai') b.innerHTML = renderOutfitAIHTML();
   }
   function renderOutfitTodayHTML() {
@@ -4039,13 +4058,40 @@
     if (!wardrobe.length) {
       return `<div class="outfit-card"><div class="outfit-empty"><div class="outfit-empty-icon">🪞</div><div class="outfit-empty-text">试衣间需要先到「我的衣橱」添加衣物<br/>才能预览搭配哦～</div></div></div>`;
     }
-    const combos = generateFittingCombos();
+    const palette = wardrobe.map(it => `
+      <div class="fit-item ${it.cut ? 'cut-ready' : ''}" data-fitadd="${esc(it.id)}">
+        ${it.cut ? '<span class="fi-cut">已抠</span>' : '<span class="fi-add">＋</span>'}
+        <img src="${it.img || ''}" alt="" />
+        <div class="fi-name">${esc(it.name)}</div>
+        <div class="fi-cat">${esc(it.category)}</div>
+      </div>`).join('');
+    const looks = fittingLooks.length ? `<div class="fitting-section-title">💾 我的搭配（${fittingLooks.length}）</div><div class="fitting-looks">${fittingLooks.map(l => `
+      <div class="fitting-look"><img src="${l.img}" alt="" /><button class="fl-del" data-fitlookdel="${esc(l.id)}">✕</button><div class="fl-name">${esc(l.name)}</div></div>`).join('')}</div>` : '';
     return `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:0 4px 10px;">
-        <span style="font-size:13px;font-weight:700;color:var(--text);">推荐搭配</span>
-        <button class="outfit-btn-outline" data-orefresh>🔄 换一批</button>
-      </div>
-      <div id="outfitCombos">${combos}</div>`;
+      <div class="fitting-wrap">
+        <div class="fitting-topbar">
+          <button class="fitting-tbtn" data-fitbase>🧍 换底图</button>
+          <button class="fitting-tbtn" data-fitclear>🧹 清空</button>
+          <button class="fitting-tbtn" data-fitsave>💾 存搭配</button>
+          <button class="fitting-tbtn primary" data-fitexport>📤 导出</button>
+        </div>
+        <div class="fitting-stage"><canvas id="fittingCanvas" width="360" height="560"></canvas></div>
+        <div class="fitting-hint">轻点下方衣物即可「穿」到身上；在画布上拖动可移动，选中后用下方按钮缩放 / 旋转 / 调层级 / 删除。先「抠图」去掉白底，上身效果更自然。</div>
+        <div id="fittingLayerBar" class="fitting-layerbar" style="${fittingSelected ? '' : 'display:none;'}">
+          <button class="fl-btn" data-fitop="bigger">🔍＋</button>
+          <button class="fl-btn" data-fitop="smaller">🔍－</button>
+          <button class="fl-btn" data-fitop="left">↺ 左转</button>
+          <button class="fl-btn" data-fitop="right">↻ 右转</button>
+          <button class="fl-btn ghost" data-fitop="front">⬆ 前置</button>
+          <button class="fl-btn ghost" data-fitop="back">⬇ 后置</button>
+          <button class="fl-btn ghost" data-fitop="cut">✂️ 抠图</button>
+          <button class="fl-btn ghost" data-fitop="del">🗑 删除</button>
+          <input class="fl-rot" type="range" min="-180" max="180" value="0" data-fitrot />
+        </div>
+        <div class="fitting-section-title">👗 我的衣橱（点一下就穿上）</div>
+        <div class="fitting-palette">${palette}</div>
+        ${looks}
+      </div>`;
   }
   function renderOutfitAIHTML() {
     const styles = ['不限','韩系','法式','老钱风','通勤','运动','甜美','酷飒','多巴胺','Clean Fit','新中式'];
@@ -4223,6 +4269,359 @@
     return combos.length ? combos.join('') : `<div class="outfit-empty">衣物类别不够丰富，多添加几件再回来～</div>`;
   }
   function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  /* ===================== 画布式试衣间 ===================== */
+  const FIT_W = 360, FIT_H = 560;
+  let _fitDrag = null;   // {id, offx, offy}
+
+  function initFitting() {
+    const cv = $('#fittingCanvas');
+    if (!cv) return;
+    cv.onpointerdown = e => {
+      e.preventDefault();
+      const r = cv.getBoundingClientRect();
+      const px = (e.clientX - r.left) * (cv.width / r.width);
+      const py = (e.clientY - r.top) * (cv.height / r.height);
+      // 从最上层往下命中
+      let hit = null;
+      for (let i = fitting.layers.length - 1; i >= 0; i--) {
+        if (fitHit(fitting.layers[i], px, py)) { hit = fitting.layers[i]; break; }
+      }
+      if (hit) {
+        fittingSelected = hit.id;
+        _fitDrag = { id: hit.id, offx: px - hit.x, offy: py - hit.y };
+        drawFitting();
+        syncLayerBar();
+      } else {
+        fittingSelected = null;
+        drawFitting();
+        syncLayerBar();
+      }
+    };
+    cv.onpointermove = e => {
+      if (!_fitDrag) return;
+      e.preventDefault();
+      const r = cv.getBoundingClientRect();
+      const px = (e.clientX - r.left) * (cv.width / r.width);
+      const py = (e.clientY - r.top) * (cv.height / r.height);
+      const ly = fitting.layers.find(l => l.id === _fitDrag.id);
+      if (!ly) return;
+      ly.x = Math.max(-ly.w / 2, Math.min(FIT_W + ly.w / 2, px - _fitDrag.offx));
+      ly.y = Math.max(-ly.h / 2, Math.min(FIT_H + ly.h / 2, py - _fitDrag.offy));
+      drawFitting();
+    };
+    const end = () => { if (_fitDrag) { _fitDrag = null; saveFitting(); } };
+    cv.onpointerup = end; cv.onpointercancel = end;
+    const rot = $('[data-fitrot]');
+    if (rot) rot.oninput = () => {
+      const ly = fitting.layers.find(l => l.id === fittingSelected);
+      if (!ly) return;
+      ly.rot = parseInt(rot.value, 10) || 0; drawFitting(); saveFitting();
+    };
+    drawFitting();
+    syncLayerBar();
+  }
+
+  function drawMannequin(ctx, w, h) {
+    ctx.save();
+    ctx.fillStyle = '#E9E4EE';
+    ctx.strokeStyle = '#CFC6DA';
+    ctx.lineWidth = 2;
+    // 头
+    ctx.beginPath(); ctx.arc(w / 2, h * 0.12, h * 0.055, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // 脖子
+    ctx.fillRect(w / 2 - w * 0.022, h * 0.16, w * 0.044, h * 0.03);
+    // 躯干（梯形）
+    ctx.beginPath();
+    ctx.moveTo(w / 2 - w * 0.13, h * 0.20);
+    ctx.lineTo(w / 2 + w * 0.13, h * 0.20);
+    ctx.lineTo(w / 2 + w * 0.10, h * 0.52);
+    ctx.lineTo(w / 2 - w * 0.10, h * 0.52);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // 手臂
+    ctx.fillRect(w / 2 - w * 0.17, h * 0.21, w * 0.045, h * 0.30);
+    ctx.fillRect(w / 2 + w * 0.125, h * 0.21, w * 0.045, h * 0.30);
+    // 腿
+    ctx.fillRect(w / 2 - w * 0.085, h * 0.52, w * 0.07, h * 0.36);
+    ctx.fillRect(w / 2 + w * 0.015, h * 0.52, w * 0.07, h * 0.36);
+    // 脚
+    ctx.fillRect(w / 2 - w * 0.10, h * 0.88, w * 0.11, h * 0.05);
+    ctx.fillRect(w / 2 + w * 0.005, h * 0.88, w * 0.11, h * 0.05);
+    ctx.restore();
+  }
+
+  function drawFitting() {
+    const cv = $('#fittingCanvas'); if (!cv) return;
+    const ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    if (fitting.base) {
+      const img = new Image();
+      img.onload = () => { ctx.drawImage(img, 0, 0, cv.width, cv.height); drawLayers(); };
+      img.onerror = () => { drawMannequin(ctx, cv.width, cv.height); drawLayers(); };
+      img.src = fitting.base;
+    } else {
+      drawMannequin(ctx, cv.width, cv.height);
+      drawLayers();
+    }
+    function drawLayers() {
+      const ctx2 = cv.getContext('2d');
+      const sorted = [...fitting.layers].sort((a, b) => a.z - b.z);
+      sorted.forEach(l => {
+        const it = wardrobe.find(w => w.id === l.itemId);
+        if (!it) return;
+        const src = it.cut || it.img;
+        if (!src) return;
+        const im = new Image();
+        im.onload = () => {
+          ctx2.save();
+          ctx2.translate(l.x, l.y);
+          ctx2.rotate((l.rot || 0) * Math.PI / 180);
+          ctx2.drawImage(im, -l.w / 2, -l.h / 2, l.w, l.h);
+          ctx2.restore();
+          if (l.id === fittingSelected) {
+            ctx2.save();
+            ctx2.translate(l.x, l.y);
+            ctx2.rotate((l.rot || 0) * Math.PI / 180);
+            ctx2.strokeStyle = '#FF5E9C'; ctx2.lineWidth = 2; ctx2.setLineDash([6, 4]);
+            ctx2.strokeRect(-l.w / 2, -l.h / 2, l.w, l.h);
+            ctx2.restore();
+          }
+        };
+        im.src = src;
+      });
+    }
+  }
+
+  function fitHit(l, px, py) {
+    const dx = px - l.x, dy = py - l.y;
+    const a = -(l.rot || 0) * Math.PI / 180;
+    const lx = dx * Math.cos(a) - dy * Math.sin(a);
+    const ly = dx * Math.sin(a) + dy * Math.cos(a);
+    return Math.abs(lx) <= l.w / 2 && Math.abs(ly) <= l.h / 2;
+  }
+
+  function defaultPlacement(cat, w, h) {
+    const map = {
+      '上装':   { x: w / 2, y: h * 0.34, w: w * 0.62, h: h * 0.26 },
+      '外套':   { x: w / 2, y: h * 0.33, w: w * 0.72, h: h * 0.30 },
+      '连衣裙': { x: w / 2, y: h * 0.46, w: w * 0.56, h: h * 0.52 },
+      '下装':   { x: w / 2, y: h * 0.66, w: w * 0.52, h: h * 0.32 },
+      '鞋履':   { x: w / 2, y: h * 0.90, w: w * 0.46, h: h * 0.10 },
+      '配饰':   { x: w / 2, y: h * 0.21, w: w * 0.40, h: h * 0.13 },
+      '包包':   { x: w * 0.74, y: h * 0.52, w: w * 0.26, h: h * 0.20 }
+    };
+    return Object.assign({ rot: 0 }, map[cat] || map['上装']);
+  }
+
+  function addFitLayer(itemId) {
+    const it = wardrobe.find(w => w.id === itemId);
+    if (!it) return;
+    const p = defaultPlacement(it.category, FIT_W, FIT_H);
+    const layer = { id: uid(), itemId, x: p.x, y: p.y, w: p.w, h: p.h, rot: 0, z: fitting.layers.length + 1 };
+    fitting.layers.push(layer);
+    fittingSelected = layer.id;
+    saveFitting();
+    drawFitting(); syncLayerBar();
+    if (!it.cut) toast('提示：点「✂️ 抠图」去掉白底，上身更自然');
+  }
+
+  function syncLayerBar() {
+    const bar = $('#fittingLayerBar'); if (!bar) return;
+    bar.style.display = fittingSelected ? '' : 'none';
+    const ly = fitting.layers.find(l => l.id === fittingSelected);
+    const rot = $('[data-fitrot]'); if (rot && ly) rot.value = ly.rot || 0;
+  }
+
+  function fitOp(op) {
+    const ly = fitting.layers.find(l => l.id === fittingSelected);
+    if (!ly) { toast('先在画布上点选一件衣服'); return; }
+    if (op === 'bigger') { ly.w *= 1.12; ly.h *= 1.12; }
+    else if (op === 'smaller') { ly.w *= 0.9; ly.h *= 0.9; }
+    else if (op === 'left') { ly.rot = (ly.rot || 0) - 10; }
+    else if (op === 'right') { ly.rot = (ly.rot || 0) + 10; }
+    else if (op === 'front') { ly.z = Math.max(...fitting.layers.map(l => l.z)) + 1; }
+    else if (op === 'back') { ly.z = Math.min(...fitting.layers.map(l => l.z)) - 1; }
+    else if (op === 'del') { fitting.layers = fitting.layers.filter(l => l.id !== fittingSelected); fittingSelected = null; }
+    else if (op === 'cut') { const it = wardrobe.find(w => w.id === ly.itemId); if (it) openCutEditor(it.id); }
+    const rot = $('[data-fitrot]'); if (rot && ly) rot.value = ly.rot || 0;
+    saveFitting(); drawFitting(); syncLayerBar();
+  }
+
+  function exportFitting() {
+    const cv = $('#fittingCanvas'); if (!cv) return null;
+    return cv.toDataURL('image/png');
+  }
+  function saveFitLook() {
+    const data = exportFitting(); if (!data) return;
+    const items = fitting.layers.map(l => { const it = wardrobe.find(w => w.id === l.itemId); return it ? it.name : ''; }).filter(Boolean);
+    const name = items.slice(0, 3).join('+') || ('搭配' + fittingLooks.length);
+    fittingLooks.unshift({ id: uid(), name: name.slice(0, 12), img: data, items, at: Date.now() });
+    if (fittingLooks.length > 20) fittingLooks = fittingLooks.slice(0, 20);
+    try { save('yu_fitting_looks', fittingLooks); } catch (e) { toast('图库已满，先删几张'); return; }
+    toast('已保存到我的搭配 ✅');
+    renderOutfitTab('fitting');
+  }
+  function deleteFitLook(id) {
+    fittingLooks = fittingLooks.filter(l => l.id !== id);
+    save('yu_fitting_looks', fittingLooks);
+    renderOutfitTab('fitting');
+  }
+
+  /* ===================== 抠图编辑器 ===================== */
+  let _cutItemId = null, _cutCtx = null, _cutOrig = null, _cutImg = null, _cutErasing = false;
+  function openCutEditor(itemId) {
+    const it = wardrobe.find(w => w.id === itemId);
+    if (!it || !it.img) { toast('这件没有照片，无法抠图'); return; }
+    _cutItemId = itemId;
+    const ov = document.getElementById('cutOverlay');
+    if (!ov) {
+      const d = document.createElement('div');
+      d.id = 'cutOverlay'; d.className = 'cut-overlay';
+      document.body.appendChild(d);
+    }
+    const overlay = document.getElementById('cutOverlay');
+    overlay.innerHTML = `
+      <h3>✂️ 抠图 · ${esc(it.name)}</h3>
+      <div class="cut-tip">① 先点「智能去背景」去掉白底；② 不干净的地方用「橡皮擦」手动擦；③「完成」保存。</div>
+      <div class="cut-stage"><canvas id="cutCanvas"></canvas></div>
+      <div class="cut-tools">
+        <div class="ct-row">
+          <button class="ct-btn" data-cut="auto">🪄 智能去背景</button>
+          <button class="ct-btn" data-cut="erase">🧽 橡皮擦</button>
+          <button class="ct-btn ghost" data-cut="reset">↩️ 恢复原图</button>
+        </div>
+        <label>去背景容差（越大去得越多）：<span id="cutTolVal">70</span></label>
+        <input type="range" id="cutTol" min="10" max="160" value="70" />
+        <label>橡皮擦大小：<span id="cutBrushVal">26</span> px</label>
+        <input type="range" id="cutBrush" min="6" max="80" value="26" />
+        <div class="ct-row" style="margin-top:10px;">
+          <button class="ct-btn ok" data-cut="done">✅ 完成</button>
+          <button class="ct-btn ghost" data-cut="cancel">取消</button>
+        </div>
+      </div>`;
+    overlay.style.display = 'flex';
+    const tol = document.getElementById('cutTol'), tolVal = document.getElementById('cutTolVal');
+    const brush = document.getElementById('cutBrush'), brushVal = document.getElementById('cutBrushVal');
+    if (tol) tol.oninput = () => { if (tolVal) tolVal.textContent = tol.value; };
+    if (brush) brush.oninput = () => { if (brushVal) brushVal.textContent = brush.value; };
+    const img = new Image();
+    img.onload = () => {
+      const max = 300;
+      const sc = Math.min(1, max / Math.max(img.width, img.height));
+      const cw = Math.max(1, Math.round(img.width * sc)), ch = Math.max(1, Math.round(img.height * sc));
+      const c = document.getElementById('cutCanvas'); c.width = cw; c.height = ch;
+      _cutCtx = c.getContext('2d'); _cutImg = img; _cutOrig = _cutCtx.getImageData(0, 0, cw, ch);
+      _cutCtx.drawImage(img, 0, 0, cw, ch);
+      setupCutCanvas();
+    };
+    img.src = it.img;
+  }
+  function cutAutoRemove() {
+    if (!_cutCtx) return;
+    const tol = parseInt(document.getElementById('cutTol').value, 10) || 70;
+    const w = _cutCtx.canvas.width, h = _cutCtx.canvas.height;
+    const d = _cutCtx.getImageData(0, 0, w, h); const p = d.data;
+    // 采样四条边，求背景平均色
+    let rs = 0, gs = 0, bs = 0, n = 0;
+    const sample = (x, y) => { const i = (y * w + x) * 4; rs += p[i]; gs += p[i + 1]; bs += p[i + 2]; n++; };
+    for (let x = 0; x < w; x++) { sample(x, 0); sample(x, h - 1); }
+    for (let y = 0; y < h; y++) { sample(0, y); sample(w - 1, y); }
+    rs /= n; gs /= n; bs /= n;
+    for (let i = 0; i < p.length; i += 4) {
+      const dr = p[i] - rs, dg = p[i + 1] - gs, db = p[i + 2] - bs;
+      if (Math.sqrt(dr * dr + dg * dg + db * db) < tol) p[i + 3] = 0;
+    }
+    _cutCtx.putImageData(d, 0, 0);
+  }
+  function setupCutCanvas() {
+    const c = document.getElementById('cutCanvas'); if (!c || !_cutCtx) return;
+    const erase = () => document.querySelector('[data-cut="erase"]').classList.contains('active');
+    c.onpointerdown = e => {
+      if (!erase()) return;
+      e.preventDefault(); _cutErasing = true; cutEraseAt(e);
+    };
+    c.onpointermove = e => { if (_cutErasing && erase()) cutEraseAt(e); };
+    c.onpointerup = () => { _cutErasing = false; };
+    c.onpointercancel = () => { _cutErasing = false; };
+  }
+  function cutEraseAt(e) {
+    const c = document.getElementById('cutCanvas');
+    const r = c.getBoundingClientRect();
+    const x = (e.clientX - r.left) * (c.width / r.width);
+    const y = (e.clientY - r.top) * (c.height / r.height);
+    const brush = parseInt(document.getElementById('cutBrush').value, 10) || 26;
+    _cutCtx.save();
+    _cutCtx.globalCompositeOperation = 'destination-out';
+    _cutCtx.beginPath(); _cutCtx.arc(x, y, brush / 2, 0, Math.PI * 2);
+    _cutCtx.fillStyle = 'rgba(0,0,0,1)'; _cutCtx.fill();
+    _cutCtx.restore();
+  }
+  function closeCutEditor(saveIt) {
+    const overlay = document.getElementById('cutOverlay');
+    if (overlay) overlay.style.display = 'none';
+    if (saveIt && _cutItemId && _cutCtx) {
+      const data = _cutCtx.canvas.toDataURL('image/png');
+      const it = wardrobe.find(w => w.id === _cutItemId);
+      if (it) { it.cut = data; saveWardrobeSafe(); }
+      toast('抠图已保存 ✅');
+      // 若当前正穿着该件，刷新画布
+      drawFitting();
+    }
+    _cutItemId = null; _cutCtx = null; _cutOrig = null; _cutImg = null;
+  }
+  function cutAction(act) {
+    if (act === 'auto') { cutAutoRemove(); const b = document.querySelector('[data-cut="erase"]'); if (b) b.classList.remove('active'); }
+    else if (act === 'erase') { const b = document.querySelector('[data-cut="erase"]'); if (b) b.classList.toggle('active'); }
+    else if (act === 'reset') { if (_cutOrig && _cutCtx) _cutCtx.putImageData(_cutOrig, 0, 0); }
+    else if (act === 'done') { closeCutEditor(true); }
+    else if (act === 'cancel') { closeCutEditor(false); }
+  }
+  function loadImageFile(file, max, cb) {
+    if (!file || !file.type || !file.type.startsWith('image/')) { cb(null); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const sc = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * sc)), h = Math.max(1, Math.round(img.height * sc));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        try { cb(cv.toDataURL('image/jpeg', 0.82)); } catch (e) { cb(null); }
+      };
+      img.onerror = () => cb(null);
+      img.src = reader.result;
+    };
+    reader.onerror = () => cb(null);
+    reader.readAsDataURL(file);
+  }
+  function openFitBasePicker() {
+    if (fitting.base) {
+      if (confirm('当前已使用自定义照片。\n点「确定」换回默认模特；点「取消」可重新选一张照片。')) {
+        fitting.base = null; saveFitting(); drawFitting(); toast('已换回默认模特'); return;
+      }
+    }
+    let inp = document.getElementById('fitBaseInput');
+    if (!inp) {
+      inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.id = 'fitBaseInput'; inp.style.display = 'none';
+      document.body.appendChild(inp);
+      inp.onchange = () => {
+        const f = inp.files && inp.files[0]; if (!f) return;
+        loadImageFile(f, 480, url => { if (url) { fitting.base = url; saveFitting(); drawFitting(); toast('底图已更换 🧍'); } inp.value = ''; });
+      };
+    }
+    inp.click();
+  }
+  function clearFitLayers() {
+    if (!fitting.layers.length) { toast('画布上还没有衣服'); return; }
+    if (confirm('确定清空画布上的所有衣服吗？（底图保留）')) {
+      fitting.layers = []; fittingSelected = null; saveFitting(); drawFitting(); syncLayerBar();
+    }
+  }
+  function exportFit() {
+    const data = exportFitting(); if (!data) return;
+    const a = document.createElement('a'); a.href = data; a.download = '我的搭配_' + Date.now() + '.png';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
   async function outfitAIAsk() {
     const input = $('#outfitAiInput');
     const prompt = (input?.value || '').trim();
