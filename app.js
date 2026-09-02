@@ -358,6 +358,7 @@
       toast('AI 设置已保存 ✅');
       return;
     }
+    if (e.target.closest('[data-oaitest]')) { testAiConnection('oai', 'oaiSaveTip'); return; }
     // 穿搭页「一键打开 AI 设置」：自动进唱歌子页 → 切到「AI 点评」标签 → 展开折叠面板 → 滚过去
     if (e.target.closest('[data-oaisettings]')) {
       try { renderSinging(); } catch (err) { console.warn('open sing failed', err); }
@@ -394,6 +395,17 @@
         const wrap = $('#outfitAiImgPreview');
         if (wrap) { wrap.style.display = ''; wrap.innerHTML = url ? `<img class="outfit-thumb" src="${url}" alt="" /><button class="outfit-thumb-del" data-oaiimgclear>✕</button>` : ''; }
       });
+    } else if (e.target.id === 'videoFileInput') {
+      const f = e.target.files && e.target.files[0];
+      const v = document.getElementById('singVideoEl');
+      if (!f || !v) return;
+      try { if (v.src) URL.revokeObjectURL(v.src); } catch (e) {}
+      v.src = URL.createObjectURL(f);
+      v.style.display = 'block';
+      _singVideo.a = _singVideo.b = null; _singVideo.loop = false;
+      const lb = document.getElementById('videoLoop'); if (lb) lb.textContent = '🔁 循环此段：关';
+      updateVideoSegBadge();
+      toast('已加载本地视频：' + f.name);
     }
   });
 
@@ -939,6 +951,40 @@
     if (sModCheck) { const k = sModCheck.dataset.modcheck.split(':')[1]; const d = getSingData(); d.progress[k] = Math.min(100, (d.progress[k] || 0) + 15); d.xp += 5; setSingData(d); toast(`${k} +15%`); renderSingModule(k); return; }
     const singTabBtn = e.target.closest('[data-singtab]');
     if (singTabBtn) { switchSingTab(singTabBtn.dataset.singtab); return; }
+    // 示范视频：来源切换 / 歌词同步 / 播放控制 / A-B 分段循环
+    const vSrc = e.target.closest('[data-vsrc]');
+    if (vSrc) {
+      $$('[data-vsrc]').forEach(b => b.classList.toggle('active', b === vSrc));
+      const isLocal = vSrc.dataset.vsrc === 'local';
+      $('#videoLocalBox').classList.toggle('hidden', !isLocal);
+      $('#videoBiliBox').classList.toggle('hidden', isLocal);
+      return;
+    }
+    const vFollow = e.target.closest('[data-vfollow]');
+    if (vFollow) {
+      $$('[data-vfollow]').forEach(b => b.classList.toggle('active', b === vFollow));
+      videoFollowRender(vFollow.dataset.vfollow);
+      return;
+    }
+    const videoPlay = e.target.closest('#videoPlay');
+    if (videoPlay) { const v = document.getElementById('singVideoEl'); if (!v || !v.src) { toast('请先选择本地视频文件'); return; } v.play().catch(() => toast('播放失败，换一个视频试试')); return; }
+    const videoPause = e.target.closest('#videoPause');
+    if (videoPause) { pauseVideo(); return; }
+    const videoReplay = e.target.closest('#videoReplay');
+    if (videoReplay) { const v = document.getElementById('singVideoEl'); if (v && v.src) { try { v.currentTime = 0; v.play().catch(() => {}); } catch (e) {} } return; }
+    const videoSetA = e.target.closest('#videoSetA');
+    if (videoSetA) { const v = document.getElementById('singVideoEl'); if (!v || !v.src) { toast('请先选视频'); return; } _singVideo.a = v.currentTime; updateVideoSegBadge(); return; }
+    const videoSetB = e.target.closest('#videoSetB');
+    if (videoSetB) { const v = document.getElementById('singVideoEl'); if (!v || !v.src) { toast('请先选视频'); return; } _singVideo.b = v.currentTime; updateVideoSegBadge(); return; }
+    const videoLoop = e.target.closest('#videoLoop');
+    if (videoLoop) {
+      if (_singVideo.a == null || _singVideo.b == null) { toast('请先设 A 点和 B 点'); return; }
+      _singVideo.loop = !_singVideo.loop;
+      videoLoop.textContent = _singVideo.loop ? '🔁 循环此段：开' : '🔁 循环此段：关';
+      const v = document.getElementById('singVideoEl');
+      if (_singVideo.loop && v) { try { v.currentTime = Math.min(_singVideo.a, _singVideo.b); v.play().catch(() => {}); } catch (e) {} }
+      return;
+    }
     const sTarget = e.target.closest('[data-singtarget]');
     if (sTarget) { setSingTarget(Number(sTarget.dataset.singtarget), sTarget); return; }
     const singListen = e.target.closest('#singListen');
@@ -1000,6 +1046,8 @@
     if (singGuide) { voiceGuideOn = !voiceGuideOn; singGuide.textContent = voiceGuideOn ? '🔊 语音指导：开' : '🔇 语音指导：关'; if (voiceGuideOn) speakGuide('语音指导已开启'); return; }
     const aiSave = e.target.closest('#aiSave');
     if (aiSave) { saveAiConfig(); return; }
+    const aiTest = e.target.closest('#aiTest');
+    if (aiTest) { testAiConnection('ai', 'aiSaveTip'); return; }
     const reviewMode = e.target.closest('[data-reviewmode]');
     if (reviewMode) {
       const st = window.__aiState.sing;
@@ -1773,12 +1821,19 @@
         <div class="ai-tch-head">
           <div class="ai-tch-title">🎤 AI 唱歌老师 · 现场陪练</div>
           <div class="ai-tch-tip">不用打字，老师直接听你唱、看你口型，实时语音指导</div>
+          <div class="mic-status">
+            <span class="mic-dot" id="micDot"></span>
+            <span class="mic-label">麦克风：<b id="micState">未开启</b></span>
+            <span class="mic-vol" id="micVolWrap"><span class="mic-vol-fill" id="micVolFill"></span></span>
+          </div>
+          <div class="mic-tip" id="micTip"></div>
         </div>
         <div class="ai-tabs">
           <button class="ai-tab active" data-singtab="pitch">🎯 听音准</button>
           <button class="ai-tab" data-singtab="scale">🎼 逐音带练</button>
           <button class="ai-tab" data-singtab="mouth">👄 看口型</button>
           <button class="ai-tab" data-singtab="review">🤖 AI 点评</button>
+          <button class="ai-tab" data-singtab="video">📺 示范视频</button>
         </div>
         <div id="singPitch" class="ai-panel">
           <div class="ai-tline">先选目标音，老师先弹给你听，你跟着唱：</div>
@@ -1846,10 +1901,10 @@
           <details class="ai-settings">
             <summary>⚙️ AI 设置（填你自己的免费 Key，仅存本机）</summary>
             <div class="ai-set-box">
-              <div class="ai-set-row"><label>API 地址</label><input id="aiBase" placeholder="https://api.deepseek.com/v1" value="${_qv(_ac.base)}"></div>
+              <div class="ai-set-row"><label>API 地址</label><input id="aiBase" placeholder="https://open.bigmodel.cn/api/paas/v4" value="${_qv(_ac.base || 'https://open.bigmodel.cn/api/paas/v4')}"></div>
               <div class="ai-set-row"><label>API Key</label><input id="aiKey" type="password" placeholder="粘贴你的 Key（不会显示明文）" value="${_qv(_ac.key)}"></div>
-              <div class="ai-set-row"><label>🧠 文字模型<br/><span style="font-weight:400;opacity:.7;">唱歌点评、文字建议</span></label><input id="aiModel" placeholder="glm-4.7-flash" value="${_qv(_ac.model)}"></div>
-              <div class="ai-set-row"><label>👁️ 看图模型<br/><span style="font-weight:400;opacity:.7;">穿搭上传照片时用</span></label><input id="aiVisionModel" placeholder="glm-4.6v-flash" value="${_qv(_ac.visionModel || _ac.model)}"></div>
+              <div class="ai-set-row"><label>🧠 文字模型<br/><span style="font-weight:400;opacity:.7;">唱歌点评、文字建议</span></label><input id="aiModel" placeholder="glm-4.7-flash" value="${_qv(_ac.model || 'glm-4.7-flash')}"></div>
+              <div class="ai-set-row"><label>👁️ 看图模型<br/><span style="font-weight:400;opacity:.7;">穿搭上传照片时用</span></label><input id="aiVisionModel" placeholder="glm-4.6v-flash" value="${_qv(_ac.visionModel || _ac.model || 'glm-4.6v-flash')}"></div>
               <div class="ai-hint" style="margin:8px 0 2px;line-height:1.7;">
                 💡 <b>两个模型各司其职</b>（都用智谱免费模型，一套 Key 就够）：<br/>
                 🧠 文字模型填 <code>glm-4.7-flash</code>（免费，200K，说话更聪明）<br/>
@@ -1857,6 +1912,7 @@
                 地址 <code>https://open.bigmodel.cn/api/paas/v4</code>　（Key 去 bigmodel.cn 注册领取）
               </div>
               <button class="btn-primary" id="aiSave" style="margin-top:6px;">💾 保存设置</button>
+              <button class="btn-ghost" id="aiTest" style="margin-top:6px;margin-left:6px;">🔌 测试连接</button>
               <div id="aiSaveTip" class="ai-hint"></div>
             </div>
           </details>
@@ -1877,7 +1933,41 @@
             <button class="btn-outline hidden" id="reviewStop">⏹ 停止</button>
           </div>
           <div id="reviewLive" class="ai-live hidden"></div>
+          <div id="reviewLyrics" class="review-lyrics hidden"></div>
           <div id="singReviewResult" class="ai-review-result hidden"></div>
+        </div>
+        <div id="singVideo" class="ai-panel hidden">
+          <div class="ai-tline">先看老师示范，再跟着唱。上传<b>本地视频</b>可做分段循环练习与歌词同步；B 站视频仅供观看示范（跨域无法在本页精确分段）。</div>
+          <div class="ai-subtabs">
+            <span class="ai-subtab-label">示范来源</span>
+            <button class="ai-subtab active" data-vsrc="local">📁 本地视频</button>
+            <button class="ai-subtab" data-vsrc="bili">📺 B站示范</button>
+          </div>
+          <div id="videoLocalBox">
+            <input type="file" id="videoFileInput" accept="video/*" style="width:100%;margin:6px 0;" />
+            <video id="singVideoEl" controls preload="metadata"></video>
+            <div class="ai-actions">
+              <button class="btn-outline" id="videoPlay">▶ 播放</button>
+              <button class="btn-outline" id="videoPause">⏸ 暂停</button>
+              <button class="btn-outline" id="videoReplay">⏮ 重播</button>
+            </div>
+            <div class="video-seg-row">
+              <button class="btn-outline" id="videoSetA">ⓐ 设 A 点</button>
+              <button class="btn-outline" id="videoSetB">ⓑ 设 B 点</button>
+              <button class="btn-outline" id="videoLoop">🔁 循环此段：关</button>
+              <span class="seg-badge" id="videoSegBadge">未设 A/B</span>
+            </div>
+            <div class="ai-subtabs" id="videoFollowBox">
+              <span class="ai-subtab-label">歌词同步</span>
+              <button class="ai-subtab" data-vfollow="scale">🎼 音阶</button>
+              <button class="ai-subtab" data-vfollow="song">🎵 小星星</button>
+              <button class="ai-subtab active" data-vfollow="off">关</button>
+            </div>
+            <div class="follow-lyrics" id="videoLyrics"></div>
+          </div>
+          <div id="videoBiliBox" class="hidden">
+            ${videoListHTML(SING_VIDEOS[d.level], levels[d.level])}
+          </div>
         </div>
         <div class="ai-ask">
           <button class="btn-outline" id="singAsk">🎙️ 语音问老师</button>
@@ -1887,6 +1977,7 @@
       </div>
       <button class="btn-primary" style="width:100%;" id="singNext">练完打卡，更新进度 →</button>
     `);
+    setupSingVideoListeners();
   }
   function renderSingModule(k) {
     const d = getSingData();
@@ -1972,11 +2063,57 @@
     const cents = Math.round(1200 * Math.log2(freq / fExact));
     return { name, cents, midi };
   }
-  // 麦克风实时音高训练器
+
+  /* ===== 麦克风能力检测：错误分类 + 实时状态 + 音量反馈（Req1） ===== */
+  // 把 getUserMedia 抛出的错误翻译成清晰中文提示与下一步动作
+  function diagnoseMicError(err) {
+    const name = (err && err.name) || '';
+    if (name === 'NotAllowedError' || name === 'PermissionDeniedError')
+      return { title: '权限被拒绝', msg: '浏览器拒绝了麦克风权限。请点击地址栏左侧的「🎙️/锁」图标 → 允许麦克风 → 刷新本页重试。', tip: '允许后刷新页面即可。' };
+    if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'OverconstrainedError')
+      return { title: '未找到麦克风', msg: '没有检测到可用的麦克风设备。请插入麦克风/带麦耳机，或在手机上用本 App 打开。', tip: '检查设备连接后重试。' };
+    if (name === 'NotReadableError' || name === 'TrackStartError')
+      return { title: '设备被占用', msg: '麦克风被其他程序占用了（如微信、腾讯会议、Zoom 等）。请关闭它们后重试。', tip: '关闭占用程序后再点一次开始。' };
+    if (name === 'SecurityError' || (err && /secure|https|localhost/i.test(String(err.message || ''))))
+      return { title: '非安全环境', msg: '麦克风只能在 https 或 localhost 下使用。请用 https 打开，或用 WorkBuddy 本地预览（localhost）打开。', tip: '改用 https / localhost 访问。' };
+    if (name === 'AbortError')
+      return { title: '打开中断', msg: '麦克风打开被中断，请稍候重试。', tip: '稍等再试。' };
+    return { title: '打开失败', msg: '麦克风开启失败：' + ((err && (err.message || err.name)) || err), tip: '可换设备或在手机上重试。' };
+  }
+  // 共享麦克风状态指示（唱歌/钢琴通用）
+  function setMicState(state, detail) {
+    const dot = document.getElementById('micDot');
+    const st = document.getElementById('micState');
+    const tip = document.getElementById('micTip');
+    if (dot) dot.className = 'mic-dot' + (state === 'requesting' ? ' req' : state === 'active' ? ' active' : (state === 'error' || state === 'denied' || state === 'nodevice' || state === 'occupied' || state === 'insecure') ? ' err' : '');
+    if (st) {
+      const map = { idle: '未开启', requesting: '请求中…', active: '已开启 · 聆听中', denied: '权限被拒', nodevice: '无设备', occupied: '被占用', insecure: '需 https', error: '异常' };
+      st.textContent = map[state] || state;
+      if (detail) st.textContent += '（' + detail + '）';
+    }
+    if (tip) tip.textContent = (detail && (state === 'error' || state === 'denied' || state === 'nodevice' || state === 'occupied' || state === 'insecure')) ? detail : '';
+  }
+  // 音量反馈：vol 为 0~1，写入共享音量条
+  function updateMicVol(vol) {
+    const fill = document.getElementById('micVolFill');
+    if (fill) fill.style.width = Math.max(0, Math.min(100, Math.round(vol * 100))) + '%';
+  }
+  // 检查是否处于可使用麦克风的安全上下文
+  function micSecureCheck() {
+    if (typeof window.isSecureContext === 'boolean' && window.isSecureContext === false)
+      return { ok: false, err: { name: 'SecurityError', message: 'insecure context' } };
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+      return { ok: false, err: { name: 'NotFoundError', message: 'no getUserMedia' } };
+    return { ok: true };
+  }
+
+  // 麦克风实时音高训练器（回调改为 (freq, note, vol)，vol 为 0~1 音量，用于音量反馈）
   function createPitchTrainer(onPitch) {
     let audioCtx, analyser, stream, raf, data, running = false;
     return {
       async start() {
+        const chk = micSecureCheck();
+        if (!chk.ok) throw chk.err;
         stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
         window.__micCtx = window.__micCtx || new (window.AudioContext || window.webkitAudioContext)();
         audioCtx = window.__micCtx;
@@ -1992,15 +2129,19 @@
         if (raf) cancelAnimationFrame(raf);
         if (stream) stream.getTracks().forEach(t => t.stop());
         try { analyser && analyser.disconnect(); } catch (e) {}
+        updateMicVol(0);
       },
       isRunning() { return running; }
     };
     function loop() {
       if (!running) return;
       analyser.getFloatTimeDomainData(data);
+      let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+      const rms = Math.sqrt(sum / data.length);          // 0~1 音量
+      const vol = Math.min(1, rms * 3.2);
       const f = autoCorrelate(data, audioCtx.sampleRate);
-      if (f > 60 && f < 1500) onPitch(f, noteFromFreq(f));
-      else onPitch(0, { name: '—', cents: 0 });
+      if (f > 60 && f < 1500) onPitch(f, noteFromFreq(f), vol);
+      else onPitch(0, { name: '—', cents: 0 }, vol);
       raf = requestAnimationFrame(loop);
     }
   }
@@ -2077,7 +2218,9 @@
     const st = window.__aiState.sing;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
     const btn = $('#singListen'), stop = $('#singStop'), live = $('#singLive');
-    const trainer = createPitchTrainer((freq, nt) => {
+    setMicState('requesting');
+    const trainer = createPitchTrainer((freq, nt, vol) => {
+      updateMicVol(vol);
       $('#singNoteName').textContent = nt.name;
       const live2 = $('#singLive');
       if (freq > 0) {
@@ -2108,10 +2251,11 @@
     st.trainer = trainer; st.active = true; st.lastSpeak = 0;
     registerAISession(trainer);
     trainer.start().then(() => {
+      setMicState('active');
       btn.classList.add('hidden'); stop.classList.remove('hidden');
       live.classList.remove('hidden'); live.innerHTML = '老师在听…唱一个音试试' + (st.target ? '' : '（未选目标音，可先选一个）');
       if (st.target) playNote(st.target);
-    }).catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+    }).catch(err => { const d = diagnoseMicError(err); setMicState('error', d.title); toast(d.msg); });
   }
   function stopSingListen() {
     const st = window.__aiState.sing; st.active = false;
@@ -2155,6 +2299,32 @@
     if (tip) tip.innerHTML = '已保存到本机浏览器（不会上传到本项目服务器，只有你填的 API 平台会收到请求）<br/>✅ 与「👗 穿搭 → AI搭配师」里的设置是<b>同一份</b>，改哪边都一样，不用填两次。<br/>🧠 文字用「' + esc(model || 'deepseek-chat') + '」，👁️ 看图用「' + esc(visionModel || model || '（未单独设置，同文字模型）') + '」。';
     toast('AI 设置已保存');
   }
+  // 测试当前填写（或已保存）的 Key 能否真正连通，直接报出 HTTP 状态与原因，避免"填了却不知道对不对"
+  async function testAiConnection(prefix, tipId) {
+    const g = id => { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
+    const base = g(prefix + 'Base') || 'https://open.bigmodel.cn/api/paas/v4';
+    const key = g(prefix + 'Key');
+    const model = g(prefix + 'Model') || 'glm-4.7-flash';
+    const tip = document.getElementById(tipId);
+    if (!key) { if (tip) tip.innerHTML = '⚠️ 还没填 Key，先在上方粘贴 Key 再测。'; return; }
+    const url = base.replace(/\/+$/, '') + '/chat/completions';
+    if (tip) tip.innerHTML = '🔄 正在测试连接（' + esc(model) + '）…';
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+        body: JSON.stringify({ model, messages: [{ role: 'user', content: 'hi' }], max_tokens: 5 })
+      });
+      const t = await res.text().catch(() => '');
+      if (res.ok) { if (tip) tip.innerHTML = '✅ 连接成功！Key 有效，模型 <b>' + esc(model) + '</b> 可用。'; toast('连接测试通过 ✅'); }
+      else if (res.status === 401) { if (tip) tip.innerHTML = '❌ <b>HTTP 401 鉴权失败</b>：Key 无效 / 已过期 / 被删除 / 或账号未实名认证。请去 bigmodel.cn 核对或重建 Key。'; }
+      else if (res.status === 429) { if (tip) tip.innerHTML = '❌ <b>HTTP 429 限流</b>：请求太频繁，等 10 秒再试。'; }
+      else if (/image|vision|multimodal|not support|unsupported/i.test(t)) { if (tip) tip.innerHTML = '❌ 模型 <b>' + esc(model) + '</b> 不支持该调用，换 glm-4.7-flash / glm-4.6v-flash 试试。'; }
+      else { if (tip) tip.innerHTML = '❌ HTTP ' + res.status + '：' + esc(t.slice(0, 220)); }
+    } catch (e) {
+      if (tip) tip.innerHTML = '❌ 网络/CORS 错误：' + esc(String(e && e.message || e)) + '。智谱 BigModel 允许浏览器直连，请换网络或确认可访问 open.bigmodel.cn。';
+    }
+  }
   async function callLLM(messages, images) {
     window.__llmErr = '';   // 让 outfitAIAsk 等下游能读到具体原因
     const cfg = loadAiConfig();
@@ -2167,7 +2337,7 @@
     const modelToUse = (images && images.length)
       ? (cfg.visionModel || cfg.model || 'glm-4.6v-flash')
       : (cfg.model || 'deepseek-chat');
-    const base = (cfg.base || 'https://api.deepseek.com/v1').replace(/\/+$/, '');
+    const base = (cfg.base || 'https://open.bigmodel.cn/api/paas/v4').replace(/\/+$/, '');
     const url = base + '/chat/completions';
     // 若带图片，把最后一条 user 消息转为多模态（图文混排）内容
     let msgs = messages;
@@ -2281,6 +2451,51 @@
     s += '（本地点评·完全免费，未调用大模型；想更智能请到⚙️设置填免费 Key）';
     return s;
   }
+  // 演唱评分：综合音准 / 节奏 / 完成度，给出 0~100 分与具体改进建议（req2）
+  function scoreReview(seq, samples, rhythmArr, slot) {
+    const segs = splitVoices(samples);
+    const n = seq.length;
+    // 音准
+    let pitchSum = 0, good = 0, high = 0, low = 0, miss = 0;
+    const bad = [];
+    seq.forEach((s, i) => {
+      const seg = segs[i];
+      const label = s[2] || s[0];
+      if (!seg) { miss++; bad.push(label + '（没唱出）'); return; }
+      const dev = Math.round(1200 * Math.log2(seg.avg / s[1]));
+      let sc;
+      if (Math.abs(dev) <= 15) sc = 100; else if (Math.abs(dev) <= 35) sc = 82; else if (Math.abs(dev) <= 60) sc = 55; else sc = 28;
+      pitchSum += sc;
+      if (Math.abs(dev) <= 35) good++; else if (dev < 0) { low++; bad.push(label + '（偏低）'); } else { high++; bad.push(label + '（偏高）'); }
+    });
+    const pitchScore = n ? Math.round(pitchSum / n) : 0;
+    // 节奏：先比「唱出的字数 / 总字数」（完成度），再比起始时间偏差
+    const completion = n ? Math.min(segs.length, n) / n : 0;
+    let rhythmScore = Math.round(completion * 100);
+    if (rhythmArr && rhythmArr.length) {
+      let absErr = 0; rhythmArr.forEach(e => absErr += Math.abs(e));
+      const avgErr = absErr / rhythmArr.length;            // 秒
+      const timingPenalty = Math.min(40, Math.round(avgErr / (slot || 0.62) * 40));
+      rhythmScore = Math.max(0, rhythmScore - timingPenalty);
+    }
+    const total = Math.round(pitchScore * 0.6 + rhythmScore * 0.3 + completion * 100 * 0.1);
+    // 建议
+    const advice = [];
+    if (good === n && miss === 0) advice.push('🎉 每个字都音准到位，非常稳！');
+    else {
+      if (bad.length) advice.push('重点练这几个字：' + bad.slice(0, 6).join('、') + '。');
+      if (high > low) advice.push('整体偏高 → 气息下沉、别往上挤脖子，把声音位置放低一点。');
+      else if (low > high) advice.push('整体偏低 → 提一下声音位置、多给点气，跟着钢琴把音「挂」上去。');
+      if (miss >= n * 0.4) advice.push('有较多字没唱出来 → 先放慢，一个字一个字对准再连起来。');
+    }
+    if (rhythmArr && rhythmArr.length) {
+      const avgErr = rhythmArr.reduce((a, b) => a + b, 0) / rhythmArr.length;
+      if (avgErr > 0.25) advice.push('节奏偏拖拍 → 用节拍器从 60 速度练，手打拍子嘴念字。');
+      else if (avgErr < -0.25) advice.push('节奏偏抢拍 → 跟着示范慢半拍起，先把稳再加速。');
+      else advice.push('节奏基本稳住，不错。');
+    } else advice.push('（未检测到足够节奏信息，建议配合示范视频跟唱练习）');
+    return { total, pitchScore, rhythmScore, completion: Math.round(completion * 100), advice, good, high, low, miss };
+  }
   function startReview() {
     const st = window.__aiState.sing;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
@@ -2289,13 +2504,40 @@
     if (st.mode === 'custom' && !st.customList.length) { toast('请先载入自定义歌曲'); return; }
     const seq = getScaleSequence();
     if (!seq.length) { toast('没有曲目'); return; }
+    st.reviewSeq = seq;
     st.reviewOn = true; st.reviewSamples = []; st.reviewTranscript = ''; st.reviewStartT = performance.now();
+    st.reviewCur = 0; st.reviewPrevFreq = 0; st.reviewRhythm = []; st.reviewSeen = 0;
     $('#reviewStart').classList.add('hidden'); $('#reviewStop').classList.remove('hidden');
-    const rl = $('#reviewLive'); rl.classList.remove('hidden'); rl.innerHTML = '🎙️ 录音中…请跟着唱《' + esc(st.reviewName || '曲目') + '》，唱完点「停止」';
+    const rl = $('#reviewLive'); rl.classList.remove('hidden'); rl.innerHTML = '🎙️ 录音中…请跟着高亮的字唱《' + esc(st.reviewName || '曲目') + '》，唱完点「停止」';
     $('#singReviewResult').classList.add('hidden');
-    const trainer = createPitchTrainer((freq) => { st.reviewSamples.push({ t: (performance.now() - st.reviewStartT) / 1000, freq: freq > 0 ? freq : 0 }); });
+    renderReviewLyrics(seq);
+    setMicState('requesting');
+    const SLOT = st.reviewSlot = 0.62; // 每个字默认时长（秒），用于节奏偏差估算
+    const trainer = createPitchTrainer((freq, nt, vol) => {
+      updateMicVol(vol);
+      const t = (performance.now() - st.reviewStartT) / 1000;
+      st.reviewSamples.push({ t, freq: freq > 0 ? freq : 0 });
+      // 检测「新字起始」（声音从静音→有声）：推进歌词高亮 + 记录节奏偏差
+      if (freq > 0 && st.reviewPrevFreq <= 0 && st.reviewCur < seq.length) {
+        const expectedT = st.reviewCur * SLOT;
+        st.reviewRhythm.push(t - expectedT);          // 正=偏慢/拖拍，负=偏快/抢拍
+        st.reviewSeen++;
+        const cur = seq[st.reviewCur];
+        const dev = Math.round(1200 * Math.log2(freq / cur[1]));
+        markReviewLyric(st.reviewCur, Math.abs(dev) <= 35 ? 'hit' : (dev < 0 ? 'miss-low' : 'miss-high'));
+        st.reviewCur = Math.min(st.reviewCur + 1, seq.length - 1);
+        highlightReviewLyric(st.reviewCur);
+      }
+      // 当前字实时音准偏差提示
+      if (freq > 0 && st.reviewCur < seq.length) {
+        const cur = seq[st.reviewCur];
+        const dev = Math.round(1200 * Math.log2(freq / cur[1]));
+        rl.innerHTML = '🎤 当前：<b>' + esc(cur[2] || cur[0]) + '</b> · ' + (Math.abs(dev) <= 35 ? '✅ 很准' : (dev < 0 ? '⬇ 偏低 ' + (-dev) : '⬆ 偏高 ' + dev) + ' 音分');
+      }
+      st.reviewPrevFreq = freq;
+    });
     st.trainer = trainer; registerAISession(trainer);
-    trainer.start().catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+    trainer.start().then(() => { setMicState('active'); }).catch(err => { const d = diagnoseMicError(err); setMicState('error', d.title); toast(d.msg); });
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       try {
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2306,6 +2548,23 @@
       } catch (e) {}
     }
   }
+  // 渲染可跟随高亮的歌词行（req2）
+  function renderReviewLyrics(seq) {
+    const box = $('#reviewLyrics'); if (!box) return;
+    box.innerHTML = seq.map((n, i) => `<span class="rl-syl${i === 0 ? ' current' : ''}" id="rl${i}">${esc(n[2] || n[0])}</span>`).join('');
+  }
+  function highlightReviewLyric(idx) {
+    $$('#reviewLyrics .rl-syl').forEach(el => {
+      const i = Number(el.id.replace('rl', ''));
+      el.classList.toggle('current', i === idx);
+    });
+  }
+  function markReviewLyric(idx, state) {
+    const el = document.getElementById('rl' + idx); if (!el) return;
+    el.classList.remove('current');
+    if (state === 'hit') { el.classList.add('hit'); }
+    else { el.classList.add('miss'); }
+  }
   async function stopReview() {
     const st = window.__aiState.sing;
     if (!st.reviewOn) return;
@@ -2313,26 +2572,41 @@
     if (st.trainer) { st.trainer.stop(); st.trainer = null; }
     if (st.reviewRec) { try { st.reviewRec.stop(); } catch (e) {} st.reviewRec = null; }
     $('#reviewStart').classList.remove('hidden'); $('#reviewStop').classList.add('hidden');
-    const rl = $('#reviewLive'); rl.innerHTML = '🤔 正在生成逐字点评…';
+    setMicState('idle');
+    const rl = $('#reviewLive'); rl.innerHTML = '🤔 正在生成点评…';
     const seq = getScaleSequence();
     const report = buildReviewReport(seq, st.reviewSamples);
     const songName = st.reviewName || '曲目';
     const cfg = loadAiConfig();
+    // 先算出评分卡（本地规则，无需 Key）
+    const sc = scoreReview(seq, st.reviewSamples, st.reviewRhythm, st.reviewSlot);
     let content = null, source = '';
     if (cfg && cfg.key) {
       const sys = `你是一位专业、温和的声乐老师。下面是一名学生刚唱的一段《${songName}》的逐字音准分析（由前端音高检测得到，目标音为简谱对应频率，偏差单位为音分，±35 音分内算准）。请：1）逐字简评音准（哪几个字准、哪几个偏高低）；2）指出整体可能的问题（气息/咬字/节奏）并给 1-2 条针对性练习建议；3）用鼓励语气结尾。分点说明，控制在 200 字内。`;
-      const user = `【逐字分析】\n${report}\n【识别到的歌词】${st.reviewTranscript || '（未启用语音识别）'}\n请点评。`;
+      const user = `【逐字分析】\n${report}\n【本地点评总分】${sc.total} 分（音准 ${sc.pitchScore} / 节奏 ${sc.rhythmScore} / 完成度 ${sc.completion}%）\n【识别到的歌词】${st.reviewTranscript || '（未启用语音识别）'}\n请点评。`;
       content = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: user }]);
       source = 'ai';
     }
     if (!content) { content = buildLocalReview(seq, st.reviewSamples); source = 'local'; }
     const box = $('#singReviewResult');
-    if (content) {
+    if (box) {
       box.classList.remove('hidden');
       const title = source === 'ai' ? '🤖 AI 老师逐字点评' : '🎤 本地逐字点评（完全免费·无需 Key）';
-      box.innerHTML = `<b>${title}</b><div class="ai-review-body">${esc(content).replace(/\n/g, '<br/>')}</div>`;
-      speakGuide(content.slice(0, 110));
-      rl.innerHTML = '✅ 点评完成';
+      const adviceHtml = (sc.advice && sc.advice.length ? sc.advice.map(a => '· ' + esc(a)).join('<br/>') : '');
+      box.innerHTML =
+        `<div class="score-card">
+           <div class="score-num">${sc.total}</div>
+           <div class="score-sub">综合评分 / 100　《${esc(songName)}》</div>
+           <div class="score-bars">
+             <div class="score-bar"><div class="sb-label">音准 ${sc.pitchScore}</div><div class="sb-track"><div class="sb-fill" style="width:${sc.pitchScore}%"></div></div></div>
+             <div class="score-bar"><div class="sb-label">节奏 ${sc.rhythmScore}</div><div class="sb-track"><div class="sb-fill" style="width:${sc.rhythmScore}%"></div></div></div>
+             <div class="score-bar"><div class="sb-label">完成 ${sc.completion}%</div><div class="sb-track"><div class="sb-fill" style="width:${sc.completion}%"></div></div></div>
+           </div>
+           <div class="score-advice">${adviceHtml}</div>
+         </div>
+         <div style="margin-top:10px;"><b>${title}</b><div class="ai-review-body">${esc(content).replace(/\n/g, '<br/>')}</div></div>`;
+      speakGuide((source === 'ai' ? content : ('得分 ' + sc.total + ' 分。' + (sc.advice[0] || ''))).slice(0, 110));
+      rl.innerHTML = '✅ 点评完成（' + sc.total + ' 分）';
     } else {
       rl.innerHTML = '⚠️ 点评失败，请重试';
     }
@@ -2433,7 +2707,9 @@
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
     st.scaleList = getScaleSequence(); st.scaleIdx = 0; st.scalePassed = 0; st.scaleLocked = false; st.scaleLastSpeak = 0; st.scaleOn = true;
     rebuildScaleTrack();
-    const trainer = createPitchTrainer((freq, nt) => {
+    setMicState('requesting');
+    const trainer = createPitchTrainer((freq, nt, vol) => {
+      updateMicVol(vol);
       $('#scaleNoteName').textContent = freq > 0 ? nt.name : '—';
       if (freq > 0) {
         const target = st.scaleList[st.scaleIdx][1];
@@ -2467,12 +2743,13 @@
     });
     st.trainer = trainer; registerAISession(trainer);
     trainer.start().then(() => {
+      setMicState('active');
       $('#scaleStart').classList.add('hidden'); $('#scaleStop').classList.remove('hidden');
       $('#scalePrompt').classList.remove('hidden');
       markScaleNote(0, 'current'); playNote(st.scaleList[0][1]);
       $('#scalePrompt').innerHTML = '🎧 听老师唱：' + st.scaleList[0][2] + '（然后跟着唱）';
       speakGuide('我们先从哆开始，听我唱，然后你跟着唱');
-    }).catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+    }).catch(err => { const d = diagnoseMicError(err); setMicState('error', d.title); toast(d.msg); });
   }
   function stopScaleTrain(finished) {
     const st = window.__aiState.sing;
@@ -2494,17 +2771,71 @@
     $('#singScale').classList.toggle('hidden', tab !== 'scale');
     $('#singMouth').classList.toggle('hidden', tab !== 'mouth');
     $('#singReview').classList.toggle('hidden', tab !== 'review');
+    $('#singVideo').classList.toggle('hidden', tab !== 'video');
+    if (tab !== 'video') pauseVideo();           // 离开视频页时暂停，避免后台继续播放
     const st = window.__aiState.sing;
     if (tab !== 'review' && st.reviewOn) { st.reviewOn = false; if (st.trainer) { st.trainer.stop(); st.trainer = null; } if (st.reviewRec) { try { st.reviewRec.stop(); } catch (e) {} st.reviewRec = null; } $('#reviewStart').classList.remove('hidden'); $('#reviewStop').classList.add('hidden'); }
     if (tab !== 'pitch' && st.trainer && !st.scaleOn) { st.active = false; st.trainer.stop(); st.trainer = null; $('#singListen').classList.remove('hidden'); $('#singStop').classList.add('hidden'); }
     if (tab !== 'scale' && st.scaleOn) { stopScaleTrain(); }
     if (tab !== 'mouth' && st.cam) { st.cam.stop(); st.cam = null; $('#singCamStart').classList.remove('hidden'); $('#singCamStop').classList.add('hidden'); $('#singCamTip').classList.add('hidden'); }
   }
+  // ============ 唱歌·示范视频控制（req3） ============
+  // 全局视频状态：A/B 分段点、循环开关、歌词同步序列
+  let _singVideo = { a: null, b: null, loop: false, followSeq: null };
+  function setupSingVideoListeners() {
+    const v = document.getElementById('singVideoEl');
+    if (!v || v._wired) return;
+    v._wired = true;
+    v.addEventListener('timeupdate', () => {
+      if (_singVideo.loop && _singVideo.a != null && _singVideo.b != null) {
+        const a = Math.min(_singVideo.a, _singVideo.b);
+        const b = Math.max(_singVideo.a, _singVideo.b);
+        if (v.currentTime >= b - 0.05) { try { v.currentTime = a; } catch (e) {} }
+      }
+      videoFollowSync();
+    });
+    v.addEventListener('loadedmetadata', () => { videoFollowSync(); });
+  }
+  function pauseVideo() {
+    const v = document.getElementById('singVideoEl');
+    if (v && !v.paused) { try { v.pause(); } catch (e) {} }
+  }
+  function updateVideoSegBadge() {
+    const b = document.getElementById('videoSegBadge'); if (!b) return;
+    const fmt = s => (s == null) ? '—' : (Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2));
+    b.textContent = 'A ' + fmt(_singVideo.a) + ' / B ' + fmt(_singVideo.b);
+  }
+  function videoFollowRender(kind) {
+    const box = document.getElementById('videoLyrics');
+    if (!box) return;
+    let seq = null;
+    if (kind === 'scale') seq = SCALE_LIST;
+    else if (kind === 'song') seq = SONG_NOTES;
+    _singVideo.followSeq = seq;
+    if (!seq) { box.innerHTML = ''; box.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+    box.innerHTML = seq.map((n, i) => `<span class="vl-syl${i === 0 ? ' current' : ''}" id="vls${i}">${esc(n[2] || n[0])}</span>`).join('');
+  }
+  function videoFollowSync() {
+    const v = document.getElementById('singVideoEl');
+    const box = document.getElementById('videoLyrics');
+    if (!v || !box || !_singVideo.followSeq || !v.duration) return;
+    const seq = _singVideo.followSeq;
+    const slot = v.duration / seq.length;
+    let idx = Math.floor(v.currentTime / slot);
+    if (idx < 0) idx = 0; if (idx > seq.length - 1) idx = seq.length - 1;
+    for (let i = 0; i < seq.length; i++) {
+      const el = document.getElementById('vls' + i);
+      if (el) el.classList.toggle('current', i === idx);
+    }
+  }
   function startPianoListen() {
     const st = window.__aiState.piano;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('当前环境不支持麦克风'); return; }
     const btn = $('#pianoListen'), stop = $('#pianoStop'), live = $('#pianoLive');
-    const trainer = createPitchTrainer((freq, nt) => {
+    setMicState('requesting');
+    const trainer = createPitchTrainer((freq, nt, vol) => {
+      updateMicVol(vol);
       $('#pianoNoteName').textContent = nt.name;
       if (freq > 0) {
         const cents = nt.cents;
@@ -2532,7 +2863,7 @@
     });
     st.trainer = trainer; st.active = true; st.lastSpeak = 0;
     registerAISession(trainer);
-    trainer.start().then(() => { btn.classList.add('hidden'); stop.classList.remove('hidden'); live.classList.remove('hidden'); live.innerHTML = '老师在听…弹一个音试试'; }).catch(err => { toast('麦克风开启失败：' + ((err && err.message) || err)); });
+    trainer.start().then(() => { setMicState('active'); btn.classList.add('hidden'); stop.classList.remove('hidden'); live.classList.remove('hidden'); live.innerHTML = '老师在听…弹一个音试试'; }).catch(err => { const d = diagnoseMicError(err); setMicState('error', d.title); toast(d.msg); });
   }
   function stopPianoListen() {
     const st = window.__aiState.piano; st.active = false;
@@ -3748,6 +4079,7 @@
             看图若限流，把 👁️ 换成 <code>glm-4.1v-thinking-flash</code> 或 <code>glm-4v-flash</code>
           </div>
           <button class="outfit-btn-pink" data-oaisave style="width:100%;">💾 保存设置</button>
+          <button class="outfit-btn-pink" data-oaitest style="width:100%;margin-top:6px;background:#fff;color:#d63384;border:1px solid #f0b8d4;">🔌 测试连接</button>
           <div id="oaiSaveTip" class="outfit-tips"></div>
           ${hasKey ? '' : '<div class="outfit-tips" style="margin-top:6px;">没 Key？去 <b>bigmodel.cn</b> 手机号注册 → 实名认证 → 右上角「API Key」新建 → 复制那串（只显示一次）。免费。</div>'}
         </div>
