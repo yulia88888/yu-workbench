@@ -348,12 +348,13 @@
       const base = ($('#oaiBase')?.value || '').trim();
       const key = ($('#oaiKey')?.value || '').trim();
       const model = ($('#oaiModel')?.value || '').trim();
-      if (!key) { toast('请先把 Key 粘进中间那行'); return; }
+      const visionModel = ($('#oaiVisionModel')?.value || '').trim();
+      if (!key) { toast('请先把 Key 粘进第二行'); return; }
       if (!base) { toast('请填写 API 地址'); return; }
-      if (!model) { toast('请填写模型名'); return; }
-      localStorage.setItem('yu_ai_cfg', JSON.stringify({ base, key, model }));
+      if (!model) { toast('请填写文字模型名'); return; }
+      localStorage.setItem('yu_ai_cfg', JSON.stringify({ base, key, model, visionModel }));
       const tip = $('#oaiSaveTip');
-      if (tip) tip.innerHTML = '✅ 已保存到本机浏览器（唱歌模块共用同一份，不用再填一次）';
+      if (tip) tip.innerHTML = '✅ 已保存到本机浏览器（唱歌模块共用同一份，不用再填一次）<br/>🧠 文字：<b>' + esc(model) + '</b>　👁️ 看图：<b>' + esc(visionModel || model) + '</b>';
       toast('AI 设置已保存 ✅');
       return;
     }
@@ -1847,12 +1848,13 @@
             <div class="ai-set-box">
               <div class="ai-set-row"><label>API 地址</label><input id="aiBase" placeholder="https://api.deepseek.com/v1" value="${_qv(_ac.base)}"></div>
               <div class="ai-set-row"><label>API Key</label><input id="aiKey" type="password" placeholder="粘贴你的 Key（不会显示明文）" value="${_qv(_ac.key)}"></div>
-              <div class="ai-set-row"><label>模型名</label><input id="aiModel" placeholder="deepseek-chat" value="${_qv(_ac.model)}"></div>
+              <div class="ai-set-row"><label>🧠 文字模型<br/><span style="font-weight:400;opacity:.7;">唱歌点评、文字建议</span></label><input id="aiModel" placeholder="glm-4.7-flash" value="${_qv(_ac.model)}"></div>
+              <div class="ai-set-row"><label>👁️ 看图模型<br/><span style="font-weight:400;opacity:.7;">穿搭上传照片时用</span></label><input id="aiVisionModel" placeholder="glm-4.6v-flash" value="${_qv(_ac.visionModel || _ac.model)}"></div>
               <div class="ai-hint" style="margin:8px 0 2px;line-height:1.7;">
-                💡 <b>想让 AI 看懂照片</b>（穿搭页上传图问配饰），请用智谱免费视觉模型，三项照抄：<br/>
-                地址 <code>https://open.bigmodel.cn/api/paas/v4</code><br/>
-                模型 <code>glm-4.6v-flash</code>　（Key 去 bigmodel.cn 注册领取）<br/>
-                <span style="opacity:.75;">只做文字点评/搭配的话，DeepSeek 等普通模型即可，不用换。</span>
+                💡 <b>两个模型各司其职</b>（都用智谱免费模型，一套 Key 就够）：<br/>
+                🧠 文字模型填 <code>glm-4.7-flash</code>（免费，200K，说话更聪明）<br/>
+                👁️ 看图模型填 <code>glm-4.6v-flash</code>（免费，能看懂照片）<br/>
+                地址 <code>https://open.bigmodel.cn/api/paas/v4</code>　（Key 去 bigmodel.cn 注册领取）
               </div>
               <button class="btn-primary" id="aiSave" style="margin-top:6px;">💾 保存设置</button>
               <div id="aiSaveTip" class="ai-hint"></div>
@@ -2146,9 +2148,11 @@
     const base = $('#aiBase').value.trim();
     const key = $('#aiKey').value.trim();
     const model = $('#aiModel').value.trim();
-    localStorage.setItem('yu_ai_cfg', JSON.stringify({ base, key, model }));
+    const vmEl = $('#aiVisionModel');
+    const visionModel = vmEl ? vmEl.value.trim() : '';
+    localStorage.setItem('yu_ai_cfg', JSON.stringify({ base, key, model, visionModel }));
     const tip = $('#aiSaveTip');
-    if (tip) tip.innerHTML = '已保存到本机浏览器（不会上传到本项目服务器，只有你填的 API 平台会收到请求）<br/>✅ 与「👗 穿搭 → AI搭配师」里的设置是<b>同一份</b>，改哪边都一样，不用填两次。';
+    if (tip) tip.innerHTML = '已保存到本机浏览器（不会上传到本项目服务器，只有你填的 API 平台会收到请求）<br/>✅ 与「👗 穿搭 → AI搭配师」里的设置是<b>同一份</b>，改哪边都一样，不用填两次。<br/>🧠 文字用「' + esc(model || 'deepseek-chat') + '」，👁️ 看图用「' + esc(visionModel || model || '（未单独设置，同文字模型）') + '」。';
     toast('AI 设置已保存');
   }
   async function callLLM(messages, images) {
@@ -2159,6 +2163,10 @@
       toast('请先在「⚙️ AI 设置」里填写你的免费 Key');
       return null;
     }
+    // 【分模型】带图片（需要视觉）时用 visionModel，纯文字时用 model；没单独设 visionModel 就退回 model（向后兼容）
+    const modelToUse = (images && images.length)
+      ? (cfg.visionModel || cfg.model || 'glm-4.6v-flash')
+      : (cfg.model || 'deepseek-chat');
     const base = (cfg.base || 'https://api.deepseek.com/v1').replace(/\/+$/, '');
     const url = base + '/chat/completions';
     // 若带图片，把最后一条 user 消息转为多模态（图文混排）内容
@@ -2180,7 +2188,7 @@
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
-        body: JSON.stringify({ model: cfg.model || 'deepseek-chat', messages: msgs, temperature: 0.7, max_tokens: 1000 })
+        body: JSON.stringify({ model: modelToUse, messages: msgs, temperature: 0.7, max_tokens: 1000 })
       });
       if (!res.ok) {
         const t = await res.text().catch(() => '');
@@ -2188,11 +2196,11 @@
         if (res.status === 401) {
           msg = 'Key 无效或已过期（HTTP 401）。请去智谱后台核对 Key，或删掉重建一个新的。';
         } else if (res.status === 429) {
-          msg = '请求太快被限流（HTTP 429）。等 10 秒再试，或换一个账号的 Key。';
+          msg = '请求太快被限流（HTTP 429）。等 10 秒再试，或把「看图模型」换成 glm-4.1v-thinking-flash / glm-4v-flash。';
         } else if (/image|vision|multimodal|not support|unsupported/i.test(t)) {
-          msg = '当前模型不支持看图，请确认模型是 glm-4.6v-flash（智谱免费视觉模型）。';
+          msg = '模型「' + modelToUse + '」不支持看图。请把「看图模型」改成 glm-4.6v-flash（或 glm-4.1v-thinking-flash / glm-4v-flash）。';
         } else {
-          msg = '大模型调用失败 HTTP ' + res.status + '。模型=' + (cfg.model || 'deepseek-chat') + '，地址=' + base;
+          msg = '大模型调用失败 HTTP ' + res.status + '。本次用的模型=' + modelToUse + '，地址=' + base;
         }
         window.__llmErr = msg;
         toast(msg);
@@ -3713,9 +3721,10 @@
     const styleOpts = styles.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
     const _ac = loadAiConfig();
     const _qv = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    // 默认预填智谱免费视觉模型，用户只需粘 Key
+    // 默认预填智谱免费模型：文字用 glm-4.7-flash，看图用 glm-4.6v-flash，用户只需粘 Key
     const curBase = _ac.base || 'https://open.bigmodel.cn/api/paas/v4';
-    const curModel = _ac.model || 'glm-4.6v-flash';
+    const curModel = _ac.model || 'glm-4.7-flash';
+    const curVision = _ac.visionModel || 'glm-4.6v-flash';
     const hasKey = !!(_ac.key && String(_ac.key).trim());
     const inp = 'width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;background:#fff;outline:none;margin-bottom:6px;';
     return `
@@ -3727,12 +3736,17 @@
           <div style="font-size:14px;font-weight:700;margin-bottom:3px;">🔑 AI 设置 ${hasKey ? '<span style="color:#22a06b;font-size:12px;">· 已填好 ✅</span>' : ''}</div>
           <div class="outfit-tips" style="margin:0 0 9px;">
             ${hasKey
-              ? 'Key 已保存（显示为圆点保护隐私）。想换模型可改下面两行，改完点保存。'
-              : '下面两行已<b>帮你填好</b>（智谱免费视觉模型），你<b>只需把 Key 粘进中间那行</b>，然后点保存。'}
+              ? 'Key 已保存（显示为圆点保护隐私）。下面四个都用智谱免费模型，一般不用改。'
+              : '下面几行已<b>帮你填好</b>（智谱免费模型），你<b>只需把 Key 粘进第二行</b>，然后点保存。'}
           </div>
           <input id="oaiBase" value="${_qv(curBase)}" placeholder="API 地址" style="${inp}" />
           <input id="oaiKey" type="password" value="${_qv(_ac.key || '')}" placeholder="👈 在这里粘贴你的 Key" style="${inp}" />
-          <input id="oaiModel" value="${_qv(curModel)}" placeholder="模型名" style="${inp}" />
+          <input id="oaiModel" value="${_qv(curModel)}" placeholder="🧠 文字模型（唱歌点评/文字建议）" style="${inp}" />
+          <input id="oaiVisionModel" value="${_qv(curVision)}" placeholder="👁️ 看图模型（上传照片时用）" style="${inp}" />
+          <div class="outfit-tips" style="margin:-2px 0 8px;font-size:11px;">
+            🧠 用 glm-4.7-flash（说话聪明）｜👁️ 用 glm-4.6v-flash（能看照片）<br/>
+            看图若限流，把 👁️ 换成 <code>glm-4.1v-thinking-flash</code> 或 <code>glm-4v-flash</code>
+          </div>
           <button class="outfit-btn-pink" data-oaisave style="width:100%;">💾 保存设置</button>
           <div id="oaiSaveTip" class="outfit-tips"></div>
           ${hasKey ? '' : '<div class="outfit-tips" style="margin-top:6px;">没 Key？去 <b>bigmodel.cn</b> 手机号注册 → 实名认证 → 右上角「API Key」新建 → 复制那串（只显示一次）。免费。</div>'}
