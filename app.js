@@ -44,10 +44,26 @@
   let outfitPendingImg = null;   // 添加衣物时暂存的照片缩略图（dataURL）
   let outfitAiImg = null;        // AI搭配师里随问上传的参考图（dataURL）
   // 画布式试衣间状态：base=底图(mannequin 或 上传照片 dataURL)，layers=衣物图层
-  let fitting = load('yu_fitting', { base: null, layers: [] });
+  let fitting = load('yu_fitting', { base: null, layers: [], model: { skin: 'natural', body: 'regular' } });
   let fittingSelected = null;    // 当前选中图层 id
   let fittingLooks = load('yu_fitting_looks', []);   // 已保存的搭配图库
-  function saveFitting() { try { save('yu_fitting', { base: fitting.base, layers: fitting.layers }); } catch (e) { toast('搭配保存失败：本地空间不足'); } }
+  // 模特肤色 / 体型（仅用于默认矢量模特；换自定义照片时不生效）
+  const SKIN_TONES = {
+    natural:   { c: '#F3D2B3', n: '自然' },
+    light:     { c: '#FBE0C8', n: '白皙' },
+    tan:       { c: '#E0A878', n: '小麦' },
+    deep:      { c: '#9C6B4A', n: '深肤色' },
+    mannequin: { c: '#D9D2E0', n: '灰模特' }
+  };
+  const BODY_SHAPES = {
+    slim:    { n: '纤细', sh: 0.205, wa: 0.072, hip: 0.165 },
+    regular: { n: '标准', sh: 0.245, wa: 0.082, hip: 0.195 },
+    curvy:   { n: '曲线', sh: 0.255, wa: 0.078, hip: 0.238 }
+  };
+  function saveFitting() {
+    try { save('yu_fitting', { base: fitting.base, layers: fitting.layers, model: fitting.model }); }
+    catch (e) { toast('搭配保存失败：本地空间不足'); }
+  }
 
   const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰', outfit: '穿搭衣橱' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
@@ -346,6 +362,19 @@
     // 画布式试衣间
     const fitAdd = e.target.closest('[data-fitadd]');
     if (fitAdd) { addFitLayer(fitAdd.dataset.fitadd); return; }
+    const fmSkin = e.target.closest('[data-fmskin]');
+    if (fmSkin) {
+      if (fitting.base) { toast('已用自定义照片，先点「🧍 换底图」换回默认模特再调肤色'); return; }
+      fitting.model = fitting.model || {}; fitting.model.skin = fmSkin.dataset.fmskin;
+      saveFitting(); renderOutfitTab('fitting'); return;
+    }
+    const fmBody = e.target.closest('[data-fmbody]');
+    if (fmBody) {
+      if (fitting.base) { toast('已用自定义照片，先点「🧍 换底图」换回默认模特再调体型'); return; }
+      fitting.model = fitting.model || {}; fitting.model.body = fmBody.dataset.fmbody;
+      saveFitting(); renderOutfitTab('fitting'); return;
+    }
+    if (e.target.closest('[data-fitdress]')) { autoDress(); return; }
     if (e.target.closest('[data-fitbase]')) { openFitBasePicker(); return; }
     if (e.target.closest('[data-fitclear]')) { clearFitLayers(); return; }
     if (e.target.closest('[data-fitsave]')) { saveFitLook(); return; }
@@ -4070,13 +4099,19 @@
     return `
       <div class="fitting-wrap">
         <div class="fitting-topbar">
+          <button class="fitting-tbtn primary" data-fitdress>✨ 一键套身上</button>
           <button class="fitting-tbtn" data-fitbase>🧍 换底图</button>
           <button class="fitting-tbtn" data-fitclear>🧹 清空</button>
           <button class="fitting-tbtn" data-fitsave>💾 存搭配</button>
           <button class="fitting-tbtn primary" data-fitexport>📤 导出</button>
         </div>
+        <div class="fitting-model">
+          <span class="fm-label">模特</span>
+          <span class="fm-skins">${Object.keys(SKIN_TONES).map(k => `<button class="fm-skin ${fitting.model && fitting.model.skin === k ? 'on' : ''}" data-fmskin="${k}" style="background:${SKIN_TONES[k].c}" title="${SKIN_TONES[k].n}"></button>`).join('')}</span>
+          <span class="fm-bodies">${Object.keys(BODY_SHAPES).map(k => `<button class="fm-body ${fitting.model && fitting.model.body === k ? 'on' : ''}" data-fmbody="${k}">${BODY_SHAPES[k].n}</button>`).join('')}</span>
+        </div>
         <div class="fitting-stage"><canvas id="fittingCanvas" width="360" height="560"></canvas></div>
-        <div class="fitting-hint">轻点下方衣物即可「穿」到身上，会自动按你的图片比例 + 模特部位缩放、<b>不变形</b>；在画布上拖动可移动，选中后点「🔄 适配」可一键重新按模特比例贴合。先「抠图」去掉白底，上身效果更自然。</div>
+        <div class="fitting-hint">点「✨ 一键套身上」可瞬间给模特穿好一整套；也可轻点下方任意衣物单独「穿」到对应部位，自动按图片比例 + 模特身材缩放、<b>不变形</b>。拖动可微调，选中后点「🔄 适配」按模特比例重新贴合。先「抠图」去掉白底，上身更自然。</div>
         <div id="fittingLayerBar" class="fitting-layerbar" style="${fittingSelected ? '' : 'display:none;'}">
           <button class="fl-btn" data-fitop="bigger">🔍＋</button>
           <button class="fl-btn" data-fitop="smaller">🔍－</button>
@@ -4323,31 +4358,51 @@
     syncLayerBar();
   }
 
-  function drawMannequin(ctx, w, h) {
+  // 默认矢量人体模特：头/发/颈/肩/腰/臀/手臂/腿/脚，支持肤色与体型
+  function drawMannequin(ctx, w, h, model) {
+    const m = model || (fitting.model) || { skin: 'natural', body: 'regular' };
+    const skin = (SKIN_TONES[m.skin] && SKIN_TONES[m.skin].c) || SKIN_TONES.natural.c;
+    const sh = (BODY_SHAPES[m.body]) || BODY_SHAPES.regular;
+    const cx = w / 2;
     ctx.save();
-    ctx.fillStyle = '#E9E4EE';
-    ctx.strokeStyle = '#CFC6DA';
-    ctx.lineWidth = 2;
-    // 头
-    ctx.beginPath(); ctx.arc(w / 2, h * 0.12, h * 0.055, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    // 脖子
-    ctx.fillRect(w / 2 - w * 0.022, h * 0.16, w * 0.044, h * 0.03);
-    // 躯干（梯形）
+    ctx.fillStyle = skin;
+    ctx.strokeStyle = 'rgba(0,0,0,0.13)';
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    // 头发（头后）
     ctx.beginPath();
-    ctx.moveTo(w / 2 - w * 0.13, h * 0.20);
-    ctx.lineTo(w / 2 + w * 0.13, h * 0.20);
-    ctx.lineTo(w / 2 + w * 0.10, h * 0.52);
-    ctx.lineTo(w / 2 - w * 0.10, h * 0.52);
+    ctx.ellipse(cx, h * 0.098, w * 0.088, h * 0.054, 0, 0, Math.PI * 2);
+    ctx.fillStyle = (m.skin === 'mannequin') ? '#C9C2D6' : '#5b4636';
+    ctx.fill(); ctx.stroke();
+    // 头
+    ctx.fillStyle = skin;
+    ctx.beginPath();
+    ctx.ellipse(cx, h * 0.108, w * 0.068, h * 0.044, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // 脖子
+    ctx.fillRect(cx - w * 0.024, h * 0.143, w * 0.048, h * 0.034);
+    // 躯干（肩→腰→臀 曲线）
+    const shY = h * 0.178, waY = h * 0.345, hipY = h * 0.475;
+    const shW = w * sh.sh / 2, waW = w * sh.wa / 2, hipW = w * sh.hip / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - shW, shY);
+    ctx.quadraticCurveTo(cx - shW * 1.04, (shY + waY) / 2, cx - waW, waY);
+    ctx.quadraticCurveTo(cx - hipW * 0.92, (waY + hipY) / 2, cx - hipW, hipY);
+    ctx.lineTo(cx + hipW, hipY);
+    ctx.quadraticCurveTo(cx + hipW * 0.92, (waY + hipY) / 2, cx + waW, waY);
+    ctx.quadraticCurveTo(cx + shW * 1.04, (shY + waY) / 2, cx + shW, shY);
     ctx.closePath(); ctx.fill(); ctx.stroke();
-    // 手臂
-    ctx.fillRect(w / 2 - w * 0.17, h * 0.21, w * 0.045, h * 0.30);
-    ctx.fillRect(w / 2 + w * 0.125, h * 0.21, w * 0.045, h * 0.30);
+    // 手臂（垂于身侧）
+    const armTop = shY + h * 0.012, armBot = h * 0.505, armW = w * 0.05;
+    ctx.fillRect(cx - shW - armW * 0.15, armTop, armW, armBot - armTop);
+    ctx.fillRect(cx + shW - armW * 0.85, armTop, armW, armBot - armTop);
     // 腿
-    ctx.fillRect(w / 2 - w * 0.085, h * 0.52, w * 0.07, h * 0.36);
-    ctx.fillRect(w / 2 + w * 0.015, h * 0.52, w * 0.07, h * 0.36);
+    const legTop = hipY, legBot = h * 0.905, legW = w * 0.078, legGap = w * 0.013;
+    ctx.fillRect(cx - legGap - legW, legTop, legW, legBot - legTop);
+    ctx.fillRect(cx + legGap, legTop, legW, legBot - legTop);
     // 脚
-    ctx.fillRect(w / 2 - w * 0.10, h * 0.88, w * 0.11, h * 0.05);
-    ctx.fillRect(w / 2 + w * 0.005, h * 0.88, w * 0.11, h * 0.05);
+    ctx.fillRect(cx - legGap - legW * 1.35, legBot, legW * 1.45, h * 0.03);
+    ctx.fillRect(cx + legGap - legW * 0.1, legBot, legW * 1.45, h * 0.03);
     ctx.restore();
   }
 
@@ -4358,10 +4413,10 @@
     if (fitting.base) {
       const img = new Image();
       img.onload = () => { ctx.drawImage(img, 0, 0, cv.width, cv.height); drawLayers(); };
-      img.onerror = () => { drawMannequin(ctx, cv.width, cv.height); drawLayers(); };
+      img.onerror = () => { drawMannequin(ctx, cv.width, cv.height, fitting.model); drawLayers(); };
       img.src = fitting.base;
     } else {
-      drawMannequin(ctx, cv.width, cv.height);
+      drawMannequin(ctx, cv.width, cv.height, fitting.model);
       drawLayers();
     }
     function drawLayers() {
@@ -4453,6 +4508,41 @@
       ly.w = w; ly.h = h;
       saveFitting(); drawFitting(); syncLayerBar();
     });
+  }
+  // 一键套身上：从衣橱里挑一套（连衣裙 或 上装+下装，再加外套/鞋/配饰/包），按部位自动穿好
+  function autoDress() {
+    if (!wardrobe.length) { toast('衣橱还是空的，先去「我的衣橱」添加衣服 👗'); return; }
+    const byCat = {};
+    wardrobe.forEach(it => { (byCat[it.category] = byCat[it.category] || []).push(it); });
+    const pick = arr => (arr && arr.length) ? arr[Math.floor(Math.random() * arr.length)] : null;
+    const chosen = [];
+    const dress = pick(byCat['连衣裙']);
+    if (dress) chosen.push(dress);
+    else {
+      const top = pick(byCat['上装']); if (top) chosen.push(top);
+      const bottom = pick(byCat['下装']); if (bottom) chosen.push(bottom);
+    }
+    const outer = pick(byCat['外套']); if (outer && Math.random() > 0.35) chosen.push(outer);
+    const shoes = pick(byCat['鞋履']); if (shoes) chosen.push(shoes);
+    const acc = pick(byCat['配饰']); if (acc && Math.random() > 0.4) chosen.push(acc);
+    const bag = pick(byCat['包包']); if (bag && Math.random() > 0.4) chosen.push(bag);
+    const usable = chosen.filter(it => it.cut || it.img);
+    if (!usable.length) { toast('衣橱里还没有可穿的衣物（需要带图片）'); return; }
+    fitting.layers = []; fittingSelected = null;
+    let hasUncut = false;
+    usable.forEach((it, i) => {
+      const src = it.cut || it.img;
+      const place = defaultPlacement(it.category, FIT_W, FIT_H);
+      const layer = { id: uid(), itemId: it.id, x: place.x, y: place.y, w: place.maxW, h: place.maxH, rot: 0, z: i + 1 };
+      fitting.layers.push(layer);
+      if (!it.cut) hasUncut = true;
+      sizeLayerByImage(place, src, (w, h) => {
+        layer.w = w; layer.h = h;
+        saveFitting(); drawFitting(); syncLayerBar();
+      });
+    });
+    saveFitting(); drawFitting(); syncLayerBar();
+    toast(hasUncut ? '已套上一身搭配 ✨ 有衣服没抠图，点单件「✂️ 抠图」去白底更自然' : '已为你套上一身搭配 ✨');
   }
 
   function syncLayerBar() {
