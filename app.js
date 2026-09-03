@@ -4521,8 +4521,8 @@
       const c = document.getElementById('cutCanvas'); c.width = cw; c.height = ch;
       const selC = document.getElementById('cutSelCanvas'); if (selC) { selC.width = cw; selC.height = ch; }
       _cutCtx = c.getContext('2d'); _cutImg = img; _cutRect = null; _cutHistory = [];
-      _cutOrig = _cutCtx.getImageData(0, 0, cw, ch);   // 原始像素缓存：擦除/去背景前一次性留存，供按区域精准恢复
       _cutCtx.drawImage(img, 0, 0, cw, ch);
+      _cutOrig = _cutCtx.getImageData(0, 0, cw, ch);   // 原始像素缓存：必须在 drawImage 之后获取，否则拿到的是空透明画布
       setupCutCanvas(); drawCutSelection(); updateUndoBtn();
     };
     img.src = it.img;
