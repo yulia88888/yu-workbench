@@ -4076,7 +4076,7 @@
           <button class="fitting-tbtn primary" data-fitexport>📤 导出</button>
         </div>
         <div class="fitting-stage"><canvas id="fittingCanvas" width="360" height="560"></canvas></div>
-        <div class="fitting-hint">轻点下方衣物即可「穿」到身上；在画布上拖动可移动，选中后用下方按钮缩放 / 旋转 / 调层级 / 删除。先「抠图」去掉白底，上身效果更自然。</div>
+        <div class="fitting-hint">轻点下方衣物即可「穿」到身上，会自动按你的图片比例 + 模特部位缩放、<b>不变形</b>；在画布上拖动可移动，选中后点「🔄 适配」可一键重新按模特比例贴合。先「抠图」去掉白底，上身效果更自然。</div>
         <div id="fittingLayerBar" class="fitting-layerbar" style="${fittingSelected ? '' : 'display:none;'}">
           <button class="fl-btn" data-fitop="bigger">🔍＋</button>
           <button class="fl-btn" data-fitop="smaller">🔍－</button>
@@ -4084,6 +4084,7 @@
           <button class="fl-btn" data-fitop="right">↻ 右转</button>
           <button class="fl-btn ghost" data-fitop="front">⬆ 前置</button>
           <button class="fl-btn ghost" data-fitop="back">⬇ 后置</button>
+          <button class="fl-btn ghost" data-fitop="fit">🔄 适配</button>
           <button class="fl-btn ghost" data-fitop="cut">✂️ 抠图</button>
           <button class="fl-btn ghost" data-fitop="del">🗑 删除</button>
           <input class="fl-rot" type="range" min="-180" max="180" value="0" data-fitrot />
@@ -4402,27 +4403,56 @@
 
   function defaultPlacement(cat, w, h) {
     const map = {
-      '上装':   { x: w / 2, y: h * 0.34, w: w * 0.62, h: h * 0.26 },
-      '外套':   { x: w / 2, y: h * 0.33, w: w * 0.72, h: h * 0.30 },
-      '连衣裙': { x: w / 2, y: h * 0.46, w: w * 0.56, h: h * 0.52 },
-      '下装':   { x: w / 2, y: h * 0.66, w: w * 0.52, h: h * 0.32 },
-      '鞋履':   { x: w / 2, y: h * 0.90, w: w * 0.46, h: h * 0.10 },
-      '配饰':   { x: w / 2, y: h * 0.21, w: w * 0.40, h: h * 0.13 },
-      '包包':   { x: w * 0.74, y: h * 0.52, w: w * 0.26, h: h * 0.20 }
+      '上装':   { x: w / 2, y: h * 0.34, maxW: w * 0.62, maxH: h * 0.30 },
+      '外套':   { x: w / 2, y: h * 0.33, maxW: w * 0.72, maxH: h * 0.34 },
+      '连衣裙': { x: w / 2, y: h * 0.46, maxW: w * 0.56, maxH: h * 0.56 },
+      '下装':   { x: w / 2, y: h * 0.66, maxW: w * 0.52, maxH: h * 0.34 },
+      '鞋履':   { x: w / 2, y: h * 0.90, maxW: w * 0.46, maxH: h * 0.12 },
+      '配饰':   { x: w / 2, y: h * 0.21, maxW: w * 0.40, maxH: h * 0.15 },
+      '包包':   { x: w * 0.74, y: h * 0.52, maxW: w * 0.26, maxH: h * 0.22 }
     };
-    return Object.assign({ rot: 0 }, map[cat] || map['上装']);
+    const d = map[cat] || map['上装'];
+    return { x: d.x, y: d.y, maxW: d.maxW, maxH: d.maxH };
   }
 
+  // 按图片原始宽高比 + 模特部位尺寸约束，算出不变形的 w/h（落点沿用 place 的 x/y）
+  function sizeLayerByImage(place, src, cb) {
+    const img = new Image();
+    img.onload = () => {
+      const ar = img.height > 0 ? img.width / img.height : 1;
+      let w = place.maxW, h = w / ar;
+      if (h > place.maxH) { h = place.maxH; w = h * ar; }   // 约束最大高度，保证贴合模特部位
+      cb(w, h, img);
+    };
+    img.onerror = () => cb(place.maxW, place.maxH, null);
+    img.src = src;
+  }
   function addFitLayer(itemId) {
     const it = wardrobe.find(w => w.id === itemId);
     if (!it) return;
-    const p = defaultPlacement(it.category, FIT_W, FIT_H);
-    const layer = { id: uid(), itemId, x: p.x, y: p.y, w: p.w, h: p.h, rot: 0, z: fitting.layers.length + 1 };
-    fitting.layers.push(layer);
-    fittingSelected = layer.id;
-    saveFitting();
-    drawFitting(); syncLayerBar();
+    const src = it.cut || it.img;
+    if (!src) return;
+    const place = defaultPlacement(it.category, FIT_W, FIT_H);
+    sizeLayerByImage(place, src, (w, h) => {
+      const layer = { id: uid(), itemId, x: place.x, y: place.y, w, h, rot: 0, z: (fitting.layers.reduce((m, l) => Math.max(m, l.z), 0)) + 1 };
+      fitting.layers.push(layer);
+      fittingSelected = layer.id;
+      saveFitting();
+      drawFitting(); syncLayerBar();
+    });
     if (!it.cut) toast('提示：点「✂️ 抠图」去掉白底，上身更自然');
+  }
+  // 对已有图层重新按模特部位比例适配（保留用户已拖动的位置，仅重算尺寸）
+  function fitLayerToBody(ly) {
+    const it = wardrobe.find(w => w.id === ly.itemId);
+    if (!it) return;
+    const src = it.cut || it.img;
+    if (!src) return;
+    const place = defaultPlacement(it.category, FIT_W, FIT_H);
+    sizeLayerByImage(place, src, (w, h) => {
+      ly.w = w; ly.h = h;
+      saveFitting(); drawFitting(); syncLayerBar();
+    });
   }
 
   function syncLayerBar() {
@@ -4442,6 +4472,7 @@
     else if (op === 'front') { ly.z = Math.max(...fitting.layers.map(l => l.z)) + 1; }
     else if (op === 'back') { ly.z = Math.min(...fitting.layers.map(l => l.z)) - 1; }
     else if (op === 'del') { fitting.layers = fitting.layers.filter(l => l.id !== fittingSelected); fittingSelected = null; }
+    else if (op === 'fit') { fitLayerToBody(ly); toast('已按模特比例适配 ✅'); }
     else if (op === 'cut') { const it = wardrobe.find(w => w.id === ly.itemId); if (it) openCutEditor(it.id); }
     const rot = $('[data-fitrot]'); if (rot && ly) rot.value = ly.rot || 0;
     saveFitting(); drawFitting(); syncLayerBar();
