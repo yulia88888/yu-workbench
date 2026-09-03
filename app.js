@@ -4468,7 +4468,7 @@
   }
 
   /* ===================== 抠图编辑器 ===================== */
-  let _cutItemId = null, _cutCtx = null, _cutOrig = null, _cutImg = null, _cutErasing = false, _cutRect = null, _cutDrag = false, _cutDragStart = null;
+  let _cutItemId = null, _cutCtx = null, _cutOrig = null, _cutImg = null, _cutErasing = false, _cutRect = null, _cutDrag = false, _cutDragStart = null, _cutHistory = [];
   function openCutEditor(itemId) {
     const it = wardrobe.find(w => w.id === itemId);
     if (!it || !it.img) { toast('这件没有照片，无法抠图'); return; }
@@ -4492,9 +4492,13 @@
         <div class="ct-row">
           <button class="ct-btn" data-cut="select">🔲 框选区域</button>
           <button class="ct-btn" data-cut="restore">↩️ 恢复选区</button>
+        </div>
+        <div class="ct-row">
+          <button class="ct-btn ghost" data-cut="undo" disabled>↶ 撤销</button>
+          <button class="ct-btn ghost" data-cut="original">🖼️ 恢复原图</button>
           <button class="ct-btn ghost" data-cut="reset">🔄 整图重置</button>
         </div>
-        <div class="cut-tip2">👉 想精准还原某块被擦掉的区域？先点「🔲 框选区域」在画面上<b>拖出要恢复的范围</b>，再点「↩️ 恢复选区」，只还原这块、其余编辑不动。</div>
+        <div class="cut-tip2">👉 想精准还原某块被擦掉的区域？先点「🔲 框选区域」在画面上<b>拖出要恢复的范围</b>，再点「↩️ 恢复选区」，只还原这块、其余编辑不动。点「↶ 撤销」可回退上一步编辑，点「🖼️ 恢复原图」可一键回到最初原图，点「🔄 整图重置」只重置工具状态。</div>
         <label>去背景容差（越大去得越多）：<span id="cutTolVal">70</span></label>
         <input type="range" id="cutTol" min="10" max="160" value="70" />
         <label>橡皮擦大小：<span id="cutBrushVal">26</span> px</label>
@@ -4516,15 +4520,16 @@
       const cw = Math.max(1, Math.round(img.width * sc)), ch = Math.max(1, Math.round(img.height * sc));
       const c = document.getElementById('cutCanvas'); c.width = cw; c.height = ch;
       const selC = document.getElementById('cutSelCanvas'); if (selC) { selC.width = cw; selC.height = ch; }
-      _cutCtx = c.getContext('2d'); _cutImg = img; _cutRect = null;
+      _cutCtx = c.getContext('2d'); _cutImg = img; _cutRect = null; _cutHistory = [];
       _cutOrig = _cutCtx.getImageData(0, 0, cw, ch);   // 原始像素缓存：擦除/去背景前一次性留存，供按区域精准恢复
       _cutCtx.drawImage(img, 0, 0, cw, ch);
-      setupCutCanvas(); drawCutSelection();
+      setupCutCanvas(); drawCutSelection(); updateUndoBtn();
     };
     img.src = it.img;
   }
   function cutAutoRemove() {
     if (!_cutCtx) return;
+    pushCutHistory();
     const tol = parseInt(document.getElementById('cutTol').value, 10) || 70;
     const w = _cutCtx.canvas.width, h = _cutCtx.canvas.height;
     const d = _cutCtx.getImageData(0, 0, w, h); const p = d.data;
@@ -4550,7 +4555,7 @@
         _cutRect = { x: _cutDragStart.x, y: _cutDragStart.y, w: 0, h: 0 };
         drawCutSelection();
       } else if (erase()) {
-        e.preventDefault(); _cutErasing = true; cutEraseAt(e);
+        e.preventDefault(); pushCutHistory(); _cutErasing = true; cutEraseAt(e);
       }
     };
     c.onpointermove = e => {
@@ -4595,6 +4600,7 @@
   function cutRestoreRegion() {
     if (!_cutCtx || !_cutOrig) return;
     if (!_cutRect || _cutRect.w < 3 || _cutRect.h < 3) { toast('请先用「🔲 框选区域」拖出要恢复的范围'); return; }
+    pushCutHistory();
     const w = _cutCtx.canvas.width, h = _cutCtx.canvas.height;
     const x = Math.max(0, Math.floor(_cutRect.x)), y = Math.max(0, Math.floor(_cutRect.y));
     const x2 = Math.min(w, Math.ceil(_cutRect.x + _cutRect.w)), y2 = Math.min(h, Math.ceil(_cutRect.y + _cutRect.h));
@@ -4607,6 +4613,44 @@
     _cutCtx.putImageData(region, x, y);
     _cutRect = null; drawCutSelection();
     toast('已将该区域恢复为原图 ✅');
+  }
+  // 保存当前画布状态到撤销栈，限制深度 20 步
+  function pushCutHistory() {
+    if (!_cutCtx) return;
+    try {
+      const w = _cutCtx.canvas.width, h = _cutCtx.canvas.height;
+      _cutHistory.push(_cutCtx.getImageData(0, 0, w, h));
+      if (_cutHistory.length > 20) _cutHistory.shift();
+      updateUndoBtn();
+    } catch (e) {}
+  }
+  function updateUndoBtn() {
+    const btn = document.querySelector('[data-cut="undo"]');
+    if (btn) btn.disabled = _cutHistory.length === 0;
+  }
+  function undoCut() {
+    if (!_cutCtx || _cutHistory.length === 0) return;
+    const prev = _cutHistory.pop();
+    _cutCtx.putImageData(prev, 0, 0);
+    _cutRect = null; drawCutSelection();
+    updateUndoBtn();
+    toast('已撤销上一步 ✅');
+  }
+  function restoreOriginal() {
+    if (!_cutCtx || !_cutOrig) return;
+    pushCutHistory(); // 允许撤销这次恢复
+    _cutCtx.putImageData(_cutOrig, 0, 0);
+    _cutRect = null; drawCutSelection();
+    updateUndoBtn();
+    toast('已恢复原图 ✅');
+  }
+  function resetToolState() {
+    _cutRect = null; drawCutSelection();
+    const eraseBtn = document.querySelector('[data-cut="erase"]');
+    const selBtn = document.querySelector('[data-cut="select"]');
+    if (eraseBtn) eraseBtn.classList.remove('active');
+    if (selBtn) selBtn.classList.remove('active');
+    toast('已重置工具状态 ✅');
   }
   function closeCutEditor(saveIt) {
     const overlay = document.getElementById('cutOverlay');
@@ -4632,7 +4676,9 @@
     else if (act === 'erase') { if (eraseBtn) eraseBtn.classList.toggle('active'); if (selBtn) selBtn.classList.remove('active'); }
     else if (act === 'select') { if (selBtn) selBtn.classList.toggle('active'); if (eraseBtn) eraseBtn.classList.remove('active'); }
     else if (act === 'restore') { cutRestoreRegion(); }
-    else if (act === 'reset') { if (_cutOrig && _cutCtx) { _cutCtx.putImageData(_cutOrig, 0, 0); _cutRect = null; drawCutSelection(); } }
+    else if (act === 'undo') { undoCut(); }
+    else if (act === 'original') { restoreOriginal(); }
+    else if (act === 'reset') { resetToolState(); }
     else if (act === 'done') { closeCutEditor(true); }
     else if (act === 'cancel') { closeCutEditor(false); }
   }
