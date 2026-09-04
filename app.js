@@ -64,6 +64,8 @@
     try { save('yu_fitting', { base: fitting.base, layers: fitting.layers, model: fitting.model }); }
     catch (e) { toast('搭配保存失败：本地空间不足'); }
   }
+  let fittingView = '2d';   // '2d' | '3d'
+  let fit3D = null;         // Three.js 场景状态（renderer/scene/camera/...）
 
   const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰', outfit: '穿搭衣橱' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
@@ -360,6 +362,20 @@
     if (odel) { deleteOutfitItem(odel.dataset.odel); return; }
     if (e.target.closest('[data-orefresh]')) { renderOutfitTab('fitting'); return; }
     // 画布式试衣间
+    const fitView = e.target.closest('[data-fitview]');
+    if (fitView) {
+      const v = fitView.dataset.fitview;
+      if (v === fittingView) return;
+      fittingView = v; renderOutfitTab('fitting'); return;
+    }
+    const fit3d = e.target.closest('[data-fit3d]');
+    if (fit3d) {
+      const op = fit3d.dataset.fit3d;
+      if (op === 'dress') { autoDress(); if (fit3D) rebuild3D(); }
+      else if (op === 'autorot') { toggle3DAutoRotate(fit3d); }
+      else if (op === 'reset') { reset3DView(); }
+      return;
+    }
     const fitAdd = e.target.closest('[data-fitadd]');
     if (fitAdd) { addFitLayer(fitAdd.dataset.fitadd); return; }
     const fmSkin = e.target.closest('[data-fmskin]');
@@ -4012,7 +4028,7 @@
     const b = $('#outfitTabBody');
     if (tab === 'today') b.innerHTML = renderOutfitTodayHTML();
     else if (tab === 'wardrobe') b.innerHTML = renderOutfitWardrobeHTML();
-    else if (tab === 'fitting') { b.innerHTML = renderOutfitFittingHTML(); initFitting(); }
+    else if (tab === 'fitting') { b.innerHTML = renderOutfitFittingHTML(); if (fittingView === '3d') initFitting3D(); else initFitting(); }
     else if (tab === 'ai') b.innerHTML = renderOutfitAIHTML();
   }
   function renderOutfitTodayHTML() {
@@ -4097,6 +4113,11 @@
     const looks = fittingLooks.length ? `<div class="fitting-section-title">💾 我的搭配（${fittingLooks.length}）</div><div class="fitting-looks">${fittingLooks.map(l => `
       <div class="fitting-look"><img src="${l.img}" alt="" /><button class="fl-del" data-fitlookdel="${esc(l.id)}">✕</button><div class="fl-name">${esc(l.name)}</div></div>`).join('')}</div>` : '';
     return `
+      <div class="fitting-viewbar">
+        <button class="fv-btn ${fittingView === '2d' ? 'on' : ''}" data-fitview="2d">✏️ 2D 画布</button>
+        <button class="fv-btn ${fittingView === '3d' ? 'on' : ''}" data-fitview="3d">🧊 3D 试穿</button>
+      </div>
+      <div id="fitting2D" style="${fittingView === '2d' ? '' : 'display:none;'}">
       <div class="fitting-wrap">
         <div class="fitting-topbar">
           <button class="fitting-tbtn primary" data-fitdress>✨ 一键套身上</button>
@@ -4127,6 +4148,18 @@
         <div class="fitting-section-title">👗 我的衣橱（点一下就穿上）</div>
         <div class="fitting-palette">${palette}</div>
         ${looks}
+      </div>
+      </div>
+      <div id="fitting3D" style="${fittingView === '3d' ? '' : 'display:none;'}">
+        <div class="fitting-3d-stage"><div id="fitting3DCanvas"></div><div class="fitting-3d-tip">🖐 拖动旋转 · 滚轮 / 双指缩放</div></div>
+        <div class="fitting-3d-bar">
+          <button class="fv-btn" data-fit3d="dress">✨ 一键套一身</button>
+          <button class="fv-btn" data-fit3d="autorot">🔄 自动转</button>
+          <button class="fv-btn" data-fit3d="reset">🎯 复位视角</button>
+        </div>
+        <div class="fitting-section-title">👗 点衣橱衣物，实时穿上（3D）</div>
+        <div class="fitting-palette">${palette}</div>
+        <div class="fitting-hint">3D 模特会按衣服<b>类别</b>自动套到对应身体部位，可<b>拖动旋转</b>、<b>滚轮/双指缩放</b>查看立体穿着。建议先「抠图」去白底，3D 上身更干净。换模特肤色/体型请切回 2D 设置。</div>
       </div>`;
   }
   function renderOutfitAIHTML() {
@@ -4311,6 +4344,7 @@
   let _fitDrag = null;   // {id, offx, offy}
 
   function initFitting() {
+    destroyFitting3D();
     const cv = $('#fittingCanvas');
     if (!cv) return;
     cv.onpointerdown = e => {
@@ -4494,6 +4528,7 @@
       fittingSelected = layer.id;
       saveFitting();
       drawFitting(); syncLayerBar();
+      if (fit3D) rebuild3D();
     });
     if (!it.cut) toast('提示：点「✂️ 抠图」去掉白底，上身更自然');
   }
@@ -4544,6 +4579,154 @@
     saveFitting(); drawFitting(); syncLayerBar();
     toast(hasUncut ? '已套上一身搭配 ✨ 有衣服没抠图，点单件「✂️ 抠图」去白底更自然' : '已为你套上一身搭配 ✨');
   }
+
+  /* ===================== 3D 试衣间（Three.js） ===================== */
+  function skinHex3D() {
+    const m = fitting.model || {};
+    const t = (SKIN_TONES[m.skin] && SKIN_TONES[m.skin].c) || SKIN_TONES.natural.c;
+    return t;
+  }
+  function destroyFitting3D() {
+    if (!fit3D) return;
+    try { cancelAnimationFrame(fit3D.raf); } catch (e) {}
+    try { if (fit3D._onResize) window.removeEventListener('resize', fit3D._onResize); } catch (e) {}
+    try { if (fit3D.renderer) fit3D.renderer.dispose(); } catch (e) {}
+    try { if (fit3D.container) fit3D.container.innerHTML = ''; } catch (e) {}
+    fit3D = null;
+  }
+  function initFitting3D() {
+    destroyFitting3D();
+    const container = $('#fitting3DCanvas');
+    if (!container) return;
+    if (typeof THREE === 'undefined') {
+      container.innerHTML = '<div style="padding:34px 16px;text-align:center;color:#7a8699;font-size:13px;line-height:1.8;">🧊 3D 引擎加载失败<br/>（需联网从 CDN 加载 Three.js，请检查网络后刷新页面；2D 试衣间不受影响）</div>';
+      return;
+    }
+    const W = container.clientWidth || 360, H = container.clientHeight || 480;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(W, H);
+    if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+    container.appendChild(renderer.domElement);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, W / H, 0.1, 100);
+    const target = new THREE.Vector3(0, 3.2, 0);
+    const sph = { radius: 13, phi: 1.12, theta: 0.5 };
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xb0a89c, 0.95));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.85); dir.position.set(5, 10, 7); scene.add(dir);
+    const dir2 = new THREE.DirectionalLight(0xffffff, 0.3); dir2.position.set(-6, 4, -4); scene.add(dir2);
+    const ground = new THREE.Mesh(new THREE.CircleGeometry(3.4, 48), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.06 }));
+    ground.rotation.x = -Math.PI / 2; ground.position.y = 0.01; scene.add(ground);
+
+    const mannequin = new THREE.Group();
+    buildMannequin3D(mannequin, skinHex3D());
+    scene.add(mannequin);
+    const garments = new THREE.Group();
+    scene.add(garments);
+    buildGarments3D(garments);
+
+    fit3D = { renderer, scene, camera, target, sph, container, mannequin, garments, raf: 0, drag: false, lx: 0, ly: 0, pinch: 0, auto: false };
+
+    const el = renderer.domElement;
+    el.style.touchAction = 'none';
+    el.addEventListener('pointerdown', e => { fit3D.drag = true; fit3D.lx = e.clientX; fit3D.ly = e.clientY; try { el.setPointerCapture(e.pointerId); } catch (x) {} });
+    el.addEventListener('pointermove', e => {
+      if (!fit3D.drag) return;
+      const dx = e.clientX - fit3D.lx, dy = e.clientY - fit3D.ly;
+      fit3D.lx = e.clientX; fit3D.ly = e.clientY;
+      sph.theta -= dx * 0.01;
+      sph.phi = Math.max(0.18, Math.min(Math.PI - 0.18, sph.phi - dy * 0.01));
+    });
+    const end = () => { fit3D.drag = false; };
+    el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+    el.addEventListener('wheel', e => { e.preventDefault(); sph.radius = Math.max(7, Math.min(24, sph.radius * (e.deltaY > 0 ? 1.1 : 0.9))); }, { passive: false });
+    el.addEventListener('touchmove', e => {
+      if (e.touches.length === 2) {
+        const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        if (fit3D.pinch) sph.radius = Math.max(7, Math.min(24, sph.radius * (fit3D.pinch / d)));
+        fit3D.pinch = d;
+      }
+    }, { passive: true });
+    el.addEventListener('touchend', () => { fit3D.pinch = 0; });
+
+    function animate() {
+      fit3D.raf = requestAnimationFrame(animate);
+      if (fit3D.auto && !fit3D.drag) sph.theta += 0.006;
+      const r = sph.radius, p = sph.phi, t = sph.theta;
+      camera.position.set(target.x + r * Math.sin(p) * Math.sin(t), target.y + r * Math.cos(p), target.z + r * Math.sin(p) * Math.cos(t));
+      camera.lookAt(target);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    fit3D.resize = () => {
+      const w = container.clientWidth || 360, h = container.clientHeight || 480;
+      renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+    };
+    fit3D._onResize = () => { if (fit3D) fit3D.resize(); };
+    window.addEventListener('resize', fit3D._onResize);
+    setTimeout(() => { if (fit3D) fit3D.resize(); }, 60);
+  }
+
+  function buildMannequin3D(g, skinHex) {
+    const skin = new THREE.MeshStandardMaterial({ color: new THREE.Color(skinHex), roughness: 0.85, metalness: 0.0 });
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 24), skin); head.position.y = 6.25; g.add(head);
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.6), new THREE.MeshStandardMaterial({ color: 0x4a3526, roughness: 1 }));
+    hair.position.y = 6.32; g.add(hair);
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.45, 20), skin); neck.position.y = 5.75; g.add(neck);
+    const profile = [
+      [0.30, 3.15], [0.62, 3.35], [0.86, 3.9], [0.74, 4.5], [0.62, 4.9], [0.78, 5.25], [0.95, 5.55], [0.9, 5.62]
+    ].map(p => new THREE.Vector2(p[0], p[1]));
+    g.add(new THREE.Mesh(new THREE.LatheGeometry(profile, 44), skin));
+    const armGeo = new THREE.CapsuleGeometry(0.2, 2.0, 6, 12);
+    const lArm = new THREE.Mesh(armGeo, skin); lArm.position.set(-1.02, 4.4, 0); lArm.rotation.z = 0.16; g.add(lArm);
+    const rArm = new THREE.Mesh(armGeo, skin); rArm.position.set(1.02, 4.4, 0); rArm.rotation.z = -0.16; g.add(rArm);
+    const legGeo = new THREE.CapsuleGeometry(0.26, 2.6, 6, 12);
+    const lLeg = new THREE.Mesh(legGeo, skin); lLeg.position.set(-0.34, 1.55, 0); g.add(lLeg);
+    const rLeg = new THREE.Mesh(legGeo, skin); rLeg.position.set(0.34, 1.55, 0); g.add(rLeg);
+    const footGeo = new THREE.BoxGeometry(0.34, 0.22, 0.6);
+    const lFoot = new THREE.Mesh(footGeo, skin); lFoot.position.set(-0.34, 0.11, 0.16); g.add(lFoot);
+    const rFoot = new THREE.Mesh(footGeo, skin); rFoot.position.set(0.34, 0.11, 0.16); g.add(rFoot);
+  }
+
+  function texFrom(src, cb) {
+    const loader = new THREE.TextureLoader();
+    loader.load(src, tx => {
+      if (THREE.sRGBEncoding !== undefined) tx.encoding = THREE.sRGBEncoding;
+      tx.anisotropy = 4; cb(tx);
+    }, undefined, () => cb(null));
+  }
+  function makeGarmentMesh(geo, src) {
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geo, mat);
+    texFrom(src, tx => { if (tx) { mat.map = tx; mat.needsUpdate = true; } });
+    return mesh;
+  }
+  function buildGarments3D(group) {
+    while (group.children.length) {
+      const c = group.children[0];
+      try { if (c.geometry) c.geometry.dispose(); if (c.material) { if (c.material.map) c.material.map.dispose(); c.material.dispose(); } } catch (e) {}
+      group.remove(c);
+    }
+    (fitting.layers || []).forEach(layer => {
+      const it = wardrobe.find(w => w.id === layer.itemId); if (!it) return;
+      const src = it.cut || it.img; if (!src) return;
+      const cat = it.category;
+      if (cat === '上装') { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.84, 0.7, 1.75, 40, 1, true), src); m.position.y = 4.55; group.add(m); }
+      else if (cat === '外套') { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.9, 0.76, 1.95, 40, 1, true), src); m.position.y = 4.35; group.add(m); }
+      else if (cat === '连衣裙') { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.8, 1.15, 3.7, 44, 1, true), src); m.position.y = 3.7; group.add(m); }
+      else if (cat === '下装') { [-0.34, 0.34].forEach(x => { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.36, 0.3, 1.8, 28, 1, true), src); m.position.set(x, 2.25, 0); group.add(m); }); }
+      else if (cat === '鞋履') { [-0.34, 0.34].forEach(x => { const m = makeGarmentMesh(new THREE.BoxGeometry(0.36, 0.26, 0.62), src); m.position.set(x, 0.13, 0.16); group.add(m); }); }
+      else if (cat === '配饰') {
+        if (it.name && it.name.indexOf('帽') >= 0) { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.55, 0.55, 0.4, 28, 1, true), src); m.position.y = 6.55; group.add(m); }
+        else { const m = makeGarmentMesh(new THREE.TorusGeometry(0.26, 0.08, 12, 28), src); m.position.set(0, 5.62, 0); m.rotation.x = Math.PI / 2; group.add(m); }
+      }
+      else if (cat === '包包') { const m = makeGarmentMesh(new THREE.BoxGeometry(0.5, 0.6, 0.18), src); m.position.set(0.95, 3.5, 0.1); group.add(m); }
+    });
+  }
+  function rebuild3D() { if (fit3D) buildGarments3D(fit3D.garments); }
+  function reset3DView() { if (fit3D) { fit3D.sph.radius = 13; fit3D.sph.phi = 1.12; fit3D.sph.theta = 0.5; } }
+  function toggle3DAutoRotate(btn) { if (!fit3D) return; fit3D.auto = !fit3D.auto; if (btn) btn.classList.toggle('on', fit3D.auto); }
 
   function syncLayerBar() {
     const bar = $('#fittingLayerBar'); if (!bar) return;
