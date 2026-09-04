@@ -4068,7 +4068,7 @@
       listHtml = `<div style="margin-bottom:12px;font-size:12px;color:var(--text-secondary);">共 ${wardrobe.length} 件衣物</div>` +
         wardrobe.map(it => `
           <div class="outfit-item">
-            ${it.img ? `<img class="outfit-item-img" src="${it.img}" alt="" />` : `<div class="outfit-item-icon">${outfitIcon(it.category)}</div>`}
+            <img class="outfit-item-img" src="${garmentSrc(it, 160, 160) || ''}" alt="" onerror="this.style.display='none'" />
             <div class="outfit-item-info">
               <div class="outfit-item-name">${esc(it.name)}</div>
               <div class="outfit-item-meta">
@@ -4108,7 +4108,7 @@
     const palette = wardrobe.map(it => `
       <div class="fit-item ${it.cut ? 'cut-ready' : ''}" data-fitadd="${esc(it.id)}">
         ${it.cut ? '<span class="fi-cut">已抠</span>' : '<span class="fi-add">＋</span>'}
-        <img src="${it.img || ''}" alt="" />
+        <img src="${garmentSrc(it, 200, 200) || ''}" alt="" />
         <div class="fi-name">${esc(it.name)}</div>
         <div class="fi-cat">${esc(it.category)}</div>
       </div>`).join('');
@@ -4341,6 +4341,443 @@
   }
   function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
+  /* ===================== 程序化衣物外观 =====================
+     「一键建基础衣橱」等没有照片的衣物，以前在 2D/3D 里都渲染不出来（点了没反应）。
+     这里按「名称里的颜色 + 类别 + 版型关键词」用 Canvas 画出一件真实外观：
+     剪影 + 领口 + 袖子 + 门襟纽扣 + 口袋 + 条纹/格纹/针织/牛仔纹理，输出透明底 PNG。
+     只在内存缓存，不写 localStorage（避免撑爆配额）。                                */
+
+  function shade(hex, amt) {   // amt>0 变亮，<0 变暗
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    const f = v => Math.max(0, Math.min(255, Math.round(amt > 0 ? v + (255 - v) * amt : v * (1 + amt))));
+    return '#' + [f(r), f(g), f(b)].map(v => v.toString(16).padStart(2, '0')).join('');
+  }
+  function parseColor(name) {
+    const s = String(name || '');
+    const table = [
+      ['藏青','#2C3E6B'],['克莱因','#1B3A8C'],['深蓝','#24406E'],['浅蓝','#A8CBEB'],['天蓝','#7FB5E6'],['雾霾蓝','#7D94AC'],['牛仔','#5B7FA6'],
+      ['酒红','#7B2230'],['豆沙','#B06B6E'],['砖红','#B4523E'],['正红','#C0392B'],['樱花粉','#F7C6D0'],['藕粉','#E4B7BC'],['裸粉','#EBC3C6'],
+      ['军绿','#5A6B47'],['墨绿','#2F4F3E'],['薄荷绿','#A8D5BA'],['牛油果','#6B8E4E'],
+      ['卡其','#C0A97E'],['驼色','#B08D57'],['杏色','#F0DCC0'],['米色','#EDE0CB'],['奶油','#F5EBDC'],['奶白','#F7F1E6'],['香槟','#E8D9BE'],
+      ['浅灰','#C4C4C4'],['深灰','#6E6E6E'],['水泥灰','#9E9E9E'],['巧克力','#5B3A26'],['咖色','#7A5230'],['棕色','#8B5E3C'],
+      ['斑马','#ECECEC'],['豹纹','#C9A227'],['千鸟格','#4A4A4A'],['格纹','#8A5A4A'],['银色','#C9CDD2'],['金色','#C9A227'],
+      ['碎花','#F5EFE6'],['印花','#F2EAE0'],['花朵','#F5EFE6'],['小雏菊','#F7F3E8'],
+      ['白色','#F7F7F7'],['黑色','#2B2B2B'],['灰色','#9E9E9E'],['红色','#C0392B'],['蓝色','#4A6FA5'],['绿色','#4C8C5A'],
+      ['黄色','#E8C34A'],['粉色','#F2A6B3'],['紫色','#7E5A9B'],['橙色','#E08A3C'],['米白','#F2EAD9'],['米','#EDE0CB'],['杏','#F0DCC0']
+    ];
+    for (const [k, v] of table) if (s.indexOf(k) >= 0) return v;
+    const single = [['黑','#2B2B2B'],['白','#F7F7F7'],['灰','#9E9E9E'],['红','#C0392B'],['蓝','#4A6FA5'],['绿','#4C8C5A'],
+                    ['黄','#E8C34A'],['粉','#F2A6B3'],['紫','#7E5A9B'],['橙','#E08A3C'],['棕','#8B5E3C'],['咖','#7A5230'],
+                    ['驼','#B08D57'],['银','#C9CDD2'],['金','#C9A227']];
+    for (const [k, v] of single) if (s.indexOf(k) >= 0) return v;
+    const pal = ['#F7F7F7','#2B2B2B','#5B7FA6','#EDE0CB','#9E9E9E','#7E5A9B','#4C8C5A','#C0392B','#E8C34A','#7A5230','#A8CBEB','#E4B7BC'];
+    let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return pal[h % pal.length];
+  }
+
+  const _garCache = new Map();
+  function clearGarmentCache(id) {
+    if (!id) { _garCache.clear(); return; }
+    [..._garCache.keys()].forEach(k => { if (k.indexOf(id + '|') === 0) _garCache.delete(k); });
+  }
+  // 取衣物可用图源：有真实照片/抠图就用，没有就程序化画一件
+  // fill = 衣服本体占画布宽度的比例（3D 贴图需要两侧留白，避免衣服被绕到背后）
+  function garmentSrc(item, w, h, fill) {
+    if (!item) return null;
+    if (item.cut || item.img) return item.cut || item.img;
+    w = w || 320; h = h || 320;
+    if (fill == null) fill = 0.92;
+    const key = item.id + '|' + w + 'x' + h + '|' + fill + '|' + (item.name || '') + '|' + (item.category || '');
+    if (_garCache.has(key)) return _garCache.get(key);
+    let url = null;
+    try { url = drawGarment(item, w, h, fill).toDataURL('image/png'); } catch (e) { return null; }
+    if (_garCache.size > 160) _garCache.clear();
+    _garCache.set(key, url);
+    return url;
+  }
+
+  // 在裁剪区内铺图案（条纹 / 格纹 / 针织 / 牛仔 / 羽绒绗缝）
+  function fillPattern(c, X, Y, W, H, name, col, dark) {
+    const has = k => String(name).indexOf(k) >= 0;
+    c.save();
+    if (has('条纹') || has('横条')) {
+      c.globalAlpha = 0.5; c.fillStyle = shade(dark, -0.1);
+      for (let y = Y(0); y < Y(1); y += Math.max(6, H * 0.062)) c.fillRect(X(0), y, W, Math.max(3, H * 0.028));
+    } else if (has('格纹') || has('格子') || has('千鸟')) {
+      c.globalAlpha = 0.35; c.strokeStyle = shade(dark, -0.15); c.lineWidth = Math.max(1.2, W * 0.012);
+      const step = Math.max(8, W * 0.11);
+      for (let x = X(0); x < X(1.2); x += step) { c.beginPath(); c.moveTo(x, Y(0)); c.lineTo(x, Y(1)); c.stroke(); }
+      for (let y = Y(0); y < Y(1.2); y += step) { c.beginPath(); c.moveTo(X(0), y); c.lineTo(X(1), y); c.stroke(); }
+    } else if (has('针织') || has('毛衣') || has('毛衫') || has('开衫')) {
+      c.globalAlpha = 0.32; c.strokeStyle = shade(col, -0.3); c.lineWidth = Math.max(1, W * 0.008);
+      for (let x = X(0); x < X(1); x += Math.max(5, W * 0.032)) {
+        c.beginPath(); c.moveTo(x, Y(0));
+        for (let y = Y(0); y <= Y(1); y += H * 0.06) c.lineTo(x + Math.sin(y / (H * 0.05)) * W * 0.006, y);
+        c.stroke();
+      }
+    } else if (has('羽绒') || has('棉服') || has('棉袄')) {
+      c.globalAlpha = 0.45; c.strokeStyle = shade(col, -0.32); c.lineWidth = Math.max(1.2, W * 0.01);
+      for (let y = Y(0.1); y < Y(0.98); y += Math.max(10, H * 0.085)) {
+        c.beginPath(); c.moveTo(X(0.02), y);
+        c.quadraticCurveTo(X(0.5), y + H * 0.022, X(0.98), y);
+        c.stroke();
+      }
+    } else if (has('碎花') || has('印花') || has('花朵') || has('小雏菊')) {
+      c.globalAlpha = 0.75;
+      const petals = ['#E77C8E', '#F2B3C1', '#F5D78E', '#9BC4E2', '#B7DFB0'];
+      for (let i = 0; i < 26; i++) {
+        const fx = X(0.05 + (i * 0.37 % 0.9)), fy = Y(0.05 + (i * 0.23 % 0.9));
+        const fr = Math.max(2, W * 0.02);
+        c.fillStyle = petals[i % 5];
+        for (let p = 0; p < 5; p++) {
+          const a = p / 5 * Math.PI * 2;
+          c.beginPath(); c.arc(fx + Math.cos(a) * fr, fy + Math.sin(a) * fr, fr * 0.62, 0, Math.PI * 2); c.fill();
+        }
+        c.fillStyle = '#F7E07A';
+        c.beginPath(); c.arc(fx, fy, fr * 0.5, 0, Math.PI * 2); c.fill();
+      }
+      c.globalAlpha = 1;
+    } else if (has('牛仔') || has('丹宁')) {
+      c.globalAlpha = 0.16; c.strokeStyle = '#ffffff'; c.lineWidth = 1;
+      for (let i = 0; i < 90; i++) {
+        const x = X(Math.random()), y = Y(Math.random());
+        c.beginPath(); c.moveTo(x, y); c.lineTo(x + (Math.random() - 0.5) * W * 0.05, y); c.stroke();
+      }
+      c.globalAlpha = 0.5; c.strokeStyle = '#E8B06A'; c.lineWidth = Math.max(1.4, W * 0.011);
+      c.setLineDash([W * 0.02, W * 0.014]);
+      c.beginPath(); c.moveTo(X(0.16), Y(0.02)); c.lineTo(X(0.16), Y(0.98)); c.stroke();
+      c.beginPath(); c.moveTo(X(0.84), Y(0.02)); c.lineTo(X(0.84), Y(0.98)); c.stroke();
+      c.setLineDash([]);
+    }
+    c.restore();
+  }
+  function shadeBand(c, X, Y, W, H, col, y0, y1) {   // 罗纹下摆 / 袖口
+    c.fillStyle = shade(col, -0.18); c.fillRect(X(0), Y(y0), W, Y(y1) - Y(y0));
+    c.strokeStyle = shade(col, -0.34); c.lineWidth = Math.max(0.8, W * 0.006);
+    for (let x = X(0.02); x < X(0.99); x += Math.max(3, W * 0.022)) {
+      c.beginPath(); c.moveTo(x, Y(y0)); c.lineTo(x, Y(y1)); c.stroke();
+    }
+  }
+  function drawButtons(c, X, Y, col, n, dark) {
+    for (let i = 0; i < n; i++) {
+      const y = Y(0.26 + i * (0.5 / Math.max(1, n - 0.001)));
+      c.fillStyle = shade(dark, -0.25);
+      c.beginPath(); c.arc(X(0.5), y, Math.max(1.6, (X(0.56) - X(0.5))), 0, Math.PI * 2); c.fill();
+    }
+  }
+
+  function drawGarment(item, W, H, fill) {
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const c = cv.getContext('2d');
+    const name = item.name || '', cat = item.category || '上装';
+    const col = parseColor(name), dark = shade(col, -0.22), line = shade(col, -0.42);
+    c.lineJoin = 'round'; c.lineCap = 'round';
+    // 3D 贴图需要两侧留白（本体只占 fill 宽度），2D 可以更满
+    if (fill == null) fill = 0.92;
+    const pad = W * (1 - fill) / 2, bw = W * fill;
+    const X = r => pad + bw * r, Y = r => H * r;
+    const ctx = { c, X, Y, W: bw, H, name, col, dark, line, has: k => name.indexOf(k) >= 0 };
+
+    if (cat === '上装' || cat === '外套') drawTop(ctx, cat === '外套');
+    else if (cat === '连衣裙') drawDress(ctx);
+    else if (cat === '下装') drawBottom(ctx);
+    else if (cat === '鞋履') drawShoe(ctx);
+    else if (cat === '包包') drawBag(ctx);
+    else drawAccessory(ctx);
+    return cv;
+  }
+
+  function drawTop(t, outer) {
+    const { c, X, Y, W, H, col, dark, line, has } = t;
+    const shY = Y(0.15), hemY = Y(0.94);
+    const shW = W * (outer ? 0.27 : 0.235), hipW = W * (outer ? 0.325 : 0.285), waistW = W * (outer ? 0.295 : 0.25);
+    const sl = (has('无袖') || has('吊带') || has('背心')) ? 0.07 : ((has('短袖') || has('T恤') || has('t恤') || has(' polo')) ? 0.26 : 0.55);
+    const sOut = W * 0.475;
+    const cx = X(0.5);
+
+    const sleevePath = dir => {
+      c.beginPath();
+      c.moveTo(cx + dir * shW * 0.96, shY + H * 0.005);
+      c.quadraticCurveTo(cx + dir * sOut, shY + H * 0.035, cx + dir * sOut * 0.95, shY + H * sl * 0.9);
+      c.lineTo(cx + dir * (sOut - W * 0.085), shY + H * sl);
+      c.lineTo(cx + dir * (shW - W * 0.015), shY + H * sl * 0.85);
+      c.closePath();
+    };
+    const bodyPath = () => {
+      c.beginPath();
+      c.moveTo(cx - shW, shY + H * 0.05);
+      c.quadraticCurveTo(cx - shW, shY, cx - shW * 0.52, shY - H * 0.018);
+      c.quadraticCurveTo(cx, shY - H * 0.045, cx + shW * 0.52, shY - H * 0.018);
+      c.quadraticCurveTo(cx + shW, shY, cx + shW, shY + H * 0.05);
+      c.quadraticCurveTo(cx + waistW * 1.03, shY + (hemY - shY) * 0.52, cx + hipW, hemY - H * 0.025);
+      c.quadraticCurveTo(cx + hipW, hemY, cx + hipW - W * 0.05, hemY);
+      c.lineTo(cx - hipW + W * 0.05, hemY);
+      c.quadraticCurveTo(cx - hipW, hemY, cx - hipW, hemY - H * 0.025);
+      c.quadraticCurveTo(cx - waistW * 1.03, shY + (hemY - shY) * 0.52, cx - shW, shY + H * 0.05);
+      c.closePath();
+    };
+
+    // 袖子（略暗，营造层次）
+    [-1, 1].forEach(d => {
+      sleevePath(d);
+      c.fillStyle = shade(col, -0.09); c.fill();
+      c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.2, W * 0.011); sleevePath(d); c.stroke();
+    });
+    // 身体
+    bodyPath();
+    c.fillStyle = col; c.fill();
+    c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
+    c.strokeStyle = line; c.lineWidth = Math.max(1.4, W * 0.013); bodyPath(); c.stroke();
+
+    // 领口（挖空 → 露出里面的身体，3D 里会被 alphaTest 剔除）
+    c.save(); c.globalCompositeOperation = 'destination-out';
+    c.beginPath();
+    if (has('V领') || has('v领')) {
+      c.moveTo(cx - W * 0.09, shY - H * 0.01); c.lineTo(cx, shY + H * 0.11); c.lineTo(cx + W * 0.09, shY - H * 0.01);
+    } else {
+      c.ellipse(cx, shY + H * 0.005, W * 0.105, H * 0.045, 0, 0, Math.PI * 2);
+    }
+    c.fill(); c.restore();
+    c.beginPath();   // 领圈包边
+    if (has('V领') || has('v领')) { c.moveTo(cx - W * 0.09, shY - H * 0.01); c.lineTo(cx, shY + H * 0.11); c.lineTo(cx + W * 0.09, shY - H * 0.01); }
+    else c.ellipse(cx, shY + H * 0.005, W * 0.105, H * 0.045, 0, 0, Math.PI * 2);
+    c.strokeStyle = shade(col, -0.3); c.lineWidth = Math.max(1.4, W * 0.016); c.stroke();
+
+    // 翻领（衬衫 / 西装 / 风衣 / 大衣 / 夹克）
+    if (has('衬衫') || has('衬衣') || has('西装') || has('风衣') || has('大衣') || has('夹克') || outer) {
+      c.fillStyle = shade(col, 0.1);
+      [-1, 1].forEach(d => {
+        c.beginPath();
+        c.moveTo(cx + d * W * 0.015, shY - H * 0.012);
+        c.lineTo(cx + d * W * 0.135, shY - H * 0.005);
+        c.lineTo(cx + d * W * 0.045, shY + H * 0.115);
+        c.closePath(); c.fill();
+        c.strokeStyle = line; c.lineWidth = Math.max(1, W * 0.009); c.stroke();
+      });
+      c.strokeStyle = shade(col, -0.3); c.lineWidth = Math.max(1.2, W * 0.01);   // 门襟
+      c.beginPath(); c.moveTo(cx, shY + H * 0.02); c.lineTo(cx, hemY - H * 0.01); c.stroke();
+      drawButtons(c, X, Y, col, outer ? 3 : 5, dark);
+    }
+    // 连帽（卫衣 / 帽衫）
+    if (has('卫衣') || has('帽衫') || has('连帽')) {
+      c.fillStyle = shade(col, -0.13);
+      c.beginPath();
+      c.moveTo(cx - W * 0.2, shY + H * 0.055);
+      c.quadraticCurveTo(cx, shY - H * 0.085, cx + W * 0.2, shY + H * 0.055);
+      c.quadraticCurveTo(cx, shY + H * 0.03, cx - W * 0.2, shY + H * 0.055);
+      c.closePath(); c.fill();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.2, W * 0.011); c.stroke();
+      c.fillStyle = shade(col, -0.3);   // 口袋
+      c.fillRect(cx - W * 0.16, Y(0.68), W * 0.32, H * 0.055);
+    }
+    // 口袋（外套）
+    if (outer && !has('卫衣')) {
+      c.fillStyle = shade(col, -0.12);
+      [-1, 1].forEach(d => {
+        c.beginPath();
+        c.moveTo(cx + d * W * 0.1, Y(0.6)); c.lineTo(cx + d * W * 0.235, Y(0.6));
+        c.lineTo(cx + d * W * 0.235, Y(0.72)); c.lineTo(cx + d * W * 0.155, Y(0.745));
+        c.lineTo(cx + d * W * 0.1, Y(0.72)); c.closePath(); c.fill();
+        c.strokeStyle = line; c.lineWidth = Math.max(1, W * 0.008); c.stroke();
+      });
+    }
+    // 罗纹下摆（卫衣 / 毛衣 / 针织）
+    if (has('卫衣') || has('毛衣') || has('针织') || has('毛衫')) {
+      c.save(); bodyPath(); c.clip(); shadeBand(c, X, Y, W, H, col, 0.9, 0.945); c.restore();
+    }
+  }
+
+  function drawDress(t) {
+    const { c, X, Y, W, H, col, dark, line, has } = t;
+    const cx = X(0.5), shY = Y(0.1), hemY = Y(0.96);
+    const shW = W * 0.19, waistW = W * 0.155, hemW = W * (has('包臀') || has('直筒') ? 0.26 : 0.46);
+    const sl = (has('无袖') || has('吊带')) ? 0.05 : (has('短袖') ? 0.16 : 0.34);
+    [-1, 1].forEach(d => {   // 袖
+      c.beginPath();
+      c.moveTo(cx + d * shW * 0.95, shY + H * 0.005);
+      c.quadraticCurveTo(cx + d * W * 0.3, shY + H * 0.03, cx + d * W * 0.29, shY + H * sl);
+      c.lineTo(cx + d * (shW - W * 0.01), shY + H * sl * 0.85);
+      c.closePath();
+      c.fillStyle = shade(col, -0.09); c.fill();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.1, W * 0.01); c.stroke();
+    });
+    const path = () => {   // 收腰 + 伞摆
+      c.beginPath();
+      c.moveTo(cx - shW, shY + H * 0.035);
+      c.quadraticCurveTo(cx - shW, shY, cx - shW * 0.5, shY - H * 0.012);
+      c.quadraticCurveTo(cx, shY - H * 0.032, cx + shW * 0.5, shY - H * 0.012);
+      c.quadraticCurveTo(cx + shW, shY, cx + shW, shY + H * 0.035);
+      c.quadraticCurveTo(cx + waistW, Y(0.34), cx + waistW * 1.05, Y(0.42));
+      c.quadraticCurveTo(cx + hemW, Y(0.72), cx + hemW, hemY - H * 0.012);
+      c.quadraticCurveTo(cx + hemW * 0.7, hemY, cx, hemY);
+      c.quadraticCurveTo(cx - hemW * 0.7, hemY, cx - hemW, hemY - H * 0.012);
+      c.quadraticCurveTo(cx - hemW, Y(0.72), cx - waistW * 1.05, Y(0.42));
+      c.quadraticCurveTo(cx - waistW, Y(0.34), cx - shW, shY + H * 0.035);
+      c.closePath();
+    };
+    path(); c.fillStyle = col; c.fill();
+    c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
+    c.strokeStyle = line; c.lineWidth = Math.max(1.3, W * 0.012); path(); c.stroke();
+
+    c.save(); c.globalCompositeOperation = 'destination-out';   // 领口
+    c.beginPath(); c.ellipse(cx, shY + H * 0.005, W * 0.085, H * 0.026, 0, 0, Math.PI * 2); c.fill(); c.restore();
+    c.beginPath(); c.ellipse(cx, shY + H * 0.005, W * 0.085, H * 0.026, 0, 0, Math.PI * 2);
+    c.strokeStyle = shade(col, -0.3); c.lineWidth = Math.max(1.2, W * 0.012); c.stroke();
+
+    c.strokeStyle = shade(col, -0.26); c.lineWidth = Math.max(1.2, W * 0.01);   // 腰线
+    c.beginPath(); c.moveTo(cx - waistW, Y(0.41)); c.quadraticCurveTo(cx, Y(0.435), cx + waistW, Y(0.41)); c.stroke();
+  }
+
+  function drawBottom(t) {
+    const { c, X, Y, W, H, col, dark, line, has } = t;
+    const cx = X(0.5);
+    if (has('裙')) {   // 半身裙
+      const waistW = W * 0.26, hemW = W * (has('包臀') || has('直筒') ? 0.3 : 0.47);
+      const path = () => {
+        c.beginPath();
+        c.moveTo(cx - waistW, Y(0.06));
+        c.lineTo(cx + waistW, Y(0.06));
+        c.quadraticCurveTo(cx + hemW, Y(0.6), cx + hemW, Y(0.95));
+        c.quadraticCurveTo(cx + hemW * 0.6, Y(0.985), cx, Y(0.985));
+        c.quadraticCurveTo(cx - hemW * 0.6, Y(0.985), cx - hemW, Y(0.95));
+        c.quadraticCurveTo(cx - hemW, Y(0.6), cx - waistW, Y(0.06));
+        c.closePath();
+      };
+      path(); c.fillStyle = col; c.fill();
+      c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.3, W * 0.013); path(); c.stroke();
+      c.save(); path(); c.clip(); shadeBand(c, X, Y, W, H, col, 0.06, 0.115); c.restore();
+    } else {   // 裤子：连裆 + 两条分开的裤管（中间透明）
+      const waistW = W * 0.3, hipW = W * 0.33;
+      const wide = has('阔腿') || has('宽松') || has('直筒');
+      const legW = W * (wide ? 0.20 : 0.165);
+      const legLen = has('短裤') || has('五分') ? 0.55 : (has('九分') ? 0.86 : 0.97);
+      const path = () => {
+        c.beginPath();
+        c.moveTo(cx - waistW, Y(0.055)); c.lineTo(cx + waistW, Y(0.055));
+        c.quadraticCurveTo(cx + hipW, Y(0.16), cx + hipW * 0.96, Y(0.30));
+        c.lineTo(cx + legW, Y(legLen));            // 右裤管外沿
+        c.lineTo(cx + legW * 0.3, Y(legLen));      // 右裤脚
+        c.lineTo(cx, Y(0.36));                     // 裆部
+        c.lineTo(cx - legW * 0.3, Y(legLen));      // 左裤脚
+        c.lineTo(cx - legW, Y(legLen));            // 左裤管外沿
+        c.lineTo(cx - hipW * 0.96, Y(0.30));
+        c.quadraticCurveTo(cx - hipW, Y(0.16), cx - waistW, Y(0.055));
+        c.closePath();
+      };
+      path(); c.fillStyle = col; c.fill();
+      c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.3, W * 0.013); path(); c.stroke();
+      c.strokeStyle = shade(col, -0.28); c.lineWidth = Math.max(1.2, W * 0.011);   // 左右裤线
+      c.beginPath(); c.moveTo(cx + legW * 0.62, Y(0.44)); c.lineTo(cx + legW * 0.66, Y(legLen - 0.02)); c.stroke();
+      c.beginPath(); c.moveTo(cx - legW * 0.62, Y(0.44)); c.lineTo(cx - legW * 0.66, Y(legLen - 0.02)); c.stroke();
+      c.save(); path(); c.clip(); shadeBand(c, X, Y, W, H, col, 0.055, 0.11); c.restore();
+    }
+  }
+
+  function drawShoe(t) {
+    const { c, X, Y, W, H, col, dark, line, has } = t;
+    const path = () => {
+      c.beginPath();
+      c.moveTo(X(0.08), Y(0.74));
+      c.lineTo(X(0.9), Y(0.74));
+      c.quadraticCurveTo(X(0.99), Y(0.7), X(0.9), Y(0.6));
+      c.quadraticCurveTo(X(0.62), Y(0.46), X(0.5), Y(0.38));
+      c.quadraticCurveTo(X(0.36), Y(0.24), X(0.24), Y(0.2));
+      c.quadraticCurveTo(X(0.1), Y(0.18), X(0.08), Y(0.34));
+      c.lineTo(X(0.08), Y(0.74));
+      c.closePath();
+    };
+    path(); c.fillStyle = col; c.fill();
+    c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
+    c.strokeStyle = line; c.lineWidth = Math.max(1.4, W * 0.018); path(); c.stroke();
+    c.fillStyle = shade(col, -0.45);   // 鞋底
+    c.beginPath(); c.moveTo(X(0.07), Y(0.74)); c.lineTo(X(0.91), Y(0.74));
+    c.lineTo(X(0.9), Y(0.86)); c.lineTo(X(0.08), Y(0.86)); c.closePath(); c.fill();
+    c.strokeStyle = shade(col, -0.3); c.lineWidth = Math.max(1.4, W * 0.016);   // 鞋口
+    c.beginPath(); c.moveTo(X(0.24), Y(0.2)); c.quadraticCurveTo(X(0.36), Y(0.26), X(0.5), Y(0.4)); c.stroke();
+    if (!has('乐福') && !has('靴')) {   // 鞋带
+      c.strokeStyle = shade(col, 0.55); c.lineWidth = Math.max(1.2, W * 0.014);
+      for (let i = 0; i < 3; i++) {
+        c.beginPath();
+        c.moveTo(X(0.33 + i * 0.09), Y(0.3 + i * 0.055));
+        c.lineTo(X(0.44 + i * 0.09), Y(0.26 + i * 0.055));
+        c.stroke();
+      }
+    }
+    if (has('靴')) {   // 靴筒（与鞋面重叠，不分离）
+      c.fillStyle = shade(col, -0.06);
+      c.beginPath();
+      c.moveTo(X(0.07), Y(0.28)); c.lineTo(X(0.31), Y(0.24));
+      c.lineTo(X(0.33), Y(0.02)); c.lineTo(X(0.06), Y(0.02));
+      c.closePath(); c.fill();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.2, W * 0.014); c.stroke();
+    }
+  }
+
+  function drawBag(t) {
+    const { c, X, Y, W, H, col, dark, line, has } = t;
+    const cx = X(0.5);
+    c.strokeStyle = shade(col, -0.35); c.lineWidth = Math.max(2, W * 0.028);   // 肩带
+    c.beginPath(); c.moveTo(X(0.26), Y(0.34)); c.quadraticCurveTo(cx, Y(0.02), X(0.74), Y(0.34)); c.stroke();
+    const round = (x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+    round(X(0.14), Y(0.34), W * 0.72, H * 0.6, Math.max(3, W * 0.05));
+    c.fillStyle = col; c.fill();
+    c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
+    c.strokeStyle = line; c.lineWidth = Math.max(1.4, W * 0.018); c.stroke();
+    c.fillStyle = shade(col, -0.16);   // 翻盖
+    round(X(0.14), Y(0.34), W * 0.72, H * 0.24, Math.max(3, W * 0.05));
+    c.fill(); c.strokeStyle = line; c.lineWidth = Math.max(1.2, W * 0.014); c.stroke();
+    c.fillStyle = shade(col, -0.4);   // 锁扣
+    c.fillRect(cx - W * 0.05, Y(0.55), W * 0.1, H * 0.07);
+  }
+
+  function drawAccessory(t) {
+    const { c, X, Y, W, H, col, dark, line, name } = t;
+    const cx = X(0.5);
+    if (name.indexOf('帽') >= 0) {
+      c.fillStyle = col;
+      c.beginPath();   // 帽冠（贝塞尔圆顶）
+      c.moveTo(X(0.16), Y(0.62));
+      c.bezierCurveTo(X(0.13), Y(0.13), X(0.87), Y(0.13), X(0.84), Y(0.62));
+      c.closePath(); c.fill();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.4, W * 0.016); c.stroke();
+      c.fillStyle = shade(col, -0.14);   // 帽檐
+      c.beginPath(); c.ellipse(cx, Y(0.64), W * 0.44, H * 0.11, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = shade(col, -0.35);   // 帽带
+      c.fillRect(X(0.17), Y(0.55), W * 0.66, H * 0.07);
+    } else if (name.indexOf('围巾') >= 0 || name.indexOf('丝巾') >= 0 || name.indexOf('披') >= 0) {
+      c.fillStyle = col;
+      c.beginPath();   // 环形
+      c.moveTo(X(0.2), Y(0.16)); c.quadraticCurveTo(cx, Y(0.42), X(0.8), Y(0.16));
+      c.lineTo(X(0.86), Y(0.34)); c.quadraticCurveTo(cx, Y(0.62), X(0.14), Y(0.34));
+      c.closePath(); c.fill();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.3, W * 0.013); c.stroke();
+      c.fillStyle = shade(col, -0.07);   // 两条垂片
+      c.fillRect(X(0.22), Y(0.32), W * 0.2, H * 0.56);
+      c.fillRect(X(0.58), Y(0.32), W * 0.2, H * 0.56);
+      c.strokeStyle = line; c.lineWidth = Math.max(1.1, W * 0.011);
+      c.strokeRect(X(0.22), Y(0.32), W * 0.2, H * 0.56);
+      c.strokeRect(X(0.58), Y(0.32), W * 0.2, H * 0.56);
+      c.strokeStyle = shade(col, -0.25); c.lineWidth = Math.max(1, W * 0.009);   // 流苏
+      for (let i = 0; i < 6; i++) {
+        const x = X(0.24 + i * 0.034);
+        c.beginPath(); c.moveTo(x, Y(0.88)); c.lineTo(x, Y(0.97)); c.stroke();
+        const x2 = X(0.6 + i * 0.034);
+        c.beginPath(); c.moveTo(x2, Y(0.88)); c.lineTo(x2, Y(0.97)); c.stroke();
+      }
+    } else {   // 项链 / 其他
+      c.strokeStyle = col; c.lineWidth = Math.max(2.4, W * 0.035);
+      c.beginPath(); c.arc(cx, Y(0.24), W * 0.33, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke();
+      c.fillStyle = shade(col, 0.35);
+      c.beginPath(); c.arc(cx, Y(0.6), W * 0.09, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = line; c.lineWidth = Math.max(1.2, W * 0.012); c.stroke();
+    }
+  }
+
   /* ===================== 画布式试衣间 ===================== */
   const FIT_W = 360, FIT_H = 560;
   let _fitDrag = null;   // {id, offx, offy}
@@ -4461,7 +4898,7 @@
       sorted.forEach(l => {
         const it = wardrobe.find(w => w.id === l.itemId);
         if (!it) return;
-        const src = it.cut || it.img;
+        const src = garmentSrc(it, 360, 360);
         if (!src) return;
         const im = new Image();
         im.onload = () => {
@@ -4521,7 +4958,7 @@
   function addFitLayer(itemId) {
     const it = wardrobe.find(w => w.id === itemId);
     if (!it) return;
-    const src = it.cut || it.img;
+    const src = garmentSrc(it, 360, 360);
     if (!src) return;
     const place = defaultPlacement(it.category, FIT_W, FIT_H);
     sizeLayerByImage(place, src, (w, h) => {
@@ -4532,13 +4969,14 @@
       drawFitting(); syncLayerBar();
       if (fit3D) rebuild3D();
     });
-    if (!it.cut) toast('提示：点「✂️ 抠图」去掉白底，上身更自然');
+    // 只有「有真实照片但还没抠图」才提示；程序化生成的本身就是透明底
+    if (it.img && !it.cut) toast('提示：点「✂️ 抠图」去掉白底，上身更自然');
   }
   // 对已有图层重新按模特部位比例适配（保留用户已拖动的位置，仅重算尺寸）
   function fitLayerToBody(ly) {
     const it = wardrobe.find(w => w.id === ly.itemId);
     if (!it) return;
-    const src = it.cut || it.img;
+    const src = garmentSrc(it, 360, 360);
     if (!src) return;
     const place = defaultPlacement(it.category, FIT_W, FIT_H);
     sizeLayerByImage(place, src, (w, h) => {
@@ -4563,22 +5001,23 @@
     const shoes = pick(byCat['鞋履']); if (shoes) chosen.push(shoes);
     const acc = pick(byCat['配饰']); if (acc && Math.random() > 0.4) chosen.push(acc);
     const bag = pick(byCat['包包']); if (bag && Math.random() > 0.4) chosen.push(bag);
-    const usable = chosen.filter(it => it.cut || it.img);
-    if (!usable.length) { toast('衣橱里还没有可穿的衣物（需要带图片）'); return; }
+    if (!chosen.length) { toast('衣橱里还没有可搭配的衣物，先去「我的衣橱」添加 👗'); return; }
     fitting.layers = []; fittingSelected = null;
     let hasUncut = false;
-    usable.forEach((it, i) => {
-      const src = it.cut || it.img;
+    chosen.forEach((it, i) => {
+      const src = garmentSrc(it, 360, 360);
+      if (!src) return;
       const place = defaultPlacement(it.category, FIT_W, FIT_H);
       const layer = { id: uid(), itemId: it.id, x: place.x, y: place.y, w: place.maxW, h: place.maxH, rot: 0, z: i + 1 };
       fitting.layers.push(layer);
-      if (!it.cut) hasUncut = true;
+      if (it.img && !it.cut) hasUncut = true;
       sizeLayerByImage(place, src, (w, h) => {
         layer.w = w; layer.h = h;
         saveFitting(); drawFitting(); syncLayerBar();
       });
     });
     saveFitting(); drawFitting(); syncLayerBar();
+    if (fit3D) rebuild3D();
     toast(hasUncut ? '已套上一身搭配 ✨ 有衣服没抠图，点单件「✂️ 抠图」去白底更自然' : '已为你套上一身搭配 ✨');
   }
 
@@ -4601,7 +5040,7 @@
     const container = $('#fitting3DCanvas');
     if (!container) return;
     if (typeof THREE === 'undefined') {
-      container.innerHTML = '<div style="padding:34px 16px;text-align:center;color:#7a8699;font-size:13px;line-height:1.8;">🧊 3D 引擎加载失败<br/>（需联网从 CDN 加载 Three.js，请检查网络后刷新页面；2D 试衣间不受影响）</div>';
+      container.innerHTML = '<div style="padding:34px 16px;text-align:center;color:#7a8699;font-size:13px;line-height:1.8;">🧊 3D 引擎加载失败<br/>（请下拉刷新页面重试；2D 试衣间不受影响）</div>';
       return;
     }
     const W = container.clientWidth || 360, H = container.clientHeight || 480;
@@ -4713,12 +5152,40 @@
     uv.needsUpdate = true;
     return geo;
   }
-  function makeGarmentMesh(geo, src) {
+  // 布料垂坠：沿圆周做多频正弦褶皱，越往下摆幅度越大（裙子最明显），模拟自然悬挂的布料
+  function drape(geo, amp, freq) {
+    const pos = geo.attributes.position;
+    if (!pos) return geo;
+    let minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i < pos.count; i++) { const y = pos.getY(i); if (y < minY) minY = y; if (y > maxY) maxY = y; }
+    const span = (maxY - minY) || 1;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+      const t = (y - minY) / span;                       // 0=下摆 1=上沿（Three 圆柱 y 向上，下摆在 minY）
+      const w = amp * (0.25 + 0.75 * (1 - t));           // 下摆褶皱更强
+      const ang = Math.atan2(z, x);
+      const k = 1 + w * (Math.sin(ang * freq) * 0.6 + Math.sin(ang * (freq * 2.3) + 1.7) * 0.28 + Math.sin(ang * (freq * 0.7) - 0.6) * 0.22);
+      pos.setX(i, x * k); pos.setZ(i, z * k);
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+    return geo;
+  }
+  function makeGarmentMesh(geo, src, tint) {
     // 用 alphaTest 做镂空（保留深度写入），避免 transparent 带来的排序闪烁/穿模
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0, transparent: false, alphaTest: 0.42, side: THREE.DoubleSide });
+    const mat = new THREE.MeshStandardMaterial({ color: tint || 0xffffff, roughness: 0.95, metalness: 0, transparent: false, alphaTest: 0.42, side: THREE.DoubleSide });
     const mesh = new THREE.Mesh(geo, mat);
-    texFrom(src, tx => { if (tx) { mat.map = tx; mat.needsUpdate = true; } });
+    if (src) texFrom(src, tx => { if (tx) { mat.map = tx; mat.needsUpdate = true; } });
     return mesh;
+  }
+  // 3D 贴图尺寸按类别给：宽度对应包裹弧长、高度对应衣长，两侧留白由 __fill 控制
+  function texSize(cat) {
+    if (cat === '连衣裙') return [512, 400, 0.66];
+    if (cat === '上装' || cat === '外套') return [512, 288, 0.70];
+    if (cat === '下装') return [288, 360, 0.82];
+    if (cat === '鞋履') return [256, 200, 0.94];
+    if (cat === '包包') return [256, 256, 0.88];
+    return [256, 256, 0.90];
   }
   function buildGarments3D(group) {
     while (group.children.length) {
@@ -4729,46 +5196,66 @@
     const GAP = 0.035;   // 与身体的间隙：既贴身不悬浮，也不会和皮肤 z-fighting
     (fitting.layers || []).forEach(layer => {
       const it = wardrobe.find(w => w.id === layer.itemId); if (!it) return;
-      const src = it.cut || it.img; if (!src) return;
       const cat = it.category;
+      const [tw, th, fill] = texSize(cat);
+      const src = garmentSrc(it, tw, th, fill);
+      if (!src) return;
+      const tint = new THREE.Color(parseColor(it.name));   // 底色兜底，贴图未到位时也有颜色
 
       if (cat === '上装' || cat === '外套') {
         // 上身：肩(5.55,r0.95) → 胸(4.9,r0.62) → 腰(4.5,r0.74) → 贴合躯干轮廓
         const up = cat === '外套' ? 0.09 : GAP;
         const top = cat === '外套' ? 5.62 : 5.5, bot = cat === '外套' ? 3.45 : 3.75;
-        const m = makeGarmentMesh(frontMapUV(new THREE.CylinderGeometry(1.0 + up, 0.78 + up, top - bot, 48, 1, true), 0.66), src);
+        const g = frontMapUV(new THREE.CylinderGeometry(1.0 + up, 0.78 + up, top - bot, 64, 8, true), 0.62);
+        drape(g, cat === '外套' ? 0.020 : 0.014, 7);
+        const m = makeGarmentMesh(g, src, tint);
         m.position.y = (top + bot) / 2; group.add(m);
       }
       else if (cat === '连衣裙') {
         // 连衣裙：收腰 + 伞裙下摆，下摆罩住双腿（腿在 ±0.34、r0.26，下摆 r1.25 完全包住）
-        const m = makeGarmentMesh(frontMapUV(new THREE.CylinderGeometry(0.84, 1.25, 3.6, 52, 1, true), 0.78), src);
-        m.position.y = 3.72; group.add(m);
+        // 用曲线轮廓做腰→摆的外扩，再加下摆褶皱，呈现垂坠感
+        const pts = [];
+        for (let i = 0; i <= 12; i++) {
+          const t = i / 12;                       // t=0 下摆, t=1 肩
+          const y = 1.92 + t * 3.6;
+          const r = 1.24 - 0.40 * Math.pow(t, 1.7) - 0.06 * Math.sin(t * Math.PI);
+          pts.push(new THREE.Vector2(r, y));
+        }
+        const g = frontMapUV(new THREE.LatheGeometry(pts, 56), 0.74);
+        drape(g, 0.055, 9);                        // 下摆褶皱明显
+        const m = makeGarmentMesh(g, src, tint);
+        group.add(m);
       }
       else if (cat === '下装') {
+        const isSkirt = it.name && it.name.indexOf('裙') >= 0;
         [-0.34, 0.34].forEach(x => {
-          const m = makeGarmentMesh(frontMapUV(new THREE.CylinderGeometry(0.30 + GAP, 0.26 + GAP, 1.95, 32, 1, true), 0.85), src);
-          m.position.set(x, 2.2, 0); group.add(m);
+          const g = isSkirt
+            ? frontMapUV(new THREE.CylinderGeometry(0.30 + GAP, 0.52 + GAP, 1.85, 40, 6, true), 0.9)
+            : frontMapUV(new THREE.CylinderGeometry(0.30 + GAP, 0.26 + GAP, 1.95, 40, 6, true), 0.9);
+          drape(g, isSkirt ? 0.05 : 0.016, 8);
+          const m = makeGarmentMesh(g, src, tint);
+          m.position.set(x, isSkirt ? 2.3 : 2.2, 0); group.add(m);
         });
       }
       else if (cat === '鞋履') {
         // 鞋盒比脚(0.34×0.22×0.60)每边大 0.05 以上，避免与脚面闪烁
         [-0.34, 0.34].forEach(x => {
-          const m = makeGarmentMesh(new THREE.BoxGeometry(0.46, 0.34, 0.74), src);
+          const m = makeGarmentMesh(new THREE.BoxGeometry(0.46, 0.34, 0.74), src, tint);
           m.position.set(x, 0.19, 0.17); group.add(m);
         });
       }
       else if (cat === '配饰') {
         if (it.name && it.name.indexOf('帽') >= 0) {
           // 帽檐 r0.62 罩住头发(r0.55)，高度覆盖到发顶 6.87
-          const m = makeGarmentMesh(new THREE.CylinderGeometry(0.62, 0.62, 0.52, 32, 1, true), src);
+          const m = makeGarmentMesh(new THREE.CylinderGeometry(0.62, 0.62, 0.52, 32, 1, true), src, tint);
           m.position.y = 6.66; group.add(m);
         } else {
-          const m = makeGarmentMesh(new THREE.TorusGeometry(0.3, 0.09, 14, 32), src);   // 项链/围巾
+          const m = makeGarmentMesh(new THREE.TorusGeometry(0.3, 0.09, 14, 32), src, tint);   // 项链/围巾
           m.position.set(0, 5.6, 0); m.rotation.x = Math.PI / 2; group.add(m);
         }
       }
       else if (cat === '包包') {
-        const m = makeGarmentMesh(new THREE.BoxGeometry(0.52, 0.62, 0.2), src);
+        const m = makeGarmentMesh(new THREE.BoxGeometry(0.52, 0.62, 0.2), src, tint);
         m.position.set(1.18, 3.35, 0.24); group.add(m);   // 提在手上，不插进手臂
       }
       else {
@@ -5016,10 +5503,11 @@
     if (saveIt && _cutItemId && _cutCtx) {
       const data = _cutCtx.canvas.toDataURL('image/png');
       const it = wardrobe.find(w => w.id === _cutItemId);
-      if (it) { it.cut = data; saveWardrobeSafe(); }
+      if (it) { it.cut = data; clearGarmentCache(it.id); saveWardrobeSafe(); }
       toast('抠图已保存 ✅');
-      // 若当前正穿着该件，刷新画布
+      // 若当前正穿着该件，刷新画布与 3D
       drawFitting();
+      if (fit3D) rebuild3D();
     }
     _cutItemId = null; _cutCtx = null; _cutOrig = null; _cutImg = null;
   }
