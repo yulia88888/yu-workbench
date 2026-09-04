@@ -99,6 +99,7 @@
     $('#viewTitle').textContent = titles[v];
     $('#backBtn').classList.remove('show');
     closeSubpage();
+    if (v !== 'outfit') destroyFitting3D();   // 离开穿搭页即释放 WebGL
     if (v === 'plan') renderPlan();
     if (v === 'topic') renderTopics();
     if (v === 'repost') renderReposts();
@@ -4026,6 +4027,7 @@
     outfitTab = tab;
     $$('#outfitBody .outfit-tab').forEach(t => t.classList.toggle('active', t.dataset.otab === tab));
     const b = $('#outfitTabBody');
+    destroyFitting3D();   // 离开 3D / 重建面板时释放 WebGL 上下文，避免累积泄漏
     if (tab === 'today') b.innerHTML = renderOutfitTodayHTML();
     else if (tab === 'wardrobe') b.innerHTML = renderOutfitWardrobeHTML();
     else if (tab === 'fitting') { b.innerHTML = renderOutfitFittingHTML(); if (fittingView === '3d') initFitting3D(); else initFitting(); }
@@ -4693,11 +4695,27 @@
     const loader = new THREE.TextureLoader();
     loader.load(src, tx => {
       if (THREE.sRGBEncoding !== undefined) tx.encoding = THREE.sRGBEncoding;
+      tx.wrapS = THREE.ClampToEdgeWrapping;   // 关键：u 越界时钳到边缘（透明）而不是重复平铺
+      tx.wrapT = THREE.ClampToEdgeWrapping;
       tx.anisotropy = 4; cb(tx);
     }, undefined, () => cb(null));
   }
+  // 把圆柱的 UV 收拢到「正面 frac 比例」的区域：
+  // 贴图中心对准正面(θ=0)，其余部分 u 落到 [0,1] 之外 → 采样到抠图边缘的透明像素 → 被 alphaTest 剔除，
+  // 于是衣服只在身体正面呈现，不会被整圈拉花，也不会穿到背后。
+  function frontMapUV(geo, frac) {
+    const uv = geo.attributes.uv;
+    if (!uv) return geo;
+    for (let i = 0; i < uv.count; i++) {
+      const u = uv.getX(i);
+      uv.setX(i, u <= 0.5 ? 0.5 + u / frac : 0.5 - (1 - u) / frac);
+    }
+    uv.needsUpdate = true;
+    return geo;
+  }
   function makeGarmentMesh(geo, src) {
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide });
+    // 用 alphaTest 做镂空（保留深度写入），避免 transparent 带来的排序闪烁/穿模
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0, transparent: false, alphaTest: 0.42, side: THREE.DoubleSide });
     const mesh = new THREE.Mesh(geo, mat);
     texFrom(src, tx => { if (tx) { mat.map = tx; mat.needsUpdate = true; } });
     return mesh;
@@ -4708,20 +4726,56 @@
       try { if (c.geometry) c.geometry.dispose(); if (c.material) { if (c.material.map) c.material.map.dispose(); c.material.dispose(); } } catch (e) {}
       group.remove(c);
     }
+    const GAP = 0.035;   // 与身体的间隙：既贴身不悬浮，也不会和皮肤 z-fighting
     (fitting.layers || []).forEach(layer => {
       const it = wardrobe.find(w => w.id === layer.itemId); if (!it) return;
       const src = it.cut || it.img; if (!src) return;
       const cat = it.category;
-      if (cat === '上装') { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.84, 0.7, 1.75, 40, 1, true), src); m.position.y = 4.55; group.add(m); }
-      else if (cat === '外套') { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.9, 0.76, 1.95, 40, 1, true), src); m.position.y = 4.35; group.add(m); }
-      else if (cat === '连衣裙') { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.8, 1.15, 3.7, 44, 1, true), src); m.position.y = 3.7; group.add(m); }
-      else if (cat === '下装') { [-0.34, 0.34].forEach(x => { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.36, 0.3, 1.8, 28, 1, true), src); m.position.set(x, 2.25, 0); group.add(m); }); }
-      else if (cat === '鞋履') { [-0.34, 0.34].forEach(x => { const m = makeGarmentMesh(new THREE.BoxGeometry(0.36, 0.26, 0.62), src); m.position.set(x, 0.13, 0.16); group.add(m); }); }
-      else if (cat === '配饰') {
-        if (it.name && it.name.indexOf('帽') >= 0) { const m = makeGarmentMesh(new THREE.CylinderGeometry(0.55, 0.55, 0.4, 28, 1, true), src); m.position.y = 6.55; group.add(m); }
-        else { const m = makeGarmentMesh(new THREE.TorusGeometry(0.26, 0.08, 12, 28), src); m.position.set(0, 5.62, 0); m.rotation.x = Math.PI / 2; group.add(m); }
+
+      if (cat === '上装' || cat === '外套') {
+        // 上身：肩(5.55,r0.95) → 胸(4.9,r0.62) → 腰(4.5,r0.74) → 贴合躯干轮廓
+        const up = cat === '外套' ? 0.09 : GAP;
+        const top = cat === '外套' ? 5.62 : 5.5, bot = cat === '外套' ? 3.45 : 3.75;
+        const m = makeGarmentMesh(frontMapUV(new THREE.CylinderGeometry(1.0 + up, 0.78 + up, top - bot, 48, 1, true), 0.66), src);
+        m.position.y = (top + bot) / 2; group.add(m);
       }
-      else if (cat === '包包') { const m = makeGarmentMesh(new THREE.BoxGeometry(0.5, 0.6, 0.18), src); m.position.set(0.95, 3.5, 0.1); group.add(m); }
+      else if (cat === '连衣裙') {
+        // 连衣裙：收腰 + 伞裙下摆，下摆罩住双腿（腿在 ±0.34、r0.26，下摆 r1.25 完全包住）
+        const m = makeGarmentMesh(frontMapUV(new THREE.CylinderGeometry(0.84, 1.25, 3.6, 52, 1, true), 0.78), src);
+        m.position.y = 3.72; group.add(m);
+      }
+      else if (cat === '下装') {
+        [-0.34, 0.34].forEach(x => {
+          const m = makeGarmentMesh(frontMapUV(new THREE.CylinderGeometry(0.30 + GAP, 0.26 + GAP, 1.95, 32, 1, true), 0.85), src);
+          m.position.set(x, 2.2, 0); group.add(m);
+        });
+      }
+      else if (cat === '鞋履') {
+        // 鞋盒比脚(0.34×0.22×0.60)每边大 0.05 以上，避免与脚面闪烁
+        [-0.34, 0.34].forEach(x => {
+          const m = makeGarmentMesh(new THREE.BoxGeometry(0.46, 0.34, 0.74), src);
+          m.position.set(x, 0.19, 0.17); group.add(m);
+        });
+      }
+      else if (cat === '配饰') {
+        if (it.name && it.name.indexOf('帽') >= 0) {
+          // 帽檐 r0.62 罩住头发(r0.55)，高度覆盖到发顶 6.87
+          const m = makeGarmentMesh(new THREE.CylinderGeometry(0.62, 0.62, 0.52, 32, 1, true), src);
+          m.position.y = 6.66; group.add(m);
+        } else {
+          const m = makeGarmentMesh(new THREE.TorusGeometry(0.3, 0.09, 14, 32), src);   // 项链/围巾
+          m.position.set(0, 5.6, 0); m.rotation.x = Math.PI / 2; group.add(m);
+        }
+      }
+      else if (cat === '包包') {
+        const m = makeGarmentMesh(new THREE.BoxGeometry(0.52, 0.62, 0.2), src);
+        m.position.set(1.18, 3.35, 0.24); group.add(m);   // 提在手上，不插进手臂
+      }
+      else {
+        // 未知分类：默认当上装处理
+        const m = makeGarmentMesh(frontMapUV(new THREE.CylinderGeometry(1.0 + GAP, 0.78 + GAP, 1.75, 48, 1, true), 0.66), src);
+        m.position.y = 4.62; group.add(m);
+      }
     });
   }
   function rebuild3D() { if (fit3D) buildGarments3D(fit3D.garments); }
