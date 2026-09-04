@@ -724,8 +724,8 @@
     .vl-syl{padding:2px 7px;border-radius:8px;font-size:15px;font-weight:700;color:var(--text-secondary);background:#F1F3F7;transition:.15s;}
     .vl-syl.current{background:var(--primary);color:#fff;transform:scale(1.08);}
   </style>
-  <!-- 3D 试衣间：Three.js（运行时从 CDN 加载，需联网；离线时 3D 不可用但不影响 2D 画布） -->
-  <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+  <!-- 3D 试衣间：Three.js 本地文件（r149 UMD，已随站点部署并被 SW 缓存，离线也可用） -->
+  <script src="./three.min.js"></script>
 </head>
 <body>
 
