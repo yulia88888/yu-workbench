@@ -640,6 +640,15 @@
     .fm-bodies{display:flex;gap:5px;margin-left:auto;}
     .fm-body{padding:5px 10px;border-radius:999px;background:#f3f3f5;color:var(--text-secondary);font-size:12px;font-weight:600;border:none;}
     .fm-body.on{background:var(--pink-gradient);color:#fff;}
+    .fitting-viewbar{display:flex;gap:6px;margin:0 0 10px;}
+    .fv-btn{flex:1;padding:9px 6px;border-radius:12px;background:#fff;border:1px solid var(--border);color:var(--text-secondary);font-size:13px;font-weight:700;text-align:center;box-shadow:var(--shadow);}
+    .fv-btn:active{transform:scale(.97);}
+    .fv-btn.on{background:var(--pink-gradient);color:#fff;border:none;}
+    .fitting-3d-stage{position:relative;width:100%;max-width:420px;margin:0 auto;height:480px;background:linear-gradient(180deg,#fbfdff,#e9eef5);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
+    #fitting3DCanvas{position:absolute;inset:0;width:100%;height:100%;}
+    #fitting3DCanvas canvas{display:block;width:100%!important;height:100%!important;}
+    .fitting-3d-tip{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:11px;color:#7a8699;background:rgba(255,255,255,.6);padding:3px 0;border-radius:8px;pointer-events:none;}
+    .fitting-3d-bar{display:flex;gap:6px;margin:10px 0 4px;}
     .fitting-layerbar{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;background:#fff;border-radius:14px;padding:8px;box-shadow:var(--shadow);margin:0 0 12px;}
     .fl-btn{padding:7px 9px;border-radius:10px;background:var(--pink-light);color:var(--pink);font-size:13px;font-weight:700;border:none;}
     .fl-btn:active{transform:scale(.96);}
@@ -715,6 +724,8 @@
     .vl-syl{padding:2px 7px;border-radius:8px;font-size:15px;font-weight:700;color:var(--text-secondary);background:#F1F3F7;transition:.15s;}
     .vl-syl.current{background:var(--primary);color:#fff;transform:scale(1.08);}
   </style>
+  <!-- 3D 试衣间：Three.js（运行时从 CDN 加载，需联网；离线时 3D 不可用但不影响 2D 画布） -->
+  <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
 </head>
 <body>
 
