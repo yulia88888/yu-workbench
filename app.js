@@ -35,6 +35,7 @@
 
   let topicFilter = '全部', repostFilter = '全部';
   let topicMode = 'today', repostMode = 'today';
+  let topicHistDate = '', repostHistDate = '';   // 历史记录 · 右上角日期筛选
   let topicBatch = false, repostBatch = false;
   let topicSel = new Set(), repostSel = new Set();
   let currentView = 'plan';
@@ -194,6 +195,9 @@
     $('#topicTools').classList.toggle('hidden', topicMode !== 'today');
     $('#topicFoot').classList.toggle('hidden', topicMode !== 'today');
     $('#topicBatchBtn').classList.toggle('hidden', topicMode !== 'history');
+    $('#topicHistTools').classList.toggle('hidden', topicMode !== 'history');
+    $('#topicHistClear').classList.toggle('hidden', !topicHistDate);
+    if (topicMode !== 'history') { topicHistDate = ''; const d = $('#topicHistDate'); if (d) d.value = ''; }
     if (topicMode === 'history') { renderTopicHistory(); return; }
     const list = allTopics().filter(t => topicFilter === '全部' || t.platform === topicFilter);
     $('#topicCount').textContent = `共 ${list.length} 条`;
@@ -203,16 +207,21 @@
     prefetchHistoryIndex(); // 仅预热日期索引（极小），切到「历史」时再按天加载正文
   }
   function renderTopicHistory() {
-    const dates = Object.keys(contentHistory || {}).sort().reverse();
-    if (dates.length) {
+    const allDates = Object.keys(contentHistory || {}).sort().reverse();
+    const dates = topicHistDate ? allDates.filter(d => d === topicHistDate) : allDates;
+    if (allDates.length || topicHistDate) {
       let html = '';
-      dates.forEach(d => {
-        const items = (contentHistory[d].topics || []).filter(t => !hidden.includes(t.id));
-        if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 选题 ${items.length} 条</div>` + items.map((t, i) => topicCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
-      });
+      if (dates.length) {
+        dates.forEach(d => {
+          const items = (contentHistory[d].topics || []).filter(t => !hidden.includes(t.id));
+          html += `<div class="aip-hist-date">📅 ${esc(d)} · 选题 ${items.length} 条</div>` + (items.length ? items.map((t, i) => topicCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('') : '<div class="empty">该日无记录</div>');
+        });
+      } else {
+        html = `<div class="empty">📅 ${esc(topicHistDate)} 暂无选题记录</div>`;
+      }
       const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).topics) || [];
-      if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => topicCard({ ...t, _hist: true }, i + 1)).join('');
-      $('#topicCount').textContent = `共 ${dates.length} 天记录`;
+      if (extra.length && !topicHistDate) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => topicCard({ ...t, _hist: true }, i + 1)).join('');
+      $('#topicCount').textContent = topicHistDate ? `📅 ${topicHistDate}` : `共 ${allDates.length} 天记录`;
       $('#topicList').innerHTML = html || '<div class="empty">暂无历史</div>';
       updateBatch('topic');
       return;
@@ -249,6 +258,8 @@
     $$('[data-tmode]').forEach(x => x.classList.toggle('active', x === b));
     renderTopics();
   }));
+  $('#topicHistDate').addEventListener('change', e => { topicHistDate = e.target.value; $('#topicHistClear').classList.toggle('hidden', !topicHistDate); renderTopicHistory(); });
+  $('#topicHistClear').addEventListener('click', () => { topicHistDate = ''; const d = $('#topicHistDate'); if (d) d.value = ''; $('#topicHistClear').classList.add('hidden'); renderTopicHistory(); });
 
   /* ---------- 爆款二创 ---------- */
   function renderRepostFilters() {
@@ -284,6 +295,9 @@
     renderRepostFilters();
     $('#repostFoot').classList.toggle('hidden', repostMode !== 'today');
     $('#repostBatchBtn').classList.toggle('hidden', repostMode !== 'history');
+    $('#repostHistTools').classList.toggle('hidden', repostMode !== 'history');
+    $('#repostHistClear').classList.toggle('hidden', !repostHistDate);
+    if (repostMode !== 'history') { repostHistDate = ''; const d = $('#repostHistDate'); if (d) d.value = ''; }
     if (repostMode === 'history') { renderRepostHistory(); return; }
     const list = allReposts().filter(t => repostFilter === '全部' || t.platform === repostFilter);
     $('#repostCount').textContent = `共 ${list.length} 条`;
@@ -293,16 +307,21 @@
     prefetchHistoryIndex(); // 仅预热日期索引（极小），切到「历史」时再按天加载正文
   }
   function renderRepostHistory() {
-    const dates = Object.keys(contentHistory || {}).sort().reverse();
-    if (dates.length) {
+    const allDates = Object.keys(contentHistory || {}).sort().reverse();
+    const dates = repostHistDate ? allDates.filter(d => d === repostHistDate) : allDates;
+    if (allDates.length || repostHistDate) {
       let html = '';
-      dates.forEach(d => {
-        const items = (contentHistory[d].reposts || []).filter(t => !hidden.includes(t.id));
-        if (items.length) html += `<div class="aip-hist-date">📅 ${esc(d)} · 二创 ${items.length} 条</div>` + items.map((t, i) => repostCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('');
-      });
+      if (dates.length) {
+        dates.forEach(d => {
+          const items = (contentHistory[d].reposts || []).filter(t => !hidden.includes(t.id));
+          html += `<div class="aip-hist-date">📅 ${esc(d)} · 二创 ${items.length} 条</div>` + (items.length ? items.map((t, i) => repostCard({ ...t, _hist: true, seen_date: d }, i + 1)).join('') : '<div class="empty">该日无记录</div>');
+        });
+      } else {
+        html = `<div class="empty">📅 ${esc(repostHistDate)} 暂无二创记录</div>`;
+      }
       const extra = (load(LS.historyExtra, { topics: [], reposts: [] }).reposts) || [];
-      if (extra.length) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => repostCard({ ...t, _hist: true }, i + 1)).join('');
-      $('#repostCount').textContent = `共 ${dates.length} 天记录`;
+      if (extra.length && !repostHistDate) html += `<div class="aip-hist-date">📌 我的收藏（手动存为灵感）</div>` + extra.filter(t => !hidden.includes(t.id)).map((t, i) => repostCard({ ...t, _hist: true }, i + 1)).join('');
+      $('#repostCount').textContent = repostHistDate ? `📅 ${repostHistDate}` : `共 ${allDates.length} 天记录`;
       $('#repostList').innerHTML = html || '<div class="empty">暂无历史</div>';
       updateBatch('repost');
       return;
@@ -339,6 +358,8 @@
     $$('[data-rmode]').forEach(x => x.classList.toggle('active', x === b));
     renderReposts();
   }));
+  $('#repostHistDate').addEventListener('change', e => { repostHistDate = e.target.value; $('#repostHistClear').classList.toggle('hidden', !repostHistDate); renderRepostHistory(); });
+  $('#repostHistClear').addEventListener('click', () => { repostHistDate = ''; const d = $('#repostHistDate'); if (d) d.value = ''; $('#repostHistClear').classList.add('hidden'); renderRepostHistory(); });
 
   document.addEventListener('click', e => {
     const add = e.target.closest('[data-addplan], [data-addtask]');
@@ -3701,6 +3722,7 @@
 
   /* ---------- AI爆品 / 新闻 ---------- */
   let aipTime = '每日', aipPlat = '全部', newsCat = '全部';
+  let aipHistDate = '';   // AI爆品·历史记录 日期筛选
   const AIP_FLAT = [
     { title: '便携式制冷杯', tag: 'hot', tagText: '爆款', sales: '2.3w+', commission: '25%', rating: '4.8', script: '“夏天办公室没有冰箱？这个制冷杯3秒冰镇你的饮料！”→展示对比普通杯子 vs 制冷杯→上手演示→价格锚定“一杯奶茶钱”' },
     { title: '防晒空顶帽', tag: 'trend', tagText: '趋势', sales: '5.6w+', commission: '20%', rating: '4.9', script: '“军训/通勤不晒黑的秘密”→紫外线测试卡对比→多场景佩戴展示→强调“不闷热不勒头”痛点解决' },
@@ -3787,10 +3809,13 @@
     let bodyHtml;
     if (aipTime === '历史记录') {
       const ah = contentHistory || {};
-      const dates = Object.keys(ah).sort().reverse();
-      if (!dates.length) {
+      let dates = Object.keys(ah).sort().reverse();
+      if (aipHistDate) dates = dates.filter(d => d === aipHistDate);
+      if (!dates.length && !aipHistDate) {
         bodyHtml = '<div class="empty">⏳ 正在按天加载历史归档…（每个文件很小，手机秒开）</div>';
         fetchHistory(true);
+      } else if (!dates.length && aipHistDate) {
+        bodyHtml = `<div class="empty">📅 ${esc(aipHistDate)} 暂无爆品记录</div>`;
       } else {
         bodyHtml = dates.map(d => {
           const snap = (ah[d] && ah[d].aiproduct) || {};
@@ -3827,7 +3852,7 @@
             <div class="aip-header-icon">🛍️</div>
             <div class="aip-header-title">AI爆品</div>
           </div>
-          <div class="aip-header-right">AI选品</div>
+          <div class="aip-header-right">${aipTime === '历史记录' ? `<input type="date" id="aipHistDate" class="hist-date-pick" value="${esc(aipHistDate || '')}" title="按日期筛选历史">` : 'AI选品'}</div>
         </div>
         <div class="aip-tabs">
           ${times.map(t => `<button class="aip-tab ${aipTime === t[0] ? 'active' : ''}" data-aiptime="${t[0]}">${t[1]}</button>`).join('')}
@@ -3838,6 +3863,8 @@
         <div class="aip-list">${bodyHtml}</div>
       </div>
     `;
+    const aipD = $('#aipHistDate');
+    if (aipD) { aipD.max = todayKey(); aipD.addEventListener('change', e => { aipHistDate = e.target.value; renderAiproduct(); }); }
   }
   function renderNews() {
     const data = (daily.news && daily.news.length) ? daily.news : NEWS_FALLBACK;
@@ -5500,6 +5527,9 @@
 
   function init() {
     $('#todayDate').textContent = todayKey();
+    // 历史记录日期筛选：限制最大可选为今天（避免选到未来日期）
+    const todayStr = todayKey();
+    ['topicHistDate', 'repostHistDate'].forEach(id => { const el = $('#' + id); if (el) el.max = todayStr; });
     renderPlan();
     liveRefresh();
     liveRefreshAssets();
