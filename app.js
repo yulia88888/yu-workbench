@@ -4643,44 +4643,113 @@
     }
   }
 
+  // 鞋履：正面俯视的一双鞋（鞋口在上、鞋头朝下），能看到鞋口内里 / 鞋舌 / 鞋带 / 鞋头
   function drawShoe(t) {
     const { c, X, Y, W, H, col, dark, line, has } = t;
-    const path = () => {
-      c.beginPath();
-      c.moveTo(X(0.08), Y(0.74));
-      c.lineTo(X(0.9), Y(0.74));
-      c.quadraticCurveTo(X(0.99), Y(0.7), X(0.9), Y(0.6));
-      c.quadraticCurveTo(X(0.62), Y(0.46), X(0.5), Y(0.38));
-      c.quadraticCurveTo(X(0.36), Y(0.24), X(0.24), Y(0.2));
-      c.quadraticCurveTo(X(0.1), Y(0.18), X(0.08), Y(0.34));
-      c.lineTo(X(0.08), Y(0.74));
-      c.closePath();
-    };
-    path(); c.fillStyle = col; c.fill();
-    c.save(); c.clip(); fillPattern(c, X, Y, W, H, t.name, col, dark); c.restore();
-    c.strokeStyle = line; c.lineWidth = Math.max(1.4, W * 0.018); path(); c.stroke();
-    c.fillStyle = shade(col, -0.45);   // 鞋底
-    c.beginPath(); c.moveTo(X(0.07), Y(0.74)); c.lineTo(X(0.91), Y(0.74));
-    c.lineTo(X(0.9), Y(0.86)); c.lineTo(X(0.08), Y(0.86)); c.closePath(); c.fill();
-    c.strokeStyle = shade(col, -0.3); c.lineWidth = Math.max(1.4, W * 0.016);   // 鞋口
-    c.beginPath(); c.moveTo(X(0.24), Y(0.2)); c.quadraticCurveTo(X(0.36), Y(0.26), X(0.5), Y(0.4)); c.stroke();
-    if (!has('乐福') && !has('靴')) {   // 鞋带
-      c.strokeStyle = shade(col, 0.55); c.lineWidth = Math.max(1.2, W * 0.014);
-      for (let i = 0; i < 3; i++) {
+    const cx = X(0.5);
+    const boot = has('靴');
+    const loafer = has('乐福') || has('穆勒') || has('豆豆') || has('一脚蹬');
+    const sandal = has('凉鞋') || has('拖鞋') || has('人字');
+    const heel = has('高跟') || has('细跟') || has('跟鞋') || has('尖头');
+
+    // 一双鞋正面俯视：两鞋并排，鞋长方向被透视压缩（含鞋口椭圆整体落在画布内）
+    const sw = W * 0.455;                       // 单鞋宽
+    const sh = H * (boot ? 0.65 : 0.87);        // 单鞋长（靴要留出靴筒高度）
+    const oy = H / 2 + (boot ? 0.195 : 0.0175) * sh;   // 让整体垂直居中
+    const lw = Math.max(1.3, sw * 0.045);       // 描边宽
+
+    // 单只鞋：原点在鞋身中心，y 负=鞋口(上)，y 正=鞋头(下)
+    const one = (ox, d) => {
+      c.save();
+      c.translate(ox, oy);
+      c.rotate(d * 0.09);                       // 微微外八
+      const bodyPath = () => {
+        const tw = heel ? 0.20 : 0.30;          // 尖头鞋鞋头明显收窄
         c.beginPath();
-        c.moveTo(X(0.33 + i * 0.09), Y(0.3 + i * 0.055));
-        c.lineTo(X(0.44 + i * 0.09), Y(0.26 + i * 0.055));
-        c.stroke();
+        c.moveTo(-0.30 * sw, -0.48 * sh);
+        c.quadraticCurveTo(-0.35 * sw, -0.12 * sh, -(tw + 0.10) * sw, 0.14 * sh);
+        c.quadraticCurveTo(-(tw + 0.16) * sw, 0.36 * sh, -(tw + 0.06) * sw, 0.46 * sh);
+        c.quadraticCurveTo(-tw * 0.5 * sw, 0.53 * sh, 0, 0.53 * sh);
+        c.quadraticCurveTo(tw * 0.5 * sw, 0.53 * sh, (tw + 0.06) * sw, 0.46 * sh);
+        c.quadraticCurveTo((tw + 0.16) * sw, 0.36 * sh, (tw + 0.10) * sw, 0.14 * sh);
+        c.quadraticCurveTo(0.35 * sw, -0.12 * sh, 0.30 * sw, -0.48 * sh);
+        c.closePath();
+      };
+
+      // 靴筒（画在鞋身下层）
+      if (boot) {
+        c.fillStyle = shade(col, -0.07);
+        c.beginPath();
+        c.moveTo(-0.27 * sw, -0.40 * sh);
+        c.lineTo(-0.25 * sw, -0.86 * sh);
+        c.quadraticCurveTo(0, -0.92 * sh, 0.25 * sw, -0.86 * sh);
+        c.lineTo(0.27 * sw, -0.40 * sh);
+        c.closePath(); c.fill();
+        c.strokeStyle = line; c.lineWidth = lw; c.stroke();
       }
-    }
-    if (has('靴')) {   // 靴筒（与鞋面重叠，不分离）
-      c.fillStyle = shade(col, -0.06);
+
+      // 鞋身
+      bodyPath();
+      c.fillStyle = col; c.fill();
+      c.save(); c.clip();
+      // 鞋底（最下方深色带）
+      c.fillStyle = shade(col, -0.45);
+      c.fillRect(-0.5 * sw, 0.40 * sh, sw, 0.16 * sh);
+      // 鞋头包头（略亮，增强立体）
+      c.fillStyle = shade(col, 0.10);
       c.beginPath();
-      c.moveTo(X(0.07), Y(0.28)); c.lineTo(X(0.31), Y(0.24));
-      c.lineTo(X(0.33), Y(0.02)); c.lineTo(X(0.06), Y(0.02));
+      c.ellipse(0, 0.36 * sh, sw * 0.30, sh * 0.11, 0, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+      c.strokeStyle = line; c.lineWidth = lw; bodyPath(); c.stroke();
+
+      // 鞋口（顶部内里 + 包边）
+      c.fillStyle = shade(col, -0.5);
+      c.beginPath(); c.ellipse(0, -0.48 * sh, sw * 0.30, sh * 0.085, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = shade(col, -0.28); c.lineWidth = lw * 1.2;
+      c.beginPath(); c.ellipse(0, -0.48 * sh, sw * 0.30, sh * 0.085, 0, 0, Math.PI * 2); c.stroke();
+
+      // 鞋舌（中间竖条）
+      c.fillStyle = shade(col, 0.12);
+      const tongueH = sandal ? 0.06 : 0.44;
+      c.beginPath();
+      c.moveTo(-0.17 * sw, -0.42 * sh);
+      c.lineTo(0.17 * sw, -0.42 * sh);
+      c.lineTo(0.15 * sw, (-0.42 + tongueH) * sh);
+      c.quadraticCurveTo(0, (-0.40 + tongueH) * sh, -0.15 * sw, (-0.42 + tongueH) * sh);
       c.closePath(); c.fill();
-      c.strokeStyle = line; c.lineWidth = Math.max(1.2, W * 0.014); c.stroke();
-    }
+      c.strokeStyle = shade(col, -0.22); c.lineWidth = lw * 0.8; c.stroke();
+
+      // 鞋带 / 装饰带
+      const laceCol = shade(col, 0.6);
+      if (sandal) {
+        c.fillStyle = shade(col, -0.12);          // 凉鞋：两条宽横带
+        [-0.16, 0.06].forEach(y => c.fillRect(-0.33 * sw, y * sh, 0.66 * sw, sh * 0.09));
+      } else if (loafer) {
+        c.fillStyle = shade(col, -0.18);          // 乐福：一条横带
+        c.fillRect(-0.32 * sw, -0.22 * sh, 0.64 * sw, sh * 0.11);
+        c.fillStyle = '#D9AE55';                  // 金属扣
+        c.fillRect(-0.07 * sw, -0.22 * sh, 0.14 * sw, sh * 0.08);
+      } else {
+        c.strokeStyle = laceCol; c.lineWidth = Math.max(1.4, sw * 0.055);
+        c.lineCap = 'round';
+        for (let i = 0; i < 4; i++) {             // 鞋带（只在鞋舌两侧区域）
+          const y = (-0.34 + i * 0.10) * sh;
+          const sp = (0.19 - i * 0.008) * sw;
+          c.beginPath(); c.moveTo(-sp, y - sh * 0.012); c.lineTo(sp, y + sh * 0.012); c.stroke();
+        }
+        c.lineCap = 'butt';
+      }
+
+      if (heel) {   // 鞋跟（正面看是鞋头后的一小块）
+        c.fillStyle = shade(col, -0.35);
+        c.fillRect(-0.07 * sw, 0.50 * sh, 0.14 * sw, sh * 0.05);
+      }
+      c.restore();
+    };
+
+    one(cx - sw * 0.575, +1);   // 左鞋（鞋头朝左下）
+    one(cx + sw * 0.575, -1);   // 右鞋（鞋头朝右下）
   }
 
   function drawBag(t) {
@@ -4899,7 +4968,7 @@
       '外套':   { x: w / 2, y: h * 0.33, maxW: w * 0.72, maxH: h * 0.34 },
       '连衣裙': { x: w / 2, y: h * 0.46, maxW: w * 0.56, maxH: h * 0.56 },
       '下装':   { x: w / 2, y: h * 0.66, maxW: w * 0.52, maxH: h * 0.34 },
-      '鞋履':   { x: w / 2, y: h * 0.90, maxW: w * 0.46, maxH: h * 0.12 },
+      '鞋履':   { x: w / 2, y: h * 0.93, maxW: w * 0.21, maxH: h * 0.125 },   // 正面俯视一双鞋≈正方形
       '配饰':   { x: w / 2, y: h * 0.21, maxW: w * 0.40, maxH: h * 0.15 },
       '包包':   { x: w * 0.74, y: h * 0.52, maxW: w * 0.26, maxH: h * 0.22 }
     };
