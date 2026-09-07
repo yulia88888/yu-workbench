@@ -1,9 +1,8 @@
 // 瑜的工作台 Service Worker —— 离线缓存 App Shell（已去除 Tailwind CDN 依赖）
-const CACHE = 'yu-workbench-v30';
+const CACHE = 'yu-workbench-v31';
 const ASSETS = [
   './',
   './index.html',
-  './three.min.js',
   './manifest.webmanifest',
   './icon.svg'
 ];
