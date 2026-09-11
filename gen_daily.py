@@ -792,6 +792,73 @@ def fetch_rss(url, limit=6):
         return []
 
 
+def _by_local(parent, local):
+    """按本地名（忽略命名空间）取第一个子元素。"""
+    if parent is None:
+        return None
+    for el in parent:
+        if isinstance(el.tag, str) and el.tag.split('}')[-1] == local:
+            return el
+    return None
+
+
+def fetch_feed_items(url, limit=8, source="", timeout=8):
+    """抓取 RSS / Atom feed，返回 [{title, summary, url, source, time}]。失败返回 []。"""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=timeout, context=CTX) as r:
+            raw = r.read()
+        txt = None
+        for enc in ("utf-8", "gbk", "gb18030"):
+            try:
+                txt = raw.decode(enc)
+                break
+            except Exception:
+                continue
+        if txt is None:
+            txt = raw.decode("utf-8", "ignore")
+        root = ET.fromstring(txt)
+        out = []
+        nodes = list(root.iter("item")) or list(root.iter("entry"))
+        for it in nodes:
+            title_el = _by_local(it, "title")
+            title = re.sub("<[^>]+>", "", (title_el.text or "") if title_el is not None else "").strip()
+            # link：优先 <link> 文本，其次 atom <link href>
+            link = ""
+            link_el = _by_local(it, "link")
+            if link_el is not None and (link_el.text or "").strip():
+                link = link_el.text.strip()
+            else:
+                for l in it:
+                    if isinstance(l.tag, str) and l.tag.split('}')[-1] == "link" and l.get("href"):
+                        link = l.get("href")
+                        break
+            # 摘要：description / summary / content / encoded
+            desc = ""
+            for loc in ("description", "summary", "content", "encoded"):
+                d = _by_local(it, loc)
+                if d is not None and (d.text or "").strip():
+                    desc = re.sub("<[^>]+>", "", d.text or "")
+                    break
+            desc = re.sub(r"\s+", " ", desc).strip()[:140]
+            pub_el = _by_local(it, "pubDate") or _by_local(it, "updated") or _by_local(it, "published")
+            pub = re.sub("<[^>]+>", "", (pub_el.text or "") if pub_el is not None else "").strip()[:16]
+            if not title:
+                continue
+            item = {"title": title, "url": (link or "").strip(), "source": source}
+            if desc:
+                item["summary"] = desc
+            if pub:
+                item["time"] = pub
+            out.append(item)
+            if len(out) >= limit:
+                break
+        return out
+    except Exception as e:
+        print("[feed fail]", url, type(e).__name__, str(e)[:50])
+        return []
+
+
 def fetch_weibo_hot_raw(limit=8):
     """为「今日热榜」抓取微博实时热搜（不过滤赛道）"""
     out = []
@@ -1297,16 +1364,107 @@ INDUSTRY_FIRMS = [
     }
 ]
 
-INDUSTRY_CHANNELS = [
-    {"icon": "🤖", "name": "科技 · AI"},
-    {"icon": "💹", "name": "金融 · 投资"},
-    {"icon": "🛍️", "name": "消费 · 零售"},
-    {"icon": "🏥", "name": "医疗 · 健康"},
-    {"icon": "⚡", "name": "能源 · 碳中和"},
-    {"icon": "🚗", "name": "汽车 · 出行"},
-    {"icon": "🎬", "name": "文娱 · 传媒"},
-    {"icon": "🌍", "name": "宏观 · 智库"}
-]
+# 行业频道定义：每个频道尝试抓取真实 RSS（feeds），抓取失败则用 curated 来源站点（sources）
+# 作为「可点击跳转原始网站」的兜底内容，保证每条都有真实可用的外链。
+INDUSTRY_CHANNEL_DEFS = {
+    "科技 · AI": {
+        "icon": "🤖", "color": "#2E7D32",
+        "feeds": [
+            ("量子位", "https://www.qbitai.com/feed"),
+            ("机器之心", "https://www.jiqizhixin.com/feed"),
+            ("少数派", "https://sspai.com/feed"),
+            ("36氪", "https://36kr.com/feed"),
+        ],
+        "sources": [
+            {"name": "36氪 · AI", "url": "https://36kr.com/search/articles/AI", "desc": "科技创投与商业一线报道"},
+            {"name": "量子位", "url": "https://www.qbitai.com/", "desc": "AI 前沿与产业动态"},
+            {"name": "机器之心", "url": "https://www.jiqizhixin.com/", "desc": "AI 研究与应用"},
+            {"name": "虎嗅 · 科技", "url": "https://www.huxiu.com/search#?q=AI", "desc": "科技商业深度"},
+        ],
+    },
+    "金融 · 投资": {
+        "icon": "💹", "color": "#1565C0",
+        "feeds": [
+            ("华尔街见闻", "https://wallstreetcn.com/rss/news.xml"),
+            ("新浪财经", "https://finance.sina.com.cn/stock/column/rss.shtml"),
+        ],
+        "sources": [
+            {"name": "华尔街见闻", "url": "https://wallstreetcn.com/", "desc": "实时财经与宏观"},
+            {"name": "财新网", "url": "https://www.caixin.com/", "desc": "深度财经新闻"},
+            {"name": "第一财经", "url": "https://www.yicai.com/", "desc": "商业与资本市场"},
+            {"name": "新浪财经", "url": "https://finance.sina.com.cn/", "desc": "股市与全球市场"},
+        ],
+    },
+    "消费 · 零售": {
+        "icon": "🛍️", "color": "#C2185B",
+        "feeds": [
+            ("少数派", "https://sspai.com/feed"),
+            ("亿邦动力", "https://www.ebrun.com/rss/"),
+        ],
+        "sources": [
+            {"name": "36氪 · 消费", "url": "https://36kr.com/search/articles/%E6%B6%88%E8%B4%B9", "desc": "新消费与品牌"},
+            {"name": "亿邦动力", "url": "https://www.ebrun.com/", "desc": "电商与零售"},
+            {"name": "联商网", "url": "https://www.linkshop.com/", "desc": "零售商业"},
+            {"name": "虎嗅 · 消费", "url": "https://www.huxiu.com/search#?q=%E6%B6%88%E8%B4%B9", "desc": "消费趋势"},
+        ],
+    },
+    "医疗 · 健康": {
+        "icon": "🏥", "color": "#00897B",
+        "feeds": [],
+        "sources": [
+            {"name": "丁香园", "url": "https://www.dxy.cn/", "desc": "医疗专业社区"},
+            {"name": "动脉网", "url": "https://www.vbdata.cn/", "desc": "医疗健康产业"},
+            {"name": "生物谷", "url": "https://www.bioon.com/", "desc": "生命科学"},
+            {"name": "健康界", "url": "https://www.cn-healthcare.com/", "desc": "医疗健康资讯"},
+        ],
+    },
+    "能源 · 碳中和": {
+        "icon": "⚡", "color": "#F9A825",
+        "feeds": [
+            ("北极星光伏", "http://guangfu.bjx.com.cn/news/rss.xml"),
+            ("北极星储能", "http://chuneng.bjx.com.cn/news/rss.xml"),
+        ],
+        "sources": [
+            {"name": "北极星太阳能光伏网", "url": "https://guangfu.bjx.com.cn/", "desc": "光伏产业"},
+            {"name": "北极星储能网", "url": "https://chuneng.bjx.com.cn/", "desc": "储能与电池"},
+            {"name": "中国能源网", "url": "https://www.china5e.com/", "desc": "能源综合"},
+            {"name": "碳派坊", "url": "https://www.tanpaifang.com/", "desc": "碳中和资讯"},
+        ],
+    },
+    "汽车 · 出行": {
+        "icon": "🚗", "color": "#5E35B1",
+        "feeds": [],
+        "sources": [
+            {"name": "汽车之家", "url": "https://www.autohome.com.cn/", "desc": "汽车消费"},
+            {"name": "盖世汽车", "url": "https://www.gasgoo.com/", "desc": "汽车供应链"},
+            {"name": "易车", "url": "https://www.yiche.com/", "desc": "新车与评测"},
+            {"name": "36氪 · 汽车", "url": "https://36kr.com/search/articles/%E6%B1%BD%E8%BD%A6", "desc": "汽车产业"},
+        ],
+    },
+    "文娱 · 传媒": {
+        "icon": "🎬", "color": "#D81B60",
+        "feeds": [],
+        "sources": [
+            {"name": "艺恩", "url": "https://www.endata.com.cn/", "desc": "影视数据"},
+            {"name": "骨朵数据", "url": "https://www.guduodata.com/", "desc": "剧集热度"},
+            {"name": "娱乐资本论", "url": "https://www.yulechuanmei.com/", "desc": "文娱产业"},
+            {"name": "猫眼专业版", "url": "https://piaofang.maoyan.com/", "desc": "票房数据"},
+        ],
+    },
+    "宏观 · 智库": {
+        "icon": "🌍", "color": "#455A64",
+        "feeds": [
+            ("麦肯锡", "https://www.mckinsey.com/insights/feed"),
+            ("Bain", "https://www.bain.com/insights/feed/"),
+        ],
+        "sources": [
+            {"name": "麦肯锡", "url": "https://www.mckinsey.com.cn/", "desc": "全球洞察"},
+            {"name": "BCG", "url": "https://www.bcg.com/zh-cn/", "desc": "战略咨询"},
+            {"name": "贝恩", "url": "https://www.bain.cn/", "desc": "私募与消费"},
+            {"name": "第一财经研究院", "url": "https://www.yicai.com/", "desc": "宏观研究"},
+        ],
+    },
+}
 
 INDUSTRY_FEATURED = [
     {"title": "中国消费市场趋势：2024年消费者信心与品牌增长机会", "source": "麦肯锡", "url": "https://www.mckinsey.com.cn/consumer-insights/"},
@@ -1321,7 +1479,7 @@ INDUSTRY_FEATURED = [
 
 
 def gen_industry_intel(today_str):
-    """生成行业情报：权威咨询机构入口 + 行业频道 + 每日精选洞察。"""
+    """生成行业情报：权威咨询机构入口 + 行业频道（真实 RSS + 来源站点兜底）+ 每日精选洞察。"""
     seed = int(today_str.replace("-", ""))
     rnd = random.Random(seed)
     # 每天从精选洞察里选 3 条，按日期轮换
@@ -1331,11 +1489,31 @@ def gen_industry_intel(today_str):
     # 咨询公司顺序也轻微轮换
     firms = list(INDUSTRY_FIRMS)
     rnd.shuffle(firms)
+    channels = []
+    for name, defn in INDUSTRY_CHANNEL_DEFS.items():
+        items = []
+        try:
+            for s, u in defn.get("feeds", []) or []:
+                items += fetch_feed_items(u, limit=5, source=s, timeout=8)
+                if len(items) >= 6:
+                    break
+        except Exception as e:
+            print("[industry feed err]", name, e)
+        items = items[:8]
+        channels.append({
+            "name": name,
+            "icon": defn.get("icon", "📌"),
+            "color": defn.get("color", "#E91E63"),
+            "sources": defn.get("sources", []),
+            "items": items,           # 实时抓取到的真实条目（可能为空）
+            "live": len(items) > 0,   # 是否成功抓到实时内容
+        })
     return {
         "date": today_str,
         "firms": firms,
-        "channels": INDUSTRY_CHANNELS,
-        "featured": featured
+        "channels": channels,
+        "featured": featured,
+        "updated": today_str,
     }
 
 
