@@ -1257,6 +1257,88 @@ def gen_aiproduct():
     return result
 
 
+# ------------------------- 行业情报（权威咨询 + 行业频道入口） -------------------------
+INDUSTRY_FIRMS = [
+    {
+        "icon": "📘",
+        "name": "麦肯锡 McKinsey",
+        "name_en": "McKinsey",
+        "desc": "全球洞察 · 行业报告 · McKinsey Quarterly",
+        "links": [
+            {"t": "最新洞察 Insights", "u": "https://www.mckinsey.com/featured-insights"},
+            {"t": "中文官网", "u": "https://www.mckinsey.com.cn/"},
+            {"t": "行业频道", "u": "https://www.mckinsey.com.cn/industries/"}
+        ],
+        "wechat": "麦肯锡 (McKinsey_gco)"
+    },
+    {
+        "icon": "📗",
+        "name": "波士顿咨询 BCG",
+        "name_en": "BCG",
+        "desc": "BCG Insights · 亨德森智库 · X矩阵",
+        "links": [
+            {"t": "最新洞察 Publications", "u": "https://www.bcg.com/publications/2024"},
+            {"t": "中文官网", "u": "https://www.bcg.com/zh-cn/"},
+            {"t": "行业频道", "u": "https://www.bcg.com/zh-cn/industries"}
+        ],
+        "wechat": "BCG波士顿咨询 (BCG_Greater_China)"
+    },
+    {
+        "icon": "📕",
+        "name": "贝恩 Bain",
+        "name_en": "Bain",
+        "desc": "Bain Insights · 全球私募/消费/科技报告",
+        "links": [
+            {"t": "最新洞察 Insights", "u": "https://www.bain.com/insights/"},
+            {"t": "中文官网", "u": "https://www.bain.cn/"},
+            {"t": "行业频道", "u": "https://www.bain.cn/industry-expertise"}
+        ],
+        "wechat": "贝恩公司 (BainInsights)"
+    }
+]
+
+INDUSTRY_CHANNELS = [
+    {"icon": "🤖", "name": "科技 · AI"},
+    {"icon": "💹", "name": "金融 · 投资"},
+    {"icon": "🛍️", "name": "消费 · 零售"},
+    {"icon": "🏥", "name": "医疗 · 健康"},
+    {"icon": "⚡", "name": "能源 · 碳中和"},
+    {"icon": "🚗", "name": "汽车 · 出行"},
+    {"icon": "🎬", "name": "文娱 · 传媒"},
+    {"icon": "🌍", "name": "宏观 · 智库"}
+]
+
+INDUSTRY_FEATURED = [
+    {"title": "中国消费市场趋势：2024年消费者信心与品牌增长机会", "source": "麦肯锡", "url": "https://www.mckinsey.com.cn/consumer-insights/"},
+    {"title": "AI时代的生产力革命：企业如何规模化落地生成式AI", "source": "BCG", "url": "https://www.bcg.com/zh-cn/featured-insights/2024/ai-transformation"},
+    {"title": "全球私募市场展望：消费与科技赛道的投资逻辑", "source": "贝恩", "url": "https://www.bain.cn/global-private-equity-report/"},
+    {"title": "中国医疗健康行业：数字化转型与创新支付模式", "source": "麦肯锡", "url": "https://www.mckinsey.com.cn/industries/healthcare/"},
+    {"title": "新能源汽车下半场：智能化、出海与供应链重塑", "source": "BCG", "url": "https://www.bcg.com/zh-cn/featured-insights/2024/ev-intelligent-era"},
+    {"title": "零售媒体网络（RMN）：品牌下一个必争流量阵地", "source": "贝恩", "url": "https://www.bain.com/insights/retail-media-networks/"},
+    {"title": "中国宏观经济：政策发力点与产业新动能", "source": "麦肯锡", "url": "https://www.mckinsey.com.cn/economy-insights/"},
+    {"title": "Z世代消费图鉴：内容、情绪与社交货币", "source": "BCG", "url": "https://www.bcg.com/zh-cn/featured-insights/2024/gen-z-consumer"}
+]
+
+
+def gen_industry_intel(today_str):
+    """生成行业情报：权威咨询机构入口 + 行业频道 + 每日精选洞察。"""
+    seed = int(today_str.replace("-", ""))
+    rnd = random.Random(seed)
+    # 每天从精选洞察里选 3 条，按日期轮换
+    featured_pool = list(INDUSTRY_FEATURED)
+    rnd.shuffle(featured_pool)
+    featured = featured_pool[:3]
+    # 咨询公司顺序也轻微轮换
+    firms = list(INDUSTRY_FIRMS)
+    rnd.shuffle(firms)
+    return {
+        "date": today_str,
+        "firms": firms,
+        "channels": INDUSTRY_CHANNELS,
+        "featured": featured
+    }
+
+
 def main():
     # 用北京时间(UTC+8)算日期，避免 GitHub 服务器(UTC)在「北京时间00:00」那次运行
     # 把日期错算成前一天、覆盖掉当天历史归档。
@@ -1280,6 +1362,7 @@ def main():
     topics = []
     topic_titles_by_plat = {}
     news = gen_news()
+    industry_intel = gen_industry_intel(today_str)
     snap = load_aiproduct_real_snapshot()
     real_aip = fetch_aiproduct_real()
     aip_snap = build_aiproduct_from_snapshot() if (real_aip is None and snap) else None
@@ -1303,6 +1386,7 @@ def main():
         "topics": topics,
         "reposts": reposts,
         "news": news,
+        "industry_intel": industry_intel,
         "aiproduct": aiproduct,
         "aiproduct_hot": aip_hot,
         "aiproduct_real": real_aip is not None or aip_snap is not None,
@@ -1326,7 +1410,7 @@ def main():
         print("[warn] archive failed:", e)
     # 半年历史归档：每天抓取的选题/二创/AI爆品按日期保留 180 天
     try:
-        save_content_history(today_str, {"topics": topics, "reposts": reposts, "aiproduct": data["aiproduct"]})
+        save_content_history(today_str, {"topics": topics, "reposts": reposts, "aiproduct": data["aiproduct"], "industry_intel": industry_intel})
         print("[history] 已写入半年历史归档 history/ 目录（按天拆分，手机可逐日加载）")
     except Exception as e:
         print("[warn] history failed:", e)
