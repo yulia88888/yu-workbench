@@ -39,6 +39,7 @@
   let topicBatch = false, repostBatch = false;
   let topicSel = new Set(), repostSel = new Set();
   let currentView = 'plan';
+  let industryChannel = null;   // null=行业总览；否则为当前打开的频道名
   let subStack = [];
   let outfitTab = 'today';
   let outfitPref = 'normal'; // cold/normal/hot
@@ -93,6 +94,7 @@
 
   function switchView(v) {
     currentView = v;
+    if (v !== 'industry') industryChannel = null;
     $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
     $$('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== v));
     $('#viewTitle').textContent = titles[v];
@@ -681,8 +683,15 @@
     if (p) { aipPlat = p.dataset.aipplat; renderAiproduct(); return; }
     const n = e.target.closest('[data-newscat]');
     if (n) { newsCat = n.dataset.newscat; renderNews(); return; }
+    const bi = e.target.closest('[data-back-industry]');
+    if (bi && currentView === 'industry') {
+      const to = bi.dataset.backIndustry;
+      if (to === 'overview') { industryChannel = null; renderIndustry(); }
+      else { switchView('plan'); }
+      return;
+    }
     const ch = e.target.closest('[data-channel]');
-    if (ch) { toast(`已选中「${ch.dataset.channel}」，可去对应咨询机构官网查看该频道最新报告`); return; }
+    if (ch && currentView === 'industry') { industryChannel = ch.dataset.channel; renderIndustry(); return; }
     const newsCheckin = e.target.closest('#newsCheckin');
     if (newsCheckin) {
       newsCheckin.textContent = '✅ 今日已打卡';
@@ -3965,6 +3974,35 @@
           ],
           featured: []
         };
+    // 频道详情视图：点击某行业频道后展示该频道的实时内容 + 来源网站
+    if (industryChannel) {
+      const ch = (data.channels || []).find(c => c.name === industryChannel);
+      if (ch) {
+        const srcPills = (ch.sources || []).map(s =>
+          `<a class="industry-src-pill" href="${esc(s.url)}" target="_blank" rel="noopener">↗ ${esc(s.name)}</a>`).join('');
+        const itemsHtml = (ch.items && ch.items.length)
+          ? ch.items.map(it => `<a class="industry-item" href="${esc(it.url || '#')}" target="_blank" rel="noopener">
+              <div class="industry-item-title">${esc(it.title)}</div>
+              ${it.summary ? `<div class="industry-item-sum">${esc(it.summary)}</div>` : ''}
+              <div class="industry-item-meta"><span class="industry-item-src">🔗 ${esc(it.source || ch.name)}</span>${it.time ? ` <span>${esc(it.time)}</span>` : ''}<span class="industry-item-go">查看原文 ↗</span></div>
+            </a>`).join('')
+          : `<div class="empty">📡 实时抓取暂不可用，已为你聚合以下权威来源，点击直达原文站点 ↓</div>`;
+        $('#industryBody').innerHTML = `
+          <div class="industry-wrap">
+            <button class="back-row" data-back-industry="overview">← 返回行业频道</button>
+            <div class="industry-detail-head" style="--ch-color:${esc(ch.color || '#E91E63')}">
+              <div class="industry-detail-icon">${esc(ch.icon)}</div>
+              <div class="industry-detail-txt"><h3>${esc(ch.name)}</h3><p>${ch.live ? '✅ 已接入实时资讯' : '📡 已聚合权威来源'} · 更新于 ${esc(data.updated || data.date || '')}</p></div>
+            </div>
+            <div class="industry-section"><h3 class="industry-section-title">🌐 来源网站 <small>点击直达原文站点</small></h3><div class="industry-src-row">${srcPills}</div></div>
+            <div class="industry-section"><h3 class="industry-section-title">📰 ${ch.live ? '最新资讯' : '推荐关注'}</h3>${itemsHtml}</div>
+          </div>
+        `;
+        return;
+      }
+      industryChannel = null;
+    }
+
     const firmColor = { McKinsey: '#1565C0', BCG: '#2E7D32', Bain: '#C62828' };
     const firmCards = data.firms.map(f => {
       const color = firmColor[f.name_en] || '#E91E63';
@@ -3982,9 +4020,10 @@
         <div class="industry-firm-wechat">💬 公众号：${esc(f.wechat)}</div>
       </div>`;
     }).join('');
-    const channelGrid = (data.channels || []).map(c => `<div class="industry-channel-card" data-channel="${esc(c.name)}">
+    const channelGrid = (data.channels || []).map(c => `<div class="industry-channel-card" data-channel="${esc(c.name)}" style="--ch-color:${esc(c.color || '#E91E63')}">
       <div class="industry-channel-icon">${esc(c.icon)}</div>
       <div class="industry-channel-name">${esc(c.name)}</div>
+      <div class="industry-channel-go">进入 ›</div>
     </div>`).join('');
     const featuredCards = (data.featured || []).length
       ? data.featured.map(f => `<a class="industry-featured-card" href="${esc(f.url || '#')}" target="_blank" rel="noopener">
@@ -3994,7 +4033,7 @@
       </a>`).join('')
       : '';
     $('#industryBody').innerHTML = `
-      <button class="back-row" data-back>← 返回每日计划</button>
+      <button class="back-row" data-back-industry="plan">← 返回每日计划</button>
       <div class="industry-wrap">
         <div class="industry-section">
           <h3 class="industry-section-title">📘 权威咨询机构 <small>点开查看官方信息源</small></h3>
@@ -4002,7 +4041,7 @@
         </div>
         ${featuredCards ? `<div class="industry-section"><h3 class="industry-section-title">📈 每日精选洞察</h3>${featuredCards}</div>` : ''}
         <div class="industry-section">
-          <h3 class="industry-section-title">🗂️ 行业频道 <small>点选查看细分领域</small></h3>
+          <h3 class="industry-section-title">🗂️ 行业频道 <small>点击进入查看实时资讯</small></h3>
           <div class="industry-channel-grid">${channelGrid}</div>
         </div>
       </div>
