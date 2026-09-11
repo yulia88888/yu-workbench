@@ -551,6 +551,32 @@
     .news-sum-text{display:block;margin-top:2px;font-size:12px;color:var(--text-secondary);}
     .news-sum-heat{display:inline-block;margin-top:2px;font-size:11px;color:#E74C3C;background:#FFF0F0;padding:1px 6px;border-radius:999px;}
 
+    /* 行业情报 */
+    .industry-wrap{padding:0 16px 20px;}
+    .industry-section{margin-bottom:18px;}
+    .industry-section-title{font-size:16px;font-weight:700;color:var(--text);margin:0 0 12px;display:flex;align-items:center;gap:6px;}
+    .industry-section-title small{font-size:12px;color:var(--text-tertiary);font-weight:400;}
+    .industry-firm-card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px;border-left:4px solid var(--firm-color,#E91E63);}
+    .industry-firm-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+    .industry-firm-icon{width:42px;height:42px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+    .industry-firm-name{flex:1;}
+    .industry-firm-name h3{margin:0;font-size:16px;font-weight:700;color:var(--text);}
+    .industry-firm-name p{margin:2px 0 0;font-size:12px;color:var(--text-secondary);line-height:1.4;}
+    .industry-firm-links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+    .industry-link-pill{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;background:#fff;border:1px solid var(--firm-color,#E91E63);color:var(--firm-color,#E91E63);text-decoration:none;transition:all .15s;}
+    .industry-link-pill:active{background:var(--firm-color,#E91E63);color:#fff;}
+    .industry-firm-wechat{font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;}
+    .industry-channel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .industry-channel-card{background:var(--card);border-radius:16px;padding:14px 8px;text-align:center;box-shadow:var(--shadow);transition:all .15s;}
+    .industry-channel-card:active{transform:scale(.97);}
+    .industry-channel-icon{width:44px;height:44px;border-radius:50%;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;}
+    .industry-channel-name{font-size:13px;font-weight:600;color:var(--text);}
+    .industry-featured-card{background:linear-gradient(135deg,#FFF5F7 0%,#FFFFFF 100%);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border:1px solid var(--pink-light);}
+    .industry-featured-tag{font-size:11px;font-weight:700;color:var(--primary);margin-bottom:4px;}
+    .industry-featured-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:6px;}
+    .industry-featured-source{font-size:11px;color:var(--text-secondary);}
+    @media (max-width:360px){.industry-channel-grid{grid-template-columns:repeat(2,1fr);}}
+
     /* 运动模块 */
     .sport-card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px;}
     .sport-hero{background:linear-gradient(90deg,var(--primary),var(--primary-dark));color:#fff;border-radius:18px;padding:18px;margin-bottom:12px;}
@@ -736,6 +762,7 @@
       <button data-view="aiproduct" class="nav-btn"><span>🛒</span><span>AI爆品</span></button>
       <button data-view="outfit" class="nav-btn"><span>👗</span><span>穿搭</span></button>
       <button data-view="news" class="nav-btn"><span>📰</span><span>新闻</span></button>
+      <button data-view="industry" class="nav-btn"><span>🌐</span><span>行业情报</span></button>
     </nav>
 
     <main class="main">
@@ -886,6 +913,10 @@
 
         <div data-panel="news" class="hidden">
           <div id="newsBody"></div>
+        </div>
+
+        <div data-panel="industry" class="hidden">
+          <div id="industryBody"></div>
         </div>
 
         <div data-panel="outfit" class="hidden">
