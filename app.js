@@ -3576,7 +3576,7 @@
         <div class="clover-section"><div class="clover-icon">❤️</div><div class="clover-num">${s.hp}</div><div class="clover-label">生命值</div></div>
       </div>
       ${todayWords.length ? `
-      <div class="card" style="background:linear-gradient(90deg,#E8F5E9,#fff);">
+      <div class="card" style="background:linear-gradient(90deg,#FCE3F0,#fff);">
         <h4 style="margin:0 0 8px;">✍️ 默写巩固</h4>
         <p style="font-size:13px;color:var(--text-secondary);margin:0 0 10px;">把今天学过的 ${todayWords.length} 个单词全部默写一遍。</p>
         <button class="btn-primary" data-complete="dictation" style="width:100%;">开始默写</button>
