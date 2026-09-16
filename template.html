@@ -44,8 +44,8 @@
     .nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;flex:1;border-radius:14px;color:#A85B7B;font-size:11px;font-weight:500;gap:4px;transition:all .15s ease;}
     .nav-btn.active{background:#fff;color:var(--primary-dark);box-shadow:0 4px 14px rgba(201,74,118,.18);}
     .nav-btn span:first-child{font-size:22px;line-height:1;}
-    .nav-btn .kitty{width:32px;height:36px;display:block;}
-    .sidebar-logo svg{width:32px;height:32px;display:block;}
+    .nav-btn .kitty{height:38px;width:auto;max-width:44px;display:block;object-fit:contain;}
+    .sidebar-logo img{height:32px;width:auto;display:block;}
     .main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;}
 
     .topbar{flex-shrink:0;padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:relative;z-index:10;}
@@ -843,15 +843,15 @@
           </g>
         </defs>
       </svg>
-      <div class="sidebar-logo"><svg viewBox="0 0 40 40"><use href="#kitty-face"/></svg></div>
-      <button data-view="plan" class="nav-btn active"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#F871A8"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">📝</text></svg></span><span>每日计划</span></button>
-      <button data-view="topic" class="nav-btn"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#FFB74D"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">💡</text></svg></span><span>选题灵感</span></button>
-      <button data-view="repost" class="nav-btn"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#FF8A65"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">🔥</text></svg></span><span>爆款二创</span></button>
-      <button data-view="review" class="nav-btn"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#B39DDB"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">📊</text></svg></span><span>内容复盘</span></button>
-      <button data-view="aiproduct" class="nav-btn"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#64B5F6"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">🛒</text></svg></span><span>AI爆品</span></button>
-      <button data-view="outfit" class="nav-btn"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#F06292"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">👗</text></svg></span><span>穿搭</span></button>
-      <button data-view="news" class="nav-btn"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#4FC3F7"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">📰</text></svg></span><span>新闻</span></button>
-      <button data-view="industry" class="nav-btn"><span><svg class="kitty" viewBox="0 0 40 44" style="--kdress:#81C784"><use href="#kitty-body"/><text x="35.5" y="37" font-size="10" text-anchor="middle">🌐</text></svg></span><span>行业情报</span></button>
+      <div class="sidebar-logo"><img src="./kitty/desktop.png" alt="瑜"></div>
+      <button data-view="plan" class="nav-btn active"><span><img class="kitty" src="./kitty/desktop.png" alt=""></span><span>每日计划</span></button>
+      <button data-view="topic" class="nav-btn"><span><img class="kitty" src="./kitty/todo.png" alt=""></span><span>选题灵感</span></button>
+      <button data-view="repost" class="nav-btn"><span><img class="kitty" src="./kitty/account.png" alt=""></span><span>爆款二创</span></button>
+      <button data-view="review" class="nav-btn"><span><img class="kitty" src="./kitty/swing.png" alt=""></span><span>内容复盘</span></button>
+      <button data-view="aiproduct" class="nav-btn"><span><img class="kitty" src="./kitty/garden.png" alt=""></span><span>AI爆品</span></button>
+      <button data-view="outfit" class="nav-btn"><span><img class="kitty" src="./kitty/dress.png" alt=""></span><span>穿搭</span></button>
+      <button data-view="news" class="nav-btn"><span><img class="kitty" src="./kitty/umbrella.png" alt=""></span><span>新闻</span></button>
+      <button data-view="industry" class="nav-btn"><span><img class="kitty" src="./kitty/account.png" alt=""></span><span>行业情报</span></button>
     </nav>
 
     <main class="main">
