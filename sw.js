@@ -1,10 +1,17 @@
 // 瑜的工作台 Service Worker —— 离线缓存 App Shell（已去除 Tailwind CDN 依赖）
-const CACHE = 'yu-workbench-v39';
+const CACHE = 'yu-workbench-v40';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icon.svg'
+  './icon.svg',
+  './kitty/desktop.png',
+  './kitty/todo.png',
+  './kitty/account.png',
+  './kitty/swing.png',
+  './kitty/garden.png',
+  './kitty/umbrella.png',
+  './kitty/dress.png'
 ];
 
 self.addEventListener('install', (e) => {
