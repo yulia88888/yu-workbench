@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "gen": "2026-10-11T11:03:54+08:00",
+  "gen": "2026-10-11T22:30:30+08:00",
   "topics": [
     {
       "id": "抖音-t0",
@@ -446,213 +446,147 @@
       "id": "快手-t0",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "沙特机场遭袭造成12死309伤",
+      "title": "郑钦文首夺中网女单冠军",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%B2%99%E7%89%B9%E6%9C%BA%E5%9C%BA%E9%81%AD%E8%A2%AD%E9%80%A0%E6%88%9012%E6%AD%BB309%E4%BC%A4&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E6%B2%99%E7%89%B9%E6%9C%BA%E5%9C%BA%E9%81%AD%E8%A2%AD%E9%80%A0%E6%88%9012%E6%AD%BB309%E4%BC%A4",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E6%B2%99%E7%89%B9%E6%9C%BA%E5%9C%BA%E9%81%AD%E8%A2%AD%E9%80%A0%E6%88%9012%E6%AD%BB309%E4%BC%A4"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E9%83%91%E9%92%A6%E6%96%87%E9%A6%96%E5%A4%BA%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8D%95%E5%86%A0%E5%86%9B&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E9%83%91%E9%92%A6%E6%96%87%E9%A6%96%E5%A4%BA%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8D%95%E5%86%A0%E5%86%9B",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E9%83%91%E9%92%A6%E6%96%87%E9%A6%96%E5%A4%BA%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8D%95%E5%86%A0%E5%86%9B"
     },
     {
       "id": "快手-t1",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "郑钦文首进中网女单决赛",
+      "title": "王曼昱夺得中国大满贯女单冠军",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E9%83%91%E9%92%A6%E6%96%87%E9%A6%96%E8%BF%9B%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8D%95%E5%86%B3%E8%B5%9B&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E9%83%91%E9%92%A6%E6%96%87%E9%A6%96%E8%BF%9B%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8D%95%E5%86%B3%E8%B5%9B",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E9%83%91%E9%92%A6%E6%96%87%E9%A6%96%E8%BF%9B%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8D%95%E5%86%B3%E8%B5%9B"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E7%8E%8B%E6%9B%BC%E6%98%B1%E5%A4%BA%E5%BE%97%E4%B8%AD%E5%9B%BD%E5%A4%A7%E6%BB%A1%E8%B4%AF%E5%A5%B3%E5%8D%95%E5%86%A0%E5%86%9B&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E7%8E%8B%E6%9B%BC%E6%98%B1%E5%A4%BA%E5%BE%97%E4%B8%AD%E5%9B%BD%E5%A4%A7%E6%BB%A1%E8%B4%AF%E5%A5%B3%E5%8D%95%E5%86%A0%E5%86%9B",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E7%8E%8B%E6%9B%BC%E6%98%B1%E5%A4%BA%E5%BE%97%E4%B8%AD%E5%9B%BD%E5%A4%A7%E6%BB%A1%E8%B4%AF%E5%A5%B3%E5%8D%95%E5%86%A0%E5%86%9B"
     },
     {
       "id": "快手-t2",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "这些名字让长征的旗帜更加鲜红",
+      "title": "我国物流业景气水平进一步提升",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E8%BF%99%E4%BA%9B%E5%90%8D%E5%AD%97%E8%AE%A9%E9%95%BF%E5%BE%81%E7%9A%84%E6%97%97%E5%B8%9C%E6%9B%B4%E5%8A%A0%E9%B2%9C%E7%BA%A2&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E8%BF%99%E4%BA%9B%E5%90%8D%E5%AD%97%E8%AE%A9%E9%95%BF%E5%BE%81%E7%9A%84%E6%97%97%E5%B8%9C%E6%9B%B4%E5%8A%A0%E9%B2%9C%E7%BA%A2",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E8%BF%99%E4%BA%9B%E5%90%8D%E5%AD%97%E8%AE%A9%E9%95%BF%E5%BE%81%E7%9A%84%E6%97%97%E5%B8%9C%E6%9B%B4%E5%8A%A0%E9%B2%9C%E7%BA%A2"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%88%91%E5%9B%BD%E7%89%A9%E6%B5%81%E4%B8%9A%E6%99%AF%E6%B0%94%E6%B0%B4%E5%B9%B3%E8%BF%9B%E4%B8%80%E6%AD%A5%E6%8F%90%E5%8D%87&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E6%88%91%E5%9B%BD%E7%89%A9%E6%B5%81%E4%B8%9A%E6%99%AF%E6%B0%94%E6%B0%B4%E5%B9%B3%E8%BF%9B%E4%B8%80%E6%AD%A5%E6%8F%90%E5%8D%87",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%88%91%E5%9B%BD%E7%89%A9%E6%B5%81%E4%B8%9A%E6%99%AF%E6%B0%94%E6%B0%B4%E5%B9%B3%E8%BF%9B%E4%B8%80%E6%AD%A5%E6%8F%90%E5%8D%87"
     },
     {
       "id": "快手-t3",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "梅艳芳骨灰被盗",
+      "title": "少司缘涂山红红cos",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%B0%91%E5%8F%B8%E7%BC%98%E6%B6%82%E5%B1%B1%E7%BA%A2%E7%BA%A2cos&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%B0%91%E5%8F%B8%E7%BC%98%E6%B6%82%E5%B1%B1%E7%BA%A2%E7%BA%A2cos",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%91%E5%8F%B8%E7%BC%98%E6%B6%82%E5%B1%B1%E7%BA%A2%E7%BA%A2cos"
     },
     {
       "id": "快手-t4",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "台湾民众街头高喊我们要统一",
+      "title": "安徽水利厅原厅长王荣喜被双开",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%8F%B0%E6%B9%BE%E6%B0%91%E4%BC%97%E8%A1%97%E5%A4%B4%E9%AB%98%E5%96%8A%E6%88%91%E4%BB%AC%E8%A6%81%E7%BB%9F%E4%B8%80&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%8F%B0%E6%B9%BE%E6%B0%91%E4%BC%97%E8%A1%97%E5%A4%B4%E9%AB%98%E5%96%8A%E6%88%91%E4%BB%AC%E8%A6%81%E7%BB%9F%E4%B8%80",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8F%B0%E6%B9%BE%E6%B0%91%E4%BC%97%E8%A1%97%E5%A4%B4%E9%AB%98%E5%96%8A%E6%88%91%E4%BB%AC%E8%A6%81%E7%BB%9F%E4%B8%80"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%AE%89%E5%BE%BD%E6%B0%B4%E5%88%A9%E5%8E%85%E5%8E%9F%E5%8E%85%E9%95%BF%E7%8E%8B%E8%8D%A3%E5%96%9C%E8%A2%AB%E5%8F%8C%E5%BC%80&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%AE%89%E5%BE%BD%E6%B0%B4%E5%88%A9%E5%8E%85%E5%8E%9F%E5%8E%85%E9%95%BF%E7%8E%8B%E8%8D%A3%E5%96%9C%E8%A2%AB%E5%8F%8C%E5%BC%80",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%AE%89%E5%BE%BD%E6%B0%B4%E5%88%A9%E5%8E%85%E5%8E%9F%E5%8E%85%E9%95%BF%E7%8E%8B%E8%8D%A3%E5%96%9C%E8%A2%AB%E5%8F%8C%E5%BC%80"
     },
     {
       "id": "快手-t5",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "两名中国男子国庆赴泰旅游失联",
+      "title": "德比斯提前锁定年度亚军",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E4%B8%A4%E5%90%8D%E4%B8%AD%E5%9B%BD%E7%94%B7%E5%AD%90%E5%9B%BD%E5%BA%86%E8%B5%B4%E6%B3%B0%E6%97%85%E6%B8%B8%E5%A4%B1%E8%81%94&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E4%B8%A4%E5%90%8D%E4%B8%AD%E5%9B%BD%E7%94%B7%E5%AD%90%E5%9B%BD%E5%BA%86%E8%B5%B4%E6%B3%B0%E6%97%85%E6%B8%B8%E5%A4%B1%E8%81%94",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E4%B8%A4%E5%90%8D%E4%B8%AD%E5%9B%BD%E7%94%B7%E5%AD%90%E5%9B%BD%E5%BA%86%E8%B5%B4%E6%B3%B0%E6%97%85%E6%B8%B8%E5%A4%B1%E8%81%94"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%BE%B7%E6%AF%94%E6%96%AF%E6%8F%90%E5%89%8D%E9%94%81%E5%AE%9A%E5%B9%B4%E5%BA%A6%E4%BA%9A%E5%86%9B&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%BE%B7%E6%AF%94%E6%96%AF%E6%8F%90%E5%89%8D%E9%94%81%E5%AE%9A%E5%B9%B4%E5%BA%A6%E4%BA%9A%E5%86%9B",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%BE%B7%E6%AF%94%E6%96%AF%E6%8F%90%E5%89%8D%E9%94%81%E5%AE%9A%E5%B9%B4%E5%BA%A6%E4%BA%9A%E5%86%9B"
     },
     {
       "id": "快手-t6",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "Fly率狼队绝境翻盘",
+      "title": "周启豪坦言输在节奏",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=Fly%E7%8E%87%E7%8B%BC%E9%98%9F%E7%BB%9D%E5%A2%83%E7%BF%BB%E7%9B%98&rankType=1",
-      "dy_link": "https://www.douyin.com/search/Fly%E7%8E%87%E7%8B%BC%E9%98%9F%E7%BB%9D%E5%A2%83%E7%BF%BB%E7%9B%98",
-      "bz_link": "https://search.bilibili.com/all?keyword=Fly%E7%8E%87%E7%8B%BC%E9%98%9F%E7%BB%9D%E5%A2%83%E7%BF%BB%E7%9B%98"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%91%A8%E5%90%AF%E8%B1%AA%E5%9D%A6%E8%A8%80%E8%BE%93%E5%9C%A8%E8%8A%82%E5%A5%8F&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%91%A8%E5%90%AF%E8%B1%AA%E5%9D%A6%E8%A8%80%E8%BE%93%E5%9C%A8%E8%8A%82%E5%A5%8F",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%91%A8%E5%90%AF%E8%B1%AA%E5%9D%A6%E8%A8%80%E8%BE%93%E5%9C%A8%E8%8A%82%E5%A5%8F"
     },
     {
       "id": "快手-t7",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "91份危货车检验报告全是假的",
+      "title": "张帅组合获中网女双亚军",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=91%E4%BB%BD%E5%8D%B1%E8%B4%A7%E8%BD%A6%E6%A3%80%E9%AA%8C%E6%8A%A5%E5%91%8A%E5%85%A8%E6%98%AF%E5%81%87%E7%9A%84&rankType=1",
-      "dy_link": "https://www.douyin.com/search/91%E4%BB%BD%E5%8D%B1%E8%B4%A7%E8%BD%A6%E6%A3%80%E9%AA%8C%E6%8A%A5%E5%91%8A%E5%85%A8%E6%98%AF%E5%81%87%E7%9A%84",
-      "bz_link": "https://search.bilibili.com/all?keyword=91%E4%BB%BD%E5%8D%B1%E8%B4%A7%E8%BD%A6%E6%A3%80%E9%AA%8C%E6%8A%A5%E5%91%8A%E5%85%A8%E6%98%AF%E5%81%87%E7%9A%84"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%BC%A0%E5%B8%85%E7%BB%84%E5%90%88%E8%8E%B7%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8F%8C%E4%BA%9A%E5%86%9B&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%BC%A0%E5%B8%85%E7%BB%84%E5%90%88%E8%8E%B7%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8F%8C%E4%BA%9A%E5%86%9B",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%BC%A0%E5%B8%85%E7%BB%84%E5%90%88%E8%8E%B7%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8F%8C%E4%BA%9A%E5%86%9B"
     },
     {
       "id": "快手-t8",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "太白山秋色如画",
+      "title": "巴提巴提变装",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%A4%AA%E7%99%BD%E5%B1%B1%E7%A7%8B%E8%89%B2%E5%A6%82%E7%94%BB&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%A4%AA%E7%99%BD%E5%B1%B1%E7%A7%8B%E8%89%B2%E5%A6%82%E7%94%BB",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%A4%AA%E7%99%BD%E5%B1%B1%E7%A7%8B%E8%89%B2%E5%A6%82%E7%94%BB"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%B7%B4%E6%8F%90%E5%B7%B4%E6%8F%90%E5%8F%98%E8%A3%85&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%B7%B4%E6%8F%90%E5%B7%B4%E6%8F%90%E5%8F%98%E8%A3%85",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%B7%B4%E6%8F%90%E5%B7%B4%E6%8F%90%E5%8F%98%E8%A3%85"
     },
     {
       "id": "快手-t9",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "学会闪身步这样跳",
+      "title": "插队被拒投诉医生的家长已道歉",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%AD%A6%E4%BC%9A%E9%97%AA%E8%BA%AB%E6%AD%A5%E8%BF%99%E6%A0%B7%E8%B7%B3&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%AD%A6%E4%BC%9A%E9%97%AA%E8%BA%AB%E6%AD%A5%E8%BF%99%E6%A0%B7%E8%B7%B3",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%AD%A6%E4%BC%9A%E9%97%AA%E8%BA%AB%E6%AD%A5%E8%BF%99%E6%A0%B7%E8%B7%B3"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%8F%92%E9%98%9F%E8%A2%AB%E6%8B%92%E6%8A%95%E8%AF%89%E5%8C%BB%E7%94%9F%E7%9A%84%E5%AE%B6%E9%95%BF%E5%B7%B2%E9%81%93%E6%AD%89&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E6%8F%92%E9%98%9F%E8%A2%AB%E6%8B%92%E6%8A%95%E8%AF%89%E5%8C%BB%E7%94%9F%E7%9A%84%E5%AE%B6%E9%95%BF%E5%B7%B2%E9%81%93%E6%AD%89",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%8F%92%E9%98%9F%E8%A2%AB%E6%8B%92%E6%8A%95%E8%AF%89%E5%8C%BB%E7%94%9F%E7%9A%84%E5%AE%B6%E9%95%BF%E5%B7%B2%E9%81%93%E6%AD%89"
     },
     {
       "id": "快手-t10",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "社保卡有金卡每月有补贴是诈骗",
+      "title": "头孢停药3天就能饮酒是谣言",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E7%A4%BE%E4%BF%9D%E5%8D%A1%E6%9C%89%E9%87%91%E5%8D%A1%E6%AF%8F%E6%9C%88%E6%9C%89%E8%A1%A5%E8%B4%B4%E6%98%AF%E8%AF%88%E9%AA%97&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E7%A4%BE%E4%BF%9D%E5%8D%A1%E6%9C%89%E9%87%91%E5%8D%A1%E6%AF%8F%E6%9C%88%E6%9C%89%E8%A1%A5%E8%B4%B4%E6%98%AF%E8%AF%88%E9%AA%97",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E7%A4%BE%E4%BF%9D%E5%8D%A1%E6%9C%89%E9%87%91%E5%8D%A1%E6%AF%8F%E6%9C%88%E6%9C%89%E8%A1%A5%E8%B4%B4%E6%98%AF%E8%AF%88%E9%AA%97"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%A4%B4%E5%AD%A2%E5%81%9C%E8%8D%AF3%E5%A4%A9%E5%B0%B1%E8%83%BD%E9%A5%AE%E9%85%92%E6%98%AF%E8%B0%A3%E8%A8%80&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%A4%B4%E5%AD%A2%E5%81%9C%E8%8D%AF3%E5%A4%A9%E5%B0%B1%E8%83%BD%E9%A5%AE%E9%85%92%E6%98%AF%E8%B0%A3%E8%A8%80",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%A4%B4%E5%AD%A2%E5%81%9C%E8%8D%AF3%E5%A4%A9%E5%B0%B1%E8%83%BD%E9%A5%AE%E9%85%92%E6%98%AF%E8%B0%A3%E8%A8%80"
     },
     {
       "id": "快手-t11",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "全世界的小猫都会被邦邦两下",
+      "title": "多款儿童骑行箱斜坡上会翻车",
       "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
       "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%85%A8%E4%B8%96%E7%95%8C%E7%9A%84%E5%B0%8F%E7%8C%AB%E9%83%BD%E4%BC%9A%E8%A2%AB%E9%82%A6%E9%82%A6%E4%B8%A4%E4%B8%8B&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%85%A8%E4%B8%96%E7%95%8C%E7%9A%84%E5%B0%8F%E7%8C%AB%E9%83%BD%E4%BC%9A%E8%A2%AB%E9%82%A6%E9%82%A6%E4%B8%A4%E4%B8%8B",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%85%A8%E4%B8%96%E7%95%8C%E7%9A%84%E5%B0%8F%E7%8C%AB%E9%83%BD%E4%BC%9A%E8%A2%AB%E9%82%A6%E9%82%A6%E4%B8%A4%E4%B8%8B"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%A4%9A%E6%AC%BE%E5%84%BF%E7%AB%A5%E9%AA%91%E8%A1%8C%E7%AE%B1%E6%96%9C%E5%9D%A1%E4%B8%8A%E4%BC%9A%E7%BF%BB%E8%BD%A6&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%A4%9A%E6%AC%BE%E5%84%BF%E7%AB%A5%E9%AA%91%E8%A1%8C%E7%AE%B1%E6%96%9C%E5%9D%A1%E4%B8%8A%E4%BC%9A%E7%BF%BB%E8%BD%A6",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%A4%9A%E6%AC%BE%E5%84%BF%E7%AB%A5%E9%AA%91%E8%A1%8C%E7%AE%B1%E6%96%9C%E5%9D%A1%E4%B8%8A%E4%BC%9A%E7%BF%BB%E8%BD%A6"
     },
     {
       "id": "快手-t12",
       "platform": "快手",
       "cat": "情绪共鸣",
-      "title": "国庆特种兵结算画面",
+      "title": "哈药股份董事兼总裁被立案留置",
       "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
       "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%9B%BD%E5%BA%86%E7%89%B9%E7%A7%8D%E5%85%B5%E7%BB%93%E7%AE%97%E7%94%BB%E9%9D%A2&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%9B%BD%E5%BA%86%E7%89%B9%E7%A7%8D%E5%85%B5%E7%BB%93%E7%AE%97%E7%94%BB%E9%9D%A2",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%9B%BD%E5%BA%86%E7%89%B9%E7%A7%8D%E5%85%B5%E7%BB%93%E7%AE%97%E7%94%BB%E9%9D%A2"
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%93%88%E8%8D%AF%E8%82%A1%E4%BB%BD%E8%91%A3%E4%BA%8B%E5%85%BC%E6%80%BB%E8%A3%81%E8%A2%AB%E7%AB%8B%E6%A1%88%E7%95%99%E7%BD%AE&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%93%88%E8%8D%AF%E8%82%A1%E4%BB%BD%E8%91%A3%E4%BA%8B%E5%85%BC%E6%80%BB%E8%A3%81%E8%A2%AB%E7%AB%8B%E6%A1%88%E7%95%99%E7%BD%AE",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%93%88%E8%8D%AF%E8%82%A1%E4%BB%BD%E8%91%A3%E4%BA%8B%E5%85%BC%E6%80%BB%E8%A3%81%E8%A2%AB%E7%AB%8B%E6%A1%88%E7%95%99%E7%BD%AE"
     },
     {
       "id": "快手-t13",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "王楚然演都不演了",
-      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
-      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E7%8E%8B%E6%A5%9A%E7%84%B6%E6%BC%94%E9%83%BD%E4%B8%8D%E6%BC%94%E4%BA%86&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E7%8E%8B%E6%A5%9A%E7%84%B6%E6%BC%94%E9%83%BD%E4%B8%8D%E6%BC%94%E4%BA%86",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E7%8E%8B%E6%A5%9A%E7%84%B6%E6%BC%94%E9%83%BD%E4%B8%8D%E6%BC%94%E4%BA%86"
-    },
-    {
-      "id": "快手-t14",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "北京将迎大风降温",
-      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
-      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%8C%97%E4%BA%AC%E5%B0%86%E8%BF%8E%E5%A4%A7%E9%A3%8E%E9%99%8D%E6%B8%A9&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%8C%97%E4%BA%AC%E5%B0%86%E8%BF%8E%E5%A4%A7%E9%A3%8E%E9%99%8D%E6%B8%A9",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8C%97%E4%BA%AC%E5%B0%86%E8%BF%8E%E5%A4%A7%E9%A3%8E%E9%99%8D%E6%B8%A9"
-    },
-    {
-      "id": "快手-t15",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "小马王朝闪身步",
-      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
-      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%B0%8F%E9%A9%AC%E7%8E%8B%E6%9C%9D%E9%97%AA%E8%BA%AB%E6%AD%A5&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E5%B0%8F%E9%A9%AC%E7%8E%8B%E6%9C%9D%E9%97%AA%E8%BA%AB%E6%AD%A5",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%8F%E9%A9%AC%E7%8E%8B%E6%9C%9D%E9%97%AA%E8%BA%AB%E6%AD%A5"
-    },
-    {
-      "id": "快手-t16",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "7部门实施品质电商“五优”行动",
-      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
-      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=7%E9%83%A8%E9%97%A8%E5%AE%9E%E6%96%BD%E5%93%81%E8%B4%A8%E7%94%B5%E5%95%86%E2%80%9C%E4%BA%94%E4%BC%98%E2%80%9D%E8%A1%8C%E5%8A%A8&rankType=1",
-      "dy_link": "https://www.douyin.com/search/7%E9%83%A8%E9%97%A8%E5%AE%9E%E6%96%BD%E5%93%81%E8%B4%A8%E7%94%B5%E5%95%86%E2%80%9C%E4%BA%94%E4%BC%98%E2%80%9D%E8%A1%8C%E5%8A%A8",
-      "bz_link": "https://search.bilibili.com/all?keyword=7%E9%83%A8%E9%97%A8%E5%AE%9E%E6%96%BD%E5%93%81%E8%B4%A8%E7%94%B5%E5%95%86%E2%80%9C%E4%BA%94%E4%BC%98%E2%80%9D%E8%A1%8C%E5%8A%A8"
-    },
-    {
-      "id": "快手-t17",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "金价大跌女子花9万买金",
-      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
-      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E9%87%91%E4%BB%B7%E5%A4%A7%E8%B7%8C%E5%A5%B3%E5%AD%90%E8%8A%B19%E4%B8%87%E4%B9%B0%E9%87%91&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E9%87%91%E4%BB%B7%E5%A4%A7%E8%B7%8C%E5%A5%B3%E5%AD%90%E8%8A%B19%E4%B8%87%E4%B9%B0%E9%87%91",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E9%87%91%E4%BB%B7%E5%A4%A7%E8%B7%8C%E5%A5%B3%E5%AD%90%E8%8A%B19%E4%B8%87%E4%B9%B0%E9%87%91"
-    },
-    {
-      "id": "快手-t18",
-      "platform": "快手",
-      "cat": "情绪共鸣",
-      "title": "最美逆行者拒转派遣被辞",
-      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
-      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
-      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%9C%80%E7%BE%8E%E9%80%86%E8%A1%8C%E8%80%85%E6%8B%92%E8%BD%AC%E6%B4%BE%E9%81%A3%E8%A2%AB%E8%BE%9E&rankType=1",
-      "dy_link": "https://www.douyin.com/search/%E6%9C%80%E7%BE%8E%E9%80%86%E8%A1%8C%E8%80%85%E6%8B%92%E8%BD%AC%E6%B4%BE%E9%81%A3%E8%A2%AB%E8%BE%9E",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E6%9C%80%E7%BE%8E%E9%80%86%E8%A1%8C%E8%80%85%E6%8B%92%E8%BD%AC%E6%B4%BE%E9%81%A3%E8%A2%AB%E8%BE%9E"
-    },
-    {
-      "id": "快手-t19",
       "platform": "快手",
       "cat": "情绪共鸣",
       "title": "国庆后错峰出游太爽了",
@@ -663,326 +597,326 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%9B%BD%E5%BA%86%E5%90%8E%E9%94%99%E5%B3%B0%E5%87%BA%E6%B8%B8%E5%A4%AA%E7%88%BD%E4%BA%86"
     },
     {
+      "id": "快手-t14",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "尼泊尔再次暴发严重山洪",
+      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
+      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E5%B0%BC%E6%B3%8A%E5%B0%94%E5%86%8D%E6%AC%A1%E6%9A%B4%E5%8F%91%E4%B8%A5%E9%87%8D%E5%B1%B1%E6%B4%AA&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E5%B0%BC%E6%B3%8A%E5%B0%94%E5%86%8D%E6%AC%A1%E6%9A%B4%E5%8F%91%E4%B8%A5%E9%87%8D%E5%B1%B1%E6%B4%AA",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%BC%E6%B3%8A%E5%B0%94%E5%86%8D%E6%AC%A1%E6%9A%B4%E5%8F%91%E4%B8%A5%E9%87%8D%E5%B1%B1%E6%B4%AA"
+    },
+    {
+      "id": "快手-t15",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "李晨在村ROX现场玩嗨了",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%9D%8E%E6%99%A8%E5%9C%A8%E6%9D%91ROX%E7%8E%B0%E5%9C%BA%E7%8E%A9%E5%97%A8%E4%BA%86&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E6%9D%8E%E6%99%A8%E5%9C%A8%E6%9D%91ROX%E7%8E%B0%E5%9C%BA%E7%8E%A9%E5%97%A8%E4%BA%86",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E6%99%A8%E5%9C%A8%E6%9D%91ROX%E7%8E%B0%E5%9C%BA%E7%8E%A9%E5%97%A8%E4%BA%86"
+    },
+    {
+      "id": "快手-t16",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "李连杰否认抛妻弃子",
+      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
+      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%9D%8E%E8%BF%9E%E6%9D%B0%E5%90%A6%E8%AE%A4%E6%8A%9B%E5%A6%BB%E5%BC%83%E5%AD%90&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E6%9D%8E%E8%BF%9E%E6%9D%B0%E5%90%A6%E8%AE%A4%E6%8A%9B%E5%A6%BB%E5%BC%83%E5%AD%90",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%9D%8E%E8%BF%9E%E6%9D%B0%E5%90%A6%E8%AE%A4%E6%8A%9B%E5%A6%BB%E5%BC%83%E5%AD%90"
+    },
+    {
+      "id": "快手-t17",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "松岛辉空4比3胜林昀儒",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA4%E6%AF%943%E8%83%9C%E6%9E%97%E6%98%80%E5%84%92&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA4%E6%AF%943%E8%83%9C%E6%9E%97%E6%98%80%E5%84%92",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA4%E6%AF%943%E8%83%9C%E6%9E%97%E6%98%80%E5%84%92"
+    },
+    {
+      "id": "快手-t18",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "松岛辉空中国大满贯夺冠",
+      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
+      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA%E4%B8%AD%E5%9B%BD%E5%A4%A7%E6%BB%A1%E8%B4%AF%E5%A4%BA%E5%86%A0&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA%E4%B8%AD%E5%9B%BD%E5%A4%A7%E6%BB%A1%E8%B4%AF%E5%A4%BA%E5%86%A0",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%9D%BE%E5%B2%9B%E8%BE%89%E7%A9%BA%E4%B8%AD%E5%9B%BD%E5%A4%A7%E6%BB%A1%E8%B4%AF%E5%A4%BA%E5%86%A0"
+    },
+    {
+      "id": "快手-t19",
+      "platform": "快手",
+      "cat": "情绪共鸣",
+      "title": "香港警方回应梅艳芳骨灰被盗",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "https://index.e.kuaishou.com/rank/hotDetail?keyword=%E9%A6%99%E6%B8%AF%E8%AD%A6%E6%96%B9%E5%9B%9E%E5%BA%94%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97&rankType=1",
+      "dy_link": "https://www.douyin.com/search/%E9%A6%99%E6%B8%AF%E8%AD%A6%E6%96%B9%E5%9B%9E%E5%BA%94%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E9%A6%99%E6%B8%AF%E8%AD%A6%E6%96%B9%E5%9B%9E%E5%BA%94%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97"
+    },
+    {
       "id": "微博-t0",
       "platform": "微博",
-      "cat": "美食",
-      "title": "尿毒症大多是吃出来的",
-      "analysis": "美食是全民赛道，完播和收藏极高，教程类易被反复观看。",
-      "idea": "原创思路：用「翻车vs成功」对比制造看点，真实感拉满。",
-      "real_url": "https://s.weibo.com/weibo?q=%23%E5%B0%BF%E6%AF%92%E7%97%87%E5%A4%A7%E5%A4%9A%E6%98%AF%E5%90%83%E5%87%BA%E6%9D%A5%E7%9A%84%23",
-      "dy_link": "https://www.douyin.com/search/%E5%B0%BF%E6%AF%92%E7%97%87%E5%A4%A7%E5%A4%9A%E6%98%AF%E5%90%83%E5%87%BA%E6%9D%A5%E7%9A%84",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%BF%E6%AF%92%E7%97%87%E5%A4%A7%E5%A4%9A%E6%98%AF%E5%90%83%E5%87%BA%E6%9D%A5%E7%9A%84"
+      "cat": "唱歌碎片",
+      "title": "全网蹲郑钦文今晚唱什么",
+      "analysis": "才艺展示算法友好，情绪歌评论区活跃，对口型/变装可低成本蹭热点BGM。",
+      "idea": "原创思路：把唱歌当情绪出口而不是才艺表演，更真实。",
+      "real_url": "https://s.weibo.com/weibo?q=%23%E5%85%A8%E7%BD%91%E8%B9%B2%E9%83%91%E9%92%A6%E6%96%87%E4%BB%8A%E6%99%9A%E5%94%B1%E4%BB%80%E4%B9%88%23",
+      "dy_link": "https://www.douyin.com/search/%E5%85%A8%E7%BD%91%E8%B9%B2%E9%83%91%E9%92%A6%E6%96%87%E4%BB%8A%E6%99%9A%E5%94%B1%E4%BB%80%E4%B9%88",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%85%A8%E7%BD%91%E8%B9%B2%E9%83%91%E9%92%A6%E6%96%87%E4%BB%8A%E6%99%9A%E5%94%B1%E4%BB%80%E4%B9%88"
     },
     {
       "id": "微博-t1",
       "platform": "微博",
-      "cat": "影视",
-      "title": "金智媛空窗两年再出爆剧",
-      "analysis": "盘点/避雷类比长解说更易完播和收藏。",
-      "idea": "原创思路：做「普通人观影」短评，真诚不装，3分钟讲清值不值得看。",
-      "real_url": "https://s.weibo.com/weibo?q=%23%E9%87%91%E6%99%BA%E5%AA%9B%E7%A9%BA%E7%AA%97%E4%B8%A4%E5%B9%B4%E5%86%8D%E5%87%BA%E7%88%86%E5%89%A7%23",
-      "dy_link": "https://www.douyin.com/search/%E9%87%91%E6%99%BA%E5%AA%9B%E7%A9%BA%E7%AA%97%E4%B8%A4%E5%B9%B4%E5%86%8D%E5%87%BA%E7%88%86%E5%89%A7",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E9%87%91%E6%99%BA%E5%AA%9B%E7%A9%BA%E7%AA%97%E4%B8%A4%E5%B9%B4%E5%86%8D%E5%87%BA%E7%88%86%E5%89%A7"
+      "cat": "唱歌碎片",
+      "title": "宋雨琦广州演唱会嘉宾是关晓彤",
+      "analysis": "唱歌碎片穿插在vlog里，能低成本吸才艺粉又不抢主线。",
+      "idea": "原创思路：做「下班对镜唱」系列，素颜工服→精致变装反差，蹭热点BGM。",
+      "real_url": "https://s.weibo.com/weibo?q=%23%E5%AE%8B%E9%9B%A8%E7%90%A6%E5%B9%BF%E5%B7%9E%E6%BC%94%E5%94%B1%E4%BC%9A%E5%98%89%E5%AE%BE%E6%98%AF%E5%85%B3%E6%99%93%E5%BD%A4%23",
+      "dy_link": "https://www.douyin.com/search/%E5%AE%8B%E9%9B%A8%E7%90%A6%E5%B9%BF%E5%B7%9E%E6%BC%94%E5%94%B1%E4%BC%9A%E5%98%89%E5%AE%BE%E6%98%AF%E5%85%B3%E6%99%93%E5%BD%A4",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%AE%8B%E9%9B%A8%E7%90%A6%E5%B9%BF%E5%B7%9E%E6%BC%94%E5%94%B1%E4%BC%9A%E5%98%89%E5%AE%BE%E6%98%AF%E5%85%B3%E6%99%93%E5%BD%A4"
     },
     {
       "id": "微博-t2",
       "platform": "微博",
-      "cat": "鞋履配饰",
-      "title": "包贝尔包文婧一同出游",
-      "analysis": "鞋包配饰决策成本高、复购多，真实试穿+避雷内容收藏率极高。",
-      "idea": "原创思路：把配饰当「穿搭的最后一平米」来讲，提升整体造型感。",
-      "real_url": "https://s.weibo.com/weibo?q=%23%E5%8C%85%E8%B4%9D%E5%B0%94%E5%8C%85%E6%96%87%E5%A9%A7%E4%B8%80%E5%90%8C%E5%87%BA%E6%B8%B8%23",
-      "dy_link": "https://www.douyin.com/search/%E5%8C%85%E8%B4%9D%E5%B0%94%E5%8C%85%E6%96%87%E5%A9%A7%E4%B8%80%E5%90%8C%E5%87%BA%E6%B8%B8",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8C%85%E8%B4%9D%E5%B0%94%E5%8C%85%E6%96%87%E5%A9%A7%E4%B8%80%E5%90%8C%E5%87%BA%E6%B8%B8"
+      "cat": "情绪共鸣",
+      "title": "中国女性传统坐姿松弛张扬",
+      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
+      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
+      "real_url": "https://s.weibo.com/weibo?q=%23%E4%B8%AD%E5%9B%BD%E5%A5%B3%E6%80%A7%E4%BC%A0%E7%BB%9F%E5%9D%90%E5%A7%BF%E6%9D%BE%E5%BC%9B%E5%BC%A0%E6%89%AC%23",
+      "dy_link": "https://www.douyin.com/search/%E4%B8%AD%E5%9B%BD%E5%A5%B3%E6%80%A7%E4%BC%A0%E7%BB%9F%E5%9D%90%E5%A7%BF%E6%9D%BE%E5%BC%9B%E5%BC%A0%E6%89%AC",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E4%B8%AD%E5%9B%BD%E5%A5%B3%E6%80%A7%E4%BC%A0%E7%BB%9F%E5%9D%90%E5%A7%BF%E6%9D%BE%E5%BC%9B%E5%BC%A0%E6%89%AC"
     },
     {
       "id": "微博-t3",
       "platform": "微博",
-      "cat": "影视",
-      "title": "白鹿现代剧也要杀夫",
-      "analysis": "盘点/避雷类比长解说更易完播和收藏。",
-      "idea": "原创思路：做「普通人观影」短评，真诚不装，3分钟讲清值不值得看。",
-      "real_url": "https://s.weibo.com/weibo?q=%23%E7%99%BD%E9%B9%BF%E7%8E%B0%E4%BB%A3%E5%89%A7%E4%B9%9F%E8%A6%81%E6%9D%80%E5%A4%AB%23",
-      "dy_link": "https://www.douyin.com/search/%E7%99%BD%E9%B9%BF%E7%8E%B0%E4%BB%A3%E5%89%A7%E4%B9%9F%E8%A6%81%E6%9D%80%E5%A4%AB",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E7%99%BD%E9%B9%BF%E7%8E%B0%E4%BB%A3%E5%89%A7%E4%B9%9F%E8%A6%81%E6%9D%80%E5%A4%AB"
-    },
-    {
-      "id": "微博-t4",
-      "platform": "微博",
       "cat": "唱歌碎片",
       "title": "素颜清唱",
-      "analysis": "才艺展示算法友好，情绪歌评论区活跃，对口型/变装可低成本蹭热点BGM。",
-      "idea": "原创思路：把唱歌当情绪出口而不是才艺表演，更真实。",
+      "analysis": "唱歌碎片穿插在vlog里，能低成本吸才艺粉又不抢主线。",
+      "idea": "原创思路：做「下班对镜唱」系列，素颜工服→精致变装反差，蹭热点BGM。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E7%B4%A0%E9%A2%9C%E6%B8%85%E5%94%B1",
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%B4%A0%E9%A2%9C%E6%B8%85%E5%94%B1"
     },
     {
-      "id": "微博-t5",
+      "id": "微博-t4",
       "platform": "微博",
       "cat": "美食",
       "title": "减脂餐便当",
-      "analysis": "一人食/快手菜切中独居打工人痛点，实用性强。",
-      "idea": "原创思路：做「打工人带饭」系列，快手+便宜，封面用成品图+时长。",
+      "analysis": "美食是全民赛道，完播和收藏极高，教程类易被反复观看。",
+      "idea": "原创思路：用「翻车vs成功」对比制造看点，真实感拉满。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E5%87%8F%E8%84%82%E9%A4%90%E4%BE%BF%E5%BD%93",
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%87%8F%E8%84%82%E9%A4%90%E4%BE%BF%E5%BD%93"
     },
     {
-      "id": "微博-t6",
+      "id": "微博-t5",
       "platform": "微博",
       "cat": "旅行",
       "title": "高铁2h目的地",
-      "analysis": "旅行内容治愈感和实用性强，攻略类收藏率高，长尾流量好。",
-      "idea": "原创思路：用拍照机位作为钩子，把旅行和你的拍照擅长结合。",
+      "analysis": "周边游/低成本路线在节假日前后搜索量暴涨。",
+      "idea": "原创思路：做「打工人周末逃离」系列，近郊+低成本，附详细路线。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E9%AB%98%E9%93%812h%E7%9B%AE%E7%9A%84%E5%9C%B0",
       "bz_link": "https://search.bilibili.com/all?keyword=%E9%AB%98%E9%93%812h%E7%9B%AE%E7%9A%84%E5%9C%B0"
     },
     {
-      "id": "微博-t7",
+      "id": "微博-t6",
       "platform": "微博",
       "cat": "搞笑",
       "title": "当代上班图鉴",
-      "analysis": "职场/社恐题材和打工人身份天然契合，共鸣强。",
-      "idea": "原创思路：做「前台视角的职场发疯」系列，夸张但真实。",
+      "analysis": "搞笑内容转发率最高，情绪释放需求大，易破圈。",
+      "idea": "原创思路：用分饰两角的短剧形式，降低表演门槛。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E5%BD%93%E4%BB%A3%E4%B8%8A%E7%8F%AD%E5%9B%BE%E9%89%B4",
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%BD%93%E4%BB%A3%E4%B8%8A%E7%8F%AD%E5%9B%BE%E9%89%B4"
     },
     {
-      "id": "微博-t8",
+      "id": "微博-t7",
       "platform": "微博",
       "cat": "影视",
       "title": "烂片避雷",
-      "analysis": "影视解说长尾流量大，争议话题易引发讨论。",
-      "idea": "原创思路：用情绪共鸣角度解读经典，而非剧透。",
+      "analysis": "盘点/避雷类比长解说更易完播和收藏。",
+      "idea": "原创思路：做「普通人观影」短评，真诚不装，3分钟讲清值不值得看。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E7%83%82%E7%89%87%E9%81%BF%E9%9B%B7",
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%83%82%E7%89%87%E9%81%BF%E9%9B%B7"
     },
     {
-      "id": "微博-t9",
+      "id": "微博-t8",
       "platform": "微博",
       "cat": "知识",
       "title": "法律常识",
-      "analysis": "短知识点比长科普更易完播，适合碎片时间。",
-      "idea": "原创思路：做「打工人必备常识」系列，实用短知识点。",
+      "analysis": "知识类内容收藏率高，自带学到东西价值，易被转发。",
+      "idea": "原创思路：用案例讲知识，比纯理论更易懂。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E6%B3%95%E5%BE%8B%E5%B8%B8%E8%AF%86",
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%B3%95%E5%BE%8B%E5%B8%B8%E8%AF%86"
     },
     {
-      "id": "微博-t10",
+      "id": "微博-t9",
       "platform": "微博",
       "cat": "健身",
       "title": "居家hiit",
-      "analysis": "健身教程可跟练，收藏率高，完播较好。",
-      "idea": "原创思路：用「不饿肚子/碎片时间」降低健身心理门槛。",
+      "analysis": "办公室/睡前场景降低跟练门槛，打工人受众精准。",
+      "idea": "原创思路：做「工位微运动」系列，零器械可练。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E5%B1%85%E5%AE%B6hiit",
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%B1%85%E5%AE%B6hiit"
     },
     {
-      "id": "微博-t11",
+      "id": "微博-t10",
       "platform": "微博",
       "cat": "数码",
       "title": "电脑清理",
-      "analysis": "女生向数码避坑内容供给少，蓝海明显。",
-      "idea": "原创思路：做「女生数码避坑」系列，说人话不讲参数。",
+      "analysis": "数码测评决策成本高，真实体验比参数更有用。",
+      "idea": "原创思路：把数码和你的拍照擅长结合，讲手机出片技巧。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E7%94%B5%E8%84%91%E6%B8%85%E7%90%86",
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%94%B5%E8%84%91%E6%B8%85%E7%90%86"
     },
     {
-      "id": "微博-t12",
+      "id": "微博-t11",
       "platform": "微博",
       "cat": "职场",
       "title": "汇报技巧",
-      "analysis": "职场内容共鸣强、易转发，实用技巧收藏率高。",
-      "idea": "原创思路：用前台视角讲职场，稀缺又有代入感。",
+      "analysis": "真实不鸡汤的职场经验在打工人中极受欢迎。",
+      "idea": "原创思路：做「普通打工人职场生存」系列，真实不鸡汤。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E6%B1%87%E6%8A%A5%E6%8A%80%E5%B7%A7",
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%B1%87%E6%8A%A5%E6%8A%80%E5%B7%A7"
     },
     {
-      "id": "微博-t13",
+      "id": "微博-t12",
       "platform": "微博",
       "cat": "穿搭",
       "title": "正肩T恤显瘦密码",
-      "analysis": "全身镜+原相机展示真实效果比精修图更可信，易获「求链接」，通勤场景可自然植入平价单品。",
-      "idea": "原创思路：做「宽肩/小个子专属」系列，每期一个痛点（领型/裤型/配色），封面用前后对比+大字痛点，结尾抛「想要链接打1」引互动。",
+      "analysis": "显瘦/避雷是穿搭永久流量池，肩宽、小个子标签差异化强，评论区互动和转化意愿都高。",
+      "idea": "原创思路：用「普通人也能抄」的角度，把热门穿搭改成你的身形版本，强调真实可穿而非硬凹造型。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E6%AD%A3%E8%82%A9T%E6%81%A4%E6%98%BE%E7%98%A6%E5%AF%86%E7%A0%81",
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%AD%A3%E8%82%A9T%E6%81%A4%E6%98%BE%E7%98%A6%E5%AF%86%E7%A0%81"
     },
     {
-      "id": "微博-t14",
+      "id": "微博-t13",
       "platform": "微博",
       "cat": "妆容",
       "title": "早八5分钟出门妆",
-      "analysis": "短平快+前后对比天然拉高完播，通勤/新手关键词降低门槛，评论区爱问色号链接。",
-      "idea": "原创思路：从「新手/敏感肌」视角切入，把复杂教程拆成傻瓜步骤，降低学习门槛。",
+      "analysis": "早八场景精准戳中打工人「想美但懒」的痛点，5分钟内完成降低收藏门槛。",
+      "idea": "原创思路：做「素颜→精致」系列，封面用前后对比，强调「普通人也能学会」，结尾留色号清单。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E6%97%A9%E5%85%AB5%E5%88%86%E9%92%9F%E5%87%BA%E9%97%A8%E5%A6%86",
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%97%A9%E5%85%AB5%E5%88%86%E9%92%9F%E5%87%BA%E9%97%A8%E5%A6%86"
     },
     {
-      "id": "微博-t15",
+      "id": "微博-t14",
       "platform": "微博",
       "cat": "护肤身体护理",
       "title": "换季爆皮急救",
-      "analysis": "换季泛红、干皮急救等关键词搜索量大，长尾流量稳定。",
-      "idea": "原创思路：做「混干微敏皮实测」系列，按早C晚A/保湿/防晒分集，用红叉绿勾视觉提升点击。",
+      "analysis": "敏感肌痛点精准、决策成本高，真实测评+平价方案收藏率高，适合建立信任基本盘。",
+      "idea": "原创思路：用「空瓶记/红黑榜」形式讲清楚哪些真有用，帮观众省决策成本。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E6%8D%A2%E5%AD%A3%E7%88%86%E7%9A%AE%E6%80%A5%E6%95%91",
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%8D%A2%E5%AD%A3%E7%88%86%E7%9A%AE%E6%80%A5%E6%95%91"
     },
     {
-      "id": "微博-t16",
+      "id": "微博-t15",
       "platform": "微博",
       "cat": "测评",
       "title": "热门面膜实测",
-      "analysis": "测评类天然带避坑/种草双重价值，真实翻车比吹捧更吸粉，评论区爱吵「到底值不值」。",
-      "idea": "原创思路：把「翻车」作为钩子，真实展示踩雷，建立「帮你试错」的人设。",
+      "analysis": "高决策成本品类（美妆/小家电）的实测内容收藏率明显高于纯种草。",
+      "idea": "原创思路：做「普通人视角测评」，不堆参数，只说值不值得买+适合谁，结尾给明确结论。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E7%83%AD%E9%97%A8%E9%9D%A2%E8%86%9C%E5%AE%9E%E6%B5%8B",
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%83%AD%E9%97%A8%E9%9D%A2%E8%86%9C%E5%AE%9E%E6%B5%8B"
     },
     {
-      "id": "微博-t17",
+      "id": "微博-t16",
       "platform": "微博",
       "cat": "好物",
       "title": "百元内好物清单",
-      "analysis": "场景化好物（工位/通勤包）比泛泛清单更有代入感和转化力。",
-      "idea": "原创思路：做「行政前台工位好物」系列，真实展示桌面上每天用的，强调性价比。",
+      "analysis": "好物分享是 evergreen 流量，低客单价+高实用易被收藏转发，抄作业心理强。",
+      "idea": "原创思路：按场景而非品类组织（通勤/睡前/办公），让观众直接对号入座。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E7%99%BE%E5%85%83%E5%86%85%E5%A5%BD%E7%89%A9%E6%B8%85%E5%8D%95",
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%99%BE%E5%85%83%E5%86%85%E5%A5%BD%E7%89%A9%E6%B8%85%E5%8D%95"
     },
     {
-      "id": "微博-t18",
+      "id": "微博-t17",
       "platform": "微博",
       "cat": "鞋履配饰",
       "title": "通勤耳环推荐",
-      "analysis": "鞋包配饰决策成本高、复购多，真实试穿+避雷内容收藏率极高。",
-      "idea": "原创思路：把配饰当「穿搭的最后一平米」来讲，提升整体造型感。",
+      "analysis": "上脚/上身对比比文字描述更有说服力，评论区高频问链接。",
+      "idea": "原创思路：做「宽肩/小个子专属鞋包」系列，每期一个痛点，封面用上脚对比。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E9%80%9A%E5%8B%A4%E8%80%B3%E7%8E%AF%E6%8E%A8%E8%8D%90",
       "bz_link": "https://search.bilibili.com/all?keyword=%E9%80%9A%E5%8B%A4%E8%80%B3%E7%8E%AF%E6%8E%A8%E8%8D%90"
     },
     {
-      "id": "微博-t19",
+      "id": "微博-t18",
       "platform": "微博",
       "cat": "网购避坑",
       "title": "网红同款翻车",
-      "analysis": "维权/退货实操类内容实用性强，易被收藏当工具用。",
-      "idea": "原创思路：做「打工人网购避坑」系列，用真实翻车案例，结尾给防坑 checklist。",
+      "analysis": "避坑类情绪价值高、易转发，踩过的坑比种草更让人记住，评论区爱补充。",
+      "idea": "原创思路：以「帮姐妹省钱」的立场输出，建立靠谱人设。",
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E7%BD%91%E7%BA%A2%E5%90%8C%E6%AC%BE%E7%BF%BB%E8%BD%A6",
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%BD%91%E7%BA%A2%E5%90%8C%E6%AC%BE%E7%BF%BB%E8%BD%A6"
     },
     {
+      "id": "微博-t19",
+      "platform": "微博",
+      "cat": "情绪共鸣",
+      "title": "努力但平凡的我",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E5%8A%AA%E5%8A%9B%E4%BD%86%E5%B9%B3%E5%87%A1%E7%9A%84%E6%88%91",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%8A%AA%E5%8A%9B%E4%BD%86%E5%B9%B3%E5%87%A1%E7%9A%84%E6%88%91"
+    },
+    {
       "id": "B站-t0",
       "platform": "B站",
-      "cat": "影视",
-      "title": "杀人经历写进小说，意外成为名作家？现实比剧更离奇！万字解析《悬案：旅馆案》下",
-      "analysis": "影视解说长尾流量大，争议话题易引发讨论。",
-      "idea": "原创思路：用情绪共鸣角度解读经典，而非剧透。",
-      "real_url": "https://www.bilibili.com/video/BV1Hrp46zEWf",
-      "dy_link": "https://www.douyin.com/search/%E6%9D%80%E4%BA%BA%E7%BB%8F%E5%8E%86%E5%86%99%E8%BF%9B%E5%B0%8F%E8%AF%B4%EF%BC%8C%E6%84%8F%E5%A4%96%E6%88%90%E4%B8%BA%E5%90%8D%E4%BD%9C%E5%AE%B6%EF%BC%9F%E7%8E%B0%E5%AE%9E%E6%AF%94%E5%89%A7%E6%9B%B4%E7%A6%BB%E5%A5%87%EF%BC%81%E4%B8%87%E5%AD%97%E8%A7%A3%E6%9E%90%E3%80%8A%E6%82%AC%E6%A1%88%EF%BC%9A%E6%97%85%E9%A6%86%E6%A1%88%E3%80%8B%E4%B8%8B",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E6%9D%80%E4%BA%BA%E7%BB%8F%E5%8E%86%E5%86%99%E8%BF%9B%E5%B0%8F%E8%AF%B4%EF%BC%8C%E6%84%8F%E5%A4%96%E6%88%90%E4%B8%BA%E5%90%8D%E4%BD%9C%E5%AE%B6%EF%BC%9F%E7%8E%B0%E5%AE%9E%E6%AF%94%E5%89%A7%E6%9B%B4%E7%A6%BB%E5%A5%87%EF%BC%81%E4%B8%87%E5%AD%97%E8%A7%A3%E6%9E%90%E3%80%8A%E6%82%AC%E6%A1%88%EF%BC%9A%E6%97%85%E9%A6%86%E6%A1%88%E3%80%8B%E4%B8%8B"
+      "cat": "情绪共鸣",
+      "title": "10w？100w？1000w？普通人多少战备才打得过职业哥？",
+      "analysis": "情绪共鸣是转发发动机，普通人的真实瞬间比精致人设更戳人，完播和转发双高。",
+      "idea": "原创思路：用 vlog 纪实而非说教，让观众在你身上看到自己。",
+      "real_url": "https://www.bilibili.com/video/BV1pTpg6ZEpm",
+      "dy_link": "https://www.douyin.com/search/10w%EF%BC%9F100w%EF%BC%9F1000w%EF%BC%9F%E6%99%AE%E9%80%9A%E4%BA%BA%E5%A4%9A%E5%B0%91%E6%88%98%E5%A4%87%E6%89%8D%E6%89%93%E5%BE%97%E8%BF%87%E8%81%8C%E4%B8%9A%E5%93%A5%EF%BC%9F",
+      "bz_link": "https://search.bilibili.com/all?keyword=10w%EF%BC%9F100w%EF%BC%9F1000w%EF%BC%9F%E6%99%AE%E9%80%9A%E4%BA%BA%E5%A4%9A%E5%B0%91%E6%88%98%E5%A4%87%E6%89%8D%E6%89%93%E5%BE%97%E8%BF%87%E8%81%8C%E4%B8%9A%E5%93%A5%EF%BC%9F"
     },
     {
       "id": "B站-t1",
       "platform": "B站",
-      "cat": "鞋履配饰",
-      "title": "内蒙古包头一婚礼主持人发现新人买的礼炮里塞满纸钱和骂人纸条，婚礼主持人：发现及时，没使用",
-      "analysis": "上脚/上身对比比文字描述更有说服力，评论区高频问链接。",
-      "idea": "原创思路：做「宽肩/小个子专属鞋包」系列，每期一个痛点，封面用上脚对比。",
-      "real_url": "https://www.bilibili.com/video/BV1nUpb6kEUK",
-      "dy_link": "https://www.douyin.com/search/%E5%86%85%E8%92%99%E5%8F%A4%E5%8C%85%E5%A4%B4%E4%B8%80%E5%A9%9A%E7%A4%BC%E4%B8%BB%E6%8C%81%E4%BA%BA%E5%8F%91%E7%8E%B0%E6%96%B0%E4%BA%BA%E4%B9%B0%E7%9A%84%E7%A4%BC%E7%82%AE%E9%87%8C%E5%A1%9E%E6%BB%A1%E7%BA%B8%E9%92%B1%E5%92%8C%E9%AA%82%E4%BA%BA%E7%BA%B8%E6%9D%A1%EF%BC%8C%E5%A9%9A%E7%A4%BC%E4%B8%BB%E6%8C%81%E4%BA%BA%EF%BC%9A%E5%8F%91%E7%8E%B0%E5%8F%8A%E6%97%B6%EF%BC%8C%E6%B2%A1%E4%BD%BF%E7%94%A8",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E5%86%85%E8%92%99%E5%8F%A4%E5%8C%85%E5%A4%B4%E4%B8%80%E5%A9%9A%E7%A4%BC%E4%B8%BB%E6%8C%81%E4%BA%BA%E5%8F%91%E7%8E%B0%E6%96%B0%E4%BA%BA%E4%B9%B0%E7%9A%84%E7%A4%BC%E7%82%AE%E9%87%8C%E5%A1%9E%E6%BB%A1%E7%BA%B8%E9%92%B1%E5%92%8C%E9%AA%82%E4%BA%BA%E7%BA%B8%E6%9D%A1%EF%BC%8C%E5%A9%9A%E7%A4%BC%E4%B8%BB%E6%8C%81%E4%BA%BA%EF%BC%9A%E5%8F%91%E7%8E%B0%E5%8F%8A%E6%97%B6%EF%BC%8C%E6%B2%A1%E4%BD%BF%E7%94%A8"
-    },
-    {
-      "id": "B站-t2",
-      "platform": "B站",
       "cat": "vlog日常",
       "title": "【雀说】雀巢&鲸尾 | 自卑在哪一天消失",
-      "analysis": "vlog陪伴感强，能自然串联化妆、唱歌、穿搭多个垂类，粉丝粘性高。",
-      "idea": "原创思路：用「固定栏目+随机碎片」结构，降低日更压力。",
+      "analysis": "真实记录比精致摆拍更易引发「我也能拍」的跟拍欲。",
+      "idea": "原创思路：做「前台的一天」系列，真实记录+碎片才艺，建立立体人设。",
       "real_url": "https://www.bilibili.com/video/BV1Rgpi6DEhX",
       "dy_link": "https://www.douyin.com/search/%E3%80%90%E9%9B%80%E8%AF%B4%E3%80%91%E9%9B%80%E5%B7%A2%26%E9%B2%B8%E5%B0%BE%20%7C%20%E8%87%AA%E5%8D%91%E5%9C%A8%E5%93%AA%E4%B8%80%E5%A4%A9%E6%B6%88%E5%A4%B1",
       "bz_link": "https://search.bilibili.com/all?keyword=%E3%80%90%E9%9B%80%E8%AF%B4%E3%80%91%E9%9B%80%E5%B7%A2%26%E9%B2%B8%E5%B0%BE%20%7C%20%E8%87%AA%E5%8D%91%E5%9C%A8%E5%93%AA%E4%B8%80%E5%A4%A9%E6%B6%88%E5%A4%B1"
     },
     {
-      "id": "B站-t3",
-      "platform": "B站",
-      "cat": "影视",
-      "title": "【纪录片】中国救护2 04 心是一座城",
-      "analysis": "盘点/避雷类比长解说更易完播和收藏。",
-      "idea": "原创思路：做「普通人观影」短评，真诚不装，3分钟讲清值不值得看。",
-      "real_url": "https://www.bilibili.com/video/BV1zKp46YEMp",
-      "dy_link": "https://www.douyin.com/search/%E3%80%90%E7%BA%AA%E5%BD%95%E7%89%87%E3%80%91%E4%B8%AD%E5%9B%BD%E6%95%91%E6%8A%A42%2004%20%E5%BF%83%E6%98%AF%E4%B8%80%E5%BA%A7%E5%9F%8E",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E3%80%90%E7%BA%AA%E5%BD%95%E7%89%87%E3%80%91%E4%B8%AD%E5%9B%BD%E6%95%91%E6%8A%A42%2004%20%E5%BF%83%E6%98%AF%E4%B8%80%E5%BA%A7%E5%9F%8E"
-    },
-    {
-      "id": "B站-t4",
-      "platform": "B站",
-      "cat": "鞋履配饰",
-      "title": "“豆包问诊改问千问”是恶搞“请AI当判官”是日常，医患之间信任的沟壑不是AI挖的 AI也填不平（评论员：王珍珍 编辑：刘嘉欣）",
-      "analysis": "鞋包配饰决策成本高、复购多，真实试穿+避雷内容收藏率极高。",
-      "idea": "原创思路：把配饰当「穿搭的最后一平米」来讲，提升整体造型感。",
-      "real_url": "https://www.bilibili.com/video/BV13FHQ6DEV4",
-      "dy_link": "https://www.douyin.com/search/%E2%80%9C%E8%B1%86%E5%8C%85%E9%97%AE%E8%AF%8A%E6%94%B9%E9%97%AE%E5%8D%83%E9%97%AE%E2%80%9D%E6%98%AF%E6%81%B6%E6%90%9E%E2%80%9C%E8%AF%B7AI%E5%BD%93%E5%88%A4%E5%AE%98%E2%80%9D%E6%98%AF%E6%97%A5%E5%B8%B8%EF%BC%8C%E5%8C%BB%E6%82%A3%E4%B9%8B%E9%97%B4%E4%BF%A1%E4%BB%BB%E7%9A%84%E6%B2%9F%E5%A3%91%E4%B8%8D%E6%98%AFAI%E6%8C%96%E7%9A%84%20AI%E4%B9%9F%E5%A1%AB%E4%B8%8D%E5%B9%B3%EF%BC%88%E8%AF%84%E8%AE%BA%E5%91%98%EF%BC%9A%E7%8E%8B%E7%8F%8D%E7%8F%8D%20%E7%BC%96%E8%BE%91%EF%BC%9A%E5%88%98%E5%98%89%E6%AC%A3%EF%BC%89",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E2%80%9C%E8%B1%86%E5%8C%85%E9%97%AE%E8%AF%8A%E6%94%B9%E9%97%AE%E5%8D%83%E9%97%AE%E2%80%9D%E6%98%AF%E6%81%B6%E6%90%9E%E2%80%9C%E8%AF%B7AI%E5%BD%93%E5%88%A4%E5%AE%98%E2%80%9D%E6%98%AF%E6%97%A5%E5%B8%B8%EF%BC%8C%E5%8C%BB%E6%82%A3%E4%B9%8B%E9%97%B4%E4%BF%A1%E4%BB%BB%E7%9A%84%E6%B2%9F%E5%A3%91%E4%B8%8D%E6%98%AFAI%E6%8C%96%E7%9A%84%20AI%E4%B9%9F%E5%A1%AB%E4%B8%8D%E5%B9%B3%EF%BC%88%E8%AF%84%E8%AE%BA%E5%91%98%EF%BC%9A%E7%8E%8B%E7%8F%8D%E7%8F%8D%20%E7%BC%96%E8%BE%91%EF%BC%9A%E5%88%98%E5%98%89%E6%AC%A3%EF%BC%89"
-    },
-    {
-      "id": "B站-t5",
+      "id": "B站-t2",
       "platform": "B站",
       "cat": "唱歌碎片",
-      "title": "老歌还是得老东西来唱『深夜之门/Stay With Me』翻唱【bilibili次元干杯】",
-      "analysis": "唱歌碎片穿插在vlog里，能低成本吸才艺粉又不抢主线。",
-      "idea": "原创思路：做「下班对镜唱」系列，素颜工服→精致变装反差，蹭热点BGM。",
-      "real_url": "https://www.bilibili.com/video/BV1FUpb6kERs",
-      "dy_link": "https://www.douyin.com/search/%E8%80%81%E6%AD%8C%E8%BF%98%E6%98%AF%E5%BE%97%E8%80%81%E4%B8%9C%E8%A5%BF%E6%9D%A5%E5%94%B1%E3%80%8E%E6%B7%B1%E5%A4%9C%E4%B9%8B%E9%97%A8/Stay%20With%20Me%E3%80%8F%E7%BF%BB%E5%94%B1%E3%80%90bilibili%E6%AC%A1%E5%85%83%E5%B9%B2%E6%9D%AF%E3%80%91",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E8%80%81%E6%AD%8C%E8%BF%98%E6%98%AF%E5%BE%97%E8%80%81%E4%B8%9C%E8%A5%BF%E6%9D%A5%E5%94%B1%E3%80%8E%E6%B7%B1%E5%A4%9C%E4%B9%8B%E9%97%A8/Stay%20With%20Me%E3%80%8F%E7%BF%BB%E5%94%B1%E3%80%90bilibili%E6%AC%A1%E5%85%83%E5%B9%B2%E6%9D%AF%E3%80%91"
-    },
-    {
-      "id": "B站-t6",
-      "platform": "B站",
-      "cat": "唱歌碎片",
-      "title": "deepseek 翻唱《人是猫》完整版，大肥鱼觉得人和猫一样可爱,所以人是猫",
+      "title": "看演唱会送好莱坞？华晨宇火星演唱会2.0全揭秘！",
       "analysis": "才艺展示算法友好，情绪歌评论区活跃，对口型/变装可低成本蹭热点BGM。",
       "idea": "原创思路：把唱歌当情绪出口而不是才艺表演，更真实。",
-      "real_url": "https://www.bilibili.com/video/BV1XXHD6sEe7",
-      "dy_link": "https://www.douyin.com/search/deepseek%20%E7%BF%BB%E5%94%B1%E3%80%8A%E4%BA%BA%E6%98%AF%E7%8C%AB%E3%80%8B%E5%AE%8C%E6%95%B4%E7%89%88%EF%BC%8C%E5%A4%A7%E8%82%A5%E9%B1%BC%E8%A7%89%E5%BE%97%E4%BA%BA%E5%92%8C%E7%8C%AB%E4%B8%80%E6%A0%B7%E5%8F%AF%E7%88%B1%2C%E6%89%80%E4%BB%A5%E4%BA%BA%E6%98%AF%E7%8C%AB",
-      "bz_link": "https://search.bilibili.com/all?keyword=deepseek%20%E7%BF%BB%E5%94%B1%E3%80%8A%E4%BA%BA%E6%98%AF%E7%8C%AB%E3%80%8B%E5%AE%8C%E6%95%B4%E7%89%88%EF%BC%8C%E5%A4%A7%E8%82%A5%E9%B1%BC%E8%A7%89%E5%BE%97%E4%BA%BA%E5%92%8C%E7%8C%AB%E4%B8%80%E6%A0%B7%E5%8F%AF%E7%88%B1%2C%E6%89%80%E4%BB%A5%E4%BA%BA%E6%98%AF%E7%8C%AB"
+      "real_url": "https://www.bilibili.com/video/BV1RKp367EuB",
+      "dy_link": "https://www.douyin.com/search/%E7%9C%8B%E6%BC%94%E5%94%B1%E4%BC%9A%E9%80%81%E5%A5%BD%E8%8E%B1%E5%9D%9E%EF%BC%9F%E5%8D%8E%E6%99%A8%E5%AE%87%E7%81%AB%E6%98%9F%E6%BC%94%E5%94%B1%E4%BC%9A2.0%E5%85%A8%E6%8F%AD%E7%A7%98%EF%BC%81",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E7%9C%8B%E6%BC%94%E5%94%B1%E4%BC%9A%E9%80%81%E5%A5%BD%E8%8E%B1%E5%9D%9E%EF%BC%9F%E5%8D%8E%E6%99%A8%E5%AE%87%E7%81%AB%E6%98%9F%E6%BC%94%E5%94%B1%E4%BC%9A2.0%E5%85%A8%E6%8F%AD%E7%A7%98%EF%BC%81"
     },
     {
-      "id": "B站-t7",
-      "platform": "B站",
-      "cat": "鞋履配饰",
-      "title": "最后离开教室的人，获得1000包干脆面！",
-      "analysis": "上脚/上身对比比文字描述更有说服力，评论区高频问链接。",
-      "idea": "原创思路：做「宽肩/小个子专属鞋包」系列，每期一个痛点，封面用上脚对比。",
-      "real_url": "https://www.bilibili.com/video/BV1gYpY6uEfy",
-      "dy_link": "https://www.douyin.com/search/%E6%9C%80%E5%90%8E%E7%A6%BB%E5%BC%80%E6%95%99%E5%AE%A4%E7%9A%84%E4%BA%BA%EF%BC%8C%E8%8E%B7%E5%BE%971000%E5%8C%85%E5%B9%B2%E8%84%86%E9%9D%A2%EF%BC%81",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E6%9C%80%E5%90%8E%E7%A6%BB%E5%BC%80%E6%95%99%E5%AE%A4%E7%9A%84%E4%BA%BA%EF%BC%8C%E8%8E%B7%E5%BE%971000%E5%8C%85%E5%B9%B2%E8%84%86%E9%9D%A2%EF%BC%81"
-    },
-    {
-      "id": "B站-t8",
-      "platform": "B站",
-      "cat": "搞笑",
-      "title": "从夯到拉盘点乾隆爆火全网名场面",
-      "analysis": "搞笑内容转发率最高，情绪释放需求大，易破圈。",
-      "idea": "原创思路：用分饰两角的短剧形式，降低表演门槛。",
-      "real_url": "https://www.bilibili.com/video/BV1Qops6SEWB",
-      "dy_link": "https://www.douyin.com/search/%E4%BB%8E%E5%A4%AF%E5%88%B0%E6%8B%89%E7%9B%98%E7%82%B9%E4%B9%BE%E9%9A%86%E7%88%86%E7%81%AB%E5%85%A8%E7%BD%91%E5%90%8D%E5%9C%BA%E9%9D%A2",
-      "bz_link": "https://search.bilibili.com/all?keyword=%E4%BB%8E%E5%A4%AF%E5%88%B0%E6%8B%89%E7%9B%98%E7%82%B9%E4%B9%BE%E9%9A%86%E7%88%86%E7%81%AB%E5%85%A8%E7%BD%91%E5%90%8D%E5%9C%BA%E9%9D%A2"
-    },
-    {
-      "id": "B站-t9",
+      "id": "B站-t3",
       "platform": "B站",
       "cat": "影视",
       "title": "必看高分电影",
@@ -993,7 +927,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%BF%85%E7%9C%8B%E9%AB%98%E5%88%86%E7%94%B5%E5%BD%B1"
     },
     {
-      "id": "B站-t10",
+      "id": "B站-t4",
       "platform": "B站",
       "cat": "知识",
       "title": "冷知识科普",
@@ -1004,7 +938,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%86%B7%E7%9F%A5%E8%AF%86%E7%A7%91%E6%99%AE"
     },
     {
-      "id": "B站-t11",
+      "id": "B站-t5",
       "platform": "B站",
       "cat": "健身",
       "title": "小基数塑形",
@@ -1015,7 +949,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%9F%BA%E6%95%B0%E5%A1%91%E5%BD%A2"
     },
     {
-      "id": "B站-t12",
+      "id": "B站-t6",
       "platform": "B站",
       "cat": "数码",
       "title": "电脑清理",
@@ -1026,7 +960,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E7%94%B5%E8%84%91%E6%B8%85%E7%90%86"
     },
     {
-      "id": "B站-t13",
+      "id": "B站-t7",
       "platform": "B站",
       "cat": "职场",
       "title": "面试话术",
@@ -1037,7 +971,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E9%9D%A2%E8%AF%95%E8%AF%9D%E6%9C%AF"
     },
     {
-      "id": "B站-t14",
+      "id": "B站-t8",
       "platform": "B站",
       "cat": "穿搭",
       "title": "宽肩女生避雷领型",
@@ -1048,7 +982,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%AE%BD%E8%82%A9%E5%A5%B3%E7%94%9F%E9%81%BF%E9%9B%B7%E9%A2%86%E5%9E%8B"
     },
     {
-      "id": "B站-t15",
+      "id": "B站-t9",
       "platform": "B站",
       "cat": "妆容",
       "title": "早八5分钟出门妆",
@@ -1059,7 +993,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%97%A9%E5%85%AB5%E5%88%86%E9%92%9F%E5%87%BA%E9%97%A8%E5%A6%86"
     },
     {
-      "id": "B站-t16",
+      "id": "B站-t10",
       "platform": "B站",
       "cat": "护肤身体护理",
       "title": "敏感肌平价护肤清单",
@@ -1070,7 +1004,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%95%8F%E6%84%9F%E8%82%8C%E5%B9%B3%E4%BB%B7%E6%8A%A4%E8%82%A4%E6%B8%85%E5%8D%95"
     },
     {
-      "id": "B站-t17",
+      "id": "B站-t11",
       "platform": "B站",
       "cat": "测评",
       "title": "小家电红黑榜",
@@ -1081,7 +1015,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%B0%8F%E5%AE%B6%E7%94%B5%E7%BA%A2%E9%BB%91%E6%A6%9C"
     },
     {
-      "id": "B站-t18",
+      "id": "B站-t12",
       "platform": "B站",
       "cat": "好物",
       "title": "提升幸福感小物",
@@ -1092,7 +1026,7 @@
       "bz_link": "https://search.bilibili.com/all?keyword=%E6%8F%90%E5%8D%87%E5%B9%B8%E7%A6%8F%E6%84%9F%E5%B0%8F%E7%89%A9"
     },
     {
-      "id": "B站-t19",
+      "id": "B站-t13",
       "platform": "B站",
       "cat": "鞋履配饰",
       "title": "平价项链红黑榜",
@@ -1101,6 +1035,72 @@
       "real_url": "",
       "dy_link": "https://www.douyin.com/search/%E5%B9%B3%E4%BB%B7%E9%A1%B9%E9%93%BE%E7%BA%A2%E9%BB%91%E6%A6%9C",
       "bz_link": "https://search.bilibili.com/all?keyword=%E5%B9%B3%E4%BB%B7%E9%A1%B9%E9%93%BE%E7%BA%A2%E9%BB%91%E6%A6%9C"
+    },
+    {
+      "id": "B站-t14",
+      "platform": "B站",
+      "cat": "网购避坑",
+      "title": "凑单陷阱",
+      "analysis": "避坑类情绪价值高、易转发，踩过的坑比种草更让人记住，评论区爱补充。",
+      "idea": "原创思路：以「帮姐妹省钱」的立场输出，建立靠谱人设。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E5%87%91%E5%8D%95%E9%99%B7%E9%98%B1",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E5%87%91%E5%8D%95%E9%99%B7%E9%98%B1"
+    },
+    {
+      "id": "B站-t15",
+      "platform": "B站",
+      "cat": "情绪共鸣",
+      "title": "普通女生的20岁",
+      "analysis": "治愈系内容在晚间流量高峰表现尤其好，评论区易形成陪伴感。",
+      "idea": "原创思路：做「行政前台的情绪日记」系列，真实记录打工日常，结尾一句治愈金句。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E7%9A%8420%E5%B2%81",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%99%AE%E9%80%9A%E5%A5%B3%E7%94%9F%E7%9A%8420%E5%B2%81"
+    },
+    {
+      "id": "B站-t16",
+      "platform": "B站",
+      "cat": "女性成长",
+      "title": "读书变现",
+      "analysis": "女性成长是长线涨粉赛道，收藏率高、易被转发，自我提升心理强。",
+      "idea": "原创思路：用「我也在学」的平等视角，而非导师说教。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E8%AF%BB%E4%B9%A6%E5%8F%98%E7%8E%B0",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E8%AF%BB%E4%B9%A6%E5%8F%98%E7%8E%B0"
+    },
+    {
+      "id": "B站-t17",
+      "platform": "B站",
+      "cat": "审美建立",
+      "title": "拍照构图审美",
+      "analysis": "对比图+讲解的形式比纯文字更易理解和传播。",
+      "idea": "原创思路：做「普通女生审美课」系列，用对比图讲清楚为什么好看。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E6%8B%8D%E7%85%A7%E6%9E%84%E5%9B%BE%E5%AE%A1%E7%BE%8E",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%8B%8D%E7%85%A7%E6%9E%84%E5%9B%BE%E5%AE%A1%E7%BE%8E"
+    },
+    {
+      "id": "B站-t18",
+      "platform": "B站",
+      "cat": "消费观",
+      "title": "穷但精致怎么花",
+      "analysis": "消费观内容易引发讨论和站队，评论区活跃，适合带出好物转化。",
+      "idea": "原创思路：用「精致穷」的真实账本，替代说教式理财。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E7%A9%B7%E4%BD%86%E7%B2%BE%E8%87%B4%E6%80%8E%E4%B9%88%E8%8A%B1",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E7%A9%B7%E4%BD%86%E7%B2%BE%E8%87%B4%E6%80%8E%E4%B9%88%E8%8A%B1"
+    },
+    {
+      "id": "B站-t19",
+      "platform": "B站",
+      "cat": "vlog日常",
+      "title": "打工人的24h",
+      "analysis": "真实记录比精致摆拍更易引发「我也能拍」的跟拍欲。",
+      "idea": "原创思路：做「前台的一天」系列，真实记录+碎片才艺，建立立体人设。",
+      "real_url": "",
+      "dy_link": "https://www.douyin.com/search/%E6%89%93%E5%B7%A5%E4%BA%BA%E7%9A%8424h",
+      "bz_link": "https://search.bilibili.com/all?keyword=%E6%89%93%E5%B7%A5%E4%BA%BA%E7%9A%8424h"
     }
   ],
   "reposts": [
@@ -2407,410 +2407,473 @@
   ],
   "news": [
     {
-      "title": "（文化中国行·校馆弦歌）闽南师范大学图书馆：“两岸一家亲”的证据库",
-      "time": "Sun, 11 Oct 2026 10:46:07",
-      "summary": "中新网漳州10月11日电 题：闽南师范大学图书馆：“两岸一家亲”的证据库",
-      "url": "https://www.chinanews.com.cn/gn/2026/10-11/10710912.shtml",
+      "title": "“外卖诗人”王计兵：普通人的笔，也能写下生活的重量",
+      "time": "Sun, 11 Oct 2026 21:59:54",
+      "summary": "中新网南京10月11日电 题：“外卖诗人”王计兵：普通人的笔，也能写下生活的重量",
+      "url": "https://www.chinanews.com.cn/cul/2026/10-11/10711136.shtml",
       "source": "中国新闻网",
       "cat": "民生社会"
     },
     {
-      "title": "“渔火猎风——黑龙江省民间工艺皮艺作品展”开幕",
-      "time": "Sun, 11 Oct 2026 10:45:57",
-      "summary": "中新网哈尔滨10月11日电 (记者 刘锡菊)“渔火猎风——黑龙江省民间工艺皮艺作品展”10日在黑龙江省文联臻艺艺术馆开幕，110件(组)作品集中亮相，充分展现了皮艺工艺深厚的文化底蕴与蓬勃的发展活力。",
-      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10710911.shtml",
+      "title": "东西问丨专访陆克文：我不认为自己是“中国通”",
+      "time": "Sun, 11 Oct 2026 21:50:41",
+      "summary": "中新社北京10月11日电 题：专访陆克文：我不认为自己是“中国通”",
+      "url": "https://www.chinanews.com.cn/dxw/2026/10-11/10711135.shtml",
       "source": "中国新闻网",
       "cat": "民生社会"
     },
     {
-      "title": "（乡村行·看振兴）“淘金客”后代归巢 吉林百年金矿焕新",
-      "time": "Sun, 11 Oct 2026 10:45:11",
-      "summary": "中新网吉林10月11日电 题：“淘金客”后代归巢 吉林百年金矿焕新",
-      "url": "https://www.chinanews.com.cn/cj/2026/10-11/10710913.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "中国首个南亚热带人工林全要素碳通量综合监测应用场景建成",
-      "time": "Sun, 11 Oct 2026 10:44:59",
-      "summary": "中新网南宁10月11日电(韦佳秀)广西壮族自治区市场监督管理局10日介绍，日前，广西壮族自治区计量检测研究院联合中国计量科学研究院、广西科学院，依托中国林业科学研究院热带林业实验中心，在凭祥市建成中国首个面向南亚热带人工林的“天—空—塔—地",
-      "url": "https://www.chinanews.com.cn/aseaninfo/2026/10-11/10710914.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "CBA季前赛汕头站：广州队战胜广东队",
-      "time": "Sun, 11 Oct 2026 10:43:57",
-      "summary": "中新网汕头10月11日电(记者 张璐)2026-2027赛季CBA季前赛汕头站10日晚在汕头举行，广州智都集团队(简称“广州队”)以86:82战胜广东东阳光队(简称“广东队”)。",
-      "url": "https://www.chinanews.com.cn/ty/2026/10-11/10710915.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "广东33名运动员出征第五届亚残运会",
-      "time": "Sun, 11 Oct 2026 10:43:51",
-      "summary": "中新网广州10月11日电 (记者 张璐)记者11日从广东省残疾人联合会获悉，第五届亚洲残疾人运动会中国体育代表团成立大会近日召开。中国体育代表团总计500人，其中运动员312人(含男运动员146人、女运动员166人)。广东入选本届亚残运会中",
-      "url": "https://www.chinanews.com.cn/ty/2026/10-11/10710916.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "中国AI，开始为算力算账",
-      "time": "Sun, 11 Oct 2026 10:42:15",
-      "summary": "本文来自微信公众号： 奇帆商业 ，编辑：陆垚，作者：小钱10月8日，《金融时报》把目光投向了内蒙古乌兰察布。这座距离北京数百公里的北方城市，正在成为中国数据中心建设最密集的地区之一。当地已有89个签约数据中心项目，阿里、华为、快手以及第三方",
-      "url": "https://www.huxiu.com/article/4896581.html?f=rss",
+      "title": "贾樟柯开始看红果，AI很热闹、普通人只想“耍起”",
+      "time": "Sun, 11 Oct 2026 21:32:26",
+      "summary": "本文来自微信公众号： 师天浩观察 ，作者：辰聪8月6日晚上，贾樟柯发了条微博，说最近在看红果。（图片来源：微博）这条微博被转了两万多次。一个用长镜头拍《三峡好人》的导演，追起三秒一个冲突的免费短剧，评论区没人觉得违和。底下一半人在说，自己爸",
+      "url": "https://www.huxiu.com/article/4896639.html?f=rss",
       "source": "虎嗅",
       "cat": "科技前沿"
     },
     {
-      "title": "安徽芜湖：金秋十月稻飘香 智能农机抢农时保归仓",
-      "time": "Sun, 11 Oct 2026 10:39:59",
-      "summary": "图为水稻收割现场。(无人机照片)章敏 摄 图为水稻收割现场。(无人机照片)章敏 摄 图为水稻收割现场。(无人机照片)章敏 摄",
-      "url": "https://www.chinanews.com.cn/tp/2026/10-11/10710902.shtml",
-      "source": "中国新闻网",
-      "cat": "科技前沿"
-    },
-    {
-      "title": "三大原料暴涨逼退利润，60余家轮胎厂集体提价",
-      "time": "Sun, 11 Oct 2026 10:23:13",
-      "summary": "本文来自微信公众号： 经观传媒 ，作者：霍婷婷天然橡胶、合成橡胶、炭黑三者价格上涨叠加，轮胎企业的成本压力显而易见，这也是60余家企业集体发函、70多份涨价函覆盖全品类的根本原因。天然橡胶、炭黑、合成橡胶等轮胎核心原材料价格在2026年出现",
-      "url": "https://www.huxiu.com/article/4896579.html?f=rss",
-      "source": "虎嗅",
-      "cat": "财经动态"
-    },
-    {
-      "title": "从“失控入侵”到“擅自行动”，人工智能为何频频“闯祸”？",
-      "time": "Sun, 11 Oct 2026 10:20:34",
-      "summary": "今年以来，人工智能加速从“能对话”走向“能办事”，能替用户订票、管理手机、操作软件的智能体加快落地。与此同时，AI自主行动引发的安全事件在世界范围内频频发生。从大模型失控入侵开源平台，到AI助理擅自行动，人工智能风险正从“说错话”升级为“做",
-      "url": "https://www.chinanews.com.cn/cj/2026/10-11/10710910.shtml",
-      "source": "中国新闻网",
-      "cat": "科技前沿"
-    },
-    {
-      "title": "多地雅思考试突发取消 退费重考如何安排？最新解答→",
-      "time": "Sun, 11 Oct 2026 10:20:26",
-      "summary": "对于不少打算出国留学、海外就业的朋友来说，雅思考试作为一项衡量英语语言水平的考试，就像一张“语言通行证”。而昨天(10日)，由英国文化教育协会主办的雅思考试场次却在全国大范围取消：部分考生还在候考，就收到取消短信；也有考生考完听力，中途接到",
-      "url": "https://www.chinanews.com.cn/edu/2026/10-11/10710909.shtml",
+      "title": "广州天气晴好 游客登鸿鹄楼观景",
+      "time": "Sun, 11 Oct 2026 21:24:00",
+      "summary": "10月11日，广州市天气晴好，游客登上鸿鹄楼观赏广州城景。中新社记者 陈楚红 摄 10月11日，广州市天气晴好，鸿鹄楼吸引游客游玩参观。中新社记者 陈楚红 摄 10月11日，广州市天气晴好，游客登上鸿鹄楼观赏湖光山色和广州城景。中新社记者 ",
+      "url": "https://www.chinanews.com.cn/tp/2026/10-11/10711126.shtml",
       "source": "中国新闻网",
       "cat": "民生社会"
     },
     {
-      "title": "这些地方的公积金功能再上新",
-      "time": "Sun, 11 Oct 2026 10:18:38",
-      "summary": "近期，多地正式开始落地住房公积金惠民新政，提取范围进一步放宽。江苏南京、苏州等地已开始受理装修、物业费提取业务，辽宁沈阳也发布九项优化政策，采暖费等支出纳入提取范围。",
-      "url": "https://www.chinanews.com.cn/cj/2026/10-11/10710908.shtml",
+      "title": "王沪宁会见越南国会主席陈青敏",
+      "time": "Sun, 11 Oct 2026 21:16:26",
+      "url": "http://www.chinanews.com.cn/tp/hd2011/2026/10-11/1207540.shtml",
       "source": "中国新闻网",
-      "cat": "民生社会"
+      "cat": "国际风云"
     },
     {
-      "title": "李诞代言汉堡王“丑”翻车，笑点为什么没能变成食欲？",
-      "time": "Sun, 11 Oct 2026 10:14:11",
-      "summary": "本文来自微信公众号： 眸娱 ，作者：眸娱汉堡王这次代言，翻得比预想中彻底。为了给丑椒大皇堡回归造势，汉堡王请来李诞与米其林星厨黎子安，二人均出自综艺《一饭封神》，黎子安掌勺、李诞做美食嘴替，品牌顺势玩谐音梗打出“一椒封神”，试图用综艺感加专",
-      "url": "https://www.huxiu.com/article/4896576.html?f=rss",
-      "source": "虎嗅",
-      "cat": "民生社会"
-    },
-    {
-      "title": "在内地被当作落后而替换掉的东西，香港都还在",
-      "time": "Sun, 11 Oct 2026 10:12:50",
-      "summary": "本文来自微信公众号： FutureWise ，作者：achan，原文标题：《在内地被当作落后而替换掉的东西，香港都还在 | 在香港·01》一.试图寻找一种可能是拮据的却更有呼吸感的生活我从北京搬到香港生活，已经一个多月了。二十多年来，我在北",
-      "url": "https://www.huxiu.com/article/4896578.html?f=rss",
-      "source": "虎嗅",
-      "cat": "民生社会"
-    },
-    {
-      "title": "当格力、比亚迪纷纷下场办技校，读职教还是上本科，你会怎么选？",
-      "time": "Sun, 11 Oct 2026 10:12:24",
-      "summary": "本文来自微信公众号： 重农评 ，编辑：李克欣，作者：韩松妍教育的价值不应只用学历层级来衡量，能够让学生找到适合自己的方向、具备解决真实问题的能力，才是更重要的目标。日前，由格力电器打造、董明珠担任校长的珠海市格力技工学校，迎来了首届326名",
-      "url": "https://www.huxiu.com/article/4896577.html?f=rss",
-      "source": "虎嗅",
-      "cat": "民生社会"
-    },
-    {
-      "title": "（长江十年行）四川泸州“捕鱼人”变“护渔人” 守护一江清水出川",
-      "time": "Sun, 11 Oct 2026 10:08:15",
-      "summary": "中新网泸州10月11日电 题：四川泸州“捕鱼人”变“护渔人” 守护一江清水出川",
-      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10710900.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "香江观澜：全球最自由经济体评选“三连冠”　香港独特竞争力再获国际认可",
-      "time": "Sun, 11 Oct 2026 10:07:25",
-      "summary": "中新社香港10月11日电 题：全球最自由经济体评选“三连冠” 香港独特竞争力再获国际认可",
-      "url": "https://www.chinanews.com.cn/dwq/2026/10-11/10710907.shtml",
-      "source": "中国新闻网",
-      "cat": "财经动态"
-    },
-    {
-      "title": "中国女子高尔夫球公开赛：石昱莉1杆优势领跑冲冠",
-      "time": "Sun, 11 Oct 2026 10:07:19",
-      "summary": "中新网上海10月11日电 2026中国女子高尔夫球公开赛(以下简称“中国女子公开赛”)10日在上海崇明岛的PGA安瀛高尔夫俱乐部结束第二轮比赛。首轮领先者石昱莉打出71杆，以两轮139杆、低于标准杆5杆的总成绩继续领跑，将于次日冲击个人女子",
-      "url": "https://www.chinanews.com.cn/ty/2026/10-11/10710903.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "AI给警察局提供凶案线索，果然，是假的……",
-      "time": "Sun, 11 Oct 2026 10:06:19",
-      "summary": "本文来自微信公众号： 果壳 ，作者：Luna，原文标题：《AI给警察局提供凶案线索！果然，是假的……》Anthropic的AI，去警察局的凶杀案调查网站上提供假线索了。2026年7月18日晚上11点27分，美国费城警方的未破凶杀案网站（Ph",
-      "url": "https://www.huxiu.com/article/4896575.html?f=rss",
+      "title": "AI到底有没有“灵魂”？",
+      "time": "Sun, 11 Oct 2026 21:13:13",
+      "summary": "本文来自微信公众号： 凤凰网财经 ，作者：凤凰AI研究院2026年4月，旧金山某间闭门会场里，坐着一群宗教人士。Anthropic联合创始人奥拉（Christopher Olah）把一页幻灯片打到墙上。对话框里，Claude反复落下“我是个",
+      "url": "https://www.huxiu.com/article/4896637.html?f=rss",
       "source": "虎嗅",
       "cat": "科技前沿"
     },
     {
-      "title": "这个假期，穷游火了",
-      "time": "Sun, 11 Oct 2026 10:06:18",
-      "summary": "本文来自微信公众号： 不惑猪的频道 ，作者：博栋先生今年的中秋假期和国庆假期挨得很近，只隔了三天。为了得到一个超长假期，打工人使出了日常网购和点外卖时的硬核算法，用“拼好假”活生生地打通了中秋假期和国庆假期之间的“三天工作日”这堵墙，把两个",
-      "url": "https://www.huxiu.com/article/4896573.html?f=rss",
-      "source": "虎嗅",
+      "title": "云南40名选手以“路”为核心 讲述铸牢中华民族共同体意识故事",
+      "time": "Sun, 11 Oct 2026 21:08:25",
+      "summary": "中新网昆明10月11日电 (黄兴鸿 黄欣媛)11日，云南省第三届“融美云南 道物中华”铸牢中华民族共同体意识讲解比赛决赛在昆明举行。40名选手以“路”为核心叙事意象，围绕茶马古道、滇缅公路、西南联大西迁之路、中老铁路等历史古道与时代通途，生",
+      "url": "https://www.chinanews.com.cn/txy/2026/10-11/10711132.shtml",
+      "source": "中国新闻网",
       "cat": "民生社会"
     },
     {
-      "title": "AI“克隆”的Adobe 全家桶一夜爆火，但先别急着卸载正版",
-      "time": "Sun, 11 Oct 2026 10:03:08",
-      "summary": "本文来自微信公众号： APPSO ，作者：发现明日产品的，原文标题：《AI「克隆」的 Adobe 全家桶一夜爆火，但先别急着卸载正版》「平替」如果只是比原装便宜一点点，是不够吸引人的。但如果原本贵到肉痛如Adobe全家桶，直接原地免费，那无",
-      "url": "https://www.huxiu.com/article/4896574.html?f=rss",
-      "source": "虎嗅",
+      "title": "新疆新星市举办奇石文化旅游活动",
+      "time": "Sun, 11 Oct 2026 21:01:49",
+      "summary": "中新网新疆新星10月11日电 (史玉江)新疆生产建设兵团第十三师新星市“戈壁奇石·丝路新星”奇石文化旅游活动10日启幕。活动汇聚全国200多家集市展商，玛瑙、泥石、戈壁石、火山岩、沉积岩等上百类奇石亮相，将开展为期10天的交易展示。",
+      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10711131.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "2026年河北省赛事资源策划运营对接洽谈会举行",
+      "time": "Sun, 11 Oct 2026 20:58:25",
+      "summary": "中新网石家庄10月11日电 (宋文浩)10月10日至11日，2026年河北省赛事资源策划运营对接洽谈会在河北省石家庄市河北奥林匹克体育中心举行。",
+      "url": "https://www.chinanews.com.cn/ty/2026/10-11/10711129.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "（机遇香港）全球电竞市场升温 香港搭台对接全球买家觅商机",
+      "time": "Sun, 11 Oct 2026 20:58:15",
+      "summary": "中新社香港10月11日电 (记者 张语洽 赵静怡)2026年环球资源香港展一期11日在香港亚洲国际博览馆开幕，其中消费电子展及游戏展同期登场，逾4000个展位汇聚超过2100家供应商参展，随着全球电竞市场需求持续增长，海内外厂商纷纷借此机会",
+      "url": "https://www.chinanews.com.cn/dwq/2026/10-11/10711130.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "马来西亚中总：新时代华商可以成为区域连接者",
+      "time": "Sun, 11 Oct 2026 20:57:27",
+      "summary": "中新网吉隆坡10月11日电 (记者 刘育英)马来西亚中华总商会(中总)总会长吴逸平在中总105周年名人讲堂上提出，在全球供应链重构、数字经济崛起的大背景下，新时代的华商，可以从传统的企业经营者，进一步成为区域连接者。",
+      "url": "https://www.chinanews.com.cn/aseaninfo/2026/10-11/10711121.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "《苍穹之剑——纪念无名英雄蔡威百幅画卷》在福建宁德首展",
+      "time": "Sun, 11 Oct 2026 20:57:19",
+      "summary": "中新网宁德10月11日电 (记者 叶茂)2026年是中国工农红军长征胜利90周年。11日，《苍穹之剑——纪念无名英雄蔡威百幅画卷》展览在福建省宁德市举办。",
+      "url": "https://www.chinanews.com.cn/gn/2026/10-11/10711124.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "全球数百名航空代表走进广州永庆坊 领略广府文化魅力",
+      "time": "Sun, 11 Oct 2026 20:57:13",
+      "summary": "中新网广州10月11日电 (记者 程景伟)全球航空业界约600名嘉宾代表11日下午走进广州永庆坊，在青砖镬耳墙之间交错穿行，感受岭南园林艺术之美；在粤剧艺术博物馆欣赏粤语歌曲及醒狮表演、品尝特色美食，体验广府人文风情。",
+      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10711125.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "浙江乡村化身“毛孩子”度假区 吸引携宠游客",
+      "time": "Sun, 11 Oct 2026 20:53:42",
+      "summary": "中新网杭州10月11日电(蓝伊旎)每逢周末和节假日，杭州上城区皋城村的皋亭山千桃园里总会迎来许多“毛孩子”打卡。萌宠们在嬉水池中溅起阵阵水花，在草坪上围着露营桌追逐打转，主人们便不时用镜头定格它们撒欢的美好瞬间。",
+      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10711123.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "津巴布韦梦想秀艺术团在上海演出 以艺传情筑丝路友谊",
+      "time": "Sun, 11 Oct 2026 20:52:52",
+      "summary": "中新社上海10月11日电 (范宇斌)“青春共鸣·梦想相连——共绘丝路华章”中非(中津)青年文化交流活动11日在上海应用技术大学举行。",
+      "url": "https://www.chinanews.com.cn/cul/2026/10-11/10711118.shtml",
+      "source": "中国新闻网",
+      "cat": "民生社会"
+    },
+    {
+      "title": "万吨巨梁精准转体 津潍高铁胡家园特大桥取得关键突破",
+      "time": "Sun, 11 Oct 2026 20:52:44",
+      "summary": "中新网天津10月11日电 (记者 周亚强)10月11日凌晨，津潍高铁天津枢纽胡家园双线特大桥连续梁完成转体作业，两幅总重18100吨的梁体同步相向转动，实现毫米级精准落位，为后续箱梁架设及全线建设奠定基础。",
+      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10711116.shtml",
+      "source": "中国新闻网",
       "cat": "科技前沿"
     },
     {
-      "title": "何以中国·纹样里的中国｜绣在裙摆上的路",
-      "time": "Sun, 11 Oct 2026 10:02:07",
-      "summary": "一纹一理，藏着华夏的呼吸；方寸之间，见得着千年风华。",
-      "url": "https://www.chinanews.com.cn/cul/2026/10-11/10710905.shtml",
+      "title": "从草场放牧到高原种菊 西藏特色种养产业让群众致富增收",
+      "time": "Sun, 11 Oct 2026 20:47:26",
+      "summary": "近年来，在党中央关心关怀和全国人民支援下，西藏从脱贫攻坚到乡村振兴接续发力，620多个边境村全部建成了小康村，绘就边疆长治久安、人民安居乐业的壮美画卷。",
+      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10711122.shtml",
       "source": "中国新闻网",
       "cat": "民生社会"
     },
     {
-      "title": "从“流量”到“留量”：8.26亿人次出游背后的文旅经济之变",
-      "time": "Sun, 11 Oct 2026 10:01:03",
-      "summary": "“经”彩新图景丨从“流量”到“留量”：8.26亿人次出游背后的文旅经济之变",
-      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10710901.shtml",
+      "title": "埃及总统塞西访印尼  两国重申支持巴勒斯坦建国",
+      "time": "Sun, 11 Oct 2026 20:45:56",
+      "summary": "中新社雅加达10月11日电 (记者 李志全)印度尼西亚总统普拉博沃11日与到访的埃及总统塞西举行会谈，双方重申支持建立独立的巴勒斯坦国，强调通过“两国方案”实现地区和平，并呼吁缓和中东地区紧张局势。",
+      "url": "https://www.chinanews.com.cn/gj/2026/10-11/10711109.shtml",
       "source": "中国新闻网",
-      "cat": "财经动态"
+      "cat": "国际风云"
     },
     {
-      "title": "深度｜欧盟为拿回话语权加税35.3%，中国车企却在匈牙利盖起了工厂",
-      "time": "Sun, 11 Oct 2026 10:00:38",
-      "summary": "本文来自微信公众号： 斯凯碎碎侃 ，作者：斯凯，原文标题：《深度｜欧盟为拿回话语权加税35.3%，中国车企却在匈牙利盖起了工厂》前段时间，应安徽一个地方政府的邀请，参加了一场产业研讨会。会上聊到了最近特别火的哪吒汽车，也聊到了产业出海。哪吒",
-      "url": "https://www.huxiu.com/article/4896566.html?f=rss",
+      "title": "这些掌握了内幕消息的人，是怎么亏钱的？",
+      "time": "Sun, 11 Oct 2026 20:41:23",
+      "summary": "本文来自微信公众号： 思想钢印 ，作者：思想钢印1/7亏钱跟消息无关在很多人看来，有了内幕消息，就好像游戏开了外挂，赚钱不就是水到渠成的事，但监管处罚数据给出了相反的答案。2025年全年的126份适用新《证券法》的内幕交易行政处罚中，61件",
+      "url": "https://www.huxiu.com/article/4896635.html?f=rss",
+      "source": "虎嗅",
+      "cat": "民生社会"
+    },
+    {
+      "title": "“不敢”再上49.9元大学生自助了，比格比萨创始人：9月亏了近千万",
+      "time": "Sun, 11 Oct 2026 19:36:44",
+      "summary": "本文来自微信公众号： 红餐网 ，作者：红餐编辑部，编辑：倩君，原文标题：《“不敢”再上49.9元大学生自助了！比格比萨创始人：9月亏了近千万》比格比萨在低价引流与高成本、扩张盈利压力之间的两难。大学生还想要49.99元/位的自助优惠，比格比",
+      "url": "https://www.huxiu.com/article/4896631.html?f=rss",
+      "source": "虎嗅",
+      "cat": "民生社会"
+    },
+    {
+      "title": "韩国股市，遭遇资金大撤退",
+      "time": "Sun, 11 Oct 2026 19:32:24",
+      "summary": "本文来自微信公众号： 财联社 ，作者：赵昊今年大部分时间里，韩国一直是全球AI交易热潮的典型代表。但如今，从几乎所有指标来看，这个规模达4.3万亿美元的股票市场，正迅速失去对投资者的吸引力。韩国股市成交量已较今年5月下旬的峰值暴跌70%，外",
+      "url": "https://www.huxiu.com/article/4896630.html?f=rss",
       "source": "虎嗅",
       "cat": "国际风云"
     },
     {
-      "title": "“不烧心”，生活乙方的终极幻想",
-      "time": "Sun, 11 Oct 2026 09:59:17",
-      "summary": "本文来自微信公众号： 娱乐硬糖 ，作者：谢明宏，编辑：李春晖“快救救她，你们快救救她。”音乐节上，陆虎为了救晕倒的歌迷，临时改了歌词。此举既救了人，又没耽搁演出。群众纷纷夸“人要救，但规矩得先立住”、“他唱的歌听了不烧心”。网瘾小一点的，都",
-      "url": "https://www.huxiu.com/article/4896572.html?f=rss",
+      "title": "第一批“喜老登”，开始摘牌了",
+      "time": "Sun, 11 Oct 2026 19:01:14",
+      "summary": "本文来自微信公众号： 旅界 ，作者：theodore熙少喜来登的老登危机。01这两天，曾被誉为七星级酒店的湖州喜来登酒店摘牌一事，在国内酒店圈引发极大关注。十一前，已经有网友发现这家酒店在万豪官网刷不到了，OTA上的名称也悄然改成了湖州太湖",
+      "url": "https://www.huxiu.com/article/4896627.html?f=rss",
       "source": "虎嗅",
       "cat": "民生社会"
     },
     {
-      "title": "中企承建的马拉维利隆圭供水项目让约5万村民告别“用水难”",
-      "time": "Sun, 11 Oct 2026 09:59:05",
-      "summary": "中企承建的马拉维利隆圭供水项目让约5万村民告别“用水难”",
-      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10710899.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "红星照耀中国丨红色根脉点亮赣鄱三农新图景",
-      "time": "Sun, 11 Oct 2026 09:56:17",
-      "summary": "央广网南昌10月10日消息(记者郇康新)90年前，从江西于都河畔集结出发的红军队伍在今宁夏西吉县将台堡胜利会师，宣告长征的伟大胜利。长征出发之时，于都百姓拆下门板、床板，帮红军渡过第一道河。岁月流转，初心不改。如今，江西这片红色热土将长征奋",
-      "url": "https://www.chinanews.com.cn/sh/2026/10-11/10710898.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "国庆假期后错峰出游 这几条松弛线路带你“慢旅行”",
-      "time": "Sun, 11 Oct 2026 09:54:55",
-      "summary": "国庆假期刚过，正是错峰出游的好时机。客流缓和，出行成本降低，不少游客选择假期后出行，尽享慢旅行的松弛乐趣。",
-      "url": "https://www.chinanews.com.cn/life/2026/10-11/10710897.shtml",
-      "source": "中国新闻网",
-      "cat": "民生社会"
-    },
-    {
-      "title": "银鳕鱼汞中毒风波：涉事企业建议每周吃2至3次，称“儿童装”非婴幼儿专用",
-      "time": "Sun, 11 Oct 2026 09:52:57",
-      "summary": "本文来自微信公众号： 大橘财经 ，作者：王力国庆假期前后，一场围绕银鳕鱼的儿童血汞异常风波持续发酵。上海新华医院近期接诊了多名有银鳕鱼食用史的儿童，并加开相关门诊。观察者网在消费者交流中了解到，有家长反映孩子血汞检测值超过50微克/升，也有",
-      "url": "https://www.huxiu.com/article/4896571.html?f=rss",
+      "title": "9岁自闭症男孩被踹出电梯，作为谱系孩子爸爸，我想起儿子遭遇的所有恶意",
+      "time": "Sun, 11 Oct 2026 18:26:52",
+      "summary": "本文来自微信公众号： 大米和小米 ，编辑：苏渡，作者：特殊孩子保护每一个家长都会有这么一天：孩子在外边被人打了，我怎么办？自闭症孩子的家长则更加卑微：孩子这次被人欺负了，以后还敢出去吗？要不是网友爆料，编辑又约稿，我没法看完海口9岁自闭症男",
+      "url": "https://www.huxiu.com/article/4896625.html?f=rss",
       "source": "虎嗅",
       "cat": "民生社会"
     },
     {
-      "title": "凭“美”一国之力，能“废”一座国际法庭吗？",
-      "time": "Sun, 11 Oct 2026 09:19:09",
-      "summary": "本文来自微信公众号： 从正义路到经纬路 ，作者：法律科技人当地时间10月9日，美国国务院宣布对国际刑事法院（ICC）实施制裁。国务卿鲁比奥的表态很直白：特朗普“绝不允许国际刑事法院起诉美国人”，美方将“禁止与其进行交易、切断其资源，并使其运",
-      "url": "https://www.huxiu.com/article/4896567.html?f=rss",
+      "title": "现偶太想吃po文这碗饭了",
+      "time": "Sun, 11 Oct 2026 18:15:31",
+      "summary": "本文来自微信公众号： 毒眸 ，编辑：刘南豆，作者：毒眸编辑部当短视频上越来越多人信奉“生理性喜欢才是真爱”的同时，现偶也在积极地兜售“性暗示”，用吻戏、床戏（的周边产品）来满足观众对这一类型新的想象。点开最近发布预告片的《雾里青》《许你星河",
+      "url": "https://www.huxiu.com/article/4896624.html?f=rss",
+      "source": "虎嗅",
+      "cat": "民生社会"
+    },
+    {
+      "title": "中国正走到日本20年前：家庭变小之后，消费会流向哪里？",
+      "time": "Sun, 11 Oct 2026 18:12:45",
+      "summary": "本文来自微信公众号： 新经销 ，作者：任文青最近研究人口与消费，我发现了一组有意思的数字。2005年，日本平均每个普通家庭户有2.55人，一人户、二人户合计占56.0%。2020年，中国平均每个家庭户有2.62人，一人户、二人户合计占55.",
+      "url": "https://www.huxiu.com/article/4896623.html?f=rss",
+      "source": "虎嗅",
+      "cat": "国际风云"
+    },
+    {
+      "title": "观察｜残酷真相：AI轰轰烈烈扩张，却在悄悄地向我们收一笔AI隐形税",
+      "time": "Sun, 11 Oct 2026 18:06:18",
+      "summary": "本文来自微信公众号： 斯凯碎碎侃 ，作者：斯凯，原文标题：《观察｜残酷真相：AI轰轰烈烈扩张，却在悄悄地向我们收一笔AI隐形税》不是手机厂商涨价割韭菜，晶圆产能被HBM抢占，廉价数码时代正在落幕上个月，我想给家里换台Mac mini。打开苹",
+      "url": "https://www.huxiu.com/article/4896622.html?f=rss",
       "source": "虎嗅",
       "cat": "时政要闻"
     },
     {
-      "title": "大二专科生称靠切片三年赚七百万",
+      "title": "骤然下滑，运营商关键增长引擎为何急刹车？",
+      "time": "Sun, 11 Oct 2026 17:58:33",
+      "summary": "本文来自微信公众号： 大橘财经 ，作者：汤普济电信产业曾经高速增长的政企业务，如今正面临收入下滑的压力。近日，有媒体披露，中国电信2026年前7个月政企全业务累计收入1314.5亿元，同比下降1.9%，降幅较上半年扩大0.2个百分点。其中，",
+      "url": "https://www.huxiu.com/article/4896621.html?f=rss",
+      "source": "虎嗅",
+      "cat": "民生社会"
+    },
+    {
+      "title": "天阳科技买2万张英伟达GPU，为何不发公告？",
+      "time": "Sun, 11 Oct 2026 17:48:29",
+      "summary": "本文来自微信公众号： 青眼商评 ，作者：啸清一条注明“非上市公司公告”的消息，出现在天阳科技（300872）的官方微信公众号上。2026年10月9日盘前，公司宣布与“X公司”签署《GPU采购协议》，采购2万张英伟达RTX PRO 5500 ",
+      "url": "https://www.huxiu.com/article/4896619.html?f=rss",
+      "source": "虎嗅",
+      "cat": "科技前沿"
+    },
+    {
+      "title": "郑钦文中网女单夺冠",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "254.2万",
-      "url": "https://s.weibo.com/weibo?q=%E5%A4%A7%E4%BA%8C%E4%B8%93%E7%A7%91%E7%94%9F%E7%A7%B0%E9%9D%A0%E5%88%87%E7%89%87%E4%B8%89%E5%B9%B4%E8%B5%9A%E4%B8%83%E7%99%BE%E4%B8%87",
+      "heat": "1360.3万",
+      "url": "https://s.weibo.com/weibo?q=%E9%83%91%E9%92%A6%E6%96%87%E4%B8%AD%E7%BD%91%E5%A5%B3%E5%8D%95%E5%A4%BA%E5%86%A0",
       "time": "2026-10-11"
     },
     {
-      "title": "在曼谷失联摄影师已回国",
+      "title": "中网奖金",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "105.3万",
-      "url": "https://s.weibo.com/weibo?q=%E5%9C%A8%E6%9B%BC%E8%B0%B7%E5%A4%B1%E8%81%94%E6%91%84%E5%BD%B1%E5%B8%88%E5%B7%B2%E5%9B%9E%E5%9B%BD",
+      "heat": "385.6万",
+      "url": "https://s.weibo.com/weibo?q=%E4%B8%AD%E7%BD%91%E5%A5%96%E9%87%91",
       "time": "2026-10-11"
     },
     {
-      "title": "每一个名字都是山河丰碑",
+      "title": "我国经济回升向好态势持续巩固",
       "source": "微博热搜",
-      "cat": "今日热榜",
-      "heat": "82.4万",
-      "url": "https://s.weibo.com/weibo?q=%E6%AF%8F%E4%B8%80%E4%B8%AA%E5%90%8D%E5%AD%97%E9%83%BD%E6%98%AF%E5%B1%B1%E6%B2%B3%E4%B8%B0%E7%A2%91",
+      "cat": "财经动态",
+      "heat": "286.1万",
+      "url": "https://s.weibo.com/weibo?q=%E6%88%91%E5%9B%BD%E7%BB%8F%E6%B5%8E%E5%9B%9E%E5%8D%87%E5%90%91%E5%A5%BD%E6%80%81%E5%8A%BF%E6%8C%81%E7%BB%AD%E5%B7%A9%E5%9B%BA",
       "time": "2026-10-11"
     },
     {
-      "title": "梅艳芳骨灰被盗",
+      "title": "霸王茶姬",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "74.2万",
-      "url": "https://s.weibo.com/weibo?q=%E6%A2%85%E8%89%B3%E8%8A%B3%E9%AA%A8%E7%81%B0%E8%A2%AB%E7%9B%97",
+      "heat": "285.3万",
+      "url": "https://s.weibo.com/weibo?q=%E9%9C%B8%E7%8E%8B%E8%8C%B6%E5%A7%AC",
       "time": "2026-10-11"
     },
     {
-      "title": "利雅得机场遭袭致12死309伤",
+      "title": "中国人时隔14年再夺1000赛冠军",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "48.5万",
-      "url": "https://s.weibo.com/weibo?q=%E5%88%A9%E9%9B%85%E5%BE%97%E6%9C%BA%E5%9C%BA%E9%81%AD%E8%A2%AD%E8%87%B412%E6%AD%BB309%E4%BC%A4",
+      "heat": "162.8万",
+      "url": "https://s.weibo.com/weibo?q=%E4%B8%AD%E5%9B%BD%E4%BA%BA%E6%97%B6%E9%9A%9414%E5%B9%B4%E5%86%8D%E5%A4%BA1000%E8%B5%9B%E5%86%A0%E5%86%9B",
       "time": "2026-10-11"
     },
     {
-      "title": "虎鲸妈妈带幼崽尸体十七天",
+      "title": "郑钦文夺冠后热泪盈眶",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "48.5万",
-      "url": "https://s.weibo.com/weibo?q=%E8%99%8E%E9%B2%B8%E5%A6%88%E5%A6%88%E5%B8%A6%E5%B9%BC%E5%B4%BD%E5%B0%B8%E4%BD%93%E5%8D%81%E4%B8%83%E5%A4%A9",
+      "heat": "125.8万",
+      "url": "https://s.weibo.com/weibo?q=%E9%83%91%E9%92%A6%E6%96%87%E5%A4%BA%E5%86%A0%E5%90%8E%E7%83%AD%E6%B3%AA%E7%9B%88%E7%9C%B6",
       "time": "2026-10-11"
     },
     {
-      "title": "女子长期鼻塞查出患癌",
+      "title": "郑钦文中网决赛收视率第一",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "46.4万",
-      "url": "https://s.weibo.com/weibo?q=%E5%A5%B3%E5%AD%90%E9%95%BF%E6%9C%9F%E9%BC%BB%E5%A1%9E%E6%9F%A5%E5%87%BA%E6%82%A3%E7%99%8C",
+      "heat": "72.1万",
+      "url": "https://s.weibo.com/weibo?q=%E9%83%91%E9%92%A6%E6%96%87%E4%B8%AD%E7%BD%91%E5%86%B3%E8%B5%9B%E6%94%B6%E8%A7%86%E7%8E%87%E7%AC%AC%E4%B8%80",
       "time": "2026-10-11"
     },
     {
-      "title": "台湾民众在台北街头高喊要统一",
+      "title": "避孕套能预防性传播疾病",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "31.6万",
-      "url": "https://s.weibo.com/weibo?q=%E5%8F%B0%E6%B9%BE%E6%B0%91%E4%BC%97%E5%9C%A8%E5%8F%B0%E5%8C%97%E8%A1%97%E5%A4%B4%E9%AB%98%E5%96%8A%E8%A6%81%E7%BB%9F%E4%B8%80",
+      "heat": "64.1万",
+      "url": "https://s.weibo.com/weibo?q=%E9%81%BF%E5%AD%95%E5%A5%97%E8%83%BD%E9%A2%84%E9%98%B2%E6%80%A7%E4%BC%A0%E6%92%AD%E7%96%BE%E7%97%85",
       "time": "2026-10-11"
     },
     {
-      "title": "明知不该买房却想要自己的家",
+      "title": "插队被拒投诉儿科医生的家长已道歉",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "29.5万",
-      "url": "https://s.weibo.com/weibo?q=%E6%98%8E%E7%9F%A5%E4%B8%8D%E8%AF%A5%E4%B9%B0%E6%88%BF%E5%8D%B4%E6%83%B3%E8%A6%81%E8%87%AA%E5%B7%B1%E7%9A%84%E5%AE%B6",
+      "heat": "49.3万",
+      "url": "https://s.weibo.com/weibo?q=%E6%8F%92%E9%98%9F%E8%A2%AB%E6%8B%92%E6%8A%95%E8%AF%89%E5%84%BF%E7%A7%91%E5%8C%BB%E7%94%9F%E7%9A%84%E5%AE%B6%E9%95%BF%E5%B7%B2%E9%81%93%E6%AD%89",
       "time": "2026-10-11"
     },
     {
-      "title": "岸本齐史火影忍者全新漫画",
+      "title": "郑钦文收获收获115万美元和1000积分",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "28.9万",
-      "url": "https://s.weibo.com/weibo?q=%E5%B2%B8%E6%9C%AC%E9%BD%90%E5%8F%B2%E7%81%AB%E5%BD%B1%E5%BF%8D%E8%80%85%E5%85%A8%E6%96%B0%E6%BC%AB%E7%94%BB",
+      "heat": "45.6万",
+      "url": "https://s.weibo.com/weibo?q=%E9%83%91%E9%92%A6%E6%96%87%E6%94%B6%E8%8E%B7%E6%94%B6%E8%8E%B7115%E4%B8%87%E7%BE%8E%E5%85%83%E5%92%8C1000%E7%A7%AF%E5%88%86",
       "time": "2026-10-11"
     },
     {
-      "title": "谢娜刘烨十多年都没有同台过",
+      "title": "社保",
       "source": "微博热搜",
-      "cat": "今日热榜",
-      "heat": "28.5万",
-      "url": "https://s.weibo.com/weibo?q=%E8%B0%A2%E5%A8%9C%E5%88%98%E7%83%A8%E5%8D%81%E5%A4%9A%E5%B9%B4%E9%83%BD%E6%B2%A1%E6%9C%89%E5%90%8C%E5%8F%B0%E8%BF%87",
+      "cat": "时政要闻",
+      "heat": "45.5万",
+      "url": "https://s.weibo.com/weibo?q=%E7%A4%BE%E4%BF%9D",
       "time": "2026-10-11"
     },
     {
-      "title": "电诈园区打人视频曝光",
+      "title": "身高2.2米巨人网红小玥去世",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "28.0万",
-      "url": "https://s.weibo.com/weibo?q=%E7%94%B5%E8%AF%88%E5%9B%AD%E5%8C%BA%E6%89%93%E4%BA%BA%E8%A7%86%E9%A2%91%E6%9B%9D%E5%85%89",
+      "heat": "45.5万",
+      "url": "https://s.weibo.com/weibo?q=%E8%BA%AB%E9%AB%982.2%E7%B1%B3%E5%B7%A8%E4%BA%BA%E7%BD%91%E7%BA%A2%E5%B0%8F%E7%8E%A5%E5%8E%BB%E4%B8%96",
       "time": "2026-10-11"
     },
     {
-      "title": "五旬女子称做美容手术后眼睛闭不上",
+      "title": "杭州限狗令白天遛狗罚款",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "27.4万",
-      "url": "https://s.weibo.com/weibo?q=%E4%BA%94%E6%97%AC%E5%A5%B3%E5%AD%90%E7%A7%B0%E5%81%9A%E7%BE%8E%E5%AE%B9%E6%89%8B%E6%9C%AF%E5%90%8E%E7%9C%BC%E7%9D%9B%E9%97%AD%E4%B8%8D%E4%B8%8A",
+      "heat": "45.5万",
+      "url": "https://s.weibo.com/weibo?q=%E6%9D%AD%E5%B7%9E%E9%99%90%E7%8B%97%E4%BB%A4%E7%99%BD%E5%A4%A9%E9%81%9B%E7%8B%97%E7%BD%9A%E6%AC%BE",
       "time": "2026-10-11"
     },
     {
-      "title": "金子涵称脸上被打了100多针",
+      "title": "撒贝宁龙凤胎长这么大了",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "26.7万",
-      "url": "https://s.weibo.com/weibo?q=%E9%87%91%E5%AD%90%E6%B6%B5%E7%A7%B0%E8%84%B8%E4%B8%8A%E8%A2%AB%E6%89%93%E4%BA%86100%E5%A4%9A%E9%92%88",
+      "heat": "45.4万",
+      "url": "https://s.weibo.com/weibo?q=%E6%92%92%E8%B4%9D%E5%AE%81%E9%BE%99%E5%87%A4%E8%83%8E%E9%95%BF%E8%BF%99%E4%B9%88%E5%A4%A7%E4%BA%86",
       "time": "2026-10-11"
     },
     {
-      "title": "闫妮自曝离婚后还会去前夫家里打掼蛋",
+      "title": "郑钦文vs安德列娃",
+      "source": "微博热搜",
+      "cat": "今日热榜",
+      "heat": "44.8万",
+      "url": "https://s.weibo.com/weibo?q=%E9%83%91%E9%92%A6%E6%96%87vs%E5%AE%89%E5%BE%B7%E5%88%97%E5%A8%83",
+      "time": "2026-10-11"
+    },
+    {
+      "title": "网传缅北诈骗盯上泰百粉丝",
       "source": "微博热搜",
       "cat": "民生社会",
-      "heat": "26.2万",
-      "url": "https://s.weibo.com/weibo?q=%E9%97%AB%E5%A6%AE%E8%87%AA%E6%9B%9D%E7%A6%BB%E5%A9%9A%E5%90%8E%E8%BF%98%E4%BC%9A%E5%8E%BB%E5%89%8D%E5%A4%AB%E5%AE%B6%E9%87%8C%E6%89%93%E6%8E%BC%E8%9B%8B",
+      "heat": "44.4万",
+      "url": "https://s.weibo.com/weibo?q=%E7%BD%91%E4%BC%A0%E7%BC%85%E5%8C%97%E8%AF%88%E9%AA%97%E7%9B%AF%E4%B8%8A%E6%B3%B0%E7%99%BE%E7%B2%89%E4%B8%9D",
       "time": "2026-10-11"
     },
     {
-      "title": "王楚然现发4口碑反转",
+      "title": "华为被曝将推子品牌星芒",
       "source": "微博热搜",
-      "cat": "今日热榜",
-      "heat": "25.5万",
-      "url": "https://s.weibo.com/weibo?q=%E7%8E%8B%E6%A5%9A%E7%84%B6%E7%8E%B0%E5%8F%914%E5%8F%A3%E7%A2%91%E5%8F%8D%E8%BD%AC",
+      "cat": "科技前沿",
+      "heat": "43.3万",
+      "url": "https://s.weibo.com/weibo?q=%E5%8D%8E%E4%B8%BA%E8%A2%AB%E6%9B%9D%E5%B0%86%E6%8E%A8%E5%AD%90%E5%93%81%E7%89%8C%E6%98%9F%E8%8A%92",
       "time": "2026-10-11"
     },
     {
-      "title": "尿毒症大多是吃出来的",
+      "title": "全网蹲郑钦文今晚唱什么",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "24.5万",
-      "url": "https://s.weibo.com/weibo?q=%E5%B0%BF%E6%AF%92%E7%97%87%E5%A4%A7%E5%A4%9A%E6%98%AF%E5%90%83%E5%87%BA%E6%9D%A5%E7%9A%84",
+      "heat": "42.9万",
+      "url": "https://s.weibo.com/weibo?q=%E5%85%A8%E7%BD%91%E8%B9%B2%E9%83%91%E9%92%A6%E6%96%87%E4%BB%8A%E6%99%9A%E5%94%B1%E4%BB%80%E4%B9%88",
       "time": "2026-10-11"
     },
     {
-      "title": "施永青建议推会漏的避孕套",
+      "title": "郑钦文决赛状态",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "24.4万",
-      "url": "https://s.weibo.com/weibo?q=%E6%96%BD%E6%B0%B8%E9%9D%92%E5%BB%BA%E8%AE%AE%E6%8E%A8%E4%BC%9A%E6%BC%8F%E7%9A%84%E9%81%BF%E5%AD%95%E5%A5%97",
+      "heat": "41.6万",
+      "url": "https://s.weibo.com/weibo?q=%E9%83%91%E9%92%A6%E6%96%87%E5%86%B3%E8%B5%9B%E7%8A%B6%E6%80%81",
       "time": "2026-10-11"
     },
     {
-      "title": "王仁君没想到怎么称呼高露",
+      "title": "梦的光点",
       "source": "微博热搜",
       "cat": "今日热榜",
-      "heat": "23.7万",
-      "url": "https://s.weibo.com/weibo?q=%E7%8E%8B%E4%BB%81%E5%90%9B%E6%B2%A1%E6%83%B3%E5%88%B0%E6%80%8E%E4%B9%88%E7%A7%B0%E5%91%BC%E9%AB%98%E9%9C%B2",
-      "time": "2026-10-11"
-    },
-    {
-      "title": "金智媛空窗两年再出爆剧",
-      "source": "微博热搜",
-      "cat": "今日热榜",
-      "heat": "18.3万",
-      "url": "https://s.weibo.com/weibo?q=%E9%87%91%E6%99%BA%E5%AA%9B%E7%A9%BA%E7%AA%97%E4%B8%A4%E5%B9%B4%E5%86%8D%E5%87%BA%E7%88%86%E5%89%A7",
+      "heat": "40.1万",
+      "url": "https://s.weibo.com/weibo?q=%E6%A2%A6%E7%9A%84%E5%85%89%E7%82%B9",
       "time": "2026-10-11"
     },
     {
       "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "电影中的长征丨方志敏用生命诠释信仰",
+      "url": "https://www.news.cn/video/20261011/0cc077ec54954458a763b40efa73dcaf/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
       "cat": "时政要闻",
-      "title": "内蒙古书写团结奋进新答卷",
-      "url": "https://www.news.cn/politics/20261011/1fd5c373302142d585aeec70f7b67810/c.html",
+      "title": "铁纪长征丨两枚铜板：见证红军严明的群众纪律",
+      "url": "https://www.news.cn/politics/20261011/d908b81ad36a43d0bf71c26977976312/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "家书万金丨纸短情长，字里行间的牵挂",
+      "url": "https://www.news.cn/politics/20261011/68561f3cd04343b8ba19eccd2b8356a6/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "卫星视角看长征—传承红军志 川蜀大地长征号角回响",
+      "url": "https://www.news.cn/local/20261011/21d36fd2f05c4def90fc89fa5d3706db/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "从安顺场到泸定桥：大渡河畔两场著名战斗",
+      "url": "https://www.news.cn/photo/20261011/5f27a493eee24b78a8096786dfd6e36f/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "“家国同心向复兴——中国侨联成立70周年主题展”在京开幕",
+      "url": "https://www.news.cn/photo/20261011/bd179d4a598b4d489f1d602973fadb92/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "皇岗口岸将于12日正式开通运行",
+      "url": "https://www.news.cn/photo/20261011/f6152be865184498b838aa50e2568010/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "“我的命是中国人救的，一定要回去感谢他们”",
+      "url": "https://www.news.cn/world/20261011/80c1b7615e074646a5b954ae22e00874/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "美丽中国｜枫染代钦塔拉",
+      "url": "https://www.news.cn/photo/20261011/5b308f6bcec449a59d6ae67b1c945bef/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "科技前沿",
+      "title": "天宫TV丨身在太空，心系祖国",
+      "url": "https://www.news.cn/tech/20261011/6fa612674c1e42f6a4d2300bb26f8001/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "星空相册丨黑龙江再次观测到极光",
+      "url": "https://www.news.cn/photo/20261011/79282d254ced4fe2bbe8d4b499f184eb/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
@@ -2825,16 +2888,32 @@
     {
       "source": "新华网(news.cn)",
       "cat": "时政要闻",
-      "title": "二十四道拐：一段曾被误传了六十年左右的抗战公路史",
-      "url": "https://www.news.cn/politics/20261011/e904c5c38c1d4af195241cca9494c2f5/c.html",
+      "title": "在瑞金 找一颗红星",
+      "url": "https://www.news.cn/politics/20261011/9b14885617c94e24bde6cd374deb47c3/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "传统村落影像志丨老外爱上在这里“干农活”",
+      "url": "https://www.news.cn/local/20261011/b7524f0c2b8a42f1905c1bbfcf637f3e/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
       "cat": "时政要闻",
-      "title": "这些文物见证伟大远征",
-      "url": "https://www.news.cn/politics/20261011/1379b1a3107c40c3a963d0f1b53c226a/c.html",
+      "title": "一棵古银杏，见证何家冲的红色接力",
+      "url": "https://www.news.cn/politics/20261011/298c7df077214799ad4f233988a9d1a8/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "中国侨联七十载画好侨界团结最大同心圆",
+      "url": "https://www.news.cn/politics/20261011/47ddc3bef62749228d9e91c97bcb68b7/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
@@ -2849,88 +2928,88 @@
     {
       "source": "新华网(news.cn)",
       "cat": "财经动态",
-      "title": "权威数读丨本周，这些数据值得关注",
-      "url": "https://www.news.cn/fortune/20261011/12cdc9fc01f447b49eaa666f300c3327/c.html",
+      "title": "中国汽车工业协会：严守安全底线，规范创新设计",
+      "url": "https://www.news.cn/fortune/20261011/f1a13355729c49e7bc14594110099cae/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "财经动态",
+      "title": "新华社经济随笔：在“老本行”里找到“新活法”",
+      "url": "https://www.news.cn/fortune/20261011/f9754998795049ad87d7d7b4242f1175/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
       "cat": "民生社会",
-      "title": "时评丨无论赖清德如何包装欺骗都阻挡不了统一大势",
-      "url": "https://www.news.cn/tw/20261011/5d77071ef54943c482be3bb00a0ff1f6/c.html",
-      "time": "2026-10-11",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "北方多地将迎降雨降温 江南华南暖意仍将持续",
-      "url": "https://www.news.cn/politics/20261011/07e499e4608742e39f316cde0b028da6/c.html",
-      "time": "2026-10-11",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "利雅得机场遭袭数百死伤 沙特主导联军：坚决回应",
-      "url": "https://www.news.cn/world/20261011/bfca55ace2284a24b6d763a8cff015e9/c.html",
-      "time": "2026-10-11",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "我使馆提醒在沙中资机构和中国公民注意风险防范",
-      "url": "https://www.news.cn/world/20261011/9e130bf240c346aa83bf4424a0c0af06/c.html",
-      "time": "2026-10-11",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "傅莹率团参加2026年北极圈论坛大会",
-      "url": "https://www.news.cn/world/20261011/04bee8830e724300b56f0a994a9348d0/c.html",
-      "time": "2026-10-11",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "英学者：12345系统让多元声音都能够被听见",
-      "url": "https://www.news.cn/world/20261011/27b413f15b374711919726f8dda2fa7c/c.html",
-      "time": "2026-10-11",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "葛均波院士当选世界心脏联盟候任主席",
-      "url": "https://www.news.cn/world/20261011/a13835061890426697ecd882c036e6af/c.html",
+      "title": "国防部新闻发言人就赖清德发表所谓“双十”讲话答问",
+      "url": "https://www.news.cn/tw/20261011/eee093e1c7e8487692b4e1e67ac9dc3e/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
       "cat": "民生社会",
-      "title": "“AI赋能”，隐私侵害升级 接到陌生来电要先沉默三秒",
-      "url": "https://www.news.cn/legal/20261011/3c0b68bfdb11433daebd91f8d2334626/c.html",
+      "title": "专家：赖清德“台独”分裂本质不变、毒性不减",
+      "url": "https://www.news.cn/tw/20261011/17c242a32f3f4d18b43ac086920814e6/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
       "cat": "民生社会",
-      "title": "羽毛球世青赛：中国队卫冕混合团体",
-      "url": "https://www.news.cn/sports/20261011/ce92139770c34d9c89af9f3a7baa6ee1/c.html",
+      "title": "郑钦文成为中网首位本土女单冠军",
+      "url": "https://www.news.cn/sports/20261011/617dbe901d9647e7ac461e9789885f63/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
       "cat": "民生社会",
-      "title": "“张雪机车”德比斯获WSBK葡萄牙站首回合第六",
-      "url": "https://www.news.cn/sports/20261011/e03e710e868d4fff8a6888db03208acc/c.html",
+      "title": "WTT中国大满贯赛：王曼昱女单卫冕 国乒两冠收官",
+      "url": "https://www.news.cn/sports/20261011/fce39f6a721b4cb993b7dbc4004ebde4/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "沙特首都利雅得传出巨响",
+      "url": "https://www.news.cn/world/20261011/5c485342d77e4146b8e94450c77fa1f1/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "三大因素令沙特面临也门战事升级危机",
+      "url": "https://www.news.cn/world/20261011/cb8611809c184ab7bce13b4f4883f847/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "一部纪录片引发的追问：日本政府究竟保护谁？",
+      "url": "https://www.news.cn/world/20261011/c481ad30e58941c6af920e70505197d4/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "沙特称防空拦截弹库存不足",
+      "url": "https://www.news.cn/world/20261011/b7416d7e60cc49918f72eab7b0d99407/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "胡塞武装何以成势？",
+      "url": "https://www.news.cn/world/20261011/a27b38e8229c4d05aeea05bcd6efb9ef/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
@@ -2944,33 +3023,273 @@
     },
     {
       "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "巴拿马政府宣布进入紧急状态应对强震",
-      "url": "https://www.news.cn/world/20261011/482dc317867c4d92a489b17b2beecae0/c.html",
+      "cat": "时政要闻",
+      "title": "“2026世界市长对话·洛阳”共话古都焕新与城市发展",
+      "url": "https://www.news.cn/politics/20261011/6df344b149854061abd2cb59c12559af/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "美军击中阿曼湾一商船致其丧失航行能力",
-      "url": "https://www.news.cn/world/20261011/85e560da1be84da59494c7233241169c/c.html",
+      "cat": "民生社会",
+      "title": "北京：接诉即办 绘就数智时代城市治理新图景",
+      "url": "https://www.news.cn/local/20261011/933453323cf94e369616dfb2d9cc69c9/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "飓风“伊萨亚斯”已致美国4人死亡 数十万人遭遇断电",
-      "url": "https://www.news.cn/world/20261011/94330f99618d4321a7043e7a6e03c9ae/c.html",
+      "cat": "民生社会",
+      "title": "皇岗口岸开通仪式在深圳举行",
+      "url": "https://www.news.cn/gangao/20261011/49415c4c62564363a9fd475a0965d298/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "财经动态",
+      "title": "成都至拉萨图定班列首发 进藏物资铁路运输新选择",
+      "url": "https://www.news.cn/fortune/20261011/fa36119ab6da47fbbf931f493c89014f/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "安徽马鞍山城市更新观察：一座钢城的“二次生长”",
+      "url": "https://www.news.cn/local/20261011/a83496fc3a6e45139d2fbdebbbcc88ca/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "“沙戈荒”新能源基地储能难题咋破？兰大探索新路径",
+      "url": "https://www.news.cn/politics/20261011/684d76f720704d228574fb9ae1c8a2cc/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "1亿次往来之间：拱北－关闸口岸见证大湾区融合发展坚实步履",
+      "url": "https://www.news.cn/gangao/20261011/802615899268489bb34d8197e91f324b/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "财经动态",
+      "title": "天津出台实施意见支持现房销售及“好房子”项目",
+      "url": "https://www.news.cn/fortune/20261011/f92397bbea514bca80567d2ab8ce0fef/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "“张雪机车”德比斯获WSBK葡萄牙站次回合第三",
+      "url": "https://www.news.cn/sports/20261011/0390ec3cef2b4611b279c2463eedfebe/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "科学与健康丨小心“病从口入” 怎样吃更安全？",
+      "url": "https://www.news.cn/politics/20261011/0c255349019f4035b55375b58ac357ff/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "科学健身周周练丨垫上开练，缓解髋部紧张",
+      "url": "https://www.news.cn/politics/20261011/390fd0aff4284b9c9b4d029fcfd73a84/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
       "cat": "科技前沿",
-      "title": "直面AI，真诚创作永不过时",
-      "url": "https://www.news.cn/tech/20261011/b7505fec70874785909ff36aa89b2f09/c.html",
+      "title": "星空有约丨13日冲日，“最亮小行星”迎来观测良机",
+      "url": "https://www.news.cn/tech/20261011/65a7b922c1674ccc8e84e6693a4dbfd6/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "特朗普：俄乌双方同意“能源停火”",
+      "url": "https://www.news.cn/world/20261011/3d83a1b132d64250800a9d92832cfd0e/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "蒙古国草原火蔓延至我边境 2000余人正在堵截",
+      "url": "https://www.news.cn/world/20261011/a383810478c54790bdd2def94d8fabea/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "以军称摧毁多个哈马斯军事目标",
+      "url": "https://www.news.cn/world/20261011/9f7097d8f17a4ab28de63b50191c3630/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "韩国低龄未成年人盗窃数量激增",
+      "url": "https://www.news.cn/world/20261011/a7936db0d4154bc687854d5b4d1f87aa/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "巴基斯坦总统批准在开伯尔-普什图省实施紧急状态",
+      "url": "https://www.news.cn/world/20261011/252180a3cbcb47b88d9b51f1b832e7ea/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "厄立特里亚呼吁联合国介入以应对与埃塞的紧张局势",
+      "url": "https://www.news.cn/world/20261011/adac0208bd7348cc96cd7305fa3b6073/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "以法治之力守护食品安全",
+      "url": "https://www.news.cn/politics/20261011/1a7819439a2b4f058a88d0815bf7e0e6/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "无论赖清德如何包装欺骗，都阻挡不了统一大势",
+      "url": "https://www.news.cn/tw/20261011/5d77071ef54943c482be3bb00a0ff1f6/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "贵州关岭以果治荒“唤醒”山地经济",
+      "url": "https://www.news.cn/local/20261011/0608a8713c4049a5af223de56983f375/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "看见古村丨百年商帮故里飘出新潮咖啡香",
+      "url": "https://www.news.cn/politics/20261011/9c85535800454413a1306da9f338496c/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "秦岭大熊猫“秦华”迎来六岁生日",
+      "url": "https://www.news.cn/local/20261011/c3030736e0244dc5956d8bf15092ed10/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "黄柿子串起“金链子”",
+      "url": "https://www.news.cn/local/20261011/a39898405dc847e9be54390e122f0b60/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "河北丰南：南蔗北种节节甜",
+      "url": "https://www.news.cn/photo/20261011/e5e75f6fcea34b41862264bee3852b7a/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "财经动态",
+      "title": "“北京大兴—天水”往返航线正式通航",
+      "url": "https://www.news.cn/fortune/20261011/39ff33a90c174b189ead42e304bdad37/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "重点水利工程蒙河双堠水库项目进展顺利",
+      "url": "https://www.news.cn/photo/20261011/3a578093a2f34f62a9a377468e409002/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "广西：提升中医药服务可及性",
+      "url": "https://www.news.cn/photo/20261011/8e074ce8e35a460989894df55bf66e67/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "时政要闻",
+      "title": "内蒙古书写团结奋进新答卷",
+      "url": "https://www.news.cn/politics/20261011/1fd5c373302142d585aeec70f7b67810/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "通讯丨让女孩掌握自己的未来",
+      "url": "https://www.news.cn/world/20261011/1b0b95afafe84f969d3f4322e13305b9/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "记者手记丨当各国记者为乒乓球较真",
+      "url": "https://www.news.cn/sports/20261011/877ff51c1c66484cac974f77fe04c937/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "北极问题三大分歧凸显跨大西洋裂痕",
+      "url": "https://www.news.cn/world/20261011/36ecb3fcdf98442d936220a86e18efeb/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "从“拖鞋军”到关键一方　胡塞武装何以成势",
+      "url": "https://www.news.cn/world/20261011/a27b38e8229c4d05aeea05bcd6efb9ef/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "巴拿马政府宣布进入紧急状态应对强震",
+      "url": "https://www.news.cn/world/20261011/426e0003546c4b0d947c8fb1a3fd3513/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
@@ -2987,6 +3306,22 @@
       "cat": "国际风云",
       "title": "电影《欢迎来龙餐馆》登陆北美院线",
       "url": "https://www.news.cn/world/20261011/8cee5cce8ddf483bb22b3f46059647c3/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "特稿丨大道致远，笃行不怠——记中国元首外交金秋繁忙季",
+      "url": "https://www.news.cn/world/20261011/f9b3005038634247b8189ac03f92da21/c.html",
+      "time": "2026-10-11",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
+      "title": "美国司法部调查五大电视媒体“停拍白宫”行为",
+      "url": "https://www.news.cn/world/20261011/732b348446654084ad4321dd61160236/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
@@ -3017,16 +3352,16 @@
     {
       "source": "新华网(news.cn)",
       "cat": "国际风云",
-      "title": "泽连斯基与多个欧洲国家领导人通话",
-      "url": "https://www.news.cn/world/20261011/f8e9f5cf2f5d49018e937a879cd3280e/c.html",
+      "title": "特朗普敦促乌克兰举行选举",
+      "url": "https://www.news.cn/world/20261011/f035060312784615b0ab6ef6d1480981/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
     {
       "source": "新华网(news.cn)",
       "cat": "国际风云",
-      "title": "特朗普：“乌克兰应该换个总统”",
-      "url": "https://www.news.cn/world/20261011/79727fe154f0447894f0b6160dacbc3b/c.html",
+      "title": "泽连斯基与多个欧洲国家领导人通话",
+      "url": "https://www.news.cn/world/20261011/f8e9f5cf2f5d49018e937a879cd3280e/c.html",
       "time": "2026-10-11",
       "summary": ""
     },
@@ -3073,30 +3408,6 @@
     {
       "source": "新华网(news.cn)",
       "cat": "民生社会",
-      "title": "中国共产党历史展览馆推出两大长征主题展",
-      "url": "https://www.news.cn/photo/20261010/0089971778364ff189d52877f427f298/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "全国铁路10月11日起实行新的列车运行图",
-      "url": "https://www.news.cn/photo/20261010/f9590003c48c4e67a813e50fc2accdc4/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "燕赵大地秋收忙",
-      "url": "https://www.news.cn/photo/20261010/b3e7f817304946beb5994c447eac46f8/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
       "title": "“杜立特行动”获救飞行员后代访问江西上饶",
       "url": "https://www.news.cn/photo/20261010/1ef74978d27f4b49a695f3a5a062d8b9/c.html",
       "time": "2026-10-10",
@@ -3112,254 +3423,6 @@
     },
     {
       "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "一周看天下",
-      "url": "https://www.news.cn/photo/20261010/cf75fbf807304263ae549b7f3c4f74b3/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "海上日出",
-      "url": "https://www.news.cn/photo/20261010/e69e2ed9ea0f4a9a9bda1e9131286566/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "中国地震台网：巴拿马发生7.6级地震",
-      "url": "https://www.news.cn/photo/20261010/df80e2b99d1846a4920977310e1586ff/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "我国成功发射卫星互联网低轨27组卫星",
-      "url": "https://www.news.cn/photo/20261010/2ed0868f63a840c68c4a8adcb3275d9a/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "“独腿将军”靠什么爬过海拔4000米的雪山？",
-      "url": "https://www.news.cn/politics/20261010/c70fdc7ef6e94e02ad54133e929e2075/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "12天内两次精准预警，他让700多人躲过泥石流",
-      "url": "https://www.news.cn/politics/20261010/a1de6c625a6a4dc5ad9217bff81bc818/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "国新办发布会聚焦“十五五”就业和社保高质量发展",
-      "url": "https://www.news.cn/politics/20261010/6fe8792188c144f0ab661a10156d7eae/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "食品安全法迎大修",
-      "url": "https://www.news.cn/politics/20261010/b052e5dad3c1456a83ae20b0dc0e843a/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "拟修改哪些内容",
-      "url": "https://www.news.cn/politics/20261010/26a5702feb05457bb1506b4a72ee261c/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "四部门征意见 进一步加强汽车产品创新设计等管理",
-      "url": "https://www.news.cn/politics/20261010/27a09fb65e5a4126976a2d2262bee43d/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "财经动态",
-      "title": "房贷贴息政策加速落地见效",
-      "url": "https://www.news.cn/fortune/20261010/0860bd4bfd8e4141b0e79b9f1a8457ac/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "财经动态",
-      "title": "国庆假期楼市探访",
-      "url": "https://www.news.cn/fortune/20261010/d8d355367e1e40f1a98b068e2fb39b81/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "国防部发言人就近期涉军问题发布消息并答记者问",
-      "url": "https://www.news.cn/world/20261010/ada60384d0e44ac388f07c01980af6d3/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "第三次新疆综合科学考察成果丰硕",
-      "url": "https://www.news.cn/politics/20261010/00808aaf2de54be7a3de49d9a3c8a41c/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "财经动态",
-      "title": "有哪些新发现",
-      "url": "https://www.news.cn/fortune/20261010/0d671c6d84f84d95a8f607e21c133bc9/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "“新华语典”上新“舆情分析助手”：舆情研判“快人一步”",
-      "url": "https://www.news.cn/digital/20261010/29b7dafcabdc409aa368f76567e53dfb/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "军史里的布衣英雄",
-      "url": "https://www.news.cn/politics/20261010/724eaa6543fc4bb385d2ce4e0bb08f1f/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "谌贻琴看望慰问即将出征亚残运会的中国体育代表团",
-      "url": "https://www.news.cn/sports/20261010/cd9da0416b6e4ea397a0b6301cbdd8ee/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "财经动态",
-      "title": "经营者集中审查举行首次公开听证审议美团收购案",
-      "url": "https://www.news.cn/fortune/20261010/1ae7e0277f324621a2ed81665f2bcb26/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "郑钦文创造历史 成中网首位本土女单决赛选手",
-      "url": "https://www.news.cn/sports/20261010/64de5ca0ee854d3597fa802a5ea01c5a/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "WTT中国大满贯赛：王曼昱女双卫冕女单争冠",
-      "url": "https://www.news.cn/sports/20261010/f2d9db3bf6b8493ba543e79a8cafed85/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "美“松绑”俄柴油",
-      "url": "https://www.news.cn/world/20261010/ef4664c1deb04152b166a3132fd2babf/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "选择党成员任地方议长 德政坛“防火墙”遭冲击",
-      "url": "https://www.news.cn/world/20261010/7833e180e1244f8e92f40cc3f0655809/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "第十三届狮王争霸国际赛在澳门举行",
-      "url": "https://www.news.cn/sports/20261010/108a4225807d40a497ae1622f9fceb6e/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "机器狗“途途”亮相澳门NBA House",
-      "url": "https://www.news.cn/gangao/20261010/72d4a5d78bca40888ed74b7a8c48f4b5/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "财经动态",
-      "title": "铜吉铁路全线最长特大桥完成架梁",
-      "url": "https://www.news.cn/fortune/20261010/de14a72d75d848388178739ec3a86706/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "“冰城”哈尔滨提前10天正式供热",
-      "url": "https://www.news.cn/photo/20261010/35de61707d2d4a3b84fe2fcb7d297b7f/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "北京“丹柿小院”秋色引游人",
-      "url": "https://www.news.cn/photo/20261010/10db0646da664a2ba287ec9d3a2dff13/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "财经动态",
-      "title": "成都首发至无锡南多式联运快捷班列",
-      "url": "https://www.news.cn/fortune/20261010/6c483de42afe47fa8f80c15fe47c2287/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "第二十九届北京国际音乐节启幕",
-      "url": "https://www.news.cn/politics/20261010/3464706a446e4b028780ab3b05f0d350/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "山东德州：秋粮收获忙",
-      "url": "https://www.news.cn/photo/20261010/4df76dd05ca04c8ea4aa4a087ce70dc4/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
       "cat": "科技前沿",
       "title": "财经慧说丨发展新质生产力，顶层设计来了",
       "url": "https://www.news.cn/tech/20261010/c2d4afed526c4188ab07c4f0cbd7e045/c.html",
@@ -3368,33 +3431,9 @@
     },
     {
       "source": "新华网(news.cn)",
-      "cat": "时政要闻",
-      "title": "丰收正当时 产业促振兴",
-      "url": "https://www.news.cn/politics/20261010/e15a8b70cc4b43d882478a0337100df8/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
       "cat": "民生社会",
       "title": "周杰伦来打卡？上海网球大师赛如何“玩出花”",
       "url": "https://www.news.cn/sports/20261010/50af5f0d323a48b0a1b3e6e31fd27b9c/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "记者观察丨沙特局势：冲突升级 当地现状如何？",
-      "url": "https://www.news.cn/world/20261010/8b30ca8d8c3a4c2598250a654dc18792/c.html",
-      "time": "2026-10-10",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "记者手记丨从《剧院魅影》40年看伦敦西区戏剧魅力",
-      "url": "https://www.news.cn/world/20261010/4cc283ec63d54913a425f0fbb9f62a1e/c.html",
       "time": "2026-10-10",
       "summary": ""
     },
@@ -3443,6 +3482,14 @@
       "cat": "科技前沿",
       "title": "中国低速电动车走俏北美市场",
       "url": "https://www.news.cn/tech/20261010/26ae8674b00246d68192622dc34e0f3c/c.html",
+      "time": "2026-10-10",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "科技前沿",
+      "title": "我国成功发射卫星互联网低轨27组卫星",
+      "url": "https://www.news.cn/tech/20261010/4d088308025149c989e7304b112507d1/c.html",
       "time": "2026-10-10",
       "summary": ""
     },
@@ -3625,6 +3672,14 @@
     {
       "source": "新华网(news.cn)",
       "cat": "国际风云",
+      "title": "选择党成员任地方议长 德政坛“防火墙”遭冲击",
+      "url": "https://www.news.cn/world/20261010/7833e180e1244f8e92f40cc3f0655809/c.html",
+      "time": "2026-10-10",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "国际风云",
       "title": "飓风登陆美国东南沿海 逾70万户断电",
       "url": "https://www.news.cn/world/20261010/cf78af5545f34e75b860721a7aa3a56f/c.html",
       "time": "2026-10-10",
@@ -3713,38 +3768,6 @@
     {
       "source": "新华网(news.cn)",
       "cat": "民生社会",
-      "title": "在千年盐田，看得见丰收，更记得住文化",
-      "url": "https://www.news.cn/photo/20261009/dafa7bd4926542849d909e709ca8786b/c.html",
-      "time": "2026-10-09",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "国庆节假期国内出游8.26亿人次",
-      "url": "https://www.news.cn/photo/20261009/71e30f089be74793b0764d6751d3738b/c.html",
-      "time": "2026-10-09",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
-      "title": "文旅新探丨西藏拉萨：行走古城，读懂街巷里的文化",
-      "url": "https://www.news.cn/local/20261009/56d9026648014c41b52f291e9786927e/c.html",
-      "time": "2026-10-09",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "财经动态",
-      "title": "向“新”向“优”释放假日消费热力",
-      "url": "https://www.news.cn/fortune/20261009/9a27bb5b30cd42ba82960bd24fc0830a/c.html",
-      "time": "2026-10-09",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "民生社会",
       "title": "老外“买买买”折射开放活力",
       "url": "https://www.news.cn/comments/20261009/e42d1fb06d4346d0939a8d479af9edf8/c.html",
       "time": "2026-10-09",
@@ -3777,6 +3800,14 @@
     {
       "source": "新华网(news.cn)",
       "cat": "民生社会",
+      "title": "在千年盐田，看得见丰收，更记得住文化",
+      "url": "https://www.news.cn/photo/20261009/dafa7bd4926542849d909e709ca8786b/c.html",
+      "time": "2026-10-09",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
       "title": "2026年国庆节假期国内出游8.26亿人次",
       "url": "https://www.news.cn/travel/20261009/823e861310aa46b9bcc9edf1041f092b/c.html",
       "time": "2026-10-09",
@@ -3787,6 +3818,14 @@
       "cat": "民生社会",
       "title": "24岁首战取得“开门红” 郑钦文重返中网四强",
       "url": "https://www.news.cn/sports/20261009/28ee312b1d794c29905bd4f64a92df22/c.html",
+      "time": "2026-10-09",
+      "summary": ""
+    },
+    {
+      "source": "新华网(news.cn)",
+      "cat": "民生社会",
+      "title": "国庆节假期国内出游8.26亿人次",
+      "url": "https://www.news.cn/photo/20261009/71e30f089be74793b0764d6751d3738b/c.html",
       "time": "2026-10-09",
       "summary": ""
     },
@@ -3947,14 +3986,6 @@
       "cat": "国际风云",
       "title": "中欧就经贸重要议题进行对等专业建设性讨论",
       "url": "https://www.news.cn/world/20261009/8cabb1a516414eab9de9ea0a67de316a/c.html",
-      "time": "2026-10-09",
-      "summary": ""
-    },
-    {
-      "source": "新华网(news.cn)",
-      "cat": "国际风云",
-      "title": "伊朗通过调解方与美对话 特朗普称中期选举前不攻击伊朗",
-      "url": "https://www.news.cn/world/20261009/a68572cfdf5f4877bed6ccd3591d49d2/c.html",
       "time": "2026-10-09",
       "summary": ""
     },
@@ -4191,18 +4222,18 @@
       "cat": "科技前沿"
     },
     {
-      "title": "优必选：与建发股份战略合作签约，共推万台人形机器人销售",
-      "time": "2026-10-11 10:57:35  +080",
-      "summary": "36氪获悉，据优必选消息，10月9日，优必选与厦门建发股份有限公司在厦门举行战略合作签约仪式。双方将共建合资公司，作为“优生态科技中心福建总部”的运营主体，并计划到2030年共同完成不低于1万台优必选人形机器人的销售目标。",
-      "url": "https://36kr.com/newsflashes/4020789370556553?f=rss",
+      "title": "宏盛华源：拟投资4.25亿元建设输电铁塔智慧工厂项目",
+      "time": "2026-10-11 17:58:25  +080",
+      "summary": "36氪获悉，宏盛华源公告称，公司董事会审议通过关于实施宏源钢构输电铁塔智慧工厂建设项目的议案，计划投资4.25亿元建设该项目，以提升安徽宏源钢构有限公司资产使用效率，提高核心竞争力。",
+      "url": "https://36kr.com/newsflashes/4021182737993606?f=rss",
       "source": "36氪",
-      "cat": "财经动态"
+      "cat": "民生社会"
     },
     {
-      "title": "需求持续回暖，9月中国物流业景气指数发布",
-      "time": "2026-10-11 10:43:59  +080",
-      "summary": "中国物流与采购联合会今天（11日）发布9月份中国物流业景气指数。指数继续保持在扩张区间，较上月有所回升，物流需求持续回暖，企业经营韧性不断显现。9月份，中国物流业景气指数为51.5%，较上月回升0.6个百分点，连续5个月处在扩张区间。新订单",
-      "url": "https://36kr.com/newsflashes/4020782160941186?f=rss",
+      "title": "海思科：选举王俊民为董事长",
+      "time": "2026-10-11 17:43:36  +080",
+      "summary": "36氪获悉，海思科公告称，公司第六届董事会第一次会议选举王俊民为董事长，聘任严庞科为总经理，王萌为副总经理兼董事会秘书，段鹏为财务总监，郭艳为证券事务代表。",
+      "url": "https://36kr.com/newsflashes/4021181973172102?f=rss",
       "source": "36氪",
       "cat": "民生社会"
     }
@@ -4303,34 +4334,10 @@
         ],
         "items": [
           {
-            "title": "特斯拉FSD，在欧洲被打回原形",
-            "url": "https://www.qbitai.com/2026/10/502467.html",
-            "source": "量子位",
-            "summary": "马斯克反而发文道谢？"
-          },
-          {
-            "title": "TRAE终于把Code和Work合并了",
-            "url": "https://www.qbitai.com/2026/10/502426.html",
-            "source": "量子位",
-            "summary": "大写的方便"
-          },
-          {
-            "title": "联想天禧自研代码智能体TianxiCode斩获SWE-bench-Live全球第一",
-            "url": "https://www.qbitai.com/2026/10/502422.html",
-            "source": "量子位",
-            "summary": "联想天禧AI自主研发的专业代码智能体框架TianxiCode 以71%的问题解决率登顶全球第一名"
-          },
-          {
-            "title": "0.2秒急停、秒级重规划！因果智能走进真实世界",
-            "url": "https://www.qbitai.com/2026/10/502411.html",
-            "source": "量子位",
-            "summary": "这是一台机器人正在关闭微波炉门时，因人手突然插进来而紧急悬停的时间"
-          },
-          {
-            "title": "字节找到了DeepSeek时强时弱的原因",
-            "url": "https://www.qbitai.com/2026/10/502364.html",
-            "source": "量子位",
-            "summary": "答不答得对，得看Token站位"
+            "title": "写给「跑两步就喘」的你：不能忽略的跑后拉伸与恢复",
+            "url": "https://sspai.com/post/115568",
+            "source": "少数派",
+            "summary": "前面两篇文章我们介绍了想要舒适跑步，在跑前和跑步中的一些小技巧，今天和大家聊聊跑后如何正确的拉伸，如何更好地帮助身体恢复。关联阅读：跑前精准热身，缓解跑时疼痛调整跑步姿势，舒适开跑正确拉伸多数人跑后会 ...查看全文"
           },
           {
             "title": "App+1｜专注星空：让「少刷手机」这件事更愉悦一点",
@@ -4349,6 +4356,12 @@
             "url": "https://sspai.com/post/115456",
             "source": "少数派",
             "summary": "让生活里的寻常片刻，在被轻松记录的同时依然经得起回味。查看全文"
+          },
+          {
+            "title": "App+1｜所得即所见，更适合中文的字体预览工具：Anyway.Fonts",
+            "url": "https://sspai.com/post/114869",
+            "source": "少数派",
+            "summary": "Matrix首页推荐Matrix是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选Matrix最优质的文章，展示来自用户的最真实的体验和观点。文章代表作者个人观点 ...查看全文"
           }
         ],
         "live": true
@@ -4410,6 +4423,12 @@
         ],
         "items": [
           {
+            "title": "写给「跑两步就喘」的你：不能忽略的跑后拉伸与恢复",
+            "url": "https://sspai.com/post/115568",
+            "source": "少数派",
+            "summary": "前面两篇文章我们介绍了想要舒适跑步，在跑前和跑步中的一些小技巧，今天和大家聊聊跑后如何正确的拉伸，如何更好地帮助身体恢复。关联阅读：跑前精准热身，缓解跑时疼痛调整跑步姿势，舒适开跑正确拉伸多数人跑后会 ...查看全文"
+          },
+          {
             "title": "App+1｜专注星空：让「少刷手机」这件事更愉悦一点",
             "url": "https://sspai.com/post/115237",
             "source": "少数派",
@@ -4432,12 +4451,6 @@
             "url": "https://sspai.com/post/114869",
             "source": "少数派",
             "summary": "Matrix首页推荐Matrix是少数派的写作社区，我们主张分享真实的产品体验，有实用价值的经验与思考。我们会不定期挑选Matrix最优质的文章，展示来自用户的最真实的体验和观点。文章代表作者个人观点 ...查看全文"
-          },
-          {
-            "title": "派早报：英伟达 RTX Spark 新品一览、Anthropic 发布 Claude Haiku 5.5 模型等",
-            "url": "https://sspai.com/post/115532",
-            "source": "少数派",
-            "summary": "XMG 发布 PRO 18 系列笔记本、OpenAI 宣布在 ChatGPT 上线 GPT-6 模型查看全文"
           }
         ],
         "live": true
