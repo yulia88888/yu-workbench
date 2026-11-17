@@ -2368,12 +2368,13 @@
   function speakGuide(text) { if (voiceGuideOn && text) speakText(text, 'zh-CN', 0.98); }
 
   // autocorrelation 自相关音高检测：时域 Float32 → 基频 Hz（无音/噪声返回 -1）
+  // 阈值从 0.008 降到 0.0025：手机麦克风（尤其关掉降噪后）音量偏小，原阈值会把正常唱歌误判成静音
   function autoCorrelate(buf, sampleRate) {
     let SIZE = buf.length;
     let rms = 0;
     for (let i = 0; i < SIZE; i++) { const v = buf[i]; rms += v * v; }
     rms = Math.sqrt(rms / SIZE);
-    if (rms < 0.008) return -1;
+    if (rms < 0.0025) return -1;
     let r1 = 0, r2 = SIZE - 1, thres = 0.2;
     for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
     for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } }
@@ -2447,20 +2448,28 @@
   }
 
   // 麦克风实时音高训练器（回调改为 (freq, note, vol)，vol 为 0~1 音量，用于音量反馈）
+  // 【2026-11-17 重大修复】用 getByteTimeDomainData 替代 getFloatTimeDomainData：
+  //   很多手机浏览器（微信/QQ内置、国产安卓、部分 iOS）getFloatTimeDomainData 返回全 0 → 永远"录不进声音"。
+  //   getByteTimeDomainData 兼容性最好，所有浏览器都支持。同时开启自动增益，解决手机麦克风音量过小。
   function createPitchTrainer(onPitch) {
-    let audioCtx, analyser, stream, raf, data, running = false;
+    let audioCtx, analyser, stream, raf, bytes, running = false;
     return {
       async start() {
         const chk = micSecureCheck();
         if (!chk.ok) throw chk.err;
-        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+        // 开启自动增益(autoGainControl)，关闭回声消除/降噪(保留真实音高)。
+        // 旧代码三项全 false，手机上音量极小被静音阈值过滤 → 检测不到声音。
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true }
+        });
         window.__micCtx = window.__micCtx || new (window.AudioContext || window.webkitAudioContext)();
         audioCtx = window.__micCtx;
-        if (audioCtx.state === 'suspended') await audioCtx.resume();
+        // iOS 必须在用户手势里 resume，否则 AudioContext 保持 suspended → 无声
+        if (audioCtx.state === 'suspended') { try { await audioCtx.resume(); } catch (e) {} }
         const src = audioCtx.createMediaStreamSource(stream);
         analyser = audioCtx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.1;
         src.connect(analyser);
-        data = new Float32Array(analyser.fftSize);
+        bytes = new Uint8Array(analyser.fftSize);
         running = true; loop();
       },
       stop() {
@@ -2474,10 +2483,13 @@
     };
     function loop() {
       if (!running) return;
-      analyser.getFloatTimeDomainData(data);
-      let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
-      const rms = Math.sqrt(sum / data.length);          // 0~1 音量
-      const vol = Math.min(1, rms * 3.2);
+      analyser.getByteTimeDomainData(bytes);
+      // byte(0~255, 静音=128) → float(-1~1)，自相关算法需要 float
+      const data = new Float32Array(bytes.length);
+      let sum = 0;
+      for (let i = 0; i < bytes.length; i++) { const v = (bytes[i] - 128) / 128; data[i] = v; sum += v * v; }
+      const rms = Math.sqrt(sum / bytes.length);          // 0~1 音量
+      const vol = Math.min(1, rms * 4.5);                 // 增益后音量条更灵敏
       const f = autoCorrelate(data, audioCtx.sampleRate);
       if (f > 60 && f < 1500) onPitch(f, noteFromFreq(f), vol);
       else onPitch(0, { name: '—', cents: 0 }, vol);
@@ -2592,7 +2604,7 @@
     trainer.start().then(() => {
       setMicState('active');
       btn.classList.add('hidden'); stop.classList.remove('hidden');
-      live.classList.remove('hidden'); live.innerHTML = '老师在听…唱一个音试试' + (st.target ? '' : '（未选目标音，可先选一个）');
+      live.classList.remove('hidden'); live.innerHTML = '🎙️ 老师在听了～请对着麦克风唱一个音。<br/><span style="color:var(--primary);">看上面的绿色音量条：唱歌时它会跳动，就说明录进声音了。</span>' + (st.target ? '' : '<br/>（还没选目标音，可先点上面「哆/来/咪」选一个）');
       if (st.target) playNote(st.target);
     }).catch(err => { const d = diagnoseMicError(err); setMicState('error', d.title); toast(d.msg); });
   }
