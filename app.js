@@ -12,7 +12,20 @@
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const copyLink = (url) => { if (!url || url === '#') return; navigator.clipboard.writeText(url).then(() => toast('链接已复制 📋')).catch(() => toast('复制失败，请手动复制')); };
-  const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2200); };
+  const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3200); };
+  // 语音输入引导：浏览器自带语音识别依赖 Google 服务，国内手机连不上。
+  // 改为引导用户用手机输入法键盘的话筒（走国内服务，稳定可用），并直接聚焦输入框唤起键盘。
+  function guideVoiceInput(inputSel, resultSel) {
+    if (resultSel) {
+      const box = $(resultSel);
+      if (box) {
+        box.classList.remove('hidden');
+        box.innerHTML = '<div class="voice-guide-tip"><b>🎤 这样说话最灵</b><br>这个按钮的语音识别在国内连不上服务器。请点下面的输入框 → 点手机键盘上的<b>话筒图标</b> → 直接说话，会自动变成文字，再点发送就行。</div>';
+      }
+    }
+    toast('点输入框 → 键盘话筒 🎤 说话，会自动变文字');
+    setTimeout(() => { const inp = $(inputSel); if (inp) { try { inp.focus(); inp.click(); } catch (e) {} } }, 120);
+  }
 
   const LS = {
     tasks: 'yu_tasks', check: 'yu_check', daily: 'yu_daily', archive: 'yu_archive', hidden: 'yu_hidden',
@@ -1095,13 +1108,12 @@
       d.level = lv; setPianoData(d); renderPiano(); return;
     }
     const pianoMic = e.target.closest('#pianoMic');
-    if (pianoMic) {
-      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const rec = new SR(); rec.lang = 'zh-CN'; rec.interimResults = false; rec.maxAlternatives = 1;
-      rec.onresult = ev => { const t = ev.results[0][0].transcript; aiCoachReply(t, $('#pianoResult'), 'piano'); };
-      rec.onerror = () => toast('语音识别失败，请重试');
-      toast('请说出你的问题…'); rec.start(); return;
+    if (pianoMic) { guideVoiceInput('#pianoAskInput', '#pianoResult'); return; }
+    const pianoAskSend = e.target.closest('#pianoAskSend');
+    if (pianoAskSend) {
+      const inp = $('#pianoAskInput'); const q = inp && inp.value.trim();
+      if (!q) { toast('请先说话或输入你的问题'); return; }
+      inp.value = ''; aiCoachReply(q, $('#pianoResult'), 'piano'); return;
     }
     const pianoGuide = e.target.closest('#pianoGuide');
     if (pianoGuide) { voiceGuideOn = !voiceGuideOn; pianoGuide.textContent = voiceGuideOn ? '🔊 语音指导：开' : '🔇 语音指导：关'; if (voiceGuideOn) speakGuide('语音指导已开启'); return; }
@@ -1238,13 +1250,12 @@
     const scaleStop = e.target.closest('#scaleStop');
     if (scaleStop) { stopScaleTrain(false);  return; }
     const singAsk = e.target.closest('#singAsk');
-    if (singAsk) {
-      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const rec = new SR(); rec.lang = 'zh-CN'; rec.interimResults = false; rec.maxAlternatives = 1;
-      rec.onresult = ev => { const t = ev.results[0][0].transcript; aiCoachReply(t, $('#singResult'), 'sing'); };
-      rec.onerror = () => toast('语音识别失败，请重试');
-      toast('请说出你的问题…'); rec.start(); return;
+    if (singAsk) { guideVoiceInput('#singAskInput', '#singResult'); return; }
+    const singAskSend = e.target.closest('#singAskSend');
+    if (singAskSend) {
+      const inp = $('#singAskInput'); const q = inp && inp.value.trim();
+      if (!q) { toast('请先说话或输入你的问题'); return; }
+      inp.value = ''; aiCoachReply(q, $('#singResult'), 'sing'); return;
     }
     const singGuide = e.target.closest('#singGuide');
     if (singGuide) { voiceGuideOn = !voiceGuideOn; singGuide.textContent = voiceGuideOn ? '🔊 语音指导：开' : '🔇 语音指导：关'; if (voiceGuideOn) speakGuide('语音指导已开启'); return; }
@@ -1435,16 +1446,7 @@
       return;
     }
     const micScene = e.target.closest('[data-micscene]');
-    if (micScene) {
-      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { toast('当前浏览器不支持语音输入'); return; }
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const rec = new SR();
-      rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
-      rec.onresult = ev => { const txt = ev.results[0][0].transcript; $('#speakInput').value = txt; toast('语音识别完成'); };
-      rec.onerror = () => toast('语音识别失败，请手动输入');
-      rec.start();
-      return;
-    }
+    if (micScene) { guideVoiceInput('#speakInput', null); return; }
     const practiceErrors = e.target.closest('[data-practiceerrors]');
     if (practiceErrors) {
       const all = getAllWordStates().filter(w => !w.mastered);
@@ -1939,8 +1941,12 @@
             <button class="btn-outline hidden" id="pianoCamStop">⏹ 关闭</button>
           </div>
         </div>
+        <div class="ai-ask-input">
+          <input id="pianoAskInput" class="ai-ask-field" placeholder="想问什么？点这里用键盘话筒🎤说话，或直接打字…" />
+          <button id="pianoAskSend" class="ai-ask-send" title="发送问题">➤</button>
+        </div>
         <div class="ai-ask">
-          <button class="btn-outline" id="pianoMic">🎙️ 语音问教练</button>
+          <button class="btn-outline" id="pianoMic">🎤 用话筒说话（点这里看说明）</button>
           <button class="btn-outline" id="pianoGuide">🔊 语音指导：开</button>
         </div>
         <div id="pianoResult" class="ai-result hidden" style="margin-top:10px;"></div>
@@ -2173,8 +2179,12 @@
             ${videoListHTML(SING_VIDEOS[d.level], levels[d.level])}
           </div>
         </div>
+        <div class="ai-ask-input">
+          <input id="singAskInput" class="ai-ask-field" placeholder="想问什么？点这里用键盘话筒🎤说话，或直接打字…" />
+          <button id="singAskSend" class="ai-ask-send" title="发送问题">➤</button>
+        </div>
         <div class="ai-ask">
-          <button class="btn-outline" id="singAsk">🎙️ 语音问老师</button>
+          <button class="btn-outline" id="singAsk">🎤 用话筒说话（点这里看说明）</button>
           <button class="btn-outline" id="singGuide">🔊 语音指导：开</button>
         </div>
         <div id="singResult" class="ai-result hidden" style="margin-top:10px;"></div>
