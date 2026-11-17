@@ -38,7 +38,7 @@
   let topicHistDate = '', repostHistDate = '';   // 历史记录 · 右上角日期筛选
   let topicBatch = false, repostBatch = false;
   let topicSel = new Set(), repostSel = new Set();
-  let currentView = 'plan';
+  let currentView = 'summary';
   let industryChannel = null;   // null=行业总览；否则为当前打开的频道名
   let subStack = [];
   let outfitTab = 'today';
@@ -67,7 +67,7 @@
     catch (e) { toast('搭配保存失败：本地空间不足'); }
   }
 
-  const titles = { plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰', industry: '行业情报🌐', outfit: '穿搭衣橱' };
+  const titles = { summary: '今日汇总🎀', plan: '每日计划', topic: '选题灵感', repost: '爆款二创', review: '内容复盘', aiproduct: 'AI爆品', news: '新闻📰', industry: '行业情报🌐', outfit: '穿搭衣橱' };
   const PLATFORMS = ['全部', '抖音', '小红书', '快手', '微博', 'B站'];
 
   function mergeHist(list, type) {
@@ -92,6 +92,114 @@
     return [...u, ...today];
   }
 
+  /* ---------- 今日汇总首页 ---------- */
+  function renderSummary() {
+    $('#todayDate').textContent = todayKeyCN();
+    const box = $('#summaryBody');
+    if (!box) return;
+    const hour = new Date().getHours();
+    const greet = hour < 6 ? '夜深啦，早点休息' : hour < 11 ? '早上好，瑜 🎀' : hour < 14 ? '中午好，瑜 🎀' : hour < 18 ? '下午好，瑜 🎀' : '晚上好，瑜 🎀';
+
+    // 今日必做：任务完成度
+    const tasks = load(LS.tasks, []);
+    const ck = load(LS.check, {});
+    if (!ck.date || ck.date !== todayKey()) { ck.date = todayKey(); ck.done = {}; save(LS.check, ck); }
+    const doneN = tasks.filter(t => ck.done[t.id]).length;
+    const topics = (daily.topics || []).filter(t => !hidden.includes(t.id));
+    const reposts = (daily.reposts || []).filter(t => !hidden.includes(t.id));
+    const news = (daily.news || []);
+    const reviews = load(LS.reviews, []);
+    const dyDaily = ((daily.aiproduct || {}).抖音 || {}).每日 || [];
+    const featured = ((daily.industry_intel || {}).featured || []);
+
+    let html = `<div class="sum-hero">
+      <div class="sum-hero-date">${esc(todayKeyCN())} · ${['周日','周一','周二','周三','周四','周五','周六'][new Date().getDay()]}</div>
+      <div class="sum-hero-hi">${greet}</div>
+      <div class="sum-hero-sub">今天也要闪闪发光呀 ✨</div>
+      <div class="sum-hero-stats">
+        <div class="sum-stat"><b>${doneN}/${tasks.length}</b><span>今日任务</span></div>
+        <div class="sum-stat"><b>${topics.length}</b><span>新选题</span></div>
+        <div class="sum-stat"><b>${reposts.length}</b><span>爆款灵感</span></div>
+        <div class="sum-stat"><b>${news.length}</b><span>热点资讯</span></div>
+      </div>
+    </div>`;
+
+    // 今日必做
+    html += `<div class="sum-sec">
+      <div class="sum-sec-h"><div class="sum-sec-title">✅ 今日必做</div><button class="sum-more" data-sumgo="plan">管理 ›</button></div>
+      <div class="sum-tasks">`;
+    if (!tasks.length) html += `<div class="sum-task"><span class="st-text">还没有任务，去「每日计划」添加吧</span></div>`;
+    else html += tasks.slice(0, 6).map(t => {
+      const done = !!ck.done[t.id];
+      return `<div class="sum-task" data-sumtask="${esc(t.id)}"><span class="st-check ${done ? 'done' : ''}">${done ? '✓' : ''}</span><span class="st-text ${done ? 'done' : ''}">${esc(t.text)}</span></div>`;
+    }).join('');
+    html += `</div></div>`;
+
+    // 今日选题（取前4条）
+    if (topics.length) {
+      html += `<div class="sum-sec">
+        <div class="sum-sec-h"><div class="sum-sec-title">💡 今日选题</div><button class="sum-more" data-sumgo="topic">全部 ${topics.length} 条 ›</button></div>`;
+      html += topics.slice(0, 4).map(t => `<div class="sum-card">
+        <div class="sc-title"><span class="sc-tag">${esc(t.platform || '选题')}</span>${esc(t.title || '')}</div>
+        ${t.idea ? `<div class="sc-desc">${esc(String(t.idea).replace(/^原创思路[:：]?/, ''))}</div>` : ''}
+      </div>`).join('');
+      html += `</div>`;
+    }
+
+    // 爆款二创（取前3条）
+    if (reposts.length) {
+      html += `<div class="sum-sec">
+        <div class="sum-sec-h"><div class="sum-sec-title">🔥 爆款二创</div><button class="sum-more" data-sumgo="repost">全部 ${reposts.length} 条 ›</button></div>`;
+      html += reposts.slice(0, 3).map(t => `<div class="sum-card" style="border-left-color:#FF8A65">
+        <div class="sc-title"><span class="sc-tag" style="color:#C85A2A;background:#FFF0E8;">${esc(t.tag || t.platform || '爆款')}</span>${esc((t.title || '').replace(/^原爆款[:：]?/, ''))}</div>
+        ${t.adapt_angle ? `<div class="sc-desc">${esc(t.adapt_angle)}</div>` : ''}
+      </div>`).join('');
+      html += `</div>`;
+    }
+
+    // 热点速览：新闻3条 + AI爆品2条 + 行业精选2条
+    const hotCount = news.length + dyDaily.length + featured.length;
+    if (hotCount) {
+      html += `<div class="sum-sec">
+        <div class="sum-sec-h"><div class="sum-sec-title">📰 热点速览</div><button class="sum-more" data-sumgo="news">更多 ›</button></div>`;
+      news.slice(0, 3).forEach(n => {
+        html += `<div class="sum-card" style="border-left-color:#4FC3F7">
+          <div class="sc-title">${n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title || '')}</a>` : esc(n.title || '')}</div>
+          <div class="sc-desc">${esc(n.source || '')} · ${esc(n.cat || '')}</div>
+        </div>`;
+      });
+      dyDaily.slice(0, 2).forEach(p => {
+        html += `<div class="sum-card" style="border-left-color:#F06292">
+          <div class="sc-title"><span class="sc-tag" style="color:#B4477A;background:#FCE4EC;">🛒 ${esc(p.tagText || '爆品')}</span>${esc(p.title || '')}</div>
+          <div class="sc-desc">销量 ${esc(p.sales || '-')} · 佣金 ${esc(p.commission || '-')}${p.script ? ' · ' + esc(p.script) : ''}</div>
+        </div>`;
+      });
+      featured.slice(0, 2).forEach(f => {
+        html += `<div class="sum-card" style="border-left-color:#81C784">
+          <div class="sc-title">${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.title || '')}</a>` : esc(f.title || '')}</div>
+          <div class="sc-desc">🏭 ${esc(f.source || '行业精选')}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    // 复盘提醒：最近一条
+    if (reviews.length) {
+      const r = reviews[reviews.length - 1];
+      const tips = diagnose(r);
+      html += `<div class="sum-sec">
+        <div class="sum-sec-h"><div class="sum-sec-title">📊 复盘提醒</div><button class="sum-more" data-sumgo="review">去复盘 ›</button></div>
+        <div class="sum-card" style="border-left-color:#B39DDB">
+          <div class="sc-title">${esc(r.title || '未命名内容')}</div>
+          <div class="sc-desc">${tips.length ? esc(tips[0]) : '数据正常，保持更新频率。'}</div>
+        </div>
+      </div>`;
+    }
+
+    html += `<div class="sum-foot">🎀 以上都是本地/当日数据汇总 · 点「更多」进入完整模块</div>`;
+    box.innerHTML = html;
+  }
+
   function switchView(v) {
     currentView = v;
     if (v !== 'industry') industryChannel = null;
@@ -100,6 +208,7 @@
     $('#viewTitle').textContent = titles[v];
     $('#backBtn').classList.remove('show');
     closeSubpage();
+    if (v === 'summary') renderSummary();
     if (v === 'plan') renderPlan();
     if (v === 'topic') renderTopics();
     if (v === 'repost') renderReposts();
@@ -677,6 +786,20 @@
     else if (sub === 'sport') renderSport();
   });
   $('#content').addEventListener('click', e => {
+    // 今日汇总：模块跳转
+    const go = e.target.closest('[data-sumgo]');
+    if (go) { switchView(go.dataset.sumgo); return; }
+    // 今日汇总：勾选今日任务（与每日计划共用数据）
+    const st = e.target.closest('[data-sumtask]');
+    if (st) {
+      const id = st.dataset.sumtask;
+      const ck = load(LS.check, {});
+      if (!ck.date || ck.date !== todayKey()) { ck.date = todayKey(); ck.done = {}; }
+      ck.done[id] = !ck.done[id];
+      save(LS.check, ck);
+      renderSummary();
+      return;
+    }
     const t = e.target.closest('[data-aiptime]');
     if (t) { aipTime = t.dataset.aiptime; renderAiproduct(); return; }
     const p = e.target.closest('[data-aipplat]');
@@ -5554,7 +5677,8 @@
         }
         const changed = daily.date !== d.date;
         daily = d; save(LS.daily, daily); _liveSig = sig;
-        if (currentView === 'topic') renderTopics();
+        if (currentView === 'summary') renderSummary();
+        else if (currentView === 'topic') renderTopics();
         else if (currentView === 'repost') renderReposts();
         else if (currentView === 'news') renderNews();
         else if (currentView === 'industry') renderIndustry();
@@ -5633,7 +5757,7 @@
     // 历史记录日期筛选：限制最大可选为今天（避免选到未来日期）
     const todayStr = todayKey();
     ['topicHistDate', 'repostHistDate'].forEach(id => { const el = $('#' + id); if (el) el.max = todayStr; });
-    renderPlan();
+    renderSummary();
     liveRefresh();
     liveRefreshAssets();
     const lrb = $('#liveRefreshBtn');
