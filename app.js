@@ -20,11 +20,136 @@
       const box = $(resultSel);
       if (box) {
         box.classList.remove('hidden');
-        box.innerHTML = '<div class="voice-guide-tip"><b>🎤 这样说话最灵</b><br>这个按钮的语音识别在国内连不上服务器。请点下面的输入框 → 点手机键盘上的<b>话筒图标</b> → 直接说话，会自动变成文字，再点发送就行。</div>';
+        box.innerHTML = '<div class="voice-guide-tip"><b>🎤 这样说话最灵</b><br>「说话自动变文字」需要先在下方 <b>⚙️ AI 设置</b> 粘贴你的免费智谱 Key（bigmodel.cn 免费注册，和看图/点评共用一把）。<br>暂时没 Key 也能说：点下面的输入框 → 点手机键盘上的<b>话筒图标</b> → 说话自动变文字，再点发送就行。</div>';
       }
     }
     toast('点输入框 → 键盘话筒 🎤 说话，会自动变文字');
     setTimeout(() => { const inp = $(inputSel); if (inp) { try { inp.focus(); inp.click(); } catch (e) {} } }, 120);
+  }
+
+  /* ===== 说话变文字：录音 → 智谱 GLM-ASR（国内直连·免费）→ 自动填入输入框 =====
+     浏览器自带语音识别连的是 Google，国内不可用；改用「录音 + 智谱免费语音识别」，
+     复用用户已配置的 yu_ai_cfg.key，不额外收费、不用重新注册。无 Key 时回退到输入法话筒。 */
+  let sttState = null; // 正在录音时的状态：{recorder, stream, chunks, btn, inputSel, resultSel, startT, timer}
+
+  // 把解码后的音频合成为单声道 16bit PCM 的 WAV（智谱语音识别只收 wav/mp3）
+  function encodeWav(audioBuffer) {
+    const chs = audioBuffer.numberOfChannels, len = audioBuffer.length, sr = audioBuffer.sampleRate;
+    const mono = new Float32Array(len);
+    for (let c = 0; c < chs; c++) {
+      const d = audioBuffer.getChannelData(c);
+      for (let i = 0; i < len; i++) mono[i] += d[i] / chs;
+    }
+    const buf = new ArrayBuffer(44 + len * 2), v = new DataView(buf);
+    const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    ws(0, 'RIFF'); v.setUint32(4, 36 + len * 2, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    ws(36, 'data'); v.setUint32(40, len * 2, true);
+    let o = 44;
+    for (let i = 0; i < len; i++) { const s = Math.max(-1, Math.min(1, mono[i])); v.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true); o += 2; }
+    return new Blob([buf], { type: 'audio/wav' });
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result || '').split(',')[1] || '');
+      r.onerror = () => reject(new Error('音频读取失败'));
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function transcribeAudio(blob) {
+    const cfg = loadAiConfig();
+    if (!cfg || !cfg.key) throw new Error('NO_KEY');
+    // ASR 是智谱专属接口，固定用官方地址（Key 复用用户已配置的智谱 Key）
+    const url = 'https://open.bigmodel.cn/api/paas/v4/audio/transcriptions';
+    const b64 = await blobToBase64(blob);
+    // 智谱 GLM-ASR-2512 走 JSON + file_base64（非 multipart），实测可用；返回 data.text
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
+      body: JSON.stringify({ model: 'glm-asr-2512', file_base64: b64, stream: false })
+    });
+    const t = await res.text().catch(() => '');
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 180));
+    let j; try { j = JSON.parse(t); } catch (e) { throw new Error('BAD_JSON ' + t.slice(0, 120)); }
+    return (j.text || (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '').trim();
+  }
+
+  function setVoiceBtnRecording(btn) {
+    if (!btn) return;
+    if (btn.dataset._vtLabel === undefined) btn.dataset._vtLabel = btn.textContent;
+    btn.textContent = '⏹ 停止并识别';
+    btn.classList.add('vt-recording');
+  }
+  function restoreVoiceBtn(btn) {
+    if (!btn) return;
+    if (btn.dataset._vtLabel !== undefined) btn.textContent = btn.dataset._vtLabel;
+    btn.classList.remove('vt-recording');
+  }
+
+  // 点一下开始录音，再点一下停止并识别；结果自动填进 inputSel
+  async function toggleVoiceToText(btn, inputSel, resultSel) {
+    if (sttState) { try { sttState.recorder.stop(); } catch (e) {} return; } // 正在录音 → 停止
+    const cfg = loadAiConfig();
+    if (!cfg || !cfg.key) { guideVoiceInput(inputSel, resultSel); return; } // 没 Key → 输入法话筒兜底
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+      toast('当前浏览器不支持录音，请用手机浏览器打开'); return;
+    }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+    catch (err) {
+      const d = diagnoseMicError(err); toast(d.msg);
+      if (resultSel && $(resultSel)) { const b = $(resultSel); b.classList.remove('hidden'); b.innerHTML = '<div class="voice-guide-tip">⚠️ ' + esc(d.title) + '：' + esc(d.msg) + '</div>'; }
+      return;
+    }
+    let rec;
+    try {
+      const mt = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported(m));
+      rec = new MediaRecorder(stream, mt ? { mimeType: mt } : undefined);
+    } catch (e) { toast('录音不可用：' + (e.message || e)); try { stream.getTracks().forEach(t => t.stop()); } catch (_) {} return; }
+    const chunks = [];
+    sttState = { recorder: rec, stream, chunks, btn, inputSel, resultSel, startT: Date.now(), timer: null };
+    rec.ondataavailable = ev => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+    rec.onstop = async () => {
+      const st = sttState; sttState = null;
+      if (!st) return;
+      if (st.timer) clearInterval(st.timer);
+      try { st.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+      restoreVoiceBtn(st.btn);
+      const box = st.resultSel && $(st.resultSel);
+      if (box) { box.classList.remove('hidden'); box.innerHTML = '<div class="voice-guide-tip">⏳ 正在把你说的变成文字…（约 3-8 秒）</div>'; }
+      try {
+        if (!chunks.length) throw new Error('没录到声音，再说一遍');
+        const raw = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+        const AC = window.AudioContext || window.webkitAudioContext;
+        const ac = new AC();
+        let decoded;
+        try { decoded = await ac.decodeAudioData(await raw.arrayBuffer()); }
+        finally { try { ac.close(); } catch (e) {} }
+        const text = await transcribeAudio(encodeWav(decoded));
+        if (!text) throw new Error('没听清，再说慢一点试试');
+        const inp = $(st.inputSel);
+        if (inp) { inp.value = inp.value ? (inp.value.replace(/\s+$/, '') + ' ' + text) : text; try { inp.focus(); } catch (e) {} }
+        if (box) box.innerHTML = '<div class="voice-guide-tip">✅ 已识别：<b>' + esc(text) + '</b><br/>文字已填进输入框，点旁边的 ➤ 发送就行。</div>';
+        toast('识别成功：' + text.slice(0, 16));
+      } catch (err) {
+        let msg = String(err && err.message || err);
+        if (msg.indexOf('NO_KEY') >= 0) { guideVoiceInput(st.inputSel, st.resultSel); return; }
+        if (/Failed to fetch|NetworkError|TypeError|Load failed/i.test(msg)) msg = '网络/跨域失败，可点输入框用手机键盘 🎤 说话，或直接打字';
+        else msg = msg.replace(/^HTTP \d+ /, '识别服务返回：').slice(0, 120);
+        if (box) box.innerHTML = '<div class="voice-guide-tip">❌ ' + esc(msg) + '<br/>备用办法：点输入框 → 手机键盘 🎤 说话，会自动变文字。</div>';
+        toast('识别失败，可用输入法话筒或打字');
+      }
+    };
+    rec.start();
+    setVoiceBtnRecording(btn);
+    const box = resultSel && $(resultSel);
+    if (box) { box.classList.remove('hidden'); box.innerHTML = '<div class="voice-guide-tip">🔴 正在听你说话…说完点一下「⏹ 停止并识别」，最多 30 秒。</div>'; }
+    toast('🎤 在听了，说完点一下按钮');
+    sttState.timer = setInterval(() => { const st = sttState; if (st && (Date.now() - st.startT) / 1000 >= 30) { try { st.recorder.stop(); } catch (e) {} } }, 1000);
   }
 
   const LS = {
@@ -1108,7 +1233,7 @@
       d.level = lv; setPianoData(d); renderPiano(); return;
     }
     const pianoMic = e.target.closest('#pianoMic');
-    if (pianoMic) { guideVoiceInput('#pianoAskInput', '#pianoResult'); return; }
+    if (pianoMic) { toggleVoiceToText(pianoMic, '#pianoAskInput', '#pianoResult'); return; }
     const pianoAskSend = e.target.closest('#pianoAskSend');
     if (pianoAskSend) {
       const inp = $('#pianoAskInput'); const q = inp && inp.value.trim();
@@ -1250,7 +1375,7 @@
     const scaleStop = e.target.closest('#scaleStop');
     if (scaleStop) { stopScaleTrain(false);  return; }
     const singAsk = e.target.closest('#singAsk');
-    if (singAsk) { guideVoiceInput('#singAskInput', '#singResult'); return; }
+    if (singAsk) { toggleVoiceToText(singAsk, '#singAskInput', '#singResult'); return; }
     const singAskSend = e.target.closest('#singAskSend');
     if (singAskSend) {
       const inp = $('#singAskInput'); const q = inp && inp.value.trim();
@@ -1446,7 +1571,7 @@
       return;
     }
     const micScene = e.target.closest('[data-micscene]');
-    if (micScene) { guideVoiceInput('#speakInput', null); return; }
+    if (micScene) { toggleVoiceToText(micScene, '#speakInput', null); return; }
     const practiceErrors = e.target.closest('[data-practiceerrors]');
     if (practiceErrors) {
       const all = getAllWordStates().filter(w => !w.mastered);
@@ -1942,11 +2067,11 @@
           </div>
         </div>
         <div class="ai-ask-input">
-          <input id="pianoAskInput" class="ai-ask-field" placeholder="想问什么？点这里用键盘话筒🎤说话，或直接打字…" />
+          <input id="pianoAskInput" class="ai-ask-field" placeholder="点🎤说话会自动变成文字，也可以直接打字…" />
           <button id="pianoAskSend" class="ai-ask-send" title="发送问题">➤</button>
         </div>
         <div class="ai-ask">
-          <button class="btn-outline" id="pianoMic">🎤 用话筒说话（点这里看说明）</button>
+          <button class="btn-outline" id="pianoMic">🎤 点我说话，自动变文字</button>
           <button class="btn-outline" id="pianoGuide">🔊 语音指导：开</button>
         </div>
         <div id="pianoResult" class="ai-result hidden" style="margin-top:10px;"></div>
@@ -2180,11 +2305,11 @@
           </div>
         </div>
         <div class="ai-ask-input">
-          <input id="singAskInput" class="ai-ask-field" placeholder="想问什么？点这里用键盘话筒🎤说话，或直接打字…" />
+          <input id="singAskInput" class="ai-ask-field" placeholder="点🎤说话会自动变成文字，也可以直接打字…" />
           <button id="singAskSend" class="ai-ask-send" title="发送问题">➤</button>
         </div>
         <div class="ai-ask">
-          <button class="btn-outline" id="singAsk">🎤 用话筒说话（点这里看说明）</button>
+          <button class="btn-outline" id="singAsk">🎤 点我说话，自动变文字</button>
           <button class="btn-outline" id="singGuide">🔊 语音指导：开</button>
         </div>
         <div id="singResult" class="ai-result hidden" style="margin-top:10px;"></div>
